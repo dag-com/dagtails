@@ -12,6 +12,35 @@ any past version, go to the repository's **Releases** page and pick that version
 
 ---
 
+## v1.5.0 — Landscape mode, smarter judges & a calmer landing page (2026-07-04)
+
+- **Landscape-first experience from start to finish**: the whole game now lays
+  out horizontally, not just the bar station. On phones/tablets held upright, a
+  rotate screen appears and asks the player to turn the device sideways.
+- **New welcome-back greeting** on the landing page: returning players are now
+  greeted by name, with dynamic messaging based on their streak, stage progress,
+  and whether they are starting fresh or continuing an existing journey.
+- **Decluttered landing page**: the home screen is now built around one clear
+  next action (**Continue Journey**), with Cocktail of the Day still visible and
+  the rest of the modes/features grouped under calmer tabs (`Modes`,
+  `Collection`, `Social`) instead of one large wall of buttons.
+- **Interactive judges table**: whenever judges appear, you can now tap a judge
+  to see:
+  - their score
+  - why they scored the drink that way
+  - which part of the drink they focused on
+  - tips on how to improve the drink
+  - an explanation of how the score was calculated
+- **Clearer judge scoring rules** on the result screens:
+  - early guess stages now clearly say the judges are **flavour only**
+  - later stages explain the **75% accuracy / 25% judges** blend
+  - Mixologist now explains the underlying parts behind the headline score
+    (balance, technique, glass fit, strength)
+- **Short-height landscape tuning** so the start screen and gameplay layout still
+  fit cleanly on smaller phones in landscape orientation.
+
+---
+
 ## v1.4.0 — Meet Old Tom: the opening comic (2026-06-26)
 
 - **Story intro comic reel**: a short, hand-illustrated cinematic now plays right

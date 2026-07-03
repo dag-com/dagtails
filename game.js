@@ -113,6 +113,55 @@ function applyProfile() {
   }
 }
 
+function renderStartWelcome() {
+  const p = getProfile();
+  const head = $("#welcome-back");
+  const sub = $("#welcome-sub");
+  if (!head || !sub) return;
+  if (!p) {
+    head.textContent = "Welcome.";
+    sub.textContent = "Your next shift is ready.";
+    return;
+  }
+
+  const m = getMap();
+  const d = getDaily();
+  const prog = getProgress();
+  const total = drinkPool().length;
+  const cleared = m.cleared || 0;
+  const nextStage = Math.min(cleared + 1, total);
+  const firstTime = cleared === 0 && (prog.served || 0) === 0;
+  const playedToday = d.last === todayStr();
+
+  head.textContent = `Welcome back, ${p.name}.`;
+
+  if (firstTime) {
+    sub.textContent = isUnderage()
+      ? "Your first mocktail shift is ready."
+      : "Your first shift is ready. Old Tom is waiting at the bar.";
+    return;
+  }
+  if (cleared >= total) {
+    sub.textContent = "You cleared the whole journey. Replay a favorite, try today's cocktail, or head into Mixologist.";
+    return;
+  }
+  if (playedToday && d.streak > 1) {
+    sub.textContent = `Your ${d.streak}-day streak is alive. Stage ${nextStage} is ready.`;
+    return;
+  }
+  if (playedToday) {
+    sub.textContent = `Stage ${nextStage} is ready whenever you are.`;
+    return;
+  }
+  if (d.streak > 1) {
+    sub.textContent = `Stage ${nextStage} is ready. Keep your ${d.streak}-day streak alive tonight.`;
+    return;
+  }
+  sub.textContent = isUnderage()
+    ? `Stage ${nextStage} is ready in the mocktail bar.`
+    : `Stage ${nextStage} is ready. Cocktail of the Day is waiting too.`;
+}
+
 // ============================ Drink pools & difficulty ============================
 // Difficulty is derived from ingredient count + preparation complexity.
 function methodWeight(m) {
@@ -345,6 +394,7 @@ function renderStartMeta() {
   const lvl = levelForXp(prog.xp);
   const inLvl = (prog.xp || 0) % XP_PER_LEVEL;
   const daily = getDaily();
+  const map = getMap();
 
   const lvlEl = $("#meta-level");
   if (lvlEl) lvlEl.textContent = `Lv ${lvl}`;
@@ -365,9 +415,20 @@ function renderStartMeta() {
     cotdBtn.classList.toggle("is-done", !!done);
   }
 
+  const startBtn = $("#btn-start");
+  if (startBtn) {
+    if ((map.cleared || 0) === 0 && (prog.served || 0) === 0) {
+      startBtn.textContent = "▶ Start the Journey";
+    } else if ((map.cleared || 0) >= drinkPool().length) {
+      startBtn.textContent = "▶ Replay the Journey";
+    } else {
+      startBtn.textContent = `▶ Continue Journey · Stage ${Math.min((map.cleared || 0) + 1, drinkPool().length)}`;
+    }
+  }
+
   // Unlock gating — Endless & Mixologist open after a few cleared stages.
   const ok = mapUnlocked();
-  const left = Math.max(0, STAGES_TO_UNLOCK - getMap().cleared);
+  const left = Math.max(0, STAGES_TO_UNLOCK - map.cleared);
   const endlessBtn = $("#btn-endless");
   if (endlessBtn) {
     endlessBtn.classList.toggle("is-locked", !ok);
@@ -388,6 +449,7 @@ function renderStartMeta() {
 // Combined refresh whenever we land on the start screen.
 function onShowStart() {
   applyProfile();
+  renderStartWelcome();
   renderStartBest();
   renderStartMeta();
   syncBackendStats();
@@ -768,6 +830,15 @@ function showScreen(id) {
   $("#" + id).classList.add("is-active");
   window.scrollTo({ top: 0, behavior: "smooth" });
   if (id === "screen-start") onShowStart();
+}
+
+function setStartTab(name) {
+  document.querySelectorAll("#start-tabs .seg-tab").forEach((tab) => {
+    tab.classList.toggle("is-active", tab.dataset.startTab === name);
+  });
+  document.querySelectorAll("[data-start-panel]").forEach((panel) => {
+    panel.classList.toggle("is-active", panel.dataset.startPanel === name);
+  });
 }
 
 let toastTimer = null;
@@ -1674,11 +1745,15 @@ function scoreBuild() {
     const evalResult = evaluate(state.build, { strictness: STRICTNESS });
     const panel = scoreWithJudges(evalResult, pickJudges(3));
     result.judgePanel = panel;
+    result.judgeEval = evalResult;
     const blendable = !state.complexity || state.complexity.portions !== false;
     if (blendable) {
       const blended = Math.round(pct * 0.75 + panel.total * 0.25);
       result.blended = blended;
       result.stars = blended >= 90 ? 3 : blended >= 70 ? 2 : blended >= 45 ? 1 : 0;
+      result.judgeScoring = { mode: "blended", accuracy: pct, judges: panel.total, final: blended };
+    } else {
+      result.judgeScoring = { mode: "flavor-only", accuracy: pct, judges: panel.total };
     }
   }
   return result;
@@ -1769,21 +1844,118 @@ function serveMix() {
   showMixResult(result);
 }
 
-function renderJudges(judges, sel = "#judges-panel") {
-  const el = $(sel);
+function scoreExplainHtml(scoring, evalResult) {
+  if (!scoring) return "";
+  if (scoring.mode === "mixologist") {
+    const parts = evalResult?.parts || {};
+    const chips = [
+      ["Balance", parts.balance],
+      ["Technique", parts.technique],
+      ["Glass fit", parts.glass],
+      ["Strength", parts.strength],
+    ]
+      .filter(([, v]) => Number.isFinite(v))
+      .map(([label, v]) => `<span class="judge-chip">${label} ${v}</span>`)
+      .join("");
+    return `
+      <div class="judge-explain">
+        <div class="judge-kicker">How scoring works</div>
+        <p class="judge-text">In Mixologist, the judges' average is the headline score. Under the hood, the drink is evaluated for balance, technique, glass fit and strength before each judge applies their own palate.</p>
+        <div class="judge-chip-row">${chips}</div>
+      </div>`;
+  }
+  if (scoring.mode === "flavor-only") {
+    return `
+      <div class="judge-explain">
+        <div class="judge-kicker">How scoring works</div>
+        <p class="judge-text">This early stage is flavour-only for the judges. They react to the drink, but your stars still come from choosing the right ingredients.</p>
+        <div class="judge-chip-row">
+          <span class="judge-chip">Accuracy ${scoring.accuracy}</span>
+          <span class="judge-chip">Judges avg ${scoring.judges}</span>
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="judge-explain">
+      <div class="judge-kicker">How scoring works</div>
+      <p class="judge-text">From pour stages onward, the final score blends <strong>75%</strong> build accuracy with <strong>25%</strong> judges' taste.</p>
+      <div class="judge-chip-row">
+        <span class="judge-chip">Accuracy ${scoring.accuracy}</span>
+        <span class="judge-chip">Judges avg ${scoring.judges}</span>
+        <span class="judge-chip judge-chip-hot">Final ${scoring.final}</span>
+      </div>
+    </div>`;
+}
+
+function renderJudgeDetail(judge, detailSel, opts = {}) {
+  const el = $(detailSel);
+  if (!el || !judge) return;
+  const tips = [judge.tip, ...(opts.tips || [])]
+    .filter(Boolean)
+    .filter((t, i, arr) => arr.indexOf(t) === i)
+    .slice(0, 3)
+    .map((t) => `<li>${escapeHtml(t)}</li>`)
+    .join("");
+  el.innerHTML = `
+    <div class="judge-detail-card">
+      <div class="judge-detail-head">
+        <div>
+          <div class="judge-kicker">Selected judge</div>
+          <div class="judge-detail-name">${judge.emoji} ${escapeHtml(judge.name)}</div>
+          <div class="judge-detail-blurb">${escapeHtml(judge.blurb)}</div>
+        </div>
+        <div class="judge-detail-score">${judge.score100}<small>/100</small></div>
+      </div>
+      <div class="judge-detail-grid">
+        <div class="judge-detail-block">
+          <div class="judge-kicker">Why they scored it this way</div>
+          <p class="judge-text">“${escapeHtml(judge.comment)}”</p>
+          <p class="judge-text judge-text-soft">${escapeHtml(judge.reason)}</p>
+          <div class="judge-chip-row">
+            <span class="judge-chip">Focus ${escapeHtml(judge.focus)}</span>
+            <span class="judge-chip">Palate match ${judge.palateMatch}%</span>
+          </div>
+        </div>
+        <div class="judge-detail-block">
+          <div class="judge-kicker">How to improve the drink</div>
+          <ul class="judge-tip-list">${tips}</ul>
+        </div>
+      </div>
+      ${scoreExplainHtml(opts.scoring, opts.evalResult)}
+    </div>`;
+}
+
+function renderJudgesInteractive(judges, panelSel = "#judges-panel", detailSel = "#mix-judge-detail", opts = {}) {
+  const el = $(panelSel);
   if (!el) return;
+  const selected = opts.selectedId && judges.some((j) => j.id === opts.selectedId) ? opts.selectedId : judges[0]?.id;
   el.innerHTML = judges
     .map((j) => `
-      <div class="judge-card">
+      <button class="judge-card${j.id === selected ? " is-active" : ""}" data-judge-id="${escapeHtml(j.id)}" aria-pressed="${j.id === selected ? "true" : "false"}">
         <div class="judge-top">
           <span class="judge-emoji">${j.emoji}</span>
-          <span class="judge-name">${j.name}</span>
+          <span class="judge-name">${escapeHtml(j.name)}</span>
           <span class="judge-score">${j.score}<small>/10</small></span>
         </div>
-        <div class="judge-blurb">${j.blurb}</div>
-        <div class="judge-comment">“${j.comment}”</div>
-      </div>`)
+        <div class="judge-blurb">${escapeHtml(j.blurb)}</div>
+        <div class="judge-comment">“${escapeHtml(j.comment)}”</div>
+      </button>`)
     .join("");
+
+  const choose = (id) => {
+    const judge = judges.find((j) => j.id === id) || judges[0];
+    el.querySelectorAll(".judge-card").forEach((card) => {
+      const active = card.dataset.judgeId === judge.id;
+      card.classList.toggle("is-active", active);
+      card.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+    renderJudgeDetail(judge, detailSel, opts);
+  };
+
+  el.querySelectorAll(".judge-card").forEach((card) => {
+    card.addEventListener("click", () => choose(card.dataset.judgeId));
+  });
+  choose(selected);
 }
 
 function renderFlavorBars(p) {
@@ -1809,7 +1981,11 @@ function showMixResult(result) {
   $("#mix-score").textContent = panel.total;
   $("#mix-verdict").textContent = panel.verdict;
   $("#mix-stars").innerHTML = [0, 1, 2, 3, 4].map((i) => `<span class="${i < panel.stars ? "on" : ""}">★</span>`).join("");
-  renderJudges(panel.judges);
+  renderJudgesInteractive(panel.judges, "#judges-panel", "#mix-judge-detail", {
+    tips: result.tips,
+    scoring: { mode: "mixologist", judges: panel.total, final: panel.total },
+    evalResult: result,
+  });
 
   const cl = $("#mix-classic");
   if (result.classic) {
@@ -1978,7 +2154,11 @@ function showResult(result) {
       ? `⚖️ The judges: ${p.verdict} (avg ${p.total})`
       : `⚖️ The judges taste it (avg ${p.total} — flavour only here)`;
     $("#result-judges-title").textContent = label;
-    renderJudges(p.judges, "#result-judges");
+    renderJudgesInteractive(p.judges, "#result-judges", "#result-judge-detail", {
+      tips: result.judgeEval?.tips,
+      scoring: result.judgeScoring,
+      evalResult: result.judgeEval,
+    });
     jWrap.style.display = "";
   } else {
     jWrap.style.display = "none";
@@ -2090,6 +2270,14 @@ $("#btn-start").addEventListener("click", () => {
     recordPlayDay();
     renderMap();
     showScreen("screen-map");
+  });
+});
+
+document.querySelectorAll("#start-tabs .seg-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    Sound.init();
+    Sound.click();
+    setStartTab(tab.dataset.startTab);
   });
 });
 
@@ -2577,6 +2765,8 @@ $("#set-logout").addEventListener("click", () => {
     logoutToGate();
   }
 });
+
+setStartTab("modes");
 
 // ============================ Debug / testing toolbar ============================
 // Wipe all saved identity + progress (and any backend session) and reload so the

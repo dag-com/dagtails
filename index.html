@@ -64,10 +64,8 @@
           <div class="brand-duck" aria-hidden="true"></div>
           <p class="eyebrow">A DAG.com game · Play • Care • Connect</p>
           <h1 class="title">LAST&nbsp;CALL</h1>
-          <p class="subtitle">
-            Climb the bartending journey — start simple, master the craft,
-            and work your way up to head mixologist.
-          </p>
+          <p class="welcome-back" id="welcome-back">Welcome back.</p>
+          <p class="welcome-sub" id="welcome-sub">Your next shift is ready.</p>
 
           <div class="player-meta" id="player-meta">
             <div class="pm-row">
@@ -78,6 +76,10 @@
             <span class="pm-streak" id="meta-streak">Play daily for a streak</span>
           </div>
 
+          <div class="start-cta">
+            <button id="btn-start" class="btn btn-primary btn-lg">▶ Play the Journey</button>
+          </div>
+
           <div class="cotd-card" id="cotd-card">
             <div class="cotd-info">
               <span class="cotd-eyebrow">🍹 Cocktail of the Day</span>
@@ -86,20 +88,28 @@
             <button id="btn-cotd" class="btn btn-cotd">Make it →</button>
           </div>
 
-          <div class="start-cta">
-            <button id="btn-start" class="btn btn-primary btn-lg">▶ Play the Journey</button>
-            <button id="btn-endless" class="btn btn-endless btn-lg">🔥 Endless Shift</button>
-            <button id="btn-mixologist" class="btn btn-mixologist btn-lg">🧪 Mixologist</button>
+          <div class="seg-tabs start-tabs" id="start-tabs">
+            <button class="seg-tab is-active" data-start-tab="modes">Modes</button>
+            <button class="seg-tab" data-start-tab="collection">Collection</button>
+            <button class="seg-tab" data-start-tab="social">Social</button>
           </div>
-          <div class="start-links">
-            <button id="btn-training" class="btn btn-ghost">📚 Training</button>
-            <button id="btn-badges" class="btn btn-ghost">🏅 Badges</button>
-            <button id="btn-community" class="btn btn-ghost">🌐 Community</button>
-            <button id="btn-leaderboard" class="btn btn-ghost">🏆 Leaderboard</button>
-            <button id="btn-how" class="btn btn-ghost">How to play</button>
-            <button id="btn-recipes" class="btn btn-ghost">Recipe Book</button>
-            <button id="btn-mybar" class="btn btn-ghost">My Bar</button>
-            <button id="btn-settings" class="btn btn-ghost">⚙ Settings</button>
+          <div class="start-panels">
+            <div class="start-panel is-active" data-start-panel="modes">
+              <button id="btn-endless" class="btn btn-endless btn-lg">🔥 Endless Shift</button>
+              <button id="btn-mixologist" class="btn btn-mixologist btn-lg">🧪 Mixologist</button>
+              <button id="btn-training" class="btn btn-ghost">📚 Training</button>
+              <button id="btn-how" class="btn btn-ghost">How to play</button>
+            </div>
+            <div class="start-panel" data-start-panel="collection">
+              <button id="btn-badges" class="btn btn-ghost">🏅 Badges</button>
+              <button id="btn-recipes" class="btn btn-ghost">Recipe Book</button>
+              <button id="btn-mybar" class="btn btn-ghost">My Bar</button>
+              <button id="btn-settings" class="btn btn-ghost">⚙ Settings</button>
+            </div>
+            <div class="start-panel" data-start-panel="social">
+              <button id="btn-community" class="btn btn-ghost">🌐 Community</button>
+              <button id="btn-leaderboard" class="btn btn-ghost">🏆 Leaderboard</button>
+            </div>
           </div>
           <p class="best-score" id="start-best"></p>
         </div>
@@ -254,6 +264,7 @@
           <div id="result-judges-wrap" style="display:none">
             <p class="judges-title" id="result-judges-title">⚖️ The judges taste it</p>
             <div class="judges-panel" id="result-judges"></div>
+            <div class="judge-detail" id="result-judge-detail"></div>
           </div>
           <div class="result-actions">
             <button id="btn-result-map" class="btn btn-ghost" style="display:none">🗺 Map</button>
@@ -277,6 +288,7 @@
           </div>
           <p class="judges-title">⚖️ Tonight's panel</p>
           <div class="judges-panel" id="judges-panel"></div>
+          <div class="judge-detail" id="mix-judge-detail"></div>
           <p class="mix-classic" id="mix-classic"></p>
           <p class="mix-note" id="mix-note"></p>
           <div class="mix-meta" id="mix-meta"></div>
@@ -435,6 +447,14 @@
           <p class="rankup-body" id="rankup-body"></p>
           <button id="btn-rankup-ok" class="btn btn-primary btn-lg">Keep climbing →</button>
         </div>
+      </div>
+    </div>
+
+    <div id="rotate-lock" class="rotate-lock" aria-live="polite" aria-hidden="true">
+      <div class="rotate-lock-box">
+        <div class="rotate-lock-icon">↻</div>
+        <h2>Rotate to Landscape</h2>
+        <p>Last Call now runs in a landscape-first layout from sign-in to final score. Turn your device sideways to continue.</p>
       </div>
     </div>
 
