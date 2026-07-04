@@ -1672,11 +1672,29 @@ function tolerance(unit, target) {
   return 0;
 }
 
+// A rough 1-based measure of how far the player has progressed, used to
+// scale both pour leniency and stage rewards below. Campaign uses the
+// stage being played; every other mode (endless, training, cotd,
+// challenge) reflects overall map progress since those don't have their
+// own difficulty ramp.
+function progressLevel() {
+  return state.mode === "campaign" ? state.stage + 1 : (getMap().cleared + 1);
+}
+
 // Be more forgiving about pour accuracy the deeper a player gets — harder drinks
 // with more ingredients shouldn't punish small measurement slips as harshly.
 function measureLeniency() {
-  const n = state.mode === "campaign" ? state.stage + 1 : (getMap().cleared + 1);
+  const n = progressLevel();
   return 1 + Math.min(0.8, Math.max(0, n - 6) * 0.045);
+}
+
+// Reward scaling — the same quality of drink pays out more the further the
+// player has progressed, so later (harder) stages feel proportionally more
+// valuable. Starts at 1x on stage 1, ramps up to 4x by the time the full
+// bar (every mechanic) is unlocked, then holds steady.
+function levelMultiplier() {
+  const n = progressLevel();
+  return 1 + Math.min(3, (n - 1) * 0.06);
 }
 
 function currentRecipe() {
@@ -1817,24 +1835,43 @@ function scoreBuild() {
   let points = 0;
   let maxPoints = 0;
 
+  // At early stages (and in "Guess"/"Pour" tiers) the app pre-selects the
+  // glass/method/garnish so the player can focus on the mechanic being
+  // taught. There's no point grading — or crediting — a choice the player
+  // never actually made, so those only count toward the score once the
+  // player is the one choosing them (cx === null means every step is
+  // manual, e.g. training/challenge/full-bar tier).
+  const cx = state.complexity;
+  const glassChosen = !cx || cx.chooseGlass;
+  const methodChosen = !cx || cx.chooseMethod;
+  const garnishChosen = !cx || cx.chooseGarnish;
+
   // Glass
-  maxPoints += 1;
-  if (state.build.glass === recipe.glass) {
-    points += 1;
-    feedback.push(fb("ok", "Glass", `${GLASS_BY_ID[recipe.glass].name} — correct.`));
+  if (glassChosen) {
+    maxPoints += 1;
+    if (state.build.glass === recipe.glass) {
+      points += 1;
+      feedback.push(fb("ok", "Glass", `${GLASS_BY_ID[recipe.glass].name} — correct.`));
+    } else {
+      const chosen = state.build.glass ? GLASS_BY_ID[state.build.glass].name : "none";
+      feedback.push(fb("bad", "Glass", `You used ${chosen}; should be ${GLASS_BY_ID[recipe.glass].name}.`));
+    }
   } else {
-    const chosen = state.build.glass ? GLASS_BY_ID[state.build.glass].name : "none";
-    feedback.push(fb("bad", "Glass", `You used ${chosen}; should be ${GLASS_BY_ID[recipe.glass].name}.`));
+    feedback.push(fb("auto", "Glass", `${GLASS_BY_ID[recipe.glass].name} — set for you at this stage.`));
   }
 
   // Method
-  maxPoints += 1;
-  if (state.build.method === recipe.method) {
-    points += 1;
-    feedback.push(fb("ok", "Method", `${METHOD_BY_ID[recipe.method].name} — correct.`));
+  if (methodChosen) {
+    maxPoints += 1;
+    if (state.build.method === recipe.method) {
+      points += 1;
+      feedback.push(fb("ok", "Method", `${METHOD_BY_ID[recipe.method].name} — correct.`));
+    } else {
+      const chosen = state.build.method ? METHOD_BY_ID[state.build.method].name : "none";
+      feedback.push(fb("bad", "Method", `You chose ${chosen}; should be ${METHOD_BY_ID[recipe.method].name}.`));
+    }
   } else {
-    const chosen = state.build.method ? METHOD_BY_ID[state.build.method].name : "none";
-    feedback.push(fb("bad", "Method", `You chose ${chosen}; should be ${METHOD_BY_ID[recipe.method].name}.`));
+    feedback.push(fb("auto", "Method", `${METHOD_BY_ID[recipe.method].name} — set for you at this stage.`));
   }
 
   // Ingredients
@@ -1886,20 +1923,30 @@ function scoreBuild() {
   });
 
   // Garnish
-  maxPoints += 1;
-  if (recipe.garnish.includes(state.build.garnish)) {
-    points += 1;
-    feedback.push(fb("ok", "Garnish", `${GARNISH_BY_ID[state.build.garnish].name} — nice touch.`));
+  if (garnishChosen) {
+    maxPoints += 1;
+    if (recipe.garnish.includes(state.build.garnish)) {
+      points += 1;
+      feedback.push(fb("ok", "Garnish", `${GARNISH_BY_ID[state.build.garnish].name} — nice touch.`));
+    } else {
+      const ideal = GARNISH_BY_ID[recipe.garnish[0]].name;
+      const chosen = state.build.garnish ? GARNISH_BY_ID[state.build.garnish].name : "none";
+      feedback.push(fb("near", "Garnish", `You chose ${chosen}; ${ideal} suits it better.`));
+    }
   } else {
-    const ideal = GARNISH_BY_ID[recipe.garnish[0]].name;
-    const chosen = state.build.garnish ? GARNISH_BY_ID[state.build.garnish].name : "none";
-    feedback.push(fb("near", "Garnish", `You chose ${chosen}; ${ideal} suits it better.`));
+    const gid = recipe.garnish[0];
+    const gname = gid === "none" ? "None" : GARNISH_BY_ID[gid].name;
+    feedback.push(fb("auto", "Garnish", `${gname} — added automatically at this stage.`));
   }
 
   points = Math.max(0, points);
   const pct = Math.round((points / maxPoints) * 100);
   let stars = pct >= 90 ? 3 : pct >= 70 ? 2 : pct >= 45 ? 1 : 0;
-  const result = { pct, stars, stagePoints: points * 10, feedback };
+  // Grading itself (stars/pct) doesn't change — only the payout scales, so
+  // the same quality drink is worth more the further you've progressed.
+  const levelMult = levelMultiplier();
+  const stagePoints = Math.round(points * 10 * levelMult);
+  const result = { pct, stars, stagePoints, levelMultiplier: levelMult, feedback };
 
   // Judges taste every served cocktail (except the tutorial). Their palate
   // verdict blends into the final stars once the player controls the pour;
@@ -2018,20 +2065,37 @@ function judgeSceneNote(scoring) {
   return `Random panel: 3 of 10 house judges. Final score blends 75% accuracy with 25% judges' taste. Accuracy ${scoring.accuracy}, judges avg ${scoring.judges}, final ${scoring.final}.`;
 }
 
+// Timers from the result screen's reveal choreography (judges talking →
+// scores → final verdict), kept here so a fast retry can cancel a reveal
+// still in flight instead of letting it fire on top of a fresh one.
+let resultRevealTimers = [];
+function clearResultRevealTimers() {
+  resultRevealTimers.forEach(clearTimeout);
+  resultRevealTimers = [];
+}
+
+const JUDGE_SEAT_STAGGER = 500;
+const JUDGE_SCORE_PAUSE = 700;
+
+// `opts.animated`: seats fade in one at a time ("talking"), each judge's
+// score stays hidden behind a "···" until every seat has spoken, then all
+// three scores pop in together. `opts.onDone` fires once scores are
+// revealed, so callers (showResult) can bring in the final verdict last.
 function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) {
   const el = $(panelSel);
   if (!el) return;
+  const animated = !!opts.animated;
   const note = judgeSceneNote(opts.scoring);
   el.innerHTML = `
     <div class="judge-scene-note">${escapeHtml(note)}</div>
     <div class="judge-scene">
       <div class="judge-table" aria-hidden="true"></div>
       ${judges.map((j) => `
-      <article class="judge-seat judge-seat-${escapeHtml(j.id)}" data-judge-id="${escapeHtml(j.id)}">
+      <article class="judge-seat judge-seat-${escapeHtml(j.id)}${animated ? "" : " is-in"}" data-judge-id="${escapeHtml(j.id)}">
         <div class="judge-bubble">
           <div class="judge-bubble-top">
             <span class="judge-bubble-name">${escapeHtml(j.name)}</span>
-            <span class="judge-score">${j.score100}<small>/100</small></span>
+            <span class="judge-score"><span class="judge-score-num">${animated ? "···" : j.score100}</span><small>/100</small></span>
           </div>
           <div class="judge-bubble-quote">“${escapeHtml(j.comment)}”</div>
           <div class="judge-bubble-reason">${escapeHtml(j.reason)}</div>
@@ -2046,6 +2110,30 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
         </div>
       </article>`).join("")}
     </div>`;
+
+  if (!animated) return;
+
+  const seats = [...el.querySelectorAll(".judge-seat")];
+  seats.forEach((seat, i) => {
+    resultRevealTimers.push(setTimeout(() => {
+      seat.classList.add("is-in");
+      Sound.select();
+    }, 150 + i * JUDGE_SEAT_STAGGER));
+  });
+
+  const scoresAt = 150 + Math.max(0, seats.length - 1) * JUDGE_SEAT_STAGGER + JUDGE_SCORE_PAUSE;
+  resultRevealTimers.push(setTimeout(() => {
+    seats.forEach((seat, i) => {
+      const numEl = seat.querySelector(".judge-score-num");
+      if (!numEl) return;
+      numEl.textContent = judges[i].score100;
+      numEl.classList.add("pop");
+    });
+    Sound.click();
+    if (typeof opts.onDone === "function") {
+      resultRevealTimers.push(setTimeout(opts.onDone, 650));
+    }
+  }, scoresAt));
 }
 
 function renderFlavorBars(p) {
@@ -2225,23 +2313,22 @@ function showResult(result) {
     stars: result.stars,
     pct: result.blended != null ? result.blended : result.pct,
   });
-  $("#result-eyebrow").textContent = result.stars >= 1 ? "Stage cleared" : "Needs work";
+
+  clearResultRevealTimers();
+
+  // Nothing that gives away the outcome shows yet — just the drink name and
+  // a neutral "still tasting" header. The verdict (stars, score, checklist)
+  // stays hidden until the judges have talked and scored.
+  $("#result-eyebrow").textContent = result.judgePanel ? "The judges are tasting…" : "Tasting…";
   $("#result-name").textContent = recipe.name;
 
-  // Build empty stars, then reveal earned ones one-by-one with a ding.
   const starsEl = $("#result-stars");
   starsEl.innerHTML = [0, 1, 2].map(() => `<span>★</span>`).join("");
-  const spans = [...starsEl.children];
-  for (let i = 0; i < result.stars; i++) {
-    setTimeout(() => {
-      spans[i].classList.add("on", "pop");
-      Sound.starDing(i);
-    }, 350 + i * 450);
-  }
 
-  $("#result-pct").textContent = result.blended != null ? result.blended : result.pct;
-  const pts = result.stagePoints + (result.tip || 0);
-  $("#result-points").textContent = pts;
+  const verdict = $("#result-verdict");
+  verdict.classList.add("is-pending");
+  const actions = $("#result-actions");
+  actions.classList.add("is-pending");
 
   // Judges' reaction panel (every served cocktail except the tutorial).
   const jWrap = $("#result-judges-wrap");
@@ -2251,12 +2338,46 @@ function showResult(result) {
       ? `⚖️ Tonight's panel: ${p.verdict} (3 of 10 judges, avg ${p.total})`
       : `⚖️ Tonight's panel: flavour check (3 of 10 judges, avg ${p.total})`;
     $("#result-judges-title").textContent = label;
+    jWrap.style.display = "";
     renderJudgesInteractive(p.judges, "#result-judges", {
       scoring: result.judgeScoring,
+      animated: true,
+      onDone: () => revealResultVerdict(result, recipe),
     });
-    jWrap.style.display = "";
   } else {
     jWrap.style.display = "none";
+    // No judges here (tutorial) — nothing to wait on, just a short beat.
+    resultRevealTimers.push(setTimeout(() => revealResultVerdict(result, recipe), 300));
+  }
+
+  showScreen("screen-result");
+}
+
+// The "at last" beat: stars, score, bartender checklist, customer reaction,
+// and the retry/next controls all land together once the judges are done.
+function revealResultVerdict(result, recipe) {
+  $("#result-eyebrow").textContent = result.stars >= 1 ? "Stage cleared" : "Needs work";
+
+  const starsEl = $("#result-stars");
+  const spans = [...starsEl.children];
+  for (let i = 0; i < result.stars; i++) {
+    resultRevealTimers.push(setTimeout(() => {
+      spans[i].classList.add("on", "pop");
+      Sound.starDing(i);
+    }, 350 + i * 450));
+  }
+
+  $("#result-pct").textContent = result.blended != null ? result.blended : result.pct;
+  const pts = result.stagePoints + (result.tip || 0);
+  $("#result-points").textContent = pts;
+  const bonusEl = $("#result-bonus");
+  if (bonusEl) {
+    if (result.levelMultiplier && result.levelMultiplier > 1.04) {
+      bonusEl.textContent = ` (×${result.levelMultiplier.toFixed(1)} level bonus)`;
+      bonusEl.style.display = "";
+    } else {
+      bonusEl.style.display = "none";
+    }
   }
 
   // Customer reaction (campaign & endless only)
@@ -2273,7 +2394,7 @@ function showResult(result) {
   const list = $("#feedback-list");
   list.innerHTML = "";
   result.feedback.forEach((f) => {
-    const icon = f.kind === "ok" ? "✓" : f.kind === "near" ? "≈" : "✗";
+    const icon = f.kind === "ok" ? "✓" : f.kind === "near" ? "≈" : f.kind === "auto" ? "•" : "✗";
     const li = document.createElement("li");
     li.innerHTML = `<span class="fb-icon fb-${f.kind}">${icon}</span><span class="fb-text"><strong>${f.label}:</strong> <span>${f.text}</span></span>`;
     list.appendChild(li);
@@ -2316,13 +2437,15 @@ function showResult(result) {
       nextBtn.textContent = isLast ? "See results →" : "Continue →";
     }
   }
-  showScreen("screen-result");
 
-  // Celebrate a rank-up on top of the result.
+  $("#result-verdict").classList.remove("is-pending");
+  $("#result-actions").classList.remove("is-pending");
+
+  // Celebrate a rank-up once the verdict has fully landed.
   if (pendingRankUp !== null) {
     const r = pendingRankUp;
     pendingRankUp = null;
-    setTimeout(() => showRankUp(r), 900);
+    resultRevealTimers.push(setTimeout(() => showRankUp(r), 1700));
   }
 }
 

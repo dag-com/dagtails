@@ -277,14 +277,20 @@
       <!-- ============================== RESULT SCREEN ============================== -->
       <section id="screen-result" class="screen">
         <div class="result-card">
-          <div class="result-top">
+          <div class="result-header">
+            <p class="eyebrow" id="result-eyebrow">Stage cleared</p>
+            <h2 class="result-name" id="result-name">Cocktail</h2>
+          </div>
+          <div id="result-judges-wrap" style="display:none">
+            <p class="judges-title" id="result-judges-title">⚖️ The judges taste it</p>
+            <div class="judges-panel" id="result-judges"></div>
+          </div>
+          <div class="result-top is-pending" id="result-verdict">
             <div class="result-left">
-              <p class="eyebrow" id="result-eyebrow">Stage cleared</p>
-              <h2 class="result-name" id="result-name">Cocktail</h2>
               <div class="stars" id="result-stars">★★★</div>
               <div class="result-score">
                 <span id="result-pct">0</span><span class="result-pct-sign">%</span>
-                <span class="result-points">+<span id="result-points">0</span> pts</span>
+                <span class="result-points">+<span id="result-points">0</span> pts<span class="result-bonus" id="result-bonus" style="display:none"></span></span>
               </div>
               <p class="result-customer" id="result-customer"></p>
             </div>
@@ -293,11 +299,7 @@
               <ul class="feedback" id="feedback-list"></ul>
             </div>
           </div>
-          <div id="result-judges-wrap" style="display:none">
-            <p class="judges-title" id="result-judges-title">⚖️ The judges taste it</p>
-            <div class="judges-panel" id="result-judges"></div>
-          </div>
-          <div class="result-actions">
+          <div class="result-actions" id="result-actions">
             <button id="btn-result-map" class="btn btn-ghost" style="display:none">🗺 Map</button>
             <button id="btn-result-shop" class="btn btn-ghost">🛍 Shop the gear</button>
             <button id="btn-retry" class="btn btn-ghost">Retry stage</button>

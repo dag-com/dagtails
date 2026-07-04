@@ -12,6 +12,38 @@ any past version, go to the repository's **Releases** page and pick that version
 
 ---
 
+## v1.11.1 — Main menu now fills the screen properly (2026-07-04)
+
+- **Fixed the big empty gap on the main menu.** The duck mascot was capped at
+  small fixed pixel sizes, so on anything taller than a short phone-landscape
+  screen (a normal desktop browser window, a tablet, a phone held upright) most
+  of the screen sat empty above a tiny duck.
+- The duck now grows to actually fill the space it has (while keeping its
+  proportions correct), so the hub looks properly composed on every window
+  size instead of just the one narrow landscape breakpoint it was tuned for.
+- The compact phone-landscape layout (duck beside the menu instead of above
+  it) also got a bigger, better-scaled duck.
+
+## v1.11.0 — Fairer, more suspenseful, level-scaled scoring page (2026-07-04)
+
+- **Don't grade what you didn't do.** At early stages the app pre-picks the
+  glass, method, and/or garnish for you so you can focus on the mechanic
+  being taught. Those steps no longer count toward — or against — your
+  score. The bartender checklist still lists them, just marked as "set for
+  you at this stage" instead of right/wrong.
+- **The verdict now comes last.** Serving a drink used to dump the stars,
+  score, and full checklist on screen all at once. Now the judges show up
+  one at a time and talk through their reaction first, then reveal their
+  individual scores, and only after that does the stage result — stars,
+  final score, tip, and the bartender checklist — fade in together.
+- **Points now scale with your progress.** Stars and accuracy grading work
+  the same as always, but the points payout for the same quality drink
+  grows the further you've climbed — from 1x on your first stage up to 4x
+  once the full bar is unlocked. A green "×N level bonus" tag shows up next
+  to your points whenever it's boosting your payout.
+
+---
+
 ## v1.10.1 — Fixed empty space on real phone screens (2026-07-04)
 
 - The main menu's mascot area was designed and tested mostly on wide/tall

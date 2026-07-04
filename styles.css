@@ -480,12 +480,25 @@ body {
   text-align: center;
   box-shadow: var(--shadow);
 }
+.result-header {
+  margin-bottom: 4px;
+}
 .result-top {
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
   gap: 16px;
   text-align: center;
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+/* The final verdict (stars/score/checklist) and the retry/next controls
+   stay hidden until the judges have had their say — see the reveal
+   choreography in showResult()/revealResultVerdict(). */
+.result-top.is-pending,
+.result-actions.is-pending {
+  opacity: 0;
+  transform: translateY(10px);
+  pointer-events: none;
 }
 .result-left {
   display: flex;
@@ -576,6 +589,10 @@ body {
   font-weight: 600;
   margin-top: 2px;
 }
+.result-bonus {
+  color: var(--green);
+  font-weight: 700;
+}
 .feedback {
   list-style: none;
   padding: 0;
@@ -606,6 +623,9 @@ body {
 .fb-bad {
   color: var(--red);
 }
+.fb-auto {
+  color: var(--muted);
+}
 .fb-text strong {
   color: var(--text);
 }
@@ -620,6 +640,7 @@ body {
   gap: 12px;
   justify-content: center;
   margin-top: 16px;
+  transition: opacity 0.5s ease, transform 0.5s ease;
 }
 .finish-rank {
   font-size: 18px;
@@ -2443,6 +2464,15 @@ body {
   position: relative;
   z-index: 1;
   padding-bottom: 16px;
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+/* Judges "arrive" one at a time when the result screen wants a staged
+   reveal (opts.animated in renderJudgesInteractive); plain call sites
+   (e.g. Mixologist) render with .is-in already applied, so they just
+   show up instantly like before. */
+.judge-seat:not(.is-in) {
+  opacity: 0;
+  transform: translateY(16px);
 }
 .judge-seat:hover .judge-bubble {
   border-color: rgba(233, 185, 73, 0.5);
@@ -2494,6 +2524,10 @@ body {
 .judge-score small {
   font-size: 10px;
   color: var(--muted);
+}
+.judge-score-num.pop {
+  display: inline-block;
+  animation: starPop 0.45s cubic-bezier(0.2, 1.4, 0.4, 1);
 }
 .judge-bubble-quote {
   font-size: 12.5px;
@@ -4129,9 +4163,18 @@ body {
   text-align: center;
   padding: 4px 0 0;
 }
+/* The duck grows to fill whatever vertical room .hub-stage actually has
+   (instead of a small fixed cap) so tall windows/tablets/portrait phones
+   don't leave a big empty gap above a tiny mascot. aspect-ratio keeps it
+   from distorting; max-width stops it getting comically wide on short,
+   very wide screens (row layout below has its own sizing anyway). */
 .hub-duck {
-  width: min(26vw, 190px);
-  height: min(40vw, 292px);
+  flex: 1 1 auto;
+  min-height: 90px;
+  width: auto;
+  aspect-ratio: 0.65;
+  max-width: min(46vw, 360px);
+  max-height: 64vh;
   margin-bottom: -4px;
 }
 .hub-status {
@@ -4316,10 +4359,6 @@ body {
     padding: 10px 14px 8px;
     gap: 2px;
   }
-  .hub-duck {
-    width: min(20vw, 130px);
-    height: min(30vw, 196px);
-  }
   .hub-brand-title {
     font-size: 19px;
   }
@@ -4356,8 +4395,12 @@ body {
     padding: 0;
   }
   .hub-duck {
-    width: min(20vw, 150px);
-    height: min(34vw, 220px);
+    flex: none;
+    width: auto;
+    height: 100%;
+    max-height: 280px;
+    max-width: 36vw;
+    aspect-ratio: 0.65;
     margin-bottom: 0;
   }
   .hub-status {
