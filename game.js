@@ -162,6 +162,90 @@ function renderStartWelcome() {
     : `Stage ${nextStage} is ready. Cocktail of the Day is waiting too.`;
 }
 
+function nextRewardCopy(map, prog) {
+  const cleared = map.cleared || 0;
+  const lvl = levelForXp(prog.xp);
+  const inLvl = (prog.xp || 0) % XP_PER_LEVEL;
+  if (!mapUnlocked()) {
+    const left = Math.max(0, STAGES_TO_UNLOCK - cleared);
+    return {
+      main: "Unlock Endless & Mixologist",
+      sub: `Clear ${left} more stage${left === 1 ? "" : "s"} to open the wider bar.`,
+    };
+  }
+  const curRank = rankForCleared(cleared);
+  const nextRankIdx = Math.min(curRank + 1, RANKS.length - 1);
+  const nextRankAt = (curRank + 1) * STAGES_PER_RANK;
+  if (nextRankIdx > curRank && cleared < drinkPool().length) {
+    const left = Math.max(1, nextRankAt - cleared);
+    const rk = rankInfo(nextRankIdx);
+    return {
+      main: `${rk.emoji} Reach ${rk.name}`,
+      sub: `${left} more cleared stage${left === 1 ? "" : "s"} to rank up.`,
+    };
+  }
+  return {
+    main: `Reach Lv ${lvl + 1}`,
+    sub: `${Math.max(1, XP_PER_LEVEL - inLvl)} XP until the next level.`,
+  };
+}
+
+function renderStartPreview() {
+  const host = $("#start-map-preview");
+  if (!host) return;
+  const pool = drinkPool();
+  if (!pool.length) { host.innerHTML = ""; return; }
+  const map = getMap();
+  const cleared = map.cleared || 0;
+  const current = Math.min(cleared, pool.length - 1);
+  const isComplete = cleared >= pool.length;
+  const next = Math.min(current + 1, pool.length - 1);
+  let start = Math.max(0, current - 2);
+  let end = Math.min(pool.length - 1, start + 6);
+  start = Math.max(0, end - 6);
+
+  host.innerHTML = "";
+  const rail = document.createElement("div");
+  rail.className = "start-preview-path";
+
+  for (let i = start; i <= end; i++) {
+    const recipe = pool[i];
+    const done = i < cleared || isComplete;
+    const isCurrent = i === current;
+    const isNext = !isComplete && i === next && i !== current;
+    const locked = i > cleared;
+    const node = document.createElement("div");
+    node.className = "start-preview-node" +
+      (done ? " is-done" : "") +
+      (isCurrent ? " is-current" : "") +
+      (isNext ? " is-next" : "") +
+      (locked ? " is-locked" : "");
+
+    const stars = done
+      ? [0, 1, 2].map((s) => `<span class="${s < (map.stars[i] || 0) ? "on" : ""}">★</span>`).join("")
+      : "";
+
+    node.innerHTML =
+      `<span class="start-preview-stars">${stars}</span>` +
+      `<span class="start-preview-disc">${i + 1}</span>` +
+      (isCurrent ? `<span class="start-preview-duck"><img src="assets/duck.png" alt="" draggable="false"></span>` : "") +
+      `<span class="start-preview-label">${escapeHtml(recipe.name)}</span>`;
+
+    rail.appendChild(node);
+  }
+
+  host.appendChild(rail);
+
+  const chip = $("#hero-current-stage-chip");
+  if (chip) chip.textContent = isComplete
+    ? "Journey complete"
+    : `You are here · Stage ${current + 1}`;
+
+  const rankPill = $("#hero-rank-pill");
+  const rk = rankInfo(rankForCleared(cleared));
+  if (rankPill) rankPill.textContent = `${rk.emoji} ${rk.name}`;
+}
+
 // ============================ Drink pools & difficulty ============================
 // Difficulty is derived from ingredient count + preparation complexity.
 function methodWeight(m) {
@@ -395,6 +479,7 @@ function renderStartMeta() {
   const inLvl = (prog.xp || 0) % XP_PER_LEVEL;
   const daily = getDaily();
   const map = getMap();
+  const rk = rankInfo(rankForCleared(map.cleared || 0));
 
   const lvlEl = $("#meta-level");
   if (lvlEl) lvlEl.textContent = `Lv ${lvl}`;
@@ -404,11 +489,33 @@ function renderStartMeta() {
   if (xpText) xpText.textContent = `${inLvl} / ${XP_PER_LEVEL} XP`;
   const streakEl = $("#meta-streak");
   if (streakEl) streakEl.textContent = daily.streak > 0 ? `🔥 ${daily.streak}-day streak` : "Play daily for a streak";
+  const rankName = $("#hero-rank-name");
+  if (rankName) rankName.textContent = rk.name;
+  const streakValue = $("#hero-streak-value");
+  if (streakValue) streakValue.textContent = String(daily.streak || 0);
+  const starsTotal = $("#hero-stars-total");
+  if (starsTotal) starsTotal.textContent = String(totalStars());
+  const heroLevelBig = $("#hero-level-big");
+  if (heroLevelBig) heroLevelBig.textContent = `Lv ${lvl}`;
+  const heroLevelMain = $("#hero-level-main");
+  if (heroLevelMain) heroLevelMain.textContent = rk.name;
+  const heroLevelSub = $("#hero-level-sub");
+  if (heroLevelSub) heroLevelSub.textContent = `${inLvl} / ${XP_PER_LEVEL} XP`;
+  const heroStreakBig = $("#hero-streak-big");
+  if (heroStreakBig) heroStreakBig.textContent = String(daily.streak || 0);
+  const heroStreakSub = $("#hero-streak-sub");
+  if (heroStreakSub) heroStreakSub.textContent = daily.streak > 0
+    ? `Best streak: ${daily.best || daily.streak} days`
+    : "Come back tomorrow to build one.";
 
   // Cocktail of the Day
   const { recipe, done } = todaysCotd();
   const cotdName = $("#cotd-name");
   if (cotdName && recipe) cotdName.textContent = recipe.name;
+  const cotdNote = $("#cotd-note");
+  if (cotdNote) cotdNote.textContent = done
+    ? "Done today — return tomorrow for a new featured drink."
+    : "Featured tonight with a daily bonus.";
   const cotdBtn = $("#btn-cotd");
   if (cotdBtn) {
     cotdBtn.textContent = done ? "Done today ✓" : "Make it →";
@@ -444,6 +551,14 @@ function renderStartMeta() {
   // Community surfaces user-shared cocktails, so hide it for underage players.
   const commBtn = $("#btn-community");
   if (commBtn) commBtn.style.display = isUnderage() ? "none" : "";
+
+  const nextReward = nextRewardCopy(map, prog);
+  const nextMain = $("#hero-next-reward-main");
+  if (nextMain) nextMain.textContent = nextReward.main;
+  const nextSub = $("#hero-next-reward-sub");
+  if (nextSub) nextSub.textContent = nextReward.sub;
+
+  renderStartPreview();
 }
 
 // Combined refresh whenever we land on the start screen.
@@ -2271,6 +2386,13 @@ $("#btn-start").addEventListener("click", () => {
     renderMap();
     showScreen("screen-map");
   });
+});
+
+$("#btn-open-map").addEventListener("click", () => {
+  Sound.init();
+  Sound.click();
+  renderMap();
+  showScreen("screen-map");
 });
 
 document.querySelectorAll("#start-tabs .seg-tab").forEach((tab) => {

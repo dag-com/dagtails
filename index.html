@@ -55,63 +55,121 @@
       <!-- ============================== START SCREEN ============================== -->
       <section id="screen-start" class="screen is-active">
         <div class="hero-bg" aria-hidden="true"></div>
-        <div class="start-card">
-          <div class="profile-bar" id="profile-bar" style="display:none">
-            <span class="profile-chip" id="profile-chip"></span>
-            <button id="btn-edit-profile" class="btn btn-ghost btn-sm">Edit</button>
-          </div>
-          <p class="mocktail-banner" id="mocktail-banner" style="display:none">🧃 Mocktail mode — alcohol-free menu</p>
-          <div class="brand-duck" aria-hidden="true"></div>
-          <p class="eyebrow">A DAG.com game · Play • Care • Connect</p>
-          <h1 class="title">LAST&nbsp;CALL</h1>
-          <p class="welcome-back" id="welcome-back">Welcome back.</p>
-          <p class="welcome-sub" id="welcome-sub">Your next shift is ready.</p>
+        <div class="start-showcase">
+          <div class="start-shell">
+            <aside class="start-sidebar">
+              <div class="profile-bar" id="profile-bar" style="display:none">
+                <span class="profile-chip" id="profile-chip"></span>
+                <button id="btn-edit-profile" class="btn btn-ghost btn-sm">Edit</button>
+              </div>
+              <p class="mocktail-banner" id="mocktail-banner" style="display:none">🧃 Mocktail mode — alcohol-free menu</p>
 
-          <div class="player-meta" id="player-meta">
-            <div class="pm-row">
-              <span class="pm-level" id="meta-level">Lv 1</span>
-              <div class="pm-xp"><div class="pm-xp-fill" id="meta-xp-fill"></div></div>
-              <span class="pm-xp-text" id="meta-xp-text">0 / 120 XP</span>
-            </div>
-            <span class="pm-streak" id="meta-streak">Play daily for a streak</span>
+              <div class="start-side-head">
+                <div class="brand-duck" aria-hidden="true"></div>
+                <div class="start-side-copy">
+                  <p class="eyebrow">A DAG.com game · Play • Care · Connect</p>
+                  <h1 class="title">LAST&nbsp;CALL</h1>
+                  <p class="welcome-back" id="welcome-back">Welcome back.</p>
+                  <p class="welcome-sub" id="welcome-sub">Your next shift is ready.</p>
+                </div>
+              </div>
+
+              <div class="player-meta start-meta-card" id="player-meta">
+                <div class="pm-topline">
+                  <span class="pm-level" id="meta-level">Lv 1</span>
+                  <span class="hero-rank-name" id="hero-rank-name">Trainee</span>
+                </div>
+                <div class="pm-xp"><div class="pm-xp-fill" id="meta-xp-fill"></div></div>
+                <div class="pm-bottomline">
+                  <span class="pm-streak" id="meta-streak">Play daily for a streak</span>
+                  <span class="pm-xp-text" id="meta-xp-text">0 / 120 XP</span>
+                </div>
+              </div>
+
+              <div class="start-quick-grid">
+                <div class="start-quick-card">
+                  <span class="start-quick-value" id="hero-streak-value">0</span>
+                  <span class="start-quick-label">day streak</span>
+                </div>
+                <div class="start-quick-card">
+                  <span class="start-quick-value" id="hero-stars-total">0</span>
+                  <span class="start-quick-label">journey stars</span>
+                </div>
+              </div>
+
+              <div class="start-cta">
+                <button id="btn-start" class="btn btn-primary btn-lg">▶ Play the Journey</button>
+              </div>
+              <p class="best-score" id="start-best"></p>
+            </aside>
+
+            <section class="start-stageview">
+              <div class="start-topcards">
+                <div class="cotd-card start-top-card" id="cotd-card">
+                  <div class="cotd-info">
+                    <span class="cotd-eyebrow">🍹 Cocktail of the Day</span>
+                    <span class="cotd-name" id="cotd-name">—</span>
+                    <span class="cotd-note" id="cotd-note">A featured pour for tonight.</span>
+                  </div>
+                  <button id="btn-cotd" class="btn btn-cotd">Make it →</button>
+                </div>
+
+                <div class="start-top-card stat-top-card">
+                  <span class="start-card-kicker">Current level</span>
+                  <strong class="start-card-big" id="hero-level-big">Lv 1</strong>
+                  <span class="start-card-main" id="hero-level-main">Trainee</span>
+                  <span class="start-card-sub" id="hero-level-sub">0 / 120 XP</span>
+                </div>
+
+                <div class="start-top-card stat-top-card">
+                  <span class="start-card-kicker">Streak</span>
+                  <strong class="start-card-big" id="hero-streak-big">0</strong>
+                  <span class="start-card-main" id="hero-streak-main">Days</span>
+                  <span class="start-card-sub" id="hero-streak-sub">Come back tomorrow to build one.</span>
+                </div>
+
+                <div class="start-top-card stat-top-card">
+                  <span class="start-card-kicker">Next reward</span>
+                  <strong class="start-card-main" id="hero-next-reward-main">Keep climbing</strong>
+                  <span class="start-card-sub" id="hero-next-reward-sub">Every cleared stage opens more of the bar.</span>
+                </div>
+              </div>
+
+              <button class="start-journey-frame" id="btn-open-map" type="button">
+                <div class="start-journey-overlay">
+                  <span class="start-journey-chip" id="hero-current-stage-chip">You are here</span>
+                  <span class="start-journey-rank" id="hero-rank-pill">🧽 Trainee</span>
+                </div>
+                <div class="start-map-preview" id="start-map-preview"></div>
+              </button>
+            </section>
           </div>
 
-          <div class="start-cta">
-            <button id="btn-start" class="btn btn-primary btn-lg">▶ Play the Journey</button>
-          </div>
-
-          <div class="cotd-card" id="cotd-card">
-            <div class="cotd-info">
-              <span class="cotd-eyebrow">🍹 Cocktail of the Day</span>
-              <span class="cotd-name" id="cotd-name">—</span>
+          <div class="start-dock">
+            <div class="seg-tabs start-tabs" id="start-tabs">
+              <button class="seg-tab is-active" data-start-tab="modes">Modes</button>
+              <button class="seg-tab" data-start-tab="collection">Collection</button>
+              <button class="seg-tab" data-start-tab="social">Social</button>
             </div>
-            <button id="btn-cotd" class="btn btn-cotd">Make it →</button>
-          </div>
-
-          <div class="seg-tabs start-tabs" id="start-tabs">
-            <button class="seg-tab is-active" data-start-tab="modes">Modes</button>
-            <button class="seg-tab" data-start-tab="collection">Collection</button>
-            <button class="seg-tab" data-start-tab="social">Social</button>
-          </div>
-          <div class="start-panels">
-            <div class="start-panel is-active" data-start-panel="modes">
-              <button id="btn-endless" class="btn btn-endless btn-lg">🔥 Endless Shift</button>
-              <button id="btn-mixologist" class="btn btn-mixologist btn-lg">🧪 Mixologist</button>
-              <button id="btn-training" class="btn btn-ghost">📚 Training</button>
-              <button id="btn-how" class="btn btn-ghost">How to play</button>
-            </div>
-            <div class="start-panel" data-start-panel="collection">
-              <button id="btn-badges" class="btn btn-ghost">🏅 Badges</button>
-              <button id="btn-recipes" class="btn btn-ghost">Recipe Book</button>
-              <button id="btn-mybar" class="btn btn-ghost">My Bar</button>
-              <button id="btn-settings" class="btn btn-ghost">⚙ Settings</button>
-            </div>
-            <div class="start-panel" data-start-panel="social">
-              <button id="btn-community" class="btn btn-ghost">🌐 Community</button>
-              <button id="btn-leaderboard" class="btn btn-ghost">🏆 Leaderboard</button>
+            <div class="start-panels">
+              <div class="start-panel is-active" data-start-panel="modes">
+                <button id="btn-endless" class="btn btn-endless btn-lg">🔥 Endless Shift</button>
+                <button id="btn-mixologist" class="btn btn-mixologist btn-lg">🧪 Mixologist</button>
+                <button id="btn-training" class="btn btn-ghost">📚 Training</button>
+                <button id="btn-how" class="btn btn-ghost">How to play</button>
+              </div>
+              <div class="start-panel" data-start-panel="collection">
+                <button id="btn-badges" class="btn btn-ghost">🏅 Badges</button>
+                <button id="btn-recipes" class="btn btn-ghost">Recipe Book</button>
+                <button id="btn-mybar" class="btn btn-ghost">My Bar</button>
+                <button id="btn-settings" class="btn btn-ghost">⚙ Settings</button>
+              </div>
+              <div class="start-panel" data-start-panel="social">
+                <button id="btn-community" class="btn btn-ghost">🌐 Community</button>
+                <button id="btn-leaderboard" class="btn btn-ghost">🏆 Leaderboard</button>
+              </div>
             </div>
           </div>
-          <p class="best-score" id="start-best"></p>
         </div>
         <footer class="bar-footer" id="start-footer">🍸 cocktails &nbsp;•&nbsp; precision pours &nbsp;•&nbsp; earn your stars</footer>
       </section>

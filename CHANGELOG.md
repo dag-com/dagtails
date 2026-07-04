@@ -12,6 +12,26 @@ any past version, go to the repository's **Releases** page and pick that version
 
 ---
 
+## v1.6.0 — Cinematic landing page redesign (2026-07-04)
+
+- **Full landing page redesign** inspired by the new concept art:
+  - a left-side hero column with player identity, welcome-back message, quick
+    stats and a stronger **Continue Journey** call-to-action
+  - floating premium info cards for **Cocktail of the Day**, current level,
+    streak and next reward
+  - a **live journey preview** on the right built from the player's real
+    progress, showing the duck on the current stage and the next part of the
+    path ahead
+  - a slimmer bottom dock for `Modes`, `Collection` and `Social`
+- **Better use of landscape space**: the start screen now feels like part of the
+  game world instead of a centered utility menu with unused space around it.
+- **Journey preview shortcut**: tapping the preview map now opens the full
+  journey map directly.
+- **Responsive tuning for the new layout** so the redesigned landing page fits
+  cleanly in shorter landscape viewports too.
+
+---
+
 ## v1.5.0 — Landscape mode, smarter judges & a calmer landing page (2026-07-04)
 
 - **Landscape-first experience from start to finish**: the whole game now lays
