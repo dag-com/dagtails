@@ -12,6 +12,23 @@ any past version, go to the repository's **Releases** page and pick that version
 
 ---
 
+## v1.11.3 — Judges page fixed for real phone-landscape screens (2026-07-04)
+
+- The judges/result page was badly overflowing on actual phone-landscape
+  resolutions (up to ~4x taller than the screen), pushing the score, stars,
+  checklist and — critically — the "Next"/"Retry" buttons off-screen with
+  no obvious way to scroll to them.
+- On short landscape screens, the judges now always sit 3-across (instead
+  of stacking into one tall column) with compact bubbles — name, score,
+  and a one-line reaction; the full portraits, reasons and tips are still
+  there on desktop/tablet.
+- The bartender checklist gets its own small internal scroll instead of
+  stretching the whole card, so busier recipes with more feedback lines
+  never push the buttons out of view.
+- Verified this now fits with zero or near-zero overflow on common phone
+  landscape sizes (iPhone SE/14, Pixel 7) without touching the desktop or
+  tablet layout at all.
+
 ## v1.11.2 — Slower, more suspenseful judges reveal (2026-07-04)
 
 - The judges scene now takes its time: each judge sits down and "talks"

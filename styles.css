@@ -3808,30 +3808,119 @@ body {
     padding: 18px;
   }
   .result-card {
-    padding: 16px 18px;
+    padding: 12px 16px;
   }
   .result-top {
     gap: 10px;
   }
   .result-name {
-    font-size: 26px;
-    margin: 2px 0 4px;
+    font-size: 22px;
+    margin: 1px 0 3px;
   }
   .stars {
-    font-size: 24px;
+    font-size: 20px;
+    letter-spacing: 3px;
   }
   .result-score {
-    margin: 4px 0;
-    font-size: 24px;
+    margin: 3px 0;
+    font-size: 20px;
+  }
+  .result-points {
+    font-size: 12.5px;
+  }
+  .result-customer {
+    font-size: 12px;
+    margin: 4px 0 0;
   }
   .result-right {
-    padding: 8px 12px;
+    padding: 6px 10px;
+    max-height: 112px;
+  }
+  .result-right-title {
+    font-size: 10px;
+    margin: 0 0 2px;
+  }
+  .result-right .feedback {
+    overflow-y: auto;
+  }
+  .feedback li {
+    padding: 4px 0;
+    font-size: 11.5px;
+    gap: 8px;
+  }
+  .fb-icon {
+    font-size: 13px;
   }
   #result-judges-wrap {
-    margin-top: 8px;
+    margin-top: 5px;
+  }
+  .judges-title {
+    font-size: 12px;
+    margin: 0 0 4px;
   }
   .result-actions {
-    margin-top: 10px;
+    margin-top: 6px;
+  }
+
+  /* Judges scene: on real phone landscape there's only ~320-430px of
+     height for the whole result card, so the full-size portraits +
+     paragraphs of text don't fit. Force the compact 3-across strip
+     regardless of width (the width-based stack at 700px is meant for
+     narrow portrait phones, not short landscape ones) and trim each
+     bubble down to name + score + a one-line reaction. */
+  .judge-scene-note {
+    display: none;
+  }
+  .judge-scene {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    padding: 0 4px 0;
+  }
+  .judge-seat {
+    gap: 3px;
+    padding-bottom: 2px;
+  }
+  .judge-bubble {
+    min-height: 0;
+    padding: 7px 9px 8px;
+  }
+  .judge-bubble-top {
+    margin-bottom: 3px;
+  }
+  .judge-bubble-name {
+    font-size: 11px;
+  }
+  .judge-score {
+    font-size: 12.5px;
+  }
+  .judge-score small {
+    font-size: 9px;
+  }
+  .judge-bubble-quote {
+    font-size: 10.5px;
+    line-height: 1.3;
+    margin-bottom: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .judge-bubble-reason,
+  .judge-bubble-tip {
+    display: none;
+  }
+  .judge-avatar-wrap {
+    max-width: 56px;
+    gap: 0;
+  }
+  .judge-portrait {
+    width: 36px;
+    height: 36px;
+    border-width: 2px;
+  }
+  .judge-avatar-name,
+  .judge-avatar-title {
+    display: none;
   }
 
   #screen-game.is-active {
