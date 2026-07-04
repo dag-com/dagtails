@@ -12,6 +12,14 @@ any past version, go to the repository's **Releases** page and pick that version
 
 ---
 
+## v1.11.2 — Slower, more suspenseful judges reveal (2026-07-04)
+
+- The judges scene now takes its time: each judge sits down and "talks"
+  about a second and a half apart, there's a ~2.5s pause before their
+  scores flip over, and another ~2.5s pause before the final verdict
+  (stars, points, checklist) lands. The full reveal now takes about 8
+  seconds instead of rushing through in ~2.5s.
+
 ## v1.11.1 — Main menu now fills the screen properly (2026-07-04)
 
 - **Fixed the big empty gap on the main menu.** The duck mascot was capped at

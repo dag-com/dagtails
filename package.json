@@ -1,6 +1,6 @@
 {
   "name": "last-call-bartending-game",
-  "version": "1.11.1",
+  "version": "1.11.2",
   "private": true,
   "description": "Last Call — a stage-based bartending simulation game. Zero-build vanilla JS/HTML/CSS on the web, wrapped with Capacitor for iOS/Android testing builds.",
   "scripts": {

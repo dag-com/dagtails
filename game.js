@@ -2074,8 +2074,9 @@ function clearResultRevealTimers() {
   resultRevealTimers = [];
 }
 
-const JUDGE_SEAT_STAGGER = 500;
-const JUDGE_SCORE_PAUSE = 700;
+const JUDGE_SEAT_STAGGER = 1400;
+const JUDGE_SCORE_PAUSE = 2400;
+const JUDGE_VERDICT_PAUSE = 2400;
 
 // `opts.animated`: seats fade in one at a time ("talking"), each judge's
 // score stays hidden behind a "···" until every seat has spoken, then all
@@ -2118,10 +2119,10 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
     resultRevealTimers.push(setTimeout(() => {
       seat.classList.add("is-in");
       Sound.select();
-    }, 150 + i * JUDGE_SEAT_STAGGER));
+    }, 500 + i * JUDGE_SEAT_STAGGER));
   });
 
-  const scoresAt = 150 + Math.max(0, seats.length - 1) * JUDGE_SEAT_STAGGER + JUDGE_SCORE_PAUSE;
+  const scoresAt = 500 + Math.max(0, seats.length - 1) * JUDGE_SEAT_STAGGER + JUDGE_SCORE_PAUSE;
   resultRevealTimers.push(setTimeout(() => {
     seats.forEach((seat, i) => {
       const numEl = seat.querySelector(".judge-score-num");
@@ -2131,7 +2132,7 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
     });
     Sound.click();
     if (typeof opts.onDone === "function") {
-      resultRevealTimers.push(setTimeout(opts.onDone, 650));
+      resultRevealTimers.push(setTimeout(opts.onDone, JUDGE_VERDICT_PAUSE));
     }
   }, scoresAt));
 }
