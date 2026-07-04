@@ -67,7 +67,8 @@ function judgeScore(judge, evalResult) {
   return {
     id: judge.id,
     name: judge.name,
-    emoji: judge.emoji,
+    initials: judge.initials,
+    title: judge.title,
     blurb: judge.blurb,
     score: score10,
     score100,

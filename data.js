@@ -1063,16 +1063,16 @@ export const SHOTS = [
 // how picky they are (weight), and how generous (bias). 3 judge a mix at a time.
 // ============================================================================
 export const JUDGES = [
-  { id: "vera", name: "Vera", emoji: "🍸", blurb: "Classic martini purist", ideal: { strong: 0.85, sweet: 0.2, sour: 0.3, bitter: 0.4, fizz: 0.1 }, weight: 0.6, bias: -4 },
-  { id: "sweet_lou", name: "Lou", emoji: "🍬", blurb: "Sweet tooth", ideal: { strong: 0.4, sweet: 0.85, sour: 0.4, bitter: 0.1, fizz: 0.4 }, weight: 0.65, bias: 4 },
-  { id: "sour_sal", name: "Sal", emoji: "🍋", blurb: "Loves a sharp sour", ideal: { strong: 0.5, sweet: 0.4, sour: 0.85, bitter: 0.2, fizz: 0.2 }, weight: 0.6, bias: 0 },
-  { id: "bitter_bo", name: "Bo", emoji: "🌿", blurb: "Amaro & bitters fan", ideal: { strong: 0.7, sweet: 0.25, sour: 0.3, bitter: 0.85, fizz: 0.1 }, weight: 0.65, bias: -2 },
-  { id: "fizzy_fay", name: "Fay", emoji: "🥂", blurb: "Spritz & bubbles", ideal: { strong: 0.35, sweet: 0.55, sour: 0.45, bitter: 0.2, fizz: 0.9 }, weight: 0.6, bias: 3 },
-  { id: "tiki_tom", name: "Tom", emoji: "🍍", blurb: "Tropical & fruity", ideal: { strong: 0.55, sweet: 0.7, sour: 0.6, bitter: 0.1, fizz: 0.2 }, weight: 0.55, bias: 2 },
-  { id: "balanced_bea", name: "Bea", emoji: "⚖️", blurb: "Wants perfect balance", ideal: { strong: 0.55, sweet: 0.5, sour: 0.5, bitter: 0.35, fizz: 0.3 }, weight: 0.75, bias: 0 },
-  { id: "boozy_bru", name: "Bruno", emoji: "🥃", blurb: "Spirit-forward & strong", ideal: { strong: 0.95, sweet: 0.15, sour: 0.2, bitter: 0.45, fizz: 0.05 }, weight: 0.7, bias: -3 },
-  { id: "easy_emma", name: "Emma", emoji: "😊", blurb: "Easy-going crowd-pleaser", ideal: { strong: 0.45, sweet: 0.55, sour: 0.45, bitter: 0.25, fizz: 0.4 }, weight: 0.4, bias: 6 },
-  { id: "critic_cyrus", name: "Cyrus", emoji: "🧐", blurb: "Hard-to-impress critic", ideal: { strong: 0.6, sweet: 0.45, sour: 0.5, bitter: 0.5, fizz: 0.25 }, weight: 0.7, bias: -7 },
+  { id: "vera", name: "Vera Sterling", initials: "VS", title: "Silver-screen martini grande dame", blurb: "Classic martini purist", ideal: { strong: 0.85, sweet: 0.2, sour: 0.3, bitter: 0.4, fizz: 0.1 }, weight: 0.6, bias: -4 },
+  { id: "sweet_lou", name: "Lou Marlowe", initials: "LM", title: "Lounge-showman with a sweet tooth", blurb: "Sweet tooth", ideal: { strong: 0.4, sweet: 0.85, sour: 0.4, bitter: 0.1, fizz: 0.4 }, weight: 0.65, bias: 4 },
+  { id: "sour_sal", name: "Sal Delacroix", initials: "SD", title: "Rebel sour specialist", blurb: "Loves a sharp sour", ideal: { strong: 0.5, sweet: 0.4, sour: 0.85, bitter: 0.2, fizz: 0.2 }, weight: 0.6, bias: 0 },
+  { id: "bitter_bo", name: "Beatrix Bardin", initials: "BB", title: "Velvet-dark amaro icon", blurb: "Amaro & bitters fan", ideal: { strong: 0.7, sweet: 0.25, sour: 0.3, bitter: 0.85, fizz: 0.1 }, weight: 0.65, bias: -2 },
+  { id: "fizzy_fay", name: "Faye Bellini", initials: "FB", title: "Sparkling European glamour", blurb: "Spritz & bubbles", ideal: { strong: 0.35, sweet: 0.55, sour: 0.45, bitter: 0.2, fizz: 0.9 }, weight: 0.6, bias: 3 },
+  { id: "tiki_tom", name: "Tommy Soleil", initials: "TS", title: "Tropical resort showman", blurb: "Tropical & fruity", ideal: { strong: 0.55, sweet: 0.7, sour: 0.6, bitter: 0.1, fizz: 0.2 }, weight: 0.55, bias: 2 },
+  { id: "balanced_bea", name: "Bianca Vale", initials: "BV", title: "Precision fashion-editor palate", blurb: "Wants perfect balance", ideal: { strong: 0.55, sweet: 0.5, sour: 0.5, bitter: 0.35, fizz: 0.3 }, weight: 0.75, bias: 0 },
+  { id: "boozy_bru", name: "Bruno Ryder", initials: "BR", title: "Aviator rogue who likes it strong", blurb: "Spirit-forward & strong", ideal: { strong: 0.95, sweet: 0.15, sour: 0.2, bitter: 0.45, fizz: 0.05 }, weight: 0.7, bias: -3 },
+  { id: "easy_emma", name: "Emma Hartwell", initials: "EH", title: "Crowd-pleasing star with soft edges", blurb: "Easy-going crowd-pleaser", ideal: { strong: 0.45, sweet: 0.55, sour: 0.45, bitter: 0.25, fizz: 0.4 }, weight: 0.4, bias: 6 },
+  { id: "critic_cyrus", name: "Cyrus Kane", initials: "CK", title: "Severe black-book critic", blurb: "Hard-to-impress critic", ideal: { strong: 0.6, sweet: 0.45, sour: 0.5, bitter: 0.5, fizz: 0.25 }, weight: 0.7, bias: -7 },
 ];
 
 // ============================================================================

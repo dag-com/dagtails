@@ -1959,118 +1959,45 @@ function serveMix() {
   showMixResult(result);
 }
 
-function scoreExplainHtml(scoring, evalResult) {
-  if (!scoring) return "";
+function judgeSceneNote(scoring) {
+  if (!scoring) return "Random panel: 3 of 10 house judges.";
   if (scoring.mode === "mixologist") {
-    const parts = evalResult?.parts || {};
-    const chips = [
-      ["Balance", parts.balance],
-      ["Technique", parts.technique],
-      ["Glass fit", parts.glass],
-      ["Strength", parts.strength],
-    ]
-      .filter(([, v]) => Number.isFinite(v))
-      .map(([label, v]) => `<span class="judge-chip">${label} ${v}</span>`)
-      .join("");
-    return `
-      <div class="judge-explain">
-        <div class="judge-kicker">How scoring works</div>
-        <p class="judge-text">In Mixologist, the judges' average is the headline score. Under the hood, the drink is evaluated for balance, technique, glass fit and strength before each judge applies their own palate.</p>
-        <div class="judge-chip-row">${chips}</div>
-      </div>`;
+    return `Random panel: 3 of 10 house judges. Final panel average: ${scoring.final}.`;
   }
   if (scoring.mode === "flavor-only") {
-    return `
-      <div class="judge-explain">
-        <div class="judge-kicker">How scoring works</div>
-        <p class="judge-text">This early stage is flavour-only for the judges. They react to the drink, but your stars still come from choosing the right ingredients.</p>
-        <div class="judge-chip-row">
-          <span class="judge-chip">Accuracy ${scoring.accuracy}</span>
-          <span class="judge-chip">Judges avg ${scoring.judges}</span>
-        </div>
-      </div>`;
+    return `Random panel: 3 of 10 house judges. Flavor reactions only here; stars still come from build accuracy. Judges avg ${scoring.judges}.`;
   }
-  return `
-    <div class="judge-explain">
-      <div class="judge-kicker">How scoring works</div>
-      <p class="judge-text">From pour stages onward, the final score blends <strong>75%</strong> build accuracy with <strong>25%</strong> judges' taste.</p>
-      <div class="judge-chip-row">
-        <span class="judge-chip">Accuracy ${scoring.accuracy}</span>
-        <span class="judge-chip">Judges avg ${scoring.judges}</span>
-        <span class="judge-chip judge-chip-hot">Final ${scoring.final}</span>
-      </div>
-    </div>`;
+  return `Random panel: 3 of 10 house judges. Final score blends 75% accuracy with 25% judges' taste. Accuracy ${scoring.accuracy}, judges avg ${scoring.judges}, final ${scoring.final}.`;
 }
 
-function renderJudgeDetail(judge, detailSel, opts = {}) {
-  const el = $(detailSel);
-  if (!el || !judge) return;
-  const tips = [judge.tip, ...(opts.tips || [])]
-    .filter(Boolean)
-    .filter((t, i, arr) => arr.indexOf(t) === i)
-    .slice(0, 3)
-    .map((t) => `<li>${escapeHtml(t)}</li>`)
-    .join("");
-  el.innerHTML = `
-    <div class="judge-detail-card">
-      <div class="judge-detail-head">
-        <div>
-          <div class="judge-kicker">Selected judge</div>
-          <div class="judge-detail-name">${judge.emoji} ${escapeHtml(judge.name)}</div>
-          <div class="judge-detail-blurb">${escapeHtml(judge.blurb)}</div>
-        </div>
-        <div class="judge-detail-score">${judge.score100}<small>/100</small></div>
-      </div>
-      <div class="judge-detail-grid">
-        <div class="judge-detail-block">
-          <div class="judge-kicker">Why they scored it this way</div>
-          <p class="judge-text">“${escapeHtml(judge.comment)}”</p>
-          <p class="judge-text judge-text-soft">${escapeHtml(judge.reason)}</p>
-          <div class="judge-chip-row">
-            <span class="judge-chip">Focus ${escapeHtml(judge.focus)}</span>
-            <span class="judge-chip">Palate match ${judge.palateMatch}%</span>
-          </div>
-        </div>
-        <div class="judge-detail-block">
-          <div class="judge-kicker">How to improve the drink</div>
-          <ul class="judge-tip-list">${tips}</ul>
-        </div>
-      </div>
-      ${scoreExplainHtml(opts.scoring, opts.evalResult)}
-    </div>`;
-}
-
-function renderJudgesInteractive(judges, panelSel = "#judges-panel", detailSel = "#mix-judge-detail", opts = {}) {
+function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) {
   const el = $(panelSel);
   if (!el) return;
-  const selected = opts.selectedId && judges.some((j) => j.id === opts.selectedId) ? opts.selectedId : judges[0]?.id;
-  el.innerHTML = judges
-    .map((j) => `
-      <button class="judge-card${j.id === selected ? " is-active" : ""}" data-judge-id="${escapeHtml(j.id)}" aria-pressed="${j.id === selected ? "true" : "false"}">
-        <div class="judge-top">
-          <span class="judge-emoji">${j.emoji}</span>
-          <span class="judge-name">${escapeHtml(j.name)}</span>
-          <span class="judge-score">${j.score}<small>/10</small></span>
+  const note = judgeSceneNote(opts.scoring);
+  el.innerHTML = `
+    <div class="judge-scene-note">${escapeHtml(note)}</div>
+    <div class="judge-scene">
+      <div class="judge-table" aria-hidden="true"></div>
+      ${judges.map((j) => `
+      <article class="judge-seat judge-seat-${escapeHtml(j.id)}" data-judge-id="${escapeHtml(j.id)}">
+        <div class="judge-bubble">
+          <div class="judge-bubble-top">
+            <span class="judge-bubble-name">${escapeHtml(j.name)}</span>
+            <span class="judge-score">${j.score100}<small>/100</small></span>
+          </div>
+          <div class="judge-bubble-quote">“${escapeHtml(j.comment)}”</div>
+          <div class="judge-bubble-reason">${escapeHtml(j.reason)}</div>
+          <div class="judge-bubble-tip"><strong>Tip:</strong> ${escapeHtml(j.tip)}</div>
         </div>
-        <div class="judge-blurb">${escapeHtml(j.blurb)}</div>
-        <div class="judge-comment">“${escapeHtml(j.comment)}”</div>
-      </button>`)
-    .join("");
-
-  const choose = (id) => {
-    const judge = judges.find((j) => j.id === id) || judges[0];
-    el.querySelectorAll(".judge-card").forEach((card) => {
-      const active = card.dataset.judgeId === judge.id;
-      card.classList.toggle("is-active", active);
-      card.setAttribute("aria-pressed", active ? "true" : "false");
-    });
-    renderJudgeDetail(judge, detailSel, opts);
-  };
-
-  el.querySelectorAll(".judge-card").forEach((card) => {
-    card.addEventListener("click", () => choose(card.dataset.judgeId));
-  });
-  choose(selected);
+        <div class="judge-avatar-wrap">
+          <div class="judge-portrait">
+            <img src="assets/judges/${escapeHtml(j.id)}.png" alt="${escapeHtml(j.name)}" loading="lazy">
+          </div>
+          <span class="judge-avatar-name">${escapeHtml(j.name)}</span>
+          <span class="judge-avatar-title">${escapeHtml(j.title || j.blurb)}</span>
+        </div>
+      </article>`).join("")}
+    </div>`;
 }
 
 function renderFlavorBars(p) {
@@ -2096,10 +2023,9 @@ function showMixResult(result) {
   $("#mix-score").textContent = panel.total;
   $("#mix-verdict").textContent = panel.verdict;
   $("#mix-stars").innerHTML = [0, 1, 2, 3, 4].map((i) => `<span class="${i < panel.stars ? "on" : ""}">★</span>`).join("");
-  renderJudgesInteractive(panel.judges, "#judges-panel", "#mix-judge-detail", {
-    tips: result.tips,
+  $("#mix-judges-title").textContent = `⚖️ Tonight's panel: ${panel.verdict} (3 of 10 judges, avg ${panel.total})`;
+  renderJudgesInteractive(panel.judges, "#judges-panel", {
     scoring: { mode: "mixologist", judges: panel.total, final: panel.total },
-    evalResult: result,
   });
 
   const cl = $("#mix-classic");
@@ -2266,13 +2192,11 @@ function showResult(result) {
   if (result.judgePanel) {
     const p = result.judgePanel;
     const label = result.blended != null
-      ? `⚖️ The judges: ${p.verdict} (avg ${p.total})`
-      : `⚖️ The judges taste it (avg ${p.total} — flavour only here)`;
+      ? `⚖️ Tonight's panel: ${p.verdict} (3 of 10 judges, avg ${p.total})`
+      : `⚖️ Tonight's panel: flavour check (3 of 10 judges, avg ${p.total})`;
     $("#result-judges-title").textContent = label;
-    renderJudgesInteractive(p.judges, "#result-judges", "#result-judge-detail", {
-      tips: result.judgeEval?.tips,
+    renderJudgesInteractive(p.judges, "#result-judges", {
       scoring: result.judgeScoring,
-      evalResult: result.judgeEval,
     });
     jWrap.style.display = "";
   } else {

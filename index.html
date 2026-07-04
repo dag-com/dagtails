@@ -310,19 +310,25 @@
       <!-- ============================== RESULT SCREEN ============================== -->
       <section id="screen-result" class="screen">
         <div class="result-card">
-          <p class="eyebrow" id="result-eyebrow">Stage cleared</p>
-          <h2 class="result-name" id="result-name">Cocktail</h2>
-          <div class="stars" id="result-stars">★★★</div>
-          <div class="result-score">
-            <span id="result-pct">0</span><span class="result-pct-sign">%</span>
-            <span class="result-points">+<span id="result-points">0</span> pts</span>
+          <div class="result-top">
+            <div class="result-left">
+              <p class="eyebrow" id="result-eyebrow">Stage cleared</p>
+              <h2 class="result-name" id="result-name">Cocktail</h2>
+              <div class="stars" id="result-stars">★★★</div>
+              <div class="result-score">
+                <span id="result-pct">0</span><span class="result-pct-sign">%</span>
+                <span class="result-points">+<span id="result-points">0</span> pts</span>
+              </div>
+              <p class="result-customer" id="result-customer"></p>
+            </div>
+            <div class="result-right">
+              <p class="result-right-title">Bartender checklist</p>
+              <ul class="feedback" id="feedback-list"></ul>
+            </div>
           </div>
-          <p class="result-customer" id="result-customer"></p>
-          <ul class="feedback" id="feedback-list"></ul>
           <div id="result-judges-wrap" style="display:none">
             <p class="judges-title" id="result-judges-title">⚖️ The judges taste it</p>
             <div class="judges-panel" id="result-judges"></div>
-            <div class="judge-detail" id="result-judge-detail"></div>
           </div>
           <div class="result-actions">
             <button id="btn-result-map" class="btn btn-ghost" style="display:none">🗺 Map</button>
@@ -344,9 +350,8 @@
               <div class="mix-verdict" id="mix-verdict">—</div>
             </div>
           </div>
-          <p class="judges-title">⚖️ Tonight's panel</p>
+          <p class="judges-title" id="mix-judges-title">⚖️ Tonight's panel</p>
           <div class="judges-panel" id="judges-panel"></div>
-          <div class="judge-detail" id="mix-judge-detail"></div>
           <p class="mix-classic" id="mix-classic"></p>
           <p class="mix-note" id="mix-note"></p>
           <div class="mix-meta" id="mix-meta"></div>

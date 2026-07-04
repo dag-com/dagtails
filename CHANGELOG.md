@@ -12,6 +12,22 @@ any past version, go to the repository's **Releases** page and pick that version
 
 ---
 
+## v1.7.0 — Judges get faces, and the scoring screen breathes (2026-07-04)
+
+- **Illustrated judges table**: the judging panel is now a real scene — 3 of the
+  10 house judges (each with a full name and their own painted portrait in the
+  game's signature art style) sit around a speakeasy judging table, with a
+  speech bubble above each one showing their score, their ruling, and a tip on
+  how to improve the drink.
+- **Random panel of 10**: every result now clearly calls out that the 3 judges
+  shown are randomly drawn from the full roster of 10 house judges.
+- **Redesigned scoring screen**: the stage result screen now puts the score and
+  stars in a compact column on the left, with the ingredient/glass/method
+  checklist boxed on the right — freeing up space so the judges' table can be
+  bigger and more front-and-center.
+
+---
+
 ## v1.6.0 — Cinematic landing page redesign (2026-07-04)
 
 - **Full landing page redesign** inspired by the new concept art:
