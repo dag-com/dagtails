@@ -7,10 +7,12 @@ import {
   MOCKTAILS,
   SHOTS,
   CUSTOMERS,
+  TOOLS,
   INGREDIENT_BY_ID,
   GLASS_BY_ID,
   METHOD_BY_ID,
   GARNISH_BY_ID,
+  TOOL_BY_ID,
 } from "./data.js";
 import { Sound } from "./sound.js";
 import * as Glass from "./glass.js";
@@ -87,6 +89,35 @@ function getSettings() {
   catch (e) { return { sound: true }; }
 }
 function setSettings(s) { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* ignore */ } }
+
+// ============================ Diagnostics / analytics ============================
+// Lightweight, privacy-friendly product analytics: every event is kept in a
+// capped local log (so you can inspect it on-device via the debug panel) and
+// also forwarded to Supabase when the backend is configured, so you can see
+// usage across every player from the SQL editor. Never blocks or throws.
+const ANALYTICS_KEY = "lastcall_analytics_log";
+const ANALYTICS_MAX = 300;
+const SESSION_ID = (() => {
+  try {
+    let sid = sessionStorage.getItem("lastcall_session_id");
+    if (!sid) { sid = genId(); sessionStorage.setItem("lastcall_session_id", sid); }
+    return sid;
+  } catch (e) { return genId(); }
+})();
+
+function getAnalyticsLog() {
+  try { return JSON.parse(localStorage.getItem(ANALYTICS_KEY) || "[]"); } catch (e) { return []; }
+}
+function clearAnalyticsLog() { try { localStorage.removeItem(ANALYTICS_KEY); } catch (e) { /* ignore */ } }
+
+function track(name, props = {}) {
+  try {
+    const log = getAnalyticsLog();
+    log.push({ name, props, t: Date.now() });
+    localStorage.setItem(ANALYTICS_KEY, JSON.stringify(log.slice(-ANALYTICS_MAX)));
+  } catch (e) { /* ignore */ }
+  try { Backend.logEvent(name, { ...props, session: SESSION_ID }); } catch (e) { /* ignore */ }
+}
 
 // Intro comic: shown once after sign-up, before the first level (replayable in Settings).
 const INTRO_KEY = "lastcall_intro_seen";
@@ -692,6 +723,7 @@ async function shareCreationToCommunity(payload, btn) {
     await Backend.shareCreation(payload);
     if (btn) btn.textContent = "Shared ✓";
     Sound.coin();
+    track("community_share", { name: payload && payload.name, score: payload && payload.score });
     showToast("Shared to the community!");
   } catch (e) {
     if (btn) { btn.textContent = original; btn.disabled = false; }
@@ -1518,6 +1550,7 @@ function loadStage(index) {
   enterStep();
   showScreen("screen-game");
   maybeShowTierIntro(state.complexity.label);
+  track("stage_started", { stage: index + 1, recipe: recipe.name, complexity: state.complexity.label });
 }
 
 // ============================ Endless shift ============================
@@ -2019,6 +2052,7 @@ function renderFlavorBars(p) {
 
 function showMixResult(result) {
   const panel = result.judges || scoreWithJudges(result, pickJudges(3));
+  track("mixologist_result", { score: panel.total, verdict: panel.verdict, classic: result.classic ? result.classic.name : null });
   $("#mix-name").textContent = "Your Creation";
   $("#mix-score").textContent = panel.total;
   $("#mix-verdict").textContent = panel.verdict;
@@ -2169,6 +2203,13 @@ function playInvention(inv) {
 
 function showResult(result) {
   const recipe = currentRecipe();
+  track("stage_result", {
+    mode: state.mode,
+    stage: state.stage + 1,
+    recipe: recipe.name,
+    stars: result.stars,
+    pct: result.blended != null ? result.blended : result.pct,
+  });
   $("#result-eyebrow").textContent = result.stars >= 1 ? "Stage cleared" : "Needs work";
   $("#result-name").textContent = recipe.name;
 
@@ -2329,12 +2370,18 @@ document.querySelectorAll("#start-tabs .seg-tab").forEach((tab) => {
 
 $("#btn-map-back").addEventListener("click", () => { Sound.click(); showScreen("screen-start"); });
 $("#btn-result-map").addEventListener("click", () => { Sound.click(); renderMap(); showScreen("screen-map"); });
+$("#btn-result-shop").addEventListener("click", () => {
+  Sound.click();
+  const recipe = currentRecipe();
+  if (recipe) openShop(recipe);
+});
 $("#btn-rankup-ok").addEventListener("click", () => { Sound.click(); $("#rankup").classList.remove("is-open"); });
 
 $("#btn-mixologist").addEventListener("click", () => {
   Sound.init();
   if (!mapUnlocked()) { Sound.fail(); showToast(`🔒 Clear ${STAGES_TO_UNLOCK} stages to unlock Mixologist`); return; }
   Sound.coin();
+  track("mixologist_started");
   startMixologist();
 });
 
@@ -2342,6 +2389,7 @@ $("#btn-endless").addEventListener("click", () => {
   Sound.init();
   if (!mapUnlocked()) { Sound.fail(); showToast(`🔒 Clear ${STAGES_TO_UNLOCK} stages to unlock Endless Shift`); return; }
   Sound.coin();
+  track("endless_started");
   recordPlayDay();
   state.totalScore = 0;
   state.starsEarned = 0;
@@ -2439,6 +2487,15 @@ $("#btn-mix-another").addEventListener("click", () => {
   Sound.click();
   startMixologist();
 });
+$("#btn-mix-shop").addEventListener("click", () => {
+  Sound.click();
+  const build = lastMix?.build;
+  if (build?.glass && build?.method) {
+    openShop({ name: "Your Creation", glass: build.glass, method: build.method });
+  } else {
+    showToast("Pick a glass and method first, then serve your drink.");
+  }
+});
 $("#btn-mix-quit").addEventListener("click", () => {
   renderStartBest();
   showScreen("screen-start");
@@ -2453,6 +2510,7 @@ $("#btn-mix-save").addEventListener("click", () => {
 $("#btn-training").addEventListener("click", () => {
   Sound.init();
   Sound.click();
+  track("training_started");
   loadTraining();
 });
 
@@ -2540,7 +2598,12 @@ function rbCard(r) {
     ${diffPips(r.diff)}
     <p class="rb-order">${r.order}</p>
     <ul class="rb-ings">${ings}</ul>
-    <div class="rb-garnish">Garnish: ${garnish.emoji ? garnish.emoji + " " : ""}${garnish.name}</div>`;
+    <div class="rb-garnish">Garnish: ${garnish.emoji ? garnish.emoji + " " : ""}${garnish.name}</div>
+    <button class="btn btn-ghost btn-sm rb-shop-btn">🛍 Shop the gear</button>`;
+  card.querySelector(".rb-shop-btn").addEventListener("click", () => {
+    Sound.click();
+    openShop(r);
+  });
   return card;
 }
 function renderRecipeBook() {
@@ -2574,6 +2637,124 @@ $("#btn-recipes").addEventListener("click", () => {
 });
 $("#btn-recipes-back").addEventListener("click", () => showScreen("screen-start"));
 
+// ============================ Shop (demo store) ============================
+// Fake storefront: links each drink to the glassware and tools that make it —
+// never the liquid ingredients. No real payment happens; it's here to try the
+// shopping flow before wiring up a real retailer.
+let shopScopeRecipe = null;
+let shopKindFilter = "all";
+const shopCart = {};
+
+function allShopItems() {
+  return [
+    ...GLASSES.map((g) => ({ ...g, kind: "glass" })),
+    ...TOOLS.map((t) => ({ ...t, kind: "tool" })),
+  ];
+}
+function shopItemsForRecipe(recipe) {
+  const glass = { ...GLASS_BY_ID[recipe.glass], kind: "glass" };
+  const tools = TOOLS.filter((t) => t.methods.includes(recipe.method)).map((t) => ({ ...t, kind: "tool" }));
+  return [glass, ...tools];
+}
+function shopKey(item) {
+  return `${item.kind}:${item.id}`;
+}
+function shopCardHtml(item) {
+  const key = shopKey(item);
+  const inCart = !!shopCart[key];
+  return `
+    <div class="shop-item">
+      <div class="shop-item-icon">${item.emoji}</div>
+      <div class="shop-item-body">
+        <div class="shop-item-top">
+          <span class="shop-item-name">${escapeHtml(item.name)}</span>
+          <span class="shop-item-price">$${item.price.toFixed(2)}</span>
+        </div>
+        <p class="shop-item-blurb">${escapeHtml(item.blurb)}</p>
+        <span class="shop-item-kind">${item.kind === "glass" ? "Glassware" : "Tool"}</span>
+      </div>
+      <button class="btn btn-sm ${inCart ? "btn-ghost is-added" : "btn-primary"} shop-add-btn" data-shop-key="${key}">${inCart ? "✓ In cart" : "Add to cart"}</button>
+    </div>`;
+}
+function renderShopCart() {
+  const items = Object.values(shopCart);
+  const count = items.length;
+  const total = items.reduce((sum, it) => sum + it.price, 0);
+  $("#shop-cart-count").textContent = `🛒 ${count} item${count === 1 ? "" : "s"}`;
+  $("#shop-cart-total").textContent = `$${total.toFixed(2)}`;
+  $("#btn-shop-checkout").disabled = count === 0;
+}
+function renderShopScreen() {
+  const ctxWrap = $("#shop-context");
+  if (shopScopeRecipe) {
+    $("#shop-context-label").textContent = `Shopping for: ${shopScopeRecipe.name}`;
+    ctxWrap.style.display = "";
+  } else {
+    ctxWrap.style.display = "none";
+  }
+  document.querySelectorAll("#shop-tabs .seg-tab").forEach((tab) => {
+    tab.classList.toggle("is-active", tab.dataset.shopKind === shopKindFilter);
+  });
+
+  let items = shopScopeRecipe ? shopItemsForRecipe(shopScopeRecipe) : allShopItems();
+  if (shopKindFilter !== "all") items = items.filter((i) => i.kind === shopKindFilter);
+
+  const grid = $("#shop-grid");
+  grid.innerHTML = items.length
+    ? items.map(shopCardHtml).join("")
+    : `<p class="shop-empty">No gear matches this filter.</p>`;
+  grid.querySelectorAll(".shop-add-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const key = btn.dataset.shopKey;
+      if (shopCart[key]) {
+        delete shopCart[key];
+        Sound.click();
+      } else {
+        const item = items.find((i) => shopKey(i) === key);
+        shopCart[key] = item;
+        Sound.click();
+      }
+      renderShopScreen();
+    });
+  });
+  renderShopCart();
+}
+function openShop(recipe) {
+  shopScopeRecipe = recipe || null;
+  shopKindFilter = "all";
+  renderShopScreen();
+  showScreen("screen-shop");
+  track("shop_open", { recipe: recipe ? recipe.name : null });
+}
+
+$("#btn-shop").addEventListener("click", () => {
+  Sound.init();
+  Sound.click();
+  openShop(null);
+});
+$("#btn-shop-back").addEventListener("click", () => showScreen("screen-start"));
+$("#shop-context-clear").addEventListener("click", () => {
+  shopScopeRecipe = null;
+  renderShopScreen();
+});
+document.querySelectorAll("#shop-tabs .seg-tab").forEach((tab) => {
+  tab.addEventListener("click", () => {
+    shopKindFilter = tab.dataset.shopKind;
+    Sound.click();
+    renderShopScreen();
+  });
+});
+$("#btn-shop-checkout").addEventListener("click", () => {
+  const items = Object.values(shopCart);
+  if (!items.length) return;
+  const total = items.reduce((sum, it) => sum + it.price, 0);
+  Sound.coin();
+  track("shop_checkout", { items: items.length, total: Math.round(total * 100) / 100 });
+  showToast(`🎉 Demo order placed — ${items.length} item${items.length === 1 ? "" : "s"} for $${total.toFixed(2)}. No real purchase was made.`);
+  Object.keys(shopCart).forEach((k) => delete shopCart[k]);
+  renderShopScreen();
+});
+
 // ============================ Endless finish actions ============================
 $("#btn-endless-again").addEventListener("click", () => {
   state.totalScore = 0;
@@ -2592,7 +2773,7 @@ $("#btn-endless-menu").addEventListener("click", () => {
   showScreen("screen-start");
 });
 
-// ============================ Profile / age gate ============================
+// ============================ Profile / identification modal ============================
 function openProfileForm(blank = false) {
   const p = blank ? null : getProfile();
   $("#pf-name").value = p?.name || "";
@@ -2601,8 +2782,16 @@ function openProfileForm(blank = false) {
   $("#pf-email").value = p?.email || "";
   setSegActive("pf-units", p?.units || "metric");
   $("#pf-error").textContent = "";
-  showScreen("screen-profile");
+  // First-time setup can't be dismissed; editing an existing profile can be.
+  const closeBtn = $("#btn-profile-close");
+  if (closeBtn) closeBtn.style.display = getProfile() ? "" : "none";
+  $("#modal-profile").classList.add("is-open");
   setTimeout(() => $("#pf-name").focus(), 50);
+  track("profile_modal_open", { mode: getProfile() ? "edit" : "create" });
+}
+function closeProfileModal() {
+  if (!getProfile()) return; // required for first-time visitors
+  $("#modal-profile").classList.remove("is-open");
 }
 
 // Segmented control helpers (used by the units pickers).
@@ -2646,12 +2835,19 @@ $("#profile-form").addEventListener("submit", (e) => {
     createdAt: existing?.createdAt || Date.now(),
     updatedAt: Date.now(),
   };
+  const isNewProfile = !existing;
   setProfile(profile);
-  applyProfile();
-  renderStartBest();
+  onShowStart();
+  $("#modal-profile").classList.remove("is-open");
   Sound.coin();
+  track(isNewProfile ? "profile_created" : "profile_updated", { units: profile.units, underage: isUnderage() });
   // First-timers meet Old Tom before they reach the bar; returning editors skip it.
   maybePlayIntro(() => { onShowStart(); showScreen("screen-start"); });
+});
+
+$("#btn-profile-close").addEventListener("click", () => { Sound.click(); closeProfileModal(); });
+$("#modal-profile").addEventListener("click", (e) => {
+  if (e.target.id === "modal-profile") closeProfileModal();
 });
 
 $("#btn-edit-profile").addEventListener("click", () => {
@@ -2771,7 +2967,8 @@ function logoutToGate() {
     localStorage.removeItem(PROFILE_KEY);
     Object.keys(localStorage).filter((k) => k.startsWith("sb-")).forEach((k) => localStorage.removeItem(k));
   } catch (e) { /* ignore */ }
-  applyProfile();
+  onShowStart();
+  showScreen("screen-start");
   openProfileForm(true);
 }
 
@@ -2837,10 +3034,48 @@ function debugEnabled() {
   return isLocal || hasFlag;
 }
 
+// Render the on-device diagnostics panel: connection status, per-event
+// counts, and the most recent raw events (newest first).
+function renderDiagnostics() {
+  const log = getAnalyticsLog();
+  const status = $("#diag-status");
+  if (status) {
+    const p = getProfile();
+    status.innerHTML = [
+      `<span class="diag-chip">Session ${escapeHtml(SESSION_ID.slice(0, 10))}</span>`,
+      `<span class="diag-chip ${p ? "is-on" : "is-off"}">${p ? "Profile set" : "No profile"}</span>`,
+      `<span class="diag-chip ${Backend.isConfigured() ? "is-on" : "is-off"}">Backend ${Backend.isConfigured() ? (Backend.isReady() ? "connected" : "configured") : "offline"}</span>`,
+      `<span class="diag-chip">${log.length} event${log.length === 1 ? "" : "s"} logged</span>`,
+    ].join("");
+  }
+  const summaryEl = $("#diag-summary");
+  if (summaryEl) {
+    const counts = {};
+    log.forEach((e) => { counts[e.name] = (counts[e.name] || 0) + 1; });
+    const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+    summaryEl.innerHTML = entries.length
+      ? entries.map(([name, n]) => `<span class="diag-summary-item"><b>${n}</b> ${escapeHtml(name)}</span>`).join("")
+      : "";
+  }
+  const logEl = $("#diag-log");
+  if (logEl) {
+    if (!log.length) {
+      logEl.innerHTML = `<div class="diag-empty">No events logged yet on this device.</div>`;
+    } else {
+      logEl.innerHTML = log.slice().reverse().slice(0, 100).map((e) => {
+        const time = new Date(e.t).toLocaleTimeString();
+        const props = Object.keys(e.props || {}).length ? JSON.stringify(e.props) : "";
+        return `<div class="diag-row"><span class="diag-row-time">${time}</span><span class="diag-row-name">${escapeHtml(e.name)}</span><span class="diag-row-props">${escapeHtml(props)}</span></div>`;
+      }).join("");
+    }
+  }
+}
+
 (function initDebugToolbar() {
   const bar = $("#debug-toolbar");
   const toggle = $("#dbg-toggle");
   const reset = $("#dbg-reset");
+  const diagBtn = $("#dbg-diagnostics");
   if (!bar || !toggle || !reset) return;
   if (!debugEnabled()) { bar.remove(); return; }
   bar.style.display = "";
@@ -2851,17 +3086,45 @@ function debugEnabled() {
     );
     if (ok) resetEverything();
   });
+  if (diagBtn) {
+    diagBtn.addEventListener("click", () => {
+      renderDiagnostics();
+      $("#modal-diagnostics").classList.add("is-open");
+    });
+  }
 })();
 
-// Boot: show the age gate on first visit, otherwise the start screen.
+$("#btn-diag-close").addEventListener("click", () => $("#modal-diagnostics").classList.remove("is-open"));
+$("#modal-diagnostics").addEventListener("click", (e) => {
+  if (e.target.id === "modal-diagnostics") $("#modal-diagnostics").classList.remove("is-open");
+});
+$("#btn-diag-copy").addEventListener("click", async () => {
+  const text = JSON.stringify(getAnalyticsLog(), null, 2);
+  try {
+    await navigator.clipboard.writeText(text);
+    showToast("Diagnostics JSON copied to clipboard.");
+  } catch (e) {
+    showToast("Couldn't copy — clipboard access blocked.");
+  }
+});
+$("#btn-diag-clear").addEventListener("click", () => {
+  if (window.confirm("Clear the local diagnostics log? This only clears this device's log, not anything already sent to the backend.")) {
+    clearAnalyticsLog();
+    renderDiagnostics();
+  }
+});
+
+// Boot: always show the main page first; pop the identification modal on top
+// for first-time visitors instead of gating the whole app behind it.
 Sound.enabled = getSettings().sound !== false; // restore the saved sound preference
 syncSoundButtons();
 checkBadges();
+onShowStart();
+showScreen("screen-start");
 if (!getProfile()) {
   openProfileForm(true);
-} else {
-  onShowStart();
 }
+track("app_open", { returning: !!getProfile() });
 
 // Debug-only deep link to preview the intro reel directly (localhost or ?debug).
 if (debugEnabled() && location.hash.includes("introtest")) {

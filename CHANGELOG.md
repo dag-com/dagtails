@@ -12,6 +12,29 @@ any past version, go to the repository's **Releases** page and pick that version
 
 ---
 
+## v1.8.0 — Shop, a friendlier sign-in, and a fixed bottom menu (2026-07-04)
+
+- **Shop the gear**: a new store for glasses and bartending tools (no
+  liquids) with a "Shop the gear" link on every Recipe Book card and on both
+  result screens. It's a demo store for now — checkout is a mock confirmation,
+  no real purchase happens.
+- **Sign-in is now a popup, not a wall**: the main page shows immediately when
+  you open the game; first-time visitors get a small identification popup on
+  top of it instead of a separate full screen. Editing your profile later
+  (Settings → Edit profile) opens the same popup with a close button.
+- **Fixed: bottom menu could get cut off**: on shorter/un-maximized browser
+  windows, the Modes/Collection/Social menu at the bottom of the main page
+  could end up pushed off-screen with no obvious way to reach it. The main
+  page now shrinks itself to fit common window sizes, and any screen that
+  still doesn't fit scrolls with a clearly visible gold scrollbar.
+- **Diagnostics**: lightweight, privacy-friendly usage tracking (screens
+  visited, stages played, Mixologist results, shop activity, etc.), viewable
+  on-device from the debug toolbar (📊 Diagnostics) and, once you re-run the
+  updated `supabase/schema.sql`, queryable across every player from the
+  Supabase SQL editor. See `SETUP-BACKEND.md` for details.
+
+---
+
 ## v1.7.0 — Judges get faces, and the scoring screen breathes (2026-07-04)
 
 - **Illustrated judges table**: the judging panel is now a real scene — 3 of the

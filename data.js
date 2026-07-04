@@ -7,15 +7,15 @@
 // `cap` is the reference capacity (ml) used to scale the liquid fill;
 // `stem` adds a stem + foot.
 export const GLASSES = [
-  { id: "rocks", name: "Rocks (Old Fashioned)", emoji: "🥃", tpl: "tumbler", w: 132, h: 120, cap: 220, stem: false },
-  { id: "highball", name: "Highball", emoji: "🥤", tpl: "tumbler", w: 96, h: 210, cap: 320, stem: false },
-  { id: "collins", name: "Collins", emoji: "🥤", tpl: "tumbler", w: 84, h: 240, cap: 360, stem: false },
-  { id: "coupe", name: "Coupe", emoji: "🍸", tpl: "bowl", w: 168, h: 96, cap: 200, stem: true },
-  { id: "martini", name: "Martini", emoji: "🍸", tpl: "cone", w: 184, h: 124, cap: 180, stem: true },
-  { id: "margarita", name: "Margarita", emoji: "🍹", tpl: "marg", w: 192, h: 116, cap: 250, stem: true },
-  { id: "hurricane", name: "Hurricane", emoji: "🍹", tpl: "hurricane", w: 122, h: 212, cap: 420, stem: true },
-  { id: "wine", name: "Wine", emoji: "🍷", tpl: "bowl", w: 140, h: 134, cap: 250, stem: true },
-  { id: "shot", name: "Shot", emoji: "🥃", tpl: "tumbler", w: 72, h: 82, cap: 60, stem: false },
+  { id: "rocks", name: "Rocks (Old Fashioned)", emoji: "🥃", tpl: "tumbler", w: 132, h: 120, cap: 220, stem: false, price: 9.5, blurb: "Short, heavy-bottomed tumbler for spirit-forward pours over ice." },
+  { id: "highball", name: "Highball", emoji: "🥤", tpl: "tumbler", w: 96, h: 210, cap: 320, stem: false, price: 8, blurb: "Tall straight glass for long, mixer-topped drinks." },
+  { id: "collins", name: "Collins", emoji: "🥤", tpl: "tumbler", w: 84, h: 240, cap: 360, stem: false, price: 8.5, blurb: "Slim and extra-tall — built for fizzy, refreshing pours." },
+  { id: "coupe", name: "Coupe", emoji: "🍸", tpl: "bowl", w: 168, h: 96, cap: 200, stem: true, price: 12, blurb: "Vintage saucer-shaped stem glass for elegant shaken drinks." },
+  { id: "martini", name: "Martini", emoji: "🍸", tpl: "cone", w: 184, h: 124, cap: 180, stem: true, price: 11, blurb: "The classic V-shaped stem glass for stirred, spirit-forward cocktails." },
+  { id: "margarita", name: "Margarita", emoji: "🍹", tpl: "marg", w: 192, h: 116, cap: 250, stem: true, price: 13, blurb: "Wide-rimmed glass built for salt rims and citrus-forward cocktails." },
+  { id: "hurricane", name: "Hurricane", emoji: "🍹", tpl: "hurricane", w: 122, h: 212, cap: 420, stem: true, price: 14.5, blurb: "Curvy, oversized glass for tropical and tiki-style drinks." },
+  { id: "wine", name: "Wine", emoji: "🍷", tpl: "bowl", w: 140, h: 134, cap: 250, stem: true, price: 10, blurb: "All-purpose stemmed glass, also great for wine-based cocktails." },
+  { id: "shot", name: "Shot", emoji: "🥃", tpl: "tumbler", w: 72, h: 82, cap: 60, stem: false, price: 4.5, blurb: "Small straight glass for shots and shooters." },
 ];
 
 export const METHODS = [
@@ -24,6 +24,21 @@ export const METHODS = [
   { id: "build", name: "Build", emoji: "🧱", hint: "Build directly in the serving glass." },
   { id: "muddle", name: "Muddle", emoji: "🪵", hint: "Crush ingredients to release flavour." },
   { id: "blend", name: "Blend", emoji: "🌀", hint: "Blend with ice for a frozen drink." },
+];
+
+// ============================================================================
+// Bartending tools — the gear used to make the drinks (never the liquids).
+// `methods` lists which prep methods call for this tool, used to work out
+// which tools the demo shop should suggest for a given recipe.
+// ============================================================================
+export const TOOLS = [
+  { id: "jigger", name: "Jigger", emoji: "🥄", price: 7, blurb: "Double-sided measure for accurate pours, in every build.", methods: ["shake", "stir", "build", "muddle", "blend"] },
+  { id: "shaker", name: "Cocktail Shaker", emoji: "🍸", price: 18, blurb: "Two- or three-piece tin for chilling and combining shaken drinks.", methods: ["shake"] },
+  { id: "strainer", name: "Hawthorne Strainer", emoji: "🧊", price: 6.5, blurb: "Fits the shaker or mixing glass to hold back the ice on the pour.", methods: ["shake", "stir"] },
+  { id: "mixing_glass", name: "Mixing Glass", emoji: "🥃", price: 15, blurb: "Heavy-bottomed glass for stirring spirit-forward cocktails.", methods: ["stir"] },
+  { id: "bar_spoon", name: "Bar Spoon", emoji: "🥄", price: 6, blurb: "Long twisted spoon for stirring and layering.", methods: ["stir", "build", "muddle"] },
+  { id: "muddler", name: "Muddler", emoji: "🪵", price: 8.5, blurb: "Presses fruit, herbs and sugar to release their flavour.", methods: ["muddle"] },
+  { id: "blender", name: "Electric Blender", emoji: "🌀", price: 39, blurb: "Crushes ice for frozen, blended cocktails.", methods: ["blend"] },
 ];
 
 // unit: "ml" for liquids, "dash" / "leaf" / "piece" for specials.
@@ -1111,3 +1126,4 @@ export const INGREDIENT_BY_ID = Object.fromEntries(INGREDIENTS.map((i) => [i.id,
 export const GLASS_BY_ID = Object.fromEntries(GLASSES.map((g) => [g.id, g]));
 export const METHOD_BY_ID = Object.fromEntries(METHODS.map((m) => [m.id, m]));
 export const GARNISH_BY_ID = Object.fromEntries(GARNISHES.map((g) => [g.id, g]));
+export const TOOL_BY_ID = Object.fromEntries(TOOLS.map((t) => [t.id, t]));

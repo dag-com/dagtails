@@ -76,12 +76,30 @@ create trigger trg_likes_count
   after insert or delete on public.likes
   for each row execute function public.bump_like_count();
 
+-- ---------------------------------------------------------------------------
+-- events: lightweight product analytics (screen views, stages played, shop
+-- checkouts, etc.). Write-only from the client — there is no select policy,
+-- so players can never read each other's activity. Query this yourself from
+-- the Supabase SQL editor (the table owner / service role bypasses RLS).
+-- `player_id` is nullable so events can be logged before a profile exists.
+-- ---------------------------------------------------------------------------
+create table if not exists public.events (
+  id         bigint generated always as identity primary key,
+  player_id  uuid references public.players (id) on delete set null,
+  name       text not null,
+  props      jsonb not null default '{}'::jsonb,
+  created_at timestamptz not null default now()
+);
+create index if not exists events_created_idx on public.events (created_at desc);
+create index if not exists events_name_idx on public.events (name);
+
 -- ============================================================================
 -- Row Level Security
 -- ============================================================================
 alter table public.players   enable row level security;
 alter table public.creations enable row level security;
 alter table public.likes     enable row level security;
+alter table public.events    enable row level security;
 
 -- players: anyone can read; you can only insert/update your own row.
 drop policy if exists players_select on public.players;
@@ -113,6 +131,11 @@ create policy likes_insert on public.likes for insert with check (auth.uid() = p
 drop policy if exists likes_delete on public.likes;
 create policy likes_delete on public.likes for delete using (auth.uid() = player_id);
 
+-- events: anyone can insert (even pre-signup); nobody can select/update/delete
+-- via the anon/authenticated roles, so this stays a private write-only log.
+drop policy if exists events_insert on public.events;
+create policy events_insert on public.events for insert with check (true);
+
 -- ============================================================================
 -- Public leaderboard views (read-only, no personal data beyond display name).
 -- ============================================================================
@@ -130,3 +153,14 @@ create or replace view public.leaderboard_streak as
   where p.best_streak > 0
   order by p.best_streak desc, p.level desc
   limit 100;
+
+-- ============================================================================
+-- Analytics helper view — a quick daily rollup of what players are doing.
+-- Browse from the Supabase SQL editor, e.g.:
+--   select * from public.analytics_daily order by day desc, count desc;
+-- ============================================================================
+create or replace view public.analytics_daily as
+  select date_trunc('day', created_at) as day, name, count(*) as count
+  from public.events
+  group by 1, 2
+  order by 1 desc, 3 desc;

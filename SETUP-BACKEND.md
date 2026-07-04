@@ -97,3 +97,32 @@ wasn't run, or anonymous sign-ins are still off).
 The **Community** menu button is hidden for under-18 players (it shows
 user-shared cocktails). The **Leaderboard** stays available to everyone. If you'd
 like different behaviour, just say so.
+
+---
+
+## Diagnostics — seeing what players are actually doing
+
+The game quietly logs simple usage events (app opened, profile created, a
+stage started/finished, Mixologist served, shop checkout, etc.) so you can see
+how people are using it.
+
+- **Per-device view (no setup needed):** open the game with `?debug` in the
+  URL (or run it on `localhost`), click the 🐞 icon bottom-left, then
+  **📊 Diagnostics**. This shows that browser's own recent activity — handy
+  for checking your own testing, or asking a tester to send you a screenshot.
+- **Across every player (needs the backend above):** once you've run the
+  latest `supabase/schema.sql` (safe to re-run — it just adds the new
+  `events` table if it's missing), every event is also saved to your Supabase
+  project. Open **SQL Editor** in Supabase and run:
+
+  ```sql
+  select * from public.analytics_daily order by day desc, count desc;
+  ```
+
+  to see a day-by-day breakdown of what's happening, or query
+  `public.events` directly for the raw log (e.g.
+  `select * from public.events order by created_at desc limit 100;`).
+
+Nothing here collects anything beyond what the game already stores (name/age/
+location you already see on the profile form) — it's just a count of which
+screens and actions get used, to help you see what's working.

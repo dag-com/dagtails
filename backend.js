@@ -27,6 +27,18 @@ export function isConfigured() {
 export function isReady() { return ready; }
 export function currentUserId() { return myId; }
 
+// Lazily create (or reuse) the Supabase client without requiring a signed-in
+// session — used by logEvent() so basic usage stats still flow in even
+// before a player has set up a profile.
+async function getClient() {
+  if (!isConfigured()) return null;
+  if (!sb) {
+    const mod = await import("https://esm.sh/@supabase/supabase-js@2");
+    sb = mod.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+  return sb;
+}
+
 // Sign in anonymously (or reuse the existing session) and make sure this
 // player's row exists. Returns true on success.
 export async function initBackend(profile) {
@@ -130,4 +142,19 @@ export async function leaderboardStreak() {
   const { data, error } = await sb.from("leaderboard_streak").select("*").limit(50);
   if (error) throw error;
   return data || [];
+}
+
+// ============================ Diagnostics / analytics ============================
+// Fire-and-forget product analytics. Never throws and never blocks gameplay —
+// if the backend isn't configured (or the insert fails), this is a silent no-op.
+export async function logEvent(name, props = {}) {
+  try {
+    const client = await getClient();
+    if (!client) return;
+    await client.from("events").insert({
+      player_id: myId || null,
+      name,
+      props,
+    });
+  } catch (e) { /* analytics must never break the game */ }
 }

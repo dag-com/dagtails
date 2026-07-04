@@ -644,6 +644,7 @@ body {
   display: flex;
 }
 .modal-box {
+  position: relative;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 18px;
@@ -1193,6 +1194,31 @@ body {
   flex-direction: column;
 }
 
+/* Make "you can scroll here" obvious wherever content might overflow, instead
+   of relying on the OS default (which can be invisible on dark backgrounds). */
+.screen,
+.modal-box {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(233, 185, 73, 0.45) rgba(255, 255, 255, 0.04);
+}
+.screen::-webkit-scrollbar,
+.modal-box::-webkit-scrollbar {
+  width: 10px;
+}
+.screen::-webkit-scrollbar-track,
+.modal-box::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+}
+.screen::-webkit-scrollbar-thumb,
+.modal-box::-webkit-scrollbar-thumb {
+  background: rgba(233, 185, 73, 0.45);
+  border-radius: 8px;
+}
+.screen::-webkit-scrollbar-thumb:hover,
+.modal-box::-webkit-scrollbar-thumb:hover {
+  background: rgba(233, 185, 73, 0.7);
+}
+
 .screen.is-active {
   display: flex;
   flex-direction: column;
@@ -1202,7 +1228,6 @@ body {
 
 /* Menu-like screens: centred, scroll internally only if they overflow */
 #screen-start.is-active,
-#screen-profile.is-active,
 #screen-result.is-active,
 #screen-finish.is-active {
   align-items: center;
@@ -1211,7 +1236,6 @@ body {
   min-height: 0;
 }
 #screen-start,
-#screen-profile,
 #screen-result,
 #screen-finish {
   min-height: 0;
@@ -1841,6 +1865,166 @@ body {
   border-top: 1px solid var(--line);
   padding-top: 8px;
 }
+.rb-shop-btn {
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+/* ============================ Shop (demo store) ============================ */
+#screen-shop.is-active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow-y: auto;
+  min-height: 0;
+}
+.shop-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  padding: 24px;
+  width: 100%;
+  max-width: 720px;
+  box-shadow: var(--shadow);
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.shop-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.shop-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 48ch;
+}
+.shop-context {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(233, 185, 73, 0.1);
+  border: 1px solid rgba(233, 185, 73, 0.35);
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gold-soft);
+}
+.shop-tabs {
+  align-self: flex-start;
+}
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+}
+.shop-empty {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+  padding: 20px 0;
+}
+.shop-item {
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.shop-item-icon {
+  font-size: 30px;
+  line-height: 1;
+}
+.shop-item-body {
+  flex: 1 1 auto;
+}
+.shop-item-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.shop-item-name {
+  font-weight: 700;
+  font-size: 14.5px;
+}
+.shop-item-price {
+  font-weight: 800;
+  color: var(--gold);
+  font-size: 14px;
+  white-space: nowrap;
+}
+.shop-item-blurb {
+  margin: 4px 0 6px;
+  font-size: 12.5px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.shop-item-kind {
+  display: inline-block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 700;
+  color: var(--muted);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.shop-add-btn {
+  width: 100%;
+  justify-content: center;
+}
+.shop-add-btn.is-added {
+  color: var(--green);
+  border-color: var(--green);
+}
+.shop-cart {
+  position: sticky;
+  bottom: -24px;
+  margin: 4px -24px -24px;
+  padding: 12px 24px;
+  background: linear-gradient(180deg, transparent, var(--panel) 22%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+}
+.shop-cart-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.shop-cart-count {
+  font-size: 13px;
+  font-weight: 700;
+}
+.shop-cart-total {
+  font-size: 12px;
+  color: var(--muted);
+}
+@media (max-width: 520px) {
+  .shop-grid {
+    grid-template-columns: 1fr;
+  }
+  .shop-head {
+    flex-direction: column;
+  }
+}
 
 /* Endless finish stats */
 .endless-stats {
@@ -1945,9 +2129,64 @@ body {
   }
 }
 
-/* ============================ Profile / age gate ============================ */
+/* ============================ Profile / identification modal ============================ */
 .profile-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   max-width: 460px;
+  position: relative;
+}
+.profile-modal-box {
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+}
+.profile-form .name-input {
+  margin: 4px 0 0;
+}
+@media (max-height: 700px) {
+  .profile-modal-box {
+    padding: 20px 24px;
+  }
+  .profile-card .title-sm {
+    font-size: clamp(32px, 8vw, 56px);
+  }
+  .profile-card .subtitle {
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+  .profile-form {
+    gap: 8px;
+  }
+  .name-input {
+    padding: 9px 12px;
+  }
+  .name-hint {
+    font-size: 11px;
+  }
+}
+.modal-x {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+.modal-x:hover {
+  color: var(--text);
+  border-color: var(--gold);
+  background: rgba(233, 185, 73, 0.12);
 }
 .title-sm {
   font-size: clamp(48px, 11vw, 90px);
@@ -3106,6 +3345,113 @@ body {
   background: rgba(255, 107, 107, 0.16);
 }
 
+/* ============================ Diagnostics modal ============================ */
+.diag-modal-box {
+  max-width: min(560px, calc(100vw - 32px));
+  max-height: calc(100dvh - 40px);
+  overflow-y: auto;
+  text-align: left;
+}
+.diag-sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+.diag-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.diag-chip {
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+}
+.diag-chip.is-on {
+  border-color: rgba(79, 209, 139, 0.4);
+  color: var(--green);
+  background: rgba(79, 209, 139, 0.1);
+}
+.diag-chip.is-off {
+  border-color: rgba(255, 107, 107, 0.35);
+  color: var(--red);
+  background: rgba(255, 107, 107, 0.08);
+}
+.diag-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+.diag-summary-item {
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
+  color: var(--text);
+}
+.diag-summary-item b {
+  color: var(--gold-soft);
+}
+.diag-log-label {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.diag-log {
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 11.5px;
+}
+.diag-row {
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.diag-row:last-child {
+  border-bottom: none;
+}
+.diag-row-time {
+  color: var(--muted);
+  flex: 0 0 auto;
+}
+.diag-row-name {
+  color: var(--gold-soft);
+  font-weight: 700;
+  flex: 0 0 auto;
+}
+.diag-row-props {
+  color: var(--text);
+  opacity: 0.8;
+  word-break: break-all;
+}
+.diag-empty {
+  padding: 16px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+}
+.diag-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 14px;
+}
+
 /* ============================ Intro comic reel ============================ */
 #screen-intro.is-active {
   display: flex;
@@ -3331,7 +3677,6 @@ body {
     padding: 10px 14px 14px;
   }
   #screen-start.is-active,
-  #screen-profile.is-active,
   #screen-map.is-active,
   #screen-result.is-active,
   #screen-mix-result.is-active,
@@ -3343,6 +3688,7 @@ body {
   #screen-community.is-active,
   #screen-leaderboard.is-active,
   #screen-recipes.is-active,
+  #screen-shop.is-active,
   #screen-intro.is-active {
     min-height: calc(100dvh - 24px);
   }
@@ -3352,7 +3698,8 @@ body {
   .mybar-card,
   .badges-card,
   .community-card,
-  .recipes-card {
+  .recipes-card,
+  .shop-card {
     max-width: min(1100px, calc(100vw - 32px));
   }
   .profile-card {
@@ -3453,7 +3800,8 @@ body {
   .community-card,
   .badges-card,
   .recipes-card,
-  .mybar-card {
+  .mybar-card,
+  .shop-card {
     max-width: min(1040px, calc(100vw - 32px));
   }
   .result-card {
@@ -3555,7 +3903,8 @@ body {
   .mybar-card,
   .badges-card,
   .community-card,
-  .recipes-card {
+  .recipes-card,
+  .shop-card {
     padding: 18px;
   }
   .result-card {
@@ -4047,10 +4396,11 @@ body {
 .start-preview-node.is-next .start-preview-disc::before {
   content: "";
   position: absolute;
-  inset: -120px -34px 10px;
-  background: linear-gradient(180deg, rgba(255, 220, 121, 0.52), rgba(255, 220, 121, 0));
-  filter: blur(4px);
+  inset: -46px -30px -30px;
+  background: radial-gradient(closest-side, rgba(255, 220, 121, 0.4), rgba(255, 220, 121, 0) 72%);
+  filter: blur(6px);
   z-index: -1;
+  pointer-events: none;
 }
 .start-preview-node.is-locked .start-preview-disc {
   background: linear-gradient(180deg, #332242, #24162f);
@@ -4128,31 +4478,128 @@ body {
   }
 }
 
-@media (max-height: 720px) {
+/* Shorter windows (small/un-maximized browsers, laptops without full height):
+   shrink the showcase so the bottom dock stays reachable without scrolling. */
+@media (max-height: 780px) {
   #screen-start.is-active {
     justify-content: flex-start;
     padding-top: 8px;
     padding-bottom: 8px;
   }
+  .start-showcase {
+    gap: 8px;
+  }
+  .start-shell {
+    gap: 12px;
+  }
   .start-stageview,
   .start-sidebar {
-    padding: 14px;
+    padding: 12px 14px;
+    gap: 8px;
+  }
+  #screen-start .brand-duck {
+    width: 56px;
+    height: 56px;
+  }
+  #screen-start .title {
+    font-size: clamp(32px, 4vw, 48px);
+  }
+  #screen-start .eyebrow {
+    margin-bottom: 2px;
+  }
+  #screen-start .welcome-back {
+    font-size: clamp(17px, 2.2vw, 22px);
+  }
+  #screen-start .welcome-sub {
+    font-size: 12px;
+    max-width: none;
+  }
+  .player-meta {
+    padding: 8px 10px;
+  }
+  .start-quick-card {
+    padding: 8px 10px;
+  }
+  .start-quick-value {
+    font-size: 24px;
+  }
+  #screen-start .start-cta .btn {
+    padding: 12px 20px;
+    font-size: 15px;
+  }
+  .start-top-card,
+  .stat-top-card,
+  #screen-start #cotd-card {
+    min-height: 72px;
+    padding: 10px 12px;
+  }
+  .start-card-big {
+    font-size: 30px;
+  }
+  .start-card-kicker {
+    margin-bottom: 4px;
   }
   .start-map-preview,
   .start-journey-frame {
-    min-height: 340px;
+    min-height: 140px;
+  }
+  .start-map-preview {
+    padding: 34px 16px 14px;
+  }
+  .start-preview-path {
+    top: 54px;
+    bottom: 18px;
   }
   .start-preview-disc {
-    width: 64px;
-    height: 64px;
-    font-size: 24px;
+    width: 42px;
+    height: 42px;
+    font-size: 15px;
   }
   .start-preview-node.is-current .start-preview-disc {
-    width: 78px;
-    height: 78px;
-    font-size: 30px;
+    width: 52px;
+    height: 52px;
+    font-size: 19px;
   }
   .start-preview-label {
-    font-size: 10px;
+    font-size: 9px;
+  }
+  .start-preview-duck {
+    top: -28px;
+    width: 40px;
+    height: 40px;
+  }
+  .start-dock {
+    padding: 6px 10px 8px;
+  }
+  #screen-start .start-tabs {
+    margin-bottom: 6px;
+    padding: 4px;
+  }
+  #screen-start .start-panel {
+    gap: 6px;
+  }
+  #screen-start .start-panel .btn {
+    min-height: 38px;
+    font-size: 12px;
+  }
+}
+
+/* Very short windows: trim further so the dock never gets pushed off-screen. */
+@media (max-height: 600px) {
+  .start-quick-grid {
+    display: none;
+  }
+  .start-map-preview,
+  .start-journey-frame {
+    min-height: 100px;
+  }
+  .start-preview-duck {
+    display: none;
+  }
+  .start-side-head {
+    gap: 8px;
+  }
+  #screen-start .brand-duck {
+    display: none;
   }
 }
