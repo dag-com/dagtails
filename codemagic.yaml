@@ -1,0 +1,97 @@
+definitions:
+  install_and_sync: &install_and_sync
+    - name: Install npm dependencies
+      script: npm install
+    - name: Copy web assets into www/
+      script: npm run build
+
+workflows:
+  # ------------------------------------------------------------------
+  # ANDROID — builds a debug APK you can sideload immediately, no
+  # signing/accounts required. See the commented "release" script below
+  # once you're ready to sign a release build for Google Play.
+  # ------------------------------------------------------------------
+  android-debug:
+    name: Last Call — Android (debug APK)
+    max_build_duration: 30
+    instance_type: linux_x2
+    environment:
+      node: lts
+      java: 17
+    scripts:
+      - *install_and_sync
+      - name: Sync Capacitor Android project
+        script: npx cap sync android
+      - name: Build debug APK
+        script: |
+          cd android
+          ./gradlew assembleDebug
+      # ---- Uncomment once you have a keystore uploaded in Codemagic
+      # (Team settings > Code signing identities > Android keystores),
+      # and have wired it up in android/app/build.gradle per Codemagic's
+      # Android signing docs. Needed for Google Play Console uploads. ----
+      # environment:
+      #   android_signing:
+      #     - my_keystore_reference
+      # scripts:
+      #   - name: Build signed release AAB
+      #     script: |
+      #       cd android
+      #       ./gradlew bundleRelease
+    artifacts:
+      - android/app/build/outputs/**/*.apk
+      - android/app/build/outputs/**/*.aab
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+
+  # ------------------------------------------------------------------
+  # iOS — requires an Apple Developer Program membership and a Codemagic
+  # "App Store Connect" integration + signing certificate configured in
+  # the Codemagic UI first (Team settings > Integrations, and Team
+  # settings > Code signing identities). See MOBILE-BUILD.md for the
+  # full walkthrough. Uploads straight to TestFlight for internal
+  # testing.
+  # ------------------------------------------------------------------
+  ios-testflight:
+    name: Last Call — iOS (TestFlight)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    integrations:
+      app_store_connect: codemagic # <-- rename to match the integration
+      # name you create in Codemagic Team settings > Integrations.
+    environment:
+      node: lts
+      xcode: latest
+      cocoapods: default
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.dagcom.lastcall
+      vars:
+        XCODE_WORKSPACE: "ios/App/App.xcworkspace"
+        XCODE_SCHEME: "App"
+    scripts:
+      - *install_and_sync
+      - name: Sync Capacitor iOS project
+        script: npx cap sync ios
+      - name: Install CocoaPods
+        script: cd ios/App && pod install
+      - name: Set up code signing settings on Xcode project
+        script: xcode-project use-profiles
+      - name: Build ipa for distribution
+        script: |
+          xcode-project build-ipa \
+            --workspace "$XCODE_WORKSPACE" \
+            --scheme "$XCODE_SCHEME"
+    artifacts:
+      - build/ios/ipa/*.ipa
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
+        beta_groups:
+          - Internal Testers # <-- create this group in App Store Connect first

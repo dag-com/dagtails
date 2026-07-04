@@ -193,6 +193,50 @@ function renderStartWelcome() {
     : `Stage ${nextStage} is ready. Cocktail of the Day is waiting too.`;
 }
 
+// Splash screen greeting shown for returning players before the main menu.
+function renderSplash() {
+  const p = getProfile();
+  const greet = $("#splash-greet");
+  const sub = $("#splash-sub");
+  if (!greet || !sub) return;
+  if (!p) { greet.textContent = "Welcome."; sub.textContent = "Your next shift is ready."; return; }
+
+  const map = getMap();
+  const daily = getDaily();
+  const prog = getProgress();
+  const total = drinkPool().length;
+  const cleared = map.cleared || 0;
+  const nextStage = Math.min(cleared + 1, total);
+  const lvl = levelForXp(prog.xp);
+  const rk = rankInfo(rankForCleared(cleared));
+
+  greet.textContent = `Welcome back, ${p.name}.`;
+  if (cleared >= total) {
+    sub.textContent = "You cleared the whole journey. Replay a favorite or try Mixologist.";
+  } else if (daily.streak > 1) {
+    sub.textContent = `Your ${daily.streak}-day streak is alive. Stage ${nextStage} is ready.`;
+  } else {
+    sub.textContent = isUnderage()
+      ? `Stage ${nextStage} is ready in the mocktail bar.`
+      : `Stage ${nextStage} is ready whenever you are.`;
+  }
+
+  const chipLevel = $("#splash-chip-level");
+  if (chipLevel) chipLevel.textContent = `${rk.emoji} Lv ${lvl} · ${rk.name}`;
+  const chipStreak = $("#splash-chip-streak");
+  if (chipStreak) chipStreak.textContent = daily.streak > 0 ? `🔥 ${daily.streak}-day streak` : "🔥 Start a streak today";
+  const chipStars = $("#splash-chip-stars");
+  if (chipStars) chipStars.textContent = `⭐ ${totalStars()} stars`;
+
+  applyMascotTier($("#splash-duck"), rankForCleared(cleared));
+}
+
+let splashTimer = null;
+function dismissSplash() {
+  if (splashTimer) { clearTimeout(splashTimer); splashTimer = null; }
+  showScreen("screen-start");
+}
+
 function nextRewardCopy(map, prog) {
   const cleared = map.cleared || 0;
   const lvl = levelForXp(prog.xp);
@@ -221,60 +265,39 @@ function nextRewardCopy(map, prog) {
   };
 }
 
-function renderStartPreview() {
-  const host = $("#start-map-preview");
-  if (!host) return;
+// The apprentice duck mascot visually levels up as the player climbs ranks:
+// hoodie (Trainee/Barback) -> flight jacket + shades (Bartender..Head
+// Bartender) -> full "ace" look (Master Mixologist/Bar Legend).
+function mascotTierClass(rankIdx) {
+  if (rankIdx >= 5) return "tier-3";
+  if (rankIdx >= 2) return "tier-2";
+  return "";
+}
+function applyMascotTier(el, rankIdx) {
+  if (!el) return;
+  const tier = mascotTierClass(rankIdx);
+  el.classList.toggle("tier-2", tier === "tier-2");
+  el.classList.toggle("tier-3", tier === "tier-3");
+}
+function renderHubMascot() {
+  const rankIdx = rankForCleared(getMap().cleared || 0);
+  applyMascotTier($("#hub-duck"), rankIdx);
+}
+
+// Compact one-line summary shown under the "Play the Journey" button. The
+// full progress map itself now only opens when that button is pressed.
+function renderPlayMeta() {
+  const meta = $("#play-meta");
+  if (!meta) return;
   const pool = drinkPool();
-  if (!pool.length) { host.innerHTML = ""; return; }
+  if (!pool.length) { meta.textContent = ""; return; }
   const map = getMap();
   const cleared = map.cleared || 0;
-  const current = Math.min(cleared, pool.length - 1);
   const isComplete = cleared >= pool.length;
-  const next = Math.min(current + 1, pool.length - 1);
-  let start = Math.max(0, current - 2);
-  let end = Math.min(pool.length - 1, start + 6);
-  start = Math.max(0, end - 6);
-
-  host.innerHTML = "";
-  const rail = document.createElement("div");
-  rail.className = "start-preview-path";
-
-  for (let i = start; i <= end; i++) {
-    const recipe = pool[i];
-    const done = i < cleared || isComplete;
-    const isCurrent = i === current;
-    const isNext = !isComplete && i === next && i !== current;
-    const locked = i > cleared;
-    const node = document.createElement("div");
-    node.className = "start-preview-node" +
-      (done ? " is-done" : "") +
-      (isCurrent ? " is-current" : "") +
-      (isNext ? " is-next" : "") +
-      (locked ? " is-locked" : "");
-
-    const stars = done
-      ? [0, 1, 2].map((s) => `<span class="${s < (map.stars[i] || 0) ? "on" : ""}">★</span>`).join("")
-      : "";
-
-    node.innerHTML =
-      `<span class="start-preview-stars">${stars}</span>` +
-      `<span class="start-preview-disc">${i + 1}</span>` +
-      (isCurrent ? `<span class="start-preview-duck"><img src="assets/duck.png" alt="" draggable="false"></span>` : "") +
-      `<span class="start-preview-label">${escapeHtml(recipe.name)}</span>`;
-
-    rail.appendChild(node);
-  }
-
-  host.appendChild(rail);
-
-  const chip = $("#hero-current-stage-chip");
-  if (chip) chip.textContent = isComplete
-    ? "Journey complete"
-    : `You are here · Stage ${current + 1}`;
-
-  const rankPill = $("#hero-rank-pill");
   const rk = rankInfo(rankForCleared(cleared));
-  if (rankPill) rankPill.textContent = `${rk.emoji} ${rk.name}`;
+  meta.textContent = isComplete
+    ? `Journey complete · ${rk.emoji} ${rk.name} — tap to revisit any stage`
+    : `Stage ${Math.min(cleared + 1, pool.length)} of ${pool.length} · ${rk.emoji} ${rk.name} — tap to open the map`;
 }
 
 // ============================ Drink pools & difficulty ============================
@@ -589,7 +612,8 @@ function renderStartMeta() {
   const nextSub = $("#hero-next-reward-sub");
   if (nextSub) nextSub.textContent = nextReward.sub;
 
-  renderStartPreview();
+  renderPlayMeta();
+  renderHubMascot();
 }
 
 // Combined refresh whenever we land on the start screen.
@@ -977,15 +1001,6 @@ function showScreen(id) {
   $("#" + id).classList.add("is-active");
   window.scrollTo({ top: 0, behavior: "smooth" });
   if (id === "screen-start") onShowStart();
-}
-
-function setStartTab(name) {
-  document.querySelectorAll("#start-tabs .seg-tab").forEach((tab) => {
-    tab.classList.toggle("is-active", tab.dataset.startTab === name);
-  });
-  document.querySelectorAll("[data-start-panel]").forEach((panel) => {
-    panel.classList.toggle("is-active", panel.dataset.startPanel === name);
-  });
 }
 
 let toastTimer = null;
@@ -2353,21 +2368,6 @@ $("#btn-start").addEventListener("click", () => {
   });
 });
 
-$("#btn-open-map").addEventListener("click", () => {
-  Sound.init();
-  Sound.click();
-  renderMap();
-  showScreen("screen-map");
-});
-
-document.querySelectorAll("#start-tabs .seg-tab").forEach((tab) => {
-  tab.addEventListener("click", () => {
-    Sound.init();
-    Sound.click();
-    setStartTab(tab.dataset.startTab);
-  });
-});
-
 $("#btn-map-back").addEventListener("click", () => { Sound.click(); showScreen("screen-start"); });
 $("#btn-result-map").addEventListener("click", () => { Sound.click(); renderMap(); showScreen("screen-map"); });
 $("#btn-result-shop").addEventListener("click", () => {
@@ -3009,8 +3009,6 @@ $("#set-logout").addEventListener("click", () => {
   }
 });
 
-setStartTab("modes");
-
 // ============================ Debug / testing toolbar ============================
 // Wipe all saved identity + progress (and any backend session) and reload so the
 // game boots completely fresh at the profile gate.
@@ -3114,14 +3112,20 @@ $("#btn-diag-clear").addEventListener("click", () => {
   }
 });
 
-// Boot: always show the main page first; pop the identification modal on top
-// for first-time visitors instead of gating the whole app behind it.
+$("#screen-splash").addEventListener("click", () => { Sound.init(); Sound.click(); dismissSplash(); });
+
+// Boot: returning players see a brief welcome-back splash first; first-time
+// visitors skip it and land straight on the main page + identification modal.
 Sound.enabled = getSettings().sound !== false; // restore the saved sound preference
 syncSoundButtons();
 checkBadges();
-onShowStart();
-showScreen("screen-start");
-if (!getProfile()) {
+if (getProfile()) {
+  renderSplash();
+  showScreen("screen-splash");
+  splashTimer = setTimeout(dismissSplash, 2200);
+} else {
+  onShowStart();
+  showScreen("screen-start");
   openProfileForm(true);
 }
 track("app_open", { returning: !!getProfile() });

@@ -12,6 +12,61 @@ any past version, go to the repository's **Releases** page and pick that version
 
 ---
 
+## v1.10.1 — Fixed empty space on real phone screens (2026-07-04)
+
+- The main menu's mascot area was designed and tested mostly on wide/tall
+  browser windows. On an actual phone held sideways (very wide, very
+  short), that same layout left a big empty gap above the duck. Short
+  screens now switch to a side-by-side layout — duck on the left, menu on
+  the right — that fills the width the phone actually has instead of
+  wasting it as empty space. Regular desktop/laptop/tablet views are
+  unchanged.
+
+---
+
+## v1.10.0 — Mobile app wrapper for iOS/Android testing (2026-07-04)
+
+- Wrapped the game with **Capacitor** so it can be installed and tested as a
+  real app on iPhone and Android, in addition to playing it in a browser —
+  the web version is unaffected and works exactly as before.
+- Added native `android/` and `ios/` project folders, both locked to
+  landscape orientation to match the game's design.
+- Generated a proper app icon and splash screen from the duck mascot
+  artwork for every required size on both platforms.
+- Added a `codemagic.yaml` cloud CI config: an Android workflow that
+  produces an installable debug APK with zero setup, and an iOS workflow
+  that builds and uploads to TestFlight (after a one-time Apple Developer
+  Program + Codemagic signing setup).
+- See `MOBILE-BUILD.md` for the full step-by-step guide, including account
+  setup and costs.
+
+---
+
+## v1.9.0 — Main menu rebuilt as a hub, and the duck grows up (2026-07-04)
+
+- **Welcome-back splash**: returning players now see a short personalized
+  greeting screen (name, streak, level, rank, stars) right when the app
+  opens, with a "Continue to the bar →" button — tap anywhere or wait a
+  couple seconds and it moves on to the main page. First-time visitors skip
+  it and go straight to the main page + identification popup, same as before.
+- **Main menu redesigned as a hub**: replaced the crowded sidebar / empty
+  stage-view layout with a single hub screen, styled after the main-screen
+  patterns used by popular casual games (Homescapes, Coin Master, Duolingo):
+  a compact single-row status bar (streak, level, stars, settings), the
+  mascot front and center, Cocktail of the Day tucked to one side, one
+  dominant **▶ Play the Journey** button, game modes grouped into a small
+  strip, and an icon-only bottom nav for Shop / Recipes / Badges / My Bar /
+  Community / Leaderboard. The old progress-map preview strip is gone from
+  the home screen — the full stage map is still one tap away from Play,
+  which shows a short line underneath it so you always know where you stand.
+- **The apprentice duck grows up with you**: the mascot on the main menu and
+  welcome-back splash now visually levels up as you climb ranks — hoodie
+  early on, a Top Gun flight jacket and shades once you make Bartender, and
+  a full "ace" look (scarf, wings pin, gold star) once you hit Master
+  Mixologist or Bar Legend.
+
+---
+
 ## v1.8.0 — Shop, a friendlier sign-in, and a fixed bottom menu (2026-07-04)
 
 - **Shop the gear**: a new store for glasses and bartending tools (no

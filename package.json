@@ -1,0 +1,33 @@
+{
+  "name": "last-call-bartending-game",
+  "version": "1.10.1",
+  "private": true,
+  "description": "Last Call — a stage-based bartending simulation game. Zero-build vanilla JS/HTML/CSS on the web, wrapped with Capacitor for iOS/Android testing builds.",
+  "scripts": {
+    "build": "node scripts/copy-web.js",
+    "cap:sync": "npm run build && npx cap sync",
+    "android:open": "npm run cap:sync && npx cap open android",
+    "ios:open": "npm run cap:sync && npx cap open ios"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dag-com/last-call-bartending-game.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/dag-com/last-call-bartending-game/issues"
+  },
+  "homepage": "https://github.com/dag-com/last-call-bartending-game#readme",
+  "dependencies": {
+    "@capacitor/android": "^8.4.1",
+    "@capacitor/cli": "^8.4.1",
+    "@capacitor/core": "^8.4.1",
+    "@capacitor/ios": "^8.4.1"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5"
+  }
+}

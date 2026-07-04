@@ -3730,68 +3730,6 @@ body {
     padding-top: 8px;
     padding-bottom: 8px;
   }
-  #screen-start .start-card {
-    max-width: min(1120px, calc(100vw - 32px));
-    display: grid;
-    grid-template-columns: minmax(280px, 0.95fr) minmax(360px, 1.05fr);
-    grid-template-areas:
-      "profile profile"
-      "banner banner"
-      "duck meta"
-      "eyebrow meta"
-      "title meta"
-      "welcome meta"
-      "sub cotd"
-      "cta tabs"
-      "best panels";
-    align-items: start;
-    gap: 10px 22px;
-    text-align: left;
-  }
-  #screen-start .profile-bar { grid-area: profile; justify-content: flex-start; }
-  #screen-start .mocktail-banner { grid-area: banner; margin: 0; }
-  #screen-start .brand-duck {
-    grid-area: duck;
-    justify-self: start;
-    margin: 2px 0 -2px;
-    width: min(26vw, 240px);
-    height: min(18vw, 152px);
-  }
-  #screen-start .eyebrow { grid-area: eyebrow; text-align: left; }
-  #screen-start .title {
-    grid-area: title;
-    text-align: left;
-    font-size: clamp(56px, 8vw, 120px);
-  }
-  #screen-start .welcome-back { grid-area: welcome; text-align: left; }
-  #screen-start .welcome-sub {
-    grid-area: sub;
-    text-align: left;
-    max-width: 40ch;
-  }
-  #screen-start .player-meta { grid-area: meta; margin-top: 10px; }
-  #screen-start .start-cta { grid-area: cta; justify-content: flex-start; }
-  #screen-start .start-cta .btn {
-    width: auto;
-    max-width: none;
-    min-width: min(340px, 100%);
-  }
-  #screen-start .cotd-card { grid-area: cotd; margin-bottom: 0; }
-  #screen-start .start-tabs { grid-area: tabs; margin-bottom: 0; }
-  #screen-start .start-panels {
-    grid-area: panels;
-    min-height: 0;
-    align-self: start;
-  }
-  #screen-start .best-score {
-    grid-area: best;
-    text-align: left;
-    margin-top: 8px;
-  }
-  #screen-start .bar-footer {
-    margin-top: 8px;
-    text-align: center;
-  }
 
   .settings-card {
     max-width: min(920px, calc(100vw - 32px));
@@ -3824,78 +3762,6 @@ body {
   #screen-start.is-active {
     padding-top: 0;
     padding-bottom: 0;
-  }
-  #screen-start .start-card {
-    grid-template-areas:
-      "profile profile"
-      "banner banner"
-      "eyebrow meta"
-      "title meta"
-      "welcome cotd"
-      "sub cotd"
-      "cta tabs"
-      "best panels";
-    gap: 8px 16px;
-    padding: 16px 18px 18px;
-    grid-template-columns: minmax(220px, 0.9fr) minmax(300px, 1.1fr);
-  }
-  #screen-start .brand-duck {
-    display: none;
-  }
-  #screen-start .eyebrow {
-    font-size: 10px;
-    letter-spacing: 2px;
-  }
-  #screen-start .title {
-    font-size: clamp(42px, 6vw, 72px);
-    margin: 0;
-  }
-  #screen-start .welcome-back {
-    font-size: clamp(18px, 3.2vw, 24px);
-  }
-  #screen-start .welcome-sub {
-    font-size: 13px;
-    line-height: 1.35;
-  }
-  #screen-start .player-meta {
-    margin-top: 0;
-  }
-  #screen-start .pm-row {
-    gap: 6px;
-  }
-  #screen-start .pm-level {
-    font-size: 12px;
-    padding: 3px 10px;
-  }
-  #screen-start .pm-xp {
-    height: 8px;
-  }
-  #screen-start .pm-xp-text,
-  #screen-start .pm-streak {
-    font-size: 11px;
-  }
-  #screen-start .cotd-card {
-    padding: 8px 12px;
-  }
-  #screen-start .cotd-name {
-    font-size: 16px;
-  }
-  #screen-start .start-cta .btn {
-    min-width: min(280px, 100%);
-    padding: 12px 24px;
-  }
-  #screen-start .start-panel .btn,
-  #screen-start .seg-tab {
-    padding-top: 8px;
-    padding-bottom: 8px;
-    font-size: 13px;
-  }
-  #screen-start .best-score {
-    font-size: 12px;
-    margin-top: 2px;
-  }
-  #screen-start .bar-footer {
-    display: none;
   }
   .profile-card,
   .settings-card,
@@ -4004,7 +3870,108 @@ body {
   }
 }
 
-/* ============================ Start showcase redesign ============================ */
+/* ============================ Welcome-back splash ============================ */
+#screen-splash {
+  position: relative;
+  min-height: 78vh;
+  overflow: hidden;
+  cursor: pointer;
+}
+#screen-splash.is-active {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#screen-splash .hero-bg {
+  background:
+    radial-gradient(620px 280px at 68% 50%, rgba(233, 185, 73, 0.16), transparent 62%),
+    radial-gradient(900px 360px at 80% 14%, rgba(130, 70, 255, 0.16), transparent 52%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.45)),
+    linear-gradient(180deg, #120b1f 0%, #140d22 44%, #0c0814 100%);
+}
+/* Shared rank-based mascot: the apprentice duck visually levels up as the
+   player climbs ranks (hoodie -> flight jacket -> "ace" look). */
+.mascot-duck {
+  background-image: url("assets/duck-hub-mascot.png");
+  background-position: center bottom;
+  background-size: contain;
+  background-repeat: no-repeat;
+  filter: drop-shadow(0 14px 26px rgba(0, 0, 0, 0.55));
+}
+.mascot-duck.tier-2 {
+  background-image: url("assets/duck-hub-mascot-jacket.png");
+}
+.mascot-duck.tier-3 {
+  background-image: url("assets/duck-hub-mascot-ace.png");
+}
+.splash-duck {
+  width: min(40vw, 150px);
+  height: min(58vw, 210px);
+  margin: 0 auto -4px;
+}
+.splash-card {
+  position: relative;
+  z-index: 1;
+  max-width: 480px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+.splash-greet {
+  margin: -2px 0 0;
+  font-size: clamp(24px, 5vw, 34px);
+  font-weight: 800;
+  color: var(--text);
+}
+.splash-sub {
+  margin: 0;
+  max-width: 42ch;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.splash-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 4px 0 2px;
+}
+.splash-chip {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--gold-soft);
+}
+.splash-chip:empty {
+  display: none;
+}
+.splash-hint {
+  margin-top: 2px;
+  font-size: 12px;
+  color: var(--muted);
+  opacity: 0.75;
+}
+@media (max-width: 560px) {
+  .splash-duck {
+    width: 100px;
+    height: 148px;
+  }
+}
+
+/* ============================ Start hub (main menu) ============================ */
+/* Hub-style layout (à la Homescapes/Coin Master corner-anchored hub +
+   Duolingo's compact single-row status HUD): one open stage for the mascot,
+   a single dominant "Play" action, and everything else tucked to the edges
+   so the page reads as neither empty nor crowded. */
 #screen-start {
   position: relative;
   overflow: hidden;
@@ -4022,584 +3989,404 @@ body {
     linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.45)),
     linear-gradient(180deg, #120b1f 0%, #140d22 44%, #0c0814 100%);
 }
-.start-showcase {
+
+.start-hub {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1380px;
+  max-width: 1100px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-.start-shell {
-  display: grid;
-  grid-template-columns: minmax(320px, 390px) minmax(0, 1fr);
-  gap: 18px;
-  min-height: 0;
-}
-.start-sidebar,
-.start-stageview,
-.start-dock {
-  background: linear-gradient(180deg, rgba(18, 12, 31, 0.9), rgba(11, 8, 19, 0.92));
-  border: 1px solid rgba(233, 185, 73, 0.22);
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-}
-.start-sidebar,
-.start-stageview {
-  border-radius: 26px;
-  backdrop-filter: blur(7px);
-  -webkit-backdrop-filter: blur(7px);
-}
-.start-sidebar {
-  padding: 18px 18px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-}
-.start-side-head {
-  display: flex;
-  align-items: flex-start;
-  gap: 14px;
-}
-#screen-start .brand-duck {
-  flex: 0 0 auto;
-  width: 84px;
-  height: 84px;
-  margin: 0;
-  background-size: contain;
-  filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.6));
-}
-.start-side-copy {
-  min-width: 0;
-}
-#screen-start .eyebrow,
-#screen-start .title,
-#screen-start .welcome-back,
-#screen-start .welcome-sub {
-  text-align: left;
-}
-#screen-start .eyebrow {
-  letter-spacing: 2px;
-  font-size: 11px;
-  margin-bottom: 6px;
-}
-#screen-start .title {
-  font-size: clamp(44px, 5vw, 72px);
-  margin: 0 0 2px;
-  line-height: 0.9;
-  letter-spacing: 2px;
-}
-#screen-start .welcome-back {
-  font-size: clamp(26px, 2.7vw, 38px);
-}
-#screen-start .welcome-sub {
-  max-width: 34ch;
-}
-#screen-start .profile-bar {
-  justify-content: flex-start;
-  margin-bottom: 0;
-}
-#screen-start .mocktail-banner {
-  align-self: flex-start;
-  margin: -4px 0 0;
-}
-.start-meta-card {
-  padding: 12px 14px;
-  border-radius: 18px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.02));
-}
-.pm-topline,
-.pm-bottomline {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.pm-topline {
-  margin-bottom: 8px;
-}
-.pm-bottomline {
-  margin-top: 8px;
-}
-.hero-rank-name {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--gold-soft);
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-}
-#screen-start .pm-streak,
-#screen-start .pm-xp-text {
-  margin: 0;
-}
-.start-quick-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-.start-quick-card {
-  border-radius: 18px;
-  padding: 12px 14px;
-  border: 1px solid rgba(233, 185, 73, 0.18);
-  background: linear-gradient(180deg, rgba(233, 185, 73, 0.11), rgba(233, 185, 73, 0.04));
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  border-radius: 28px;
+  overflow: hidden;
+  padding: 14px 20px 12px;
+  background: linear-gradient(180deg, rgba(18, 12, 31, 0.9), rgba(11, 8, 19, 0.92));
+  border: 1px solid rgba(233, 185, 73, 0.22);
+  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(7px);
+  -webkit-backdrop-filter: blur(7px);
 }
-.start-quick-value {
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 34px;
-  line-height: 0.9;
-  color: var(--gold);
-}
-.start-quick-label {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--muted);
-}
-#screen-start .start-cta {
-  justify-content: flex-start;
-}
-#screen-start .start-cta .btn {
-  min-width: 100%;
-  font-size: 18px;
-  justify-content: center;
-  padding: 18px 24px;
-  border-radius: 18px;
-  box-shadow: 0 18px 36px rgba(233, 185, 73, 0.26);
-}
-#screen-start .best-score {
-  text-align: left;
-  margin: 0;
+/* Soft "bar counter" glow behind the mascot so the center never reads empty. */
+.start-hub::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 150px;
+  height: 220px;
+  background:
+    radial-gradient(420px 200px at 50% 100%, rgba(233, 185, 73, 0.14), transparent 70%),
+    linear-gradient(180deg, transparent 0%, rgba(20, 13, 30, 0.5) 82%);
+  pointer-events: none;
+  z-index: 0;
 }
 
-.start-stageview {
-  padding: 14px;
+.hub-topbar {
+  position: relative;
+  z-index: 1;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-width: 0;
-}
-.start-topcards {
-  display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  gap: 12px;
-}
-.start-top-card {
-  min-width: 0;
-}
-#screen-start #cotd-card {
-  grid-column: span 5;
   align-items: center;
-  margin: 0;
-  min-height: 98px;
-  border-radius: 20px;
-  background:
-    radial-gradient(180px 120px at 86% 26%, rgba(146, 87, 255, 0.28), transparent 70%),
-    linear-gradient(135deg, rgba(233, 185, 73, 0.16), rgba(255, 122, 24, 0.08));
+  gap: 10px;
+  flex-wrap: wrap;
 }
-.cotd-note {
-  margin-top: 4px;
-  font-size: 12px;
+.hub-brand-title {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 24px;
+  letter-spacing: 1.5px;
+  background: linear-gradient(180deg, #fff, var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-right: 2px;
+}
+.hub-profile {
+  margin-bottom: 0;
+  justify-content: flex-start;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 12px 4px 4px;
+  gap: 8px;
+}
+.hub-avatar {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  flex: 0 0 auto;
+  background: url("assets/duck-hub-mascot.png") center 12% / 220% no-repeat, var(--panel-2);
+  border: 1px solid var(--line);
+}
+.hub-profile .profile-chip {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+.hub-chips {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-wrap: wrap;
+}
+.hub-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--gold-soft);
+  white-space: nowrap;
+}
+.hub-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
   color: var(--muted);
+  cursor: pointer;
+  font-size: 14px;
 }
-.stat-top-card {
-  grid-column: span 2;
-  min-height: 98px;
-  border-radius: 20px;
-  padding: 14px 16px;
+.hub-icon-btn:hover {
+  color: var(--text);
+  border-color: var(--gold);
+}
+
+#screen-start .mocktail-banner {
+  position: relative;
+  z-index: 1;
+  align-self: center;
+  margin: 2px 0 0;
+}
+
+.hub-mid {
+  position: relative;
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  border: 1px solid rgba(233, 185, 73, 0.22);
-  background:
-    linear-gradient(180deg, rgba(130, 70, 255, 0.12), rgba(255, 255, 255, 0.03)),
-    rgba(17, 13, 29, 0.82);
 }
-.stat-top-card:last-child {
-  grid-column: span 3;
+.hub-stage {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  text-align: center;
+  padding: 4px 0 0;
 }
-.start-card-kicker {
+.hub-duck {
+  width: min(26vw, 190px);
+  height: min(40vw, 292px);
+  margin-bottom: -4px;
+}
+.hub-status {
+  margin: 0 0 4px;
+  font-size: 14.5px;
+  color: var(--muted);
+  max-width: 52ch;
+}
+.hub-status-main {
+  color: var(--text);
+  font-weight: 800;
+  margin-right: 4px;
+}
+
+.hub-bottom {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: 14px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+.hub-quest {
+  justify-self: start;
+  max-width: 250px;
+  margin: 0;
+  padding: 9px 12px;
+}
+.hub-quest-info {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  min-width: 0;
+  gap: 1px;
+}
+.hub-quest-eyebrow {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: var(--gold-soft);
+  color: var(--gold);
   font-weight: 700;
-  margin-bottom: 8px;
 }
-.start-card-big {
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 42px;
-  line-height: 0.9;
-  color: #fff4d7;
-}
-.start-card-main {
-  margin-top: 6px;
-  font-size: 16px;
+.hub-quest-name {
+  font-size: 14px;
   font-weight: 800;
   color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-.start-card-sub {
-  margin-top: auto;
-  font-size: 12px;
-  line-height: 1.35;
-  color: var(--muted);
+.hub-quest .btn {
+  padding: 8px 14px;
+  font-size: 12.5px;
 }
 
-.start-journey-frame {
-  appearance: none;
-  width: 100%;
-  min-height: 320px;
-  border: 1px solid rgba(233, 185, 73, 0.22);
-  border-radius: 26px;
-  background:
-    radial-gradient(280px 180px at 72% 58%, rgba(233, 185, 73, 0.16), transparent 70%),
-    radial-gradient(240px 180px at 48% 34%, rgba(140, 73, 255, 0.2), transparent 74%),
-    linear-gradient(180deg, rgba(17, 12, 28, 0.78), rgba(11, 8, 18, 0.9)),
-    linear-gradient(180deg, #1b122b 0%, #100b18 100%);
-  overflow: hidden;
-  position: relative;
-  cursor: pointer;
-  text-align: left;
-  padding: 0;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
-}
-.start-journey-frame::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(180px 80px at 20% 92%, rgba(233,185,73,0.08), transparent 72%),
-    radial-gradient(220px 110px at 84% 85%, rgba(233,185,73,0.1), transparent 72%),
-    linear-gradient(180deg, transparent 0 68%, rgba(15, 10, 22, 0.55) 100%);
-  pointer-events: none;
-}
-.start-journey-frame:hover {
-  border-color: rgba(233, 185, 73, 0.45);
-}
-.start-journey-overlay {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  right: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  z-index: 3;
-}
-.start-journey-chip,
-.start-journey-rank {
-  border-radius: 999px;
-  padding: 7px 12px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.6px;
-  border: 1px solid rgba(233, 185, 73, 0.22);
-  background: rgba(11, 8, 18, 0.72);
-  color: var(--text);
-}
-.start-map-preview {
-  position: relative;
-  height: 100%;
-  min-height: 320px;
-  padding: 48px 24px 26px;
-}
-.start-preview-path {
-  position: absolute;
-  left: 24px;
-  right: 24px;
-  bottom: 34px;
-  top: 78px;
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 10px;
-}
-.start-preview-path::before {
-  content: "";
-  position: absolute;
-  left: 4%;
-  right: 4%;
-  top: 58%;
-  height: 6px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, rgba(233,185,73,0.35), rgba(233,185,73,0.82));
-  box-shadow: 0 0 22px rgba(233, 185, 73, 0.28);
-}
-.start-preview-node {
-  position: relative;
-  z-index: 1;
-  width: min(12.8%, 110px);
-  min-width: 76px;
+.hub-cta {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
-.start-preview-node:nth-child(2n) {
-  transform: translateY(-34px);
+.hub-cta .btn {
+  padding: 17px 38px;
+  font-size: 17px;
+  border-radius: 18px;
+  box-shadow: 0 18px 36px rgba(233, 185, 73, 0.26);
 }
-.start-preview-node:nth-child(3n) {
-  transform: translateY(-16px);
-}
-.start-preview-stars {
-  min-height: 14px;
-  letter-spacing: 1px;
-  color: rgba(233, 185, 73, 0.24);
+.play-meta {
+  margin: 0;
   font-size: 12px;
-}
-.start-preview-stars .on {
-  color: var(--gold);
-  text-shadow: 0 0 8px rgba(233, 185, 73, 0.5);
-}
-.start-preview-disc {
-  position: relative;
-  width: 74px;
-  height: 74px;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 28px;
-  color: #fff5da;
-  background:
-    radial-gradient(circle at 36% 30%, #7a58c6 0%, #45296b 62%, #221033 100%);
-  border: 2px solid rgba(233, 185, 73, 0.36);
-  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.35);
-}
-.start-preview-label {
-  max-width: 90px;
-  font-size: 11px;
-  line-height: 1.2;
+  line-height: 1.4;
+  color: var(--muted);
   text-align: center;
-  color: rgba(244, 238, 251, 0.9);
-  text-shadow: 0 2px 6px rgba(0,0,0,0.45);
-}
-.start-preview-node.is-done .start-preview-disc {
-  background:
-    radial-gradient(circle at 36% 30%, #8360d5 0%, #523284 58%, #28133c 100%);
-}
-.start-preview-node.is-current .start-preview-disc {
-  width: 88px;
-  height: 88px;
-  font-size: 34px;
-  background:
-    radial-gradient(circle at 38% 30%, #ffdc79 0%, #d39d29 42%, #5f3103 100%);
-  color: #301b05;
-  box-shadow: 0 0 0 8px rgba(233, 185, 73, 0.18), 0 0 42px rgba(233, 185, 73, 0.52);
-}
-.start-preview-node.is-next .start-preview-disc::before {
-  content: "";
-  position: absolute;
-  inset: -46px -30px -30px;
-  background: radial-gradient(closest-side, rgba(255, 220, 121, 0.4), rgba(255, 220, 121, 0) 72%);
-  filter: blur(6px);
-  z-index: -1;
-  pointer-events: none;
-}
-.start-preview-node.is-locked .start-preview-disc {
-  background: linear-gradient(180deg, #332242, #24162f);
-  border-color: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.55);
-}
-.start-preview-duck {
-  position: absolute;
-  top: -44px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 64px;
-  height: 64px;
-  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.45));
-}
-.start-preview-duck img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
 }
 
-.start-dock {
-  border-radius: 22px;
-  padding: 8px 12px 10px;
-}
-#screen-start .start-tabs {
-  margin-bottom: 10px;
-  border-radius: 16px;
-  padding: 5px;
-  background: rgba(255,255,255,0.04);
-}
-#screen-start .seg-tab {
-  border-radius: 12px;
-}
-#screen-start .start-panels {
-  width: 100%;
-  min-height: 0;
-}
-#screen-start .start-panel {
-  display: none;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-}
-#screen-start .start-panel.is-active {
-  display: grid;
-}
-#screen-start .start-panel .btn {
-  width: 100%;
-  justify-content: center;
+.hub-modes {
+  justify-self: end;
+  display: flex;
+  align-items: stretch;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--line);
   border-radius: 14px;
-  min-height: 56px;
+  overflow: hidden;
+}
+.hub-mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  border-right: 1px solid var(--line);
+  padding: 8px 13px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  min-width: 56px;
+  font-family: inherit;
+}
+.hub-mode-btn:last-child {
+  border-right: none;
+}
+.hub-mode-btn .ico {
+  font-size: 16px;
+}
+.hub-mode-btn:hover {
+  background: rgba(233, 185, 73, 0.12);
+}
+.hub-mode-btn.is-locked {
+  opacity: 0.5;
+}
+
+.hub-nav {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--line);
+}
+.hub-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-family: inherit;
+}
+.hub-nav-btn .ico {
+  font-size: 18px;
+}
+.hub-nav-btn:hover {
+  color: var(--gold-soft);
+}
+
+#screen-start .best-score {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  margin: 6px 0 0;
+  font-size: 11.5px;
 }
 #screen-start .bar-footer {
   display: none;
 }
 
-@media (max-width: 1100px) {
-  .start-shell {
-    grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+@media (max-width: 720px) {
+  .hub-bottom {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 10px;
   }
-  .start-topcards {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-  }
-  #screen-start #cotd-card {
-    grid-column: span 3;
-  }
-  .stat-top-card {
-    grid-column: span 1;
-  }
-  .stat-top-card:last-child {
-    grid-column: span 2;
-  }
-  #screen-start .start-panel {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .hub-quest,
+  .hub-modes {
+    justify-self: center;
+    max-width: 100%;
   }
 }
 
 /* Shorter windows (small/un-maximized browsers, laptops without full height):
-   shrink the showcase so the bottom dock stays reachable without scrolling. */
+   shrink the hub so nothing gets pushed off-screen. */
 @media (max-height: 780px) {
   #screen-start.is-active {
     justify-content: flex-start;
     padding-top: 8px;
     padding-bottom: 8px;
   }
-  .start-showcase {
-    gap: 8px;
+  .start-hub {
+    padding: 10px 14px 8px;
+    gap: 2px;
   }
-  .start-shell {
-    gap: 12px;
+  .hub-duck {
+    width: min(20vw, 130px);
+    height: min(30vw, 196px);
   }
-  .start-stageview,
-  .start-sidebar {
-    padding: 12px 14px;
-    gap: 8px;
-  }
-  #screen-start .brand-duck {
-    width: 56px;
-    height: 56px;
-  }
-  #screen-start .title {
-    font-size: clamp(32px, 4vw, 48px);
-  }
-  #screen-start .eyebrow {
-    margin-bottom: 2px;
-  }
-  #screen-start .welcome-back {
-    font-size: clamp(17px, 2.2vw, 22px);
-  }
-  #screen-start .welcome-sub {
-    font-size: 12px;
-    max-width: none;
-  }
-  .player-meta {
-    padding: 8px 10px;
-  }
-  .start-quick-card {
-    padding: 8px 10px;
-  }
-  .start-quick-value {
-    font-size: 24px;
-  }
-  #screen-start .start-cta .btn {
-    padding: 12px 20px;
-    font-size: 15px;
-  }
-  .start-top-card,
-  .stat-top-card,
-  #screen-start #cotd-card {
-    min-height: 72px;
-    padding: 10px 12px;
-  }
-  .start-card-big {
-    font-size: 30px;
-  }
-  .start-card-kicker {
-    margin-bottom: 4px;
-  }
-  .start-map-preview,
-  .start-journey-frame {
-    min-height: 140px;
-  }
-  .start-map-preview {
-    padding: 34px 16px 14px;
-  }
-  .start-preview-path {
-    top: 54px;
-    bottom: 18px;
-  }
-  .start-preview-disc {
-    width: 42px;
-    height: 42px;
-    font-size: 15px;
-  }
-  .start-preview-node.is-current .start-preview-disc {
-    width: 52px;
-    height: 52px;
+  .hub-brand-title {
     font-size: 19px;
   }
-  .start-preview-label {
-    font-size: 9px;
+  .hub-status {
+    font-size: 12.5px;
   }
-  .start-preview-duck {
-    top: -28px;
-    width: 40px;
-    height: 40px;
+  .hub-cta .btn {
+    padding: 12px 26px;
+    font-size: 15px;
   }
-  .start-dock {
-    padding: 6px 10px 8px;
+  .hub-mode-btn {
+    padding: 6px 10px;
+    min-width: 46px;
   }
-  #screen-start .start-tabs {
-    margin-bottom: 6px;
-    padding: 4px;
-  }
-  #screen-start .start-panel {
-    gap: 6px;
-  }
-  #screen-start .start-panel .btn {
-    min-height: 38px;
-    font-size: 12px;
+  .hub-nav {
+    margin-top: 6px;
+    padding-top: 6px;
   }
 }
 
-/* Very short windows: trim further so the dock never gets pushed off-screen. */
+/* Real phone landscape (short + very wide, e.g. 375-430px tall): stacking
+   the mascot above the menu leaves a big empty gap since there's so little
+   height to share. Switch to a side-by-side layout instead so the duck and
+   the menu sit next to each other and use the width the phone actually has. */
 @media (max-height: 600px) {
-  .start-quick-grid {
+  .hub-mid {
+    flex-direction: row;
+    align-items: stretch;
+    gap: 14px;
+  }
+  .hub-stage {
+    flex: 0 0 auto;
+    justify-content: center;
+    padding: 0;
+  }
+  .hub-duck {
+    width: min(20vw, 150px);
+    height: min(34vw, 220px);
+    margin-bottom: 0;
+  }
+  .hub-status {
     display: none;
   }
-  .start-map-preview,
-  .start-journey-frame {
-    min-height: 100px;
-  }
-  .start-preview-duck {
-    display: none;
-  }
-  .start-side-head {
+  .hub-bottom {
+    flex: 1;
+    min-width: 0;
+    grid-template-columns: 1fr;
+    align-items: stretch;
+    align-content: center;
+    justify-items: stretch;
+    margin-top: 0;
+    padding-top: 0;
     gap: 8px;
   }
-  #screen-start .brand-duck {
+  .hub-quest,
+  .hub-modes {
+    justify-self: stretch;
+    max-width: 100%;
+  }
+  .hub-modes {
+    justify-content: center;
+  }
+  .hub-nav {
+    margin-top: 4px;
+    padding-top: 4px;
+  }
+  #screen-start .best-score {
     display: none;
   }
 }

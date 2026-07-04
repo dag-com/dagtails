@@ -1,0 +1,20 @@
+{
+  "appId": "com.dagcom.lastcall",
+  "appName": "Last Call",
+  "webDir": "www",
+  "backgroundColor": "#120b1f",
+  "android": {
+    "backgroundColor": "#120b1f"
+  },
+  "ios": {
+    "backgroundColor": "#120b1f",
+    "contentInset": "always"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 800,
+      "backgroundColor": "#120b1f",
+      "showSpinner": false
+    }
+  }
+}
