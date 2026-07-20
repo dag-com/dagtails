@@ -8,6 +8,7 @@ import {
   SHOTS,
   CUSTOMERS,
   TOOLS,
+  JUDGES,
   INGREDIENT_BY_ID,
   GLASS_BY_ID,
   METHOD_BY_ID,
@@ -2055,14 +2056,15 @@ function serveMix() {
 }
 
 function judgeSceneNote(scoring) {
-  if (!scoring) return "Random panel: 3 of 10 house judges.";
+  const of = `3 of ${JUDGES.length} house judges`;
+  if (!scoring) return `Random panel: ${of}.`;
   if (scoring.mode === "mixologist") {
-    return `Random panel: 3 of 10 house judges. Final panel average: ${scoring.final}.`;
+    return `Random panel: ${of}. Final panel average: ${scoring.final}.`;
   }
   if (scoring.mode === "flavor-only") {
-    return `Random panel: 3 of 10 house judges. Flavor reactions only here; stars still come from build accuracy. Judges avg ${scoring.judges}.`;
+    return `Random panel: ${of}. Flavor reactions only here; stars still come from build accuracy. Judges avg ${scoring.judges}.`;
   }
-  return `Random panel: 3 of 10 house judges. Final score blends 75% accuracy with 25% judges' taste. Accuracy ${scoring.accuracy}, judges avg ${scoring.judges}, final ${scoring.final}.`;
+  return `Random panel: ${of}. Final score blends 75% accuracy with 25% judges' taste. Accuracy ${scoring.accuracy}, judges avg ${scoring.judges}, final ${scoring.final}.`;
 }
 
 // Timers from the result screen's reveal choreography (judges talking →
@@ -2161,7 +2163,7 @@ function showMixResult(result) {
   $("#mix-score").textContent = panel.total;
   $("#mix-verdict").textContent = panel.verdict;
   $("#mix-stars").innerHTML = [0, 1, 2, 3, 4].map((i) => `<span class="${i < panel.stars ? "on" : ""}">★</span>`).join("");
-  $("#mix-judges-title").textContent = `⚖️ Tonight's panel: ${panel.verdict} (3 of 10 judges, avg ${panel.total})`;
+  $("#mix-judges-title").textContent = `⚖️ Tonight's panel: ${panel.verdict} (3 of ${JUDGES.length} judges, avg ${panel.total})`;
   renderJudgesInteractive(panel.judges, "#judges-panel", {
     scoring: { mode: "mixologist", judges: panel.total, final: panel.total },
   });
@@ -2336,8 +2338,8 @@ function showResult(result) {
   if (result.judgePanel) {
     const p = result.judgePanel;
     const label = result.blended != null
-      ? `⚖️ Tonight's panel: ${p.verdict} (3 of 10 judges, avg ${p.total})`
-      : `⚖️ Tonight's panel: flavour check (3 of 10 judges, avg ${p.total})`;
+      ? `⚖️ Tonight's panel: ${p.verdict} (3 of ${JUDGES.length} judges, avg ${p.total})`
+      : `⚖️ Tonight's panel: flavour check (3 of ${JUDGES.length} judges, avg ${p.total})`;
     $("#result-judges-title").textContent = label;
     jWrap.style.display = "";
     renderJudgesInteractive(p.judges, "#result-judges", {

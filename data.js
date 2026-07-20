@@ -1073,7 +1073,7 @@ export const SHOTS = [
 ];
 
 // ============================================================================
-// Judges — a rotating panel for the "invent a new mix" mode. 10 judges, each
+// Judges — a rotating panel for the "invent a new mix" mode. 16 judges, each
 // with their own palate (ideal levels 0..1 for strong/sweet/sour/bitter/fizz),
 // how picky they are (weight), and how generous (bias). 3 judge a mix at a time.
 // ============================================================================
@@ -1088,6 +1088,12 @@ export const JUDGES = [
   { id: "boozy_bru", name: "Bruno Ryder", initials: "BR", title: "Aviator rogue who likes it strong", blurb: "Spirit-forward & strong", ideal: { strong: 0.95, sweet: 0.15, sour: 0.2, bitter: 0.45, fizz: 0.05 }, weight: 0.7, bias: -3 },
   { id: "easy_emma", name: "Emma Hartwell", initials: "EH", title: "Crowd-pleasing star with soft edges", blurb: "Easy-going crowd-pleaser", ideal: { strong: 0.45, sweet: 0.55, sour: 0.45, bitter: 0.25, fizz: 0.4 }, weight: 0.4, bias: 6 },
   { id: "critic_cyrus", name: "Cyrus Kane", initials: "CK", title: "Severe black-book critic", blurb: "Hard-to-impress critic", ideal: { strong: 0.6, sweet: 0.45, sour: 0.5, bitter: 0.5, fizz: 0.25 }, weight: 0.7, bias: -7 },
+  { id: "smooth_marc", name: "Marcus Vane", initials: "MV", title: "Velvet-voiced lounge crooner", blurb: "Smooth & spirit-forward", ideal: { strong: 0.65, sweet: 0.35, sour: 0.3, bitter: 0.4, fizz: 0.15 }, weight: 0.6, bias: 0 },
+  { id: "dry_freya", name: "Freya Lindqvist", initials: "FL", title: "Ice-cool Nordic purist", blurb: "Dry & precise", ideal: { strong: 0.55, sweet: 0.2, sour: 0.45, bitter: 0.35, fizz: 0.2 }, weight: 0.8, bias: -3 },
+  { id: "spice_ani", name: "Anika Rao", initials: "AR", title: "Bold celebrity-chef palate", blurb: "Spice & complexity fan", ideal: { strong: 0.55, sweet: 0.4, sour: 0.45, bitter: 0.55, fizz: 0.2 }, weight: 0.6, bias: 1 },
+  { id: "fiery_val", name: "Valentina Cruz", initials: "VC", title: "Telenovela-glam showstopper", blurb: "Fruity & fearless", ideal: { strong: 0.5, sweet: 0.65, sour: 0.55, bitter: 0.15, fizz: 0.35 }, weight: 0.55, bias: 3 },
+  { id: "silk_amir", name: "Amir Farouk", initials: "AF", title: "Old-world hospitality mogul", blurb: "Generous host's palate", ideal: { strong: 0.55, sweet: 0.5, sour: 0.35, bitter: 0.35, fizz: 0.25 }, weight: 0.45, bias: 5 },
+  { id: "pop_hana", name: "Hana Yoshida", initials: "HY", title: "Trend-setting pop sensation", blurb: "Playful & fizzy", ideal: { strong: 0.3, sweet: 0.55, sour: 0.4, bitter: 0.1, fizz: 0.75 }, weight: 0.55, bias: 4 },
 ];
 
 // ============================================================================

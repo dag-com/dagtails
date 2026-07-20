@@ -1,8 +1,8 @@
 // ============================================================================
 // Judges panel for the Mixologist "invent a new mix" mode.
-// Given an evaluation result (from mixology.evaluate) we pick 3 of the 10
-// judges and each scores the drink against their own palate. The panel's
-// average becomes the headline score.
+// Given an evaluation result (from mixology.evaluate) we pick 3 of the full
+// judges roster and each scores the drink against their own palate. The
+// panel's average becomes the headline score.
 // ============================================================================
 import { JUDGES } from "./data.js";
 

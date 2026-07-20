@@ -12,6 +12,22 @@ any past version, go to the repository's **Releases** page and pick that version
 
 ---
 
+## v1.11.4 — 6 new judges join the panel (2026-07-20)
+
+- The house judges roster grows from 10 to 16. Since every character in
+  this game is a duck (not a human), the new range comes from real duck
+  breed plumage variety instead — each with their own painted portrait,
+  name, and palate:
+  - **Marcus Vane** (black Cayuga) — velvet-voiced lounge crooner, smooth & spirit-forward
+  - **Freya Lindqvist** (white Pekin) — ice-cool Nordic purist, dry & precise
+  - **Anika Rao** (chocolate Rouen) — bold celebrity-chef palate, spice & complexity fan
+  - **Valentina Cruz** (Blue Swedish) — telenovela-glam showstopper, fruity & fearless
+  - **Amir Farouk** (Khaki Campbell) — old-world hospitality mogul, generous host's palate
+  - **Hana Yoshida** (Mandarin duck) — trend-setting pop sensation, playful & fizzy
+- All "3 of 10 judges" copy throughout the app is now generated from the
+  live roster size, so it won't need a manual update the next time judges
+  are added.
+
 ## v1.11.3 — Judges page fixed for real phone-landscape screens (2026-07-04)
 
 - The judges/result page was badly overflowing on actual phone-landscape
