@@ -1,4 +1,4 @@
-package com.dagcom.lastcall;
+package com.dagcom.dagtails;
 
 import com.getcapacitor.BridgeActivity;
 

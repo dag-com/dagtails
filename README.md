@@ -1,4 +1,4 @@
-# Last Call — a bartending game
+# DAG Tails — a bartending game
 
 Mix cocktails to order across 8 stages. You prepare each drink **step by step
 like a real bartender** at an animated bar station: choose the glass, pour the

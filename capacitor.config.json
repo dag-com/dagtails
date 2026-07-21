@@ -1,6 +1,6 @@
 {
-  "appId": "com.dagcom.lastcall",
-  "appName": "Last Call",
+  "appId": "com.dagcom.dagtails",
+  "appName": "DAG Tails",
   "webDir": "www",
   "backgroundColor": "#120b1f",
   "android": {

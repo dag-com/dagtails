@@ -3993,10 +3993,11 @@ body {
   }
 }
 
-/* ============================ Welcome-back splash ============================ */
+/* ============================ Brand splash ============================ */
 #screen-splash {
   position: relative;
-  min-height: 78vh;
+  min-height: 100vh;
+  min-height: 100dvh;
   overflow: hidden;
   cursor: pointer;
 }
@@ -4007,9 +4008,9 @@ body {
 }
 #screen-splash .hero-bg {
   background:
-    radial-gradient(620px 280px at 68% 50%, rgba(233, 185, 73, 0.16), transparent 62%),
-    radial-gradient(900px 360px at 80% 14%, rgba(130, 70, 255, 0.16), transparent 52%),
-    linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.45)),
+    radial-gradient(620px 280px at 50% 35%, rgba(233, 185, 73, 0.18), transparent 62%),
+    radial-gradient(900px 360px at 80% 14%, rgba(130, 70, 255, 0.14), transparent 52%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.55)),
     linear-gradient(180deg, #120b1f 0%, #140d22 44%, #0c0814 100%);
 }
 /* Shared rank-based mascot: the apprentice duck visually levels up as the
@@ -4027,27 +4028,43 @@ body {
 .mascot-duck.tier-3 {
   background-image: url("assets/duck-hub-mascot-ace.png");
 }
-.splash-duck {
-  width: min(40vw, 150px);
-  height: min(58vw, 210px);
-  margin: 0 auto -4px;
+.splash-hero-img {
+  display: block;
+  width: min(52vw, 280px);
+  height: auto;
+  max-height: min(48vh, 360px);
+  object-fit: contain;
+  margin: 0 auto -6px;
+  filter: drop-shadow(0 18px 36px rgba(0, 0, 0, 0.65));
+  pointer-events: none;
+  user-select: none;
+  animation: splash-hero-in 0.7s ease-out both;
+}
+@keyframes splash-hero-in {
+  from { opacity: 0; transform: translateY(18px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 .splash-card {
   position: relative;
   z-index: 1;
-  max-width: 480px;
+  max-width: 520px;
   width: 100%;
   margin: 0 auto;
-  padding: 20px 24px;
+  padding: 24px 28px 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   text-align: center;
 }
+#screen-splash .title-sm {
+  font-size: clamp(42px, 9vw, 64px);
+  letter-spacing: 0.04em;
+  margin: 0;
+}
 .splash-greet {
-  margin: -2px 0 0;
-  font-size: clamp(24px, 5vw, 34px);
+  margin: 4px 0 0;
+  font-size: clamp(22px, 4.5vw, 30px);
   font-weight: 800;
   color: var(--text);
 }
@@ -4084,10 +4101,34 @@ body {
   opacity: 0.75;
 }
 @media (max-width: 560px) {
-  .splash-duck {
-    width: 100px;
-    height: 148px;
+  .splash-hero-img {
+    width: min(58vw, 180px);
+    max-height: 42vh;
   }
+}
+@media (max-height: 480px) and (orientation: landscape) {
+  #screen-splash.is-active {
+    align-items: stretch;
+  }
+  .splash-card {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px 20px;
+    max-width: 920px;
+    padding: 12px 20px;
+  }
+  .splash-hero-img {
+    width: min(28vw, 160px);
+    max-height: 78vh;
+    margin: 0;
+  }
+  #screen-splash .title-sm {
+    font-size: clamp(28px, 6vw, 44px);
+  }
+  .splash-greet { font-size: 18px; }
+  .splash-sub { font-size: 13px; max-width: 36ch; }
 }
 
 /* ============================ Start hub (main menu) ============================ */

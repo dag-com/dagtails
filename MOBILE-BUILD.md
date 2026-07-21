@@ -1,4 +1,4 @@
-# Building Last Call for iOS & Android
+# Building DAG Tails for iOS & Android
 
 The game itself is still the same zero-build vanilla HTML/CSS/JS you've always
 had — nothing about how you develop the web version changes. What's new is a
@@ -99,7 +99,7 @@ that step — you never need to touch a physical Mac.
    ($99/year). This is required for TestFlight, no way around it.
 2. **Create an app record** in
    [App Store Connect](https://appstoreconnect.apple.com/) → **My Apps → +**
-   → New App. Use bundle ID `com.dagcom.lastcall` (already set in
+   → New App. Use bundle ID `com.dagcom.dagtails` (already set in
    `capacitor.config.json` — change it there first if you'd rather use
    something else, before you register it with Apple).
 3. **Create an App Store Connect API key** (lets Codemagic talk to Apple on
@@ -129,7 +129,7 @@ that step — you never need to touch a physical Mac.
 2. On success, Codemagic automatically uploads the build to TestFlight and
    notifies your internal testers.
 3. You and your partner install the **TestFlight** app from the App Store,
-   accept the email invite, and install **Last Call** through it — updates
+   accept the email invite, and install **DAG Tails** through it — updates
    after that are just a tap in TestFlight, no cables needed.
 
 ---
@@ -138,7 +138,7 @@ that step — you never need to touch a physical Mac.
 
 - `package.json` + `scripts/copy-web.js` — copies the game's static files
   into `www/` (the only "build step", and it's just a file copy, no bundler).
-- `capacitor.config.json` — app id (`com.dagcom.lastcall`), app name, and
+- `capacitor.config.json` — app id (`com.dagcom.dagtails`), app name, and
   Capacitor plugin settings.
 - `android/`, `ios/` — native project folders (`npx cap add android/ios`),
   with orientation locked to landscape in both

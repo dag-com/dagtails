@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to **Last Call** are listed here, newest first.
+All notable changes to **DAG Tails** are listed here, newest first.
 
 This project uses simple version numbers: `MAJOR.MINOR.PATCH`
 - **PATCH** (e.g. 1.0.1) — small fixes and tweaks
@@ -11,6 +11,17 @@ Each version below corresponds to a tagged release on GitHub. To open or downloa
 any past version, go to the repository's **Releases** page and pick that version.
 
 ---
+
+## v1.12.0 — Renamed to DAG Tails (2026-07-22)
+
+- The game is now **DAG Tails** everywhere you look — hub, splash, profile
+  gate, finish screen, intro comic dialogue, docs, and native app display
+  names.
+- Native package / bundle IDs moved from `com.dagcom.lastcall` to
+  `com.dagcom.dagtails` (Android + iOS + Capacitor).
+- Ace mascot jacket patch art updated from "ACE BARTENDER" to **DAG TAILS**.
+- Saved progress keys migrated automatically from the old `lastcall_*`
+  localStorage prefix so existing players keep their profile and stars.
 
 ## v1.11.4 — 6 new judges join the panel (2026-07-20)
 
@@ -232,7 +243,7 @@ any past version, go to the repository's **Releases** page and pick that version
 
 - **Story intro comic reel**: a short, hand-illustrated cinematic now plays right
   after you sign up and before your first level. **Old Tom**, a veteran duck
-  bartender, welcomes a young protégé (in the DAG hoodie) into *The Last Call* on
+  bartender, welcomes a young protégé (in the DAG hoodie) into *DAG Tails* on
   a rainy night and teaches the craft — glassware, the pour, shaking vs. stirring,
   a first wobbly pour, and finally handing over the apron: *"The bar's yours
   tonight. Make every pour count."* (Keep an eye out for the rubber-duck cameo.)

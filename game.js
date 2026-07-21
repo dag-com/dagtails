@@ -1,4 +1,4 @@
-import {
+﻿import {
   GLASSES,
   METHODS,
   INGREDIENTS,
@@ -54,8 +54,31 @@ function emptyBuild() {
   return { glass: null, method: null, garnish: null, ingredients: [] };
 }
 
+// One-time migrate localStorage keys from the old "Last Call" brand.
+(function migrateLastCallKeys() {
+  try {
+    if (localStorage.getItem("dagtails_migrated") === "1") return;
+    Object.keys(localStorage).forEach((k) => {
+      if (!k.startsWith("lastcall_")) return;
+      const next = "dagtails_" + k.slice("lastcall_".length);
+      if (localStorage.getItem(next) == null) {
+        localStorage.setItem(next, localStorage.getItem(k));
+      }
+      localStorage.removeItem(k);
+    });
+    try {
+      const sid = sessionStorage.getItem("lastcall_session_id");
+      if (sid && !sessionStorage.getItem("dagtails_session_id")) {
+        sessionStorage.setItem("dagtails_session_id", sid);
+      }
+      sessionStorage.removeItem("lastcall_session_id");
+    } catch (e) { /* ignore */ }
+    localStorage.setItem("dagtails_migrated", "1");
+  } catch (e) { /* ignore */ }
+})();
+
 // ============================ Player profile / age gate ============================
-const PROFILE_KEY = "lastcall_profile";
+const PROFILE_KEY = "dagtails_profile";
 const LEGAL_AGE = 18; // drinking-age threshold; under this = mocktails only
 
 function getProfile() {
@@ -84,7 +107,7 @@ function dispStep(unit) { return unit === "ml" ? (useImperial() ? 0.25 : 5) : 1;
 function toMl(unit, dispVal) { return (unit === "ml" && useImperial()) ? dispVal * ML_PER_OZ : dispVal; }
 
 // ---- App settings (sound preferences) ----
-const SETTINGS_KEY = "lastcall_settings";
+const SETTINGS_KEY = "dagtails_settings";
 function getSettings() {
   try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null") || { sound: true }; }
   catch (e) { return { sound: true }; }
@@ -96,12 +119,12 @@ function setSettings(s) { try { localStorage.setItem(SETTINGS_KEY, JSON.stringif
 // capped local log (so you can inspect it on-device via the debug panel) and
 // also forwarded to Supabase when the backend is configured, so you can see
 // usage across every player from the SQL editor. Never blocks or throws.
-const ANALYTICS_KEY = "lastcall_analytics_log";
+const ANALYTICS_KEY = "dagtails_analytics_log";
 const ANALYTICS_MAX = 300;
 const SESSION_ID = (() => {
   try {
-    let sid = sessionStorage.getItem("lastcall_session_id");
-    if (!sid) { sid = genId(); sessionStorage.setItem("lastcall_session_id", sid); }
+    let sid = sessionStorage.getItem("dagtails_session_id");
+    if (!sid) { sid = genId(); sessionStorage.setItem("dagtails_session_id", sid); }
     return sid;
   } catch (e) { return genId(); }
 })();
@@ -121,7 +144,7 @@ function track(name, props = {}) {
 }
 
 // Intro comic: shown once after sign-up, before the first level (replayable in Settings).
-const INTRO_KEY = "lastcall_intro_seen";
+const INTRO_KEY = "dagtails_intro_seen";
 function introSeen() { try { return localStorage.getItem(INTRO_KEY) === "1"; } catch (e) { return false; } }
 function markIntroSeen() { try { localStorage.setItem(INTRO_KEY, "1"); } catch (e) { /* ignore */ } }
 
@@ -194,13 +217,29 @@ function renderStartWelcome() {
     : `Stage ${nextStage} is ready. Cocktail of the Day is waiting too.`;
 }
 
-// Splash screen greeting shown for returning players before the main menu.
+// Brand splash shown on every boot before hub / credentials.
 function renderSplash() {
   const p = getProfile();
   const greet = $("#splash-greet");
   const sub = $("#splash-sub");
+  const continueBtn = $("#btn-splash-continue");
   if (!greet || !sub) return;
-  if (!p) { greet.textContent = "Welcome."; sub.textContent = "Your next shift is ready."; return; }
+
+  const chipLevel = $("#splash-chip-level");
+  const chipStreak = $("#splash-chip-streak");
+  const chipStars = $("#splash-chip-stars");
+
+  if (!p) {
+    greet.textContent = "Welcome to DAG Tails.";
+    sub.textContent = "A bartending game from DAG.com — tap to set up your bartender and begin.";
+    if (continueBtn) continueBtn.textContent = "Get started →";
+    if (chipLevel) chipLevel.textContent = "";
+    if (chipStreak) chipStreak.textContent = "";
+    if (chipStars) chipStars.textContent = "";
+    return;
+  }
+
+  if (continueBtn) continueBtn.textContent = "Enter the bar →";
 
   const map = getMap();
   const daily = getDaily();
@@ -222,20 +261,17 @@ function renderSplash() {
       : `Stage ${nextStage} is ready whenever you are.`;
   }
 
-  const chipLevel = $("#splash-chip-level");
   if (chipLevel) chipLevel.textContent = `${rk.emoji} Lv ${lvl} · ${rk.name}`;
-  const chipStreak = $("#splash-chip-streak");
   if (chipStreak) chipStreak.textContent = daily.streak > 0 ? `🔥 ${daily.streak}-day streak` : "🔥 Start a streak today";
-  const chipStars = $("#splash-chip-stars");
   if (chipStars) chipStars.textContent = `⭐ ${totalStars()} stars`;
-
-  applyMascotTier($("#splash-duck"), rankForCleared(cleared));
 }
 
 let splashTimer = null;
 function dismissSplash() {
   if (splashTimer) { clearTimeout(splashTimer); splashTimer = null; }
+  onShowStart();
   showScreen("screen-start");
+  if (!getProfile()) openProfileForm(true);
 }
 
 function nextRewardCopy(map, prog) {
@@ -335,7 +371,7 @@ function drinkPool() {
 }
 
 // ============================ Stage map / ranks / complexity ============================
-const MAP_KEY = "lastcall_map";
+const MAP_KEY = "dagtails_map";
 const STAGES_PER_RANK = 8;
 const STAGES_TO_UNLOCK = 5; // clear this many to unlock Endless + Mixologist
 const RANKS = [
@@ -415,7 +451,7 @@ function applyComplexity(cx, recipe) {
 }
 
 // ============================ Progression / XP / unlocks ============================
-const PROGRESS_KEY = "lastcall_progress";
+const PROGRESS_KEY = "dagtails_progress";
 const XP_PER_LEVEL = 120;
 const UNLOCKS = { endless: 2, advanced: 2, mixologist: 3 };
 
@@ -437,7 +473,7 @@ function recordResult(result) {
 }
 
 // ============================ Daily streak ============================
-const DAILY_KEY = "lastcall_daily";
+const DAILY_KEY = "dagtails_daily";
 function todayStr() { return new Date().toISOString().slice(0, 10); }
 function ydayStr() { return new Date(Date.now() - 86400000).toISOString().slice(0, 10); }
 function getDaily() {
@@ -459,7 +495,7 @@ function recordPlayDay() {
 }
 
 // ============================ Cocktail of the Day ============================
-const COTD_KEY = "lastcall_cotd";
+const COTD_KEY = "dagtails_cotd";
 function getCotd() {
   try { return JSON.parse(localStorage.getItem(COTD_KEY) || "null") || { date: null, id: null, queue: [], doneDate: null, count: 0 }; }
   catch (e) { return { date: null, id: null, queue: [], doneDate: null, count: 0 }; }
@@ -502,7 +538,7 @@ const BADGES = [
   { id: "inventor", emoji: "🧪", name: "Inventor", desc: "Save an invention to My Bar", test: () => getMyBar().length > 0 },
   { id: "cotd_5", emoji: "📅", name: "Daily Habit", desc: "Play 5 Cocktails of the Day", test: (s, d, c) => (c.count || 0) >= 5 },
 ];
-const BADGE_KEY = "lastcall_badges";
+const BADGE_KEY = "dagtails_badges";
 function getEarned() { try { return JSON.parse(localStorage.getItem(BADGE_KEY) || "[]"); } catch (e) { return []; } }
 function setEarned(a) { try { localStorage.setItem(BADGE_KEY, JSON.stringify(a)); } catch (e) { /* ignore */ } }
 function checkBadges() {
@@ -964,8 +1000,8 @@ function maybeShowTierIntro(label) {
 }
 
 // ============================ High score (localStorage) ============================
-const HIGH_SCORE_KEY = "lastcall_highscore";
-const ENDLESS_BEST_KEY = "lastcall_endless_best";
+const HIGH_SCORE_KEY = "dagtails_highscore";
+const ENDLESS_BEST_KEY = "dagtails_endless_best";
 function getHighScore() {
   return Number(localStorage.getItem(HIGH_SCORE_KEY) || 0);
 }
@@ -2198,7 +2234,7 @@ function showMixResult(result) {
 }
 
 // ============================ My Bar (saved inventions) ============================
-const MYBAR_KEY = "lastcall_mybar";
+const MYBAR_KEY = "dagtails_mybar";
 function getMyBar() {
   try { return JSON.parse(localStorage.getItem(MYBAR_KEY) || "[]"); } catch (e) { return []; }
 }
@@ -2987,7 +3023,7 @@ $("#btn-edit-profile").addEventListener("click", () => {
 // and can be replayed from Settings.
 const INTRO_COMIC = [
   { img: "assets/comic/comic1.png", kind: "narration", text: "Every great bartender starts behind someone else's bar." },
-  { img: "assets/comic/comic2.png", kind: "say", who: "Old Tom", text: "Come in out of the rain, kid. The Last Call doesn't bite\u2026 much." },
+  { img: "assets/comic/comic2.png", kind: "say", who: "Old Tom", text: "Come in out of the rain, kid. DAG Tails doesn't bite\u2026 much." },
   { img: "assets/comic/comic3.png", kind: "say", who: "Old Tom", text: "First lesson: respect the glass, the pour, the guest. Every drop has its place." },
   { img: "assets/comic/comic4.png", kind: "say", who: "Old Tom", text: "Shake it when it's bright. Stir it when it's strong. Feel the drink." },
   { img: "assets/comic/comic5.png", kind: "narration", text: "The first pour is always shaky. That's how the hands learn." },
@@ -3142,7 +3178,7 @@ function resetEverything() {
   try {
     // Remove this game's keys plus any Supabase auth session tokens.
     Object.keys(localStorage)
-      .filter((k) => k.startsWith("lastcall_") || k.startsWith("sb-"))
+      .filter((k) => k.startsWith("dagtails_") || k.startsWith("lastcall_") || k.startsWith("sb-"))
       .forEach((k) => localStorage.removeItem(k));
   } catch (e) { /* ignore */ }
   try { sessionStorage.clear(); } catch (e) { /* ignore */ }
@@ -3240,20 +3276,14 @@ $("#btn-diag-clear").addEventListener("click", () => {
 
 $("#screen-splash").addEventListener("click", () => { Sound.init(); Sound.click(); dismissSplash(); });
 
-// Boot: returning players see a brief welcome-back splash first; first-time
-// visitors skip it and land straight on the main page + identification modal.
+// Boot: everyone sees the brand splash first. New players then get the
+// credentials modal; returning players continue to the hub.
 Sound.enabled = getSettings().sound !== false; // restore the saved sound preference
 syncSoundButtons();
 checkBadges();
-if (getProfile()) {
-  renderSplash();
-  showScreen("screen-splash");
-  splashTimer = setTimeout(dismissSplash, 2200);
-} else {
-  onShowStart();
-  showScreen("screen-start");
-  openProfileForm(true);
-}
+renderSplash();
+showScreen("screen-splash");
+splashTimer = setTimeout(dismissSplash, 2800);
 track("app_open", { returning: !!getProfile() });
 
 // Debug-only deep link to preview the intro reel directly (localhost or ?debug).

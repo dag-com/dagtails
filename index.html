@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Last Call — Bartending Game</title>
+    <title>DAG Tails — Bartending Game</title>
     <link rel="stylesheet" href="styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,7 +19,7 @@
         <div class="modal-box profile-card profile-modal-box">
           <button id="btn-profile-close" class="modal-x" type="button" aria-label="Close" style="display:none">✕</button>
           <p class="eyebrow">Welcome to the bar</p>
-          <h1 class="title title-sm">LAST&nbsp;CALL</h1>
+          <h1 class="title title-sm">DAG&nbsp;TAILS</h1>
           <p class="subtitle">Set up your bartender profile to begin. We use your age to decide whether you get the full cocktail bar or the alcohol-free mocktail menu.</p>
 
           <form id="profile-form" class="profile-form" novalidate>
@@ -53,33 +53,39 @@
         </div>
       </div>
 
-      <!-- ============================== WELCOME-BACK SPLASH ============================== -->
-      <!-- Shown briefly on boot for returning players only; new players skip straight
-           to the main page + identification modal. Tap anywhere (or wait) to continue. -->
-      <section id="screen-splash" class="screen">
+      <!-- ============================== BRAND SPLASH ============================== -->
+      <!-- Always shown on boot. New players then get the profile modal; returning
+           players continue to the hub. Tap anywhere (or wait) to continue. -->
+      <section id="screen-splash" class="screen is-active">
         <div class="hero-bg" aria-hidden="true"></div>
         <div class="splash-card">
-          <div class="splash-duck mascot-duck" id="splash-duck" aria-hidden="true"></div>
+          <img
+            class="splash-hero-img"
+            id="splash-hero-img"
+            src="assets/duck-hub-mascot-ace.png"
+            alt="DAG Tails mascot"
+            draggable="false"
+          />
           <p class="eyebrow">A DAG.com game</p>
-          <h1 class="title title-sm">LAST&nbsp;CALL</h1>
-          <p class="splash-greet" id="splash-greet">Welcome back.</p>
+          <h1 class="title title-sm">DAG&nbsp;TAILS</h1>
+          <p class="splash-greet" id="splash-greet">Welcome.</p>
           <p class="splash-sub" id="splash-sub">Your next shift is ready.</p>
           <div class="splash-chips">
             <span class="splash-chip" id="splash-chip-level"></span>
             <span class="splash-chip" id="splash-chip-streak"></span>
             <span class="splash-chip" id="splash-chip-stars"></span>
           </div>
-          <button id="btn-splash-continue" class="btn btn-primary btn-lg" type="button">Continue to the bar →</button>
+          <button id="btn-splash-continue" class="btn btn-primary btn-lg" type="button">Enter the bar →</button>
           <span class="splash-hint">tap anywhere to continue</span>
         </div>
       </section>
 
       <!-- ============================== START SCREEN (hub layout) ============================== -->
-      <section id="screen-start" class="screen is-active">
+      <section id="screen-start" class="screen">
         <div class="hero-bg" aria-hidden="true"></div>
         <div class="start-hub">
           <div class="hub-topbar">
-            <span class="hub-brand-title">LAST&nbsp;CALL</span>
+            <span class="hub-brand-title">DAG&nbsp;TAILS</span>
             <div class="profile-bar hub-profile" id="profile-bar" style="display:none">
               <span class="hub-avatar" aria-hidden="true"></span>
               <span class="profile-chip" id="profile-chip"></span>
@@ -459,7 +465,7 @@
       <section id="screen-finish" class="screen">
         <div class="result-card">
           <p class="eyebrow">Shift complete</p>
-          <h2 class="result-name">That's Last Call 🍸</h2>
+          <h2 class="result-name">That's DAG Tails 🍸</h2>
           <div class="stars stars-lg" id="finish-stars">★★★</div>
           <div class="result-score">
             <span id="finish-score">0</span><span class="result-pct-sign"> pts</span>
@@ -518,7 +524,7 @@
       <div class="rotate-lock-box">
         <div class="rotate-lock-icon">↻</div>
         <h2>Rotate to Landscape</h2>
-        <p>Last Call now runs in a landscape-first layout from sign-in to final score. Turn your device sideways to continue.</p>
+        <p>DAG Tails now runs in a landscape-first layout from sign-in to final score. Turn your device sideways to continue.</p>
       </div>
     </div>
 

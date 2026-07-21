@@ -1,5 +1,5 @@
 -- ============================================================================
--- Last Call — backend schema for Supabase (Postgres)
+-- DAG Tails — backend schema for Supabase (Postgres)
 -- Run this once in your Supabase project: SQL Editor -> New query -> paste -> Run.
 -- Safe to re-run (uses IF NOT EXISTS / CREATE OR REPLACE).
 -- ============================================================================

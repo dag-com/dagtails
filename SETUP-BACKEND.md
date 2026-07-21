@@ -23,7 +23,7 @@ You only have to do this once.
 1. Go to **https://supabase.com** and click **Start your project** (sign in with
    GitHub is easiest).
 2. Click **New project**.
-3. Give it a name (e.g. `last-call`), choose a **database password** (save it
+3. Give it a name (e.g. `dag-tails`), choose a **database password** (save it
    somewhere — you won't need it for the game, but Supabase wants one), and pick
    the region closest to your players.
 4. Click **Create new project** and wait ~2 minutes for it to finish setting up.

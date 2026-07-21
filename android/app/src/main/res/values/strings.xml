@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Last Call</string>
-    <string name="title_activity_main">Last Call</string>
-    <string name="package_name">com.dagcom.lastcall</string>
-    <string name="custom_url_scheme">com.dagcom.lastcall</string>
+    <string name="app_name">DAG Tails</string>
+    <string name="title_activity_main">DAG Tails</string>
+    <string name="package_name">com.dagcom.dagtails</string>
+    <string name="custom_url_scheme">com.dagcom.dagtails</string>
 </resources>

@@ -12,7 +12,7 @@ workflows:
   # once you're ready to sign a release build for Google Play.
   # ------------------------------------------------------------------
   android-debug:
-    name: Last Call — Android (debug APK)
+    name: DAG Tails — Android (debug APK)
     max_build_duration: 30
     instance_type: linux_x2
     environment:
@@ -55,7 +55,7 @@ workflows:
   # testing.
   # ------------------------------------------------------------------
   ios-testflight:
-    name: Last Call — iOS (TestFlight)
+    name: DAG Tails — iOS (TestFlight)
     max_build_duration: 60
     instance_type: mac_mini_m2
     integrations:
@@ -67,7 +67,7 @@ workflows:
       cocoapods: default
       ios_signing:
         distribution_type: app_store
-        bundle_identifier: com.dagcom.lastcall
+        bundle_identifier: com.dagcom.dagtails
       vars:
         XCODE_WORKSPACE: "ios/App/App.xcworkspace"
         XCODE_SCHEME: "App"
