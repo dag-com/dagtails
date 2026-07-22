@@ -267,7 +267,11 @@ function renderSplash() {
 }
 
 let splashTimer = null;
-function dismissSplash() {
+let splashShownAt = 0;
+const SPLASH_MIN_MS = 3000;
+
+function dismissSplash(force = false) {
+  if (!force && splashShownAt && Date.now() - splashShownAt < SPLASH_MIN_MS) return;
   if (splashTimer) { clearTimeout(splashTimer); splashTimer = null; }
   onShowStart();
   showScreen("screen-start");
@@ -2824,9 +2828,12 @@ function shopKey(item) {
 function shopCardHtml(item) {
   const key = shopKey(item);
   const inCart = !!shopCart[key];
+  const icon = item.icon
+    ? `<img class="shop-item-icon-img" src="${item.icon}" alt="" draggable="false">`
+    : `<div class="shop-item-icon">${item.emoji}</div>`;
   return `
     <div class="shop-item">
-      <div class="shop-item-icon">${item.emoji}</div>
+      ${icon}
       <div class="shop-item-body">
         <div class="shop-item-top">
           <span class="shop-item-name">${escapeHtml(item.name)}</span>
@@ -3283,7 +3290,8 @@ syncSoundButtons();
 checkBadges();
 renderSplash();
 showScreen("screen-splash");
-splashTimer = setTimeout(dismissSplash, 2800);
+splashShownAt = Date.now();
+splashTimer = setTimeout(() => dismissSplash(true), SPLASH_MIN_MS);
 track("app_open", { returning: !!getProfile() });
 
 // Debug-only deep link to preview the intro reel directly (localhost or ?debug).

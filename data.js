@@ -32,7 +32,7 @@ export const METHODS = [
 // which tools the demo shop should suggest for a given recipe.
 // ============================================================================
 export const TOOLS = [
-  { id: "jigger", name: "Jigger", emoji: "🥄", price: 7, blurb: "Double-sided measure for accurate pours, in every build.", methods: ["shake", "stir", "build", "muddle", "blend"] },
+  { id: "jigger", name: "Jigger", emoji: "🥃", icon: "assets/shop/jigger.svg", price: 7, blurb: "Double-sided measure for accurate pours, in every build.", methods: ["shake", "stir", "build", "muddle", "blend"] },
   { id: "shaker", name: "Cocktail Shaker", emoji: "🍸", price: 18, blurb: "Two- or three-piece tin for chilling and combining shaken drinks.", methods: ["shake"] },
   { id: "strainer", name: "Hawthorne Strainer", emoji: "🧊", price: 6.5, blurb: "Fits the shaker or mixing glass to hold back the ice on the pour.", methods: ["shake", "stir"] },
   { id: "mixing_glass", name: "Mixing Glass", emoji: "🥃", price: 15, blurb: "Heavy-bottomed glass for stirring spirit-forward cocktails.", methods: ["stir"] },
