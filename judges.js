@@ -70,6 +70,11 @@ function judgeScore(judge, evalResult) {
     initials: judge.initials,
     title: judge.title,
     blurb: judge.blurb,
+    breed: judge.breed || "",
+    character: judge.character || "",
+    story: judge.story || "",
+    likes: judge.likes || "",
+    dislikes: judge.dislikes || "",
     score: score10,
     score100,
     comment,
@@ -81,7 +86,7 @@ function judgeScore(judge, evalResult) {
 }
 
 function praise(judge) {
-  const lines = [
+  const lines = judge.praise || [
     "Exactly my kind of drink!",
     "Beautifully made — I'm impressed.",
     "I'd order this again. Bravo.",

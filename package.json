@@ -1,6 +1,6 @@
 {
   "name": "dag-tails-bartending-game",
-  "version": "1.12.0",
+  "version": "1.12.2",
   "private": true,
   "description": "DAG Tails — a stage-based bartending simulation game. Zero-build vanilla JS/HTML/CSS on the web, wrapped with Capacitor for iOS/Android testing builds.",
   "scripts": {

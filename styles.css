@@ -2596,6 +2596,38 @@ body {
   text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
   max-width: 26ch;
 }
+.judge-avatar-breed {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--gold-soft);
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  max-width: 26ch;
+  margin-top: 2px;
+}
+.judge-avatar-character {
+  font-size: 10px;
+  line-height: 1.3;
+  color: var(--muted);
+  opacity: 0.95;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  max-width: 28ch;
+  margin-top: 3px;
+}
+.judge-bubble-prefs {
+  margin-top: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.judge-bubble-prefs .pref-like,
+.judge-bubble-prefs .pref-hate {
+  font-weight: 700;
+  color: var(--gold-soft);
+}
+.judge-bubble-prefs.pref-avoid .pref-hate {
+  color: var(--rose);
+}
 .judge-kicker {
   font-size: 10px;
   text-transform: uppercase;
@@ -3916,7 +3948,8 @@ body {
     overflow: hidden;
   }
   .judge-bubble-reason,
-  .judge-bubble-tip {
+  .judge-bubble-tip,
+  .judge-bubble-prefs {
     display: none;
   }
   .judge-avatar-wrap {
@@ -3929,7 +3962,9 @@ body {
     border-width: 2px;
   }
   .judge-avatar-name,
-  .judge-avatar-title {
+  .judge-avatar-title,
+  .judge-avatar-breed,
+  .judge-avatar-character {
     display: none;
   }
 

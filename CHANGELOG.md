@@ -12,6 +12,20 @@ any past version, go to the repository's **Releases** page and pick that version
 
 ---
 
+## v1.12.2 — World-duck judges panel grows to 20 (2026-07-23)
+
+- House judges roster is now **20**, drawn from real duck breeds worldwide
+  instead of a mostly yellow Pekin look.
+- Replaced three original yellow judges:
+  - **Rina Patel** (Indian Runner) — sweet tooth
+  - **Maggie Pike** (Magpie) — spritz & bubbles
+  - **Rio Mendes** (Muscovy) — easy crowd-pleaser
+- Four new faces join the panel:
+  - **Jax Holloway** (Wood Duck) — complex & aromatic
+  - **Lili Agung** (Bali Crested) — floral & garnish-forward
+  - **Otto Brandt** (Saxony) — malty & bitter-leaning
+  - **Sue Appleyard** (Silver Appleyard) — orchard fruit & cider notes
+
 ## v1.12.0 — Renamed to DAG Tails (2026-07-22)
 
 - The game is now **DAG Tails** everywhere you look — hub, splash, profile

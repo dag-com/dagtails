@@ -2143,6 +2143,8 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
           <div class="judge-bubble-quote">“${escapeHtml(j.comment)}”</div>
           <div class="judge-bubble-reason">${escapeHtml(j.reason)}</div>
           <div class="judge-bubble-tip"><strong>Tip:</strong> ${escapeHtml(j.tip)}</div>
+          ${j.likes ? `<div class="judge-bubble-prefs"><span class="pref-like">Loves:</span> ${escapeHtml(j.likes)}</div>` : ""}
+          ${j.dislikes ? `<div class="judge-bubble-prefs pref-avoid"><span class="pref-hate">Avoids:</span> ${escapeHtml(j.dislikes)}</div>` : ""}
         </div>
         <div class="judge-avatar-wrap">
           <div class="judge-portrait">
@@ -2150,6 +2152,8 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
           </div>
           <span class="judge-avatar-name">${escapeHtml(j.name)}</span>
           <span class="judge-avatar-title">${escapeHtml(j.title || j.blurb)}</span>
+          ${j.breed ? `<span class="judge-avatar-breed">${escapeHtml(j.breed)}</span>` : ""}
+          ${j.character ? `<span class="judge-avatar-character">${escapeHtml(j.character)}</span>` : ""}
         </div>
       </article>`).join("")}
     </div>`;
