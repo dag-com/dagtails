@@ -4025,32 +4025,35 @@ body {
   }
   .judge-scene {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 6px;
-    padding: 0 4px 0;
+    gap: 8px;
+    padding: 0 2px;
+  }
+  .judge-scene.is-compact {
+    gap: 10px;
   }
   .judge-seat {
-    gap: 3px;
-    padding-bottom: 2px;
+    gap: 6px;
+    padding-bottom: 4px;
   }
   .judge-bubble {
     min-height: 0;
-    padding: 7px 9px 8px;
+    padding: 8px 10px 10px;
   }
   .judge-bubble-top {
-    margin-bottom: 3px;
+    margin-bottom: 4px;
   }
   .judge-bubble-name {
-    font-size: 11px;
+    font-size: 12px;
   }
   .judge-score {
-    font-size: 12.5px;
+    font-size: 14px;
   }
   .judge-score small {
     font-size: 9px;
   }
   .judge-bubble-quote {
-    font-size: 10.5px;
-    line-height: 1.3;
+    font-size: 11px;
+    line-height: 1.25;
     margin-bottom: 0;
     display: -webkit-box;
     -webkit-line-clamp: 2;
@@ -4063,13 +4066,17 @@ body {
     display: none;
   }
   .judge-avatar-wrap {
-    max-width: 56px;
+    max-width: 88px;
     gap: 0;
   }
   .judge-portrait {
-    width: 36px;
-    height: 36px;
+    width: 72px;
+    height: 72px;
     border-width: 2px;
+  }
+  .judge-scene.is-compact .judge-portrait {
+    width: 78px;
+    height: 78px;
   }
   .judge-avatar-name,
   .judge-avatar-title,
@@ -4080,7 +4087,7 @@ body {
 
   #screen-game.is-active {
     display: grid;
-    grid-template-columns: minmax(250px, 32%) minmax(0, 1fr);
+    grid-template-columns: minmax(200px, 30%) minmax(0, 1fr);
     grid-template-rows: auto auto auto auto auto 1fr;
     grid-template-areas:
       "topbar topbar"
@@ -4089,9 +4096,11 @@ body {
       "steps stage"
       "coach stage"
       "nav stage";
-    gap: 8px 10px;
-    align-items: start;
-    min-height: calc(100dvh - 18px);
+    gap: 6px 8px;
+    align-items: stretch;
+    min-height: 0;
+    height: calc(100dvh - 16px);
+    overflow: hidden;
   }
   #screen-game.is-active .topbar { grid-area: topbar; }
   #screen-game.is-active .progress-wrap { grid-area: progress; }
@@ -4109,49 +4118,178 @@ body {
   #screen-game.is-active .stage-area {
     grid-area: stage;
     display: grid;
-    grid-template-columns: minmax(210px, 38%) minmax(0, 1fr);
-    grid-template-rows: 1fr;
+    grid-template-columns: minmax(160px, 42%) minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
     min-height: 0;
     height: 100%;
-    gap: 10px;
+    gap: 8px;
+    overflow: hidden;
   }
   #screen-game.is-active .step-nav {
     grid-area: nav;
     display: grid;
     grid-template-columns: 1fr;
-    gap: 8px;
+    gap: 6px;
     align-self: end;
   }
   #screen-game.is-active .step-nav .btn {
     width: 100%;
   }
   .order-ticket-compact {
-    padding: 10px 12px;
+    padding: 6px 10px;
   }
   .order-ticket-compact .ticket-desc {
     display: none;
   }
+  .cust-sub {
+    display: none;
+  }
+  .cust-line {
+    font-size: 11px;
+  }
+  .cust-avatar {
+    width: 36px;
+    height: 36px;
+  }
   .station {
     min-height: 0;
+    overflow: hidden;
   }
   .glass-mount,
   .prep-mount {
-    padding: 6px 4px 36px;
-    min-height: 140px;
+    padding: 2px 2px 4px;
+    min-height: 0;
   }
   .station-bench {
-    margin-bottom: 48px;
-    min-height: 160px;
+    margin-bottom: 22px;
+    min-height: 0;
+    gap: 4px;
+  }
+  .station-bench.is-dual .prep-mount,
+  .station-bench.is-dual .glass-mount {
+    max-width: none;
+  }
+  .glass-mount .glass-svg,
+  .prep-mount .prep-svg {
+    max-height: min(38dvh, 170px);
+  }
+  .station-status {
+    font-size: 11px;
+    bottom: 2px;
   }
   .step-panel {
-    padding: 10px 12px;
+    padding: 8px 10px;
+    overflow: hidden;
+    min-height: 0;
   }
   .topbar-right .btn-sm,
   .topbar-left .stage-pill,
   .topbar-left .diff-pill {
-    padding-top: 6px;
-    padding-bottom: 6px;
+    padding-top: 5px;
+    padding-bottom: 5px;
   }
+}
+
+/* Phone landscape: lock game + result to the viewport — no page scroll */
+body.is-phone-play {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+body.is-phone-play .app {
+  height: 100dvh;
+  max-height: 100dvh;
+  padding: 6px 8px;
+  overflow: hidden;
+}
+body.is-phone-play #screen-game.is-active,
+body.is-phone-play #screen-result.is-active,
+body.is-phone-play #screen-mix-result.is-active {
+  overflow: hidden !important;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  justify-content: stretch;
+}
+body.is-phone-play .result-card,
+body.is-phone-play .mix-card {
+  max-height: 100%;
+  height: 100%;
+  overflow: hidden;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+body.is-phone-play .result-header {
+  flex: 0 0 auto;
+}
+body.is-phone-play .result-name {
+  font-size: 22px;
+  margin: 0 0 2px;
+}
+body.is-phone-play #result-judges-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  margin: 0;
+}
+body.is-phone-play .judges-title {
+  font-size: 11px;
+  margin: 0 0 4px;
+}
+body.is-phone-play #result-judges,
+body.is-phone-play .judges-panel {
+  height: 100%;
+  min-height: 0;
+}
+body.is-phone-play .judge-scene {
+  height: 100%;
+  align-items: end;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+}
+body.is-phone-play .judge-scene.is-compact .judge-portrait {
+  width: 76px;
+  height: 76px;
+}
+body.is-phone-play .judge-bubble {
+  min-height: 0;
+  padding: 7px 8px;
+}
+body.is-phone-play .judge-bubble-quote {
+  -webkit-line-clamp: 2;
+  font-size: 10.5px;
+}
+body.is-phone-play .result-top {
+  flex: 0 0 auto;
+  gap: 8px;
+  margin-top: 4px;
+}
+body.is-phone-play .result-right {
+  max-height: 72px;
+  padding: 6px 8px;
+  overflow: hidden;
+}
+body.is-phone-play .result-right .feedback {
+  overflow: hidden;
+}
+body.is-phone-play .feedback li:nth-child(n + 3) {
+  display: none;
+}
+body.is-phone-play .result-actions {
+  flex: 0 0 auto;
+  margin-top: 4px;
+  gap: 6px;
+}
+body.is-phone-play .result-actions .btn {
+  padding: 8px 12px;
+  font-size: 13px;
+}
+body.is-phone-play .chip-grid {
+  gap: 6px;
+}
+body.is-phone-play .chip {
+  padding: 8px 10px;
+  font-size: 12px;
 }
 
 /* ============================ Brand splash ============================ */

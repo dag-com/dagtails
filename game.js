@@ -1041,8 +1041,18 @@ const $ = (sel) => document.querySelector(sel);
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("is-active"));
   $("#" + id).classList.add("is-active");
-  window.scrollTo({ top: 0, behavior: "smooth" });
+  document.body.classList.toggle("is-phone-play", isPhonePlay());
+  window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
   if (id === "screen-start") onShowStart();
+}
+
+function isPhonePlay() {
+  try {
+    return window.matchMedia("(pointer: coarse) and (orientation: landscape) and (max-height: 560px)").matches
+      || window.matchMedia("(pointer: coarse) and (max-width: 920px) and (max-height: 500px)").matches;
+  } catch (e) {
+    return false;
+  }
 }
 
 let toastTimer = null;
@@ -2282,10 +2292,11 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
   const el = $(panelSel);
   if (!el) return;
   const animated = !!opts.animated;
-  const note = judgeSceneNote(opts.scoring);
+  const compact = opts.compact != null ? !!opts.compact : isPhonePlay();
+  const note = compact ? "" : judgeSceneNote(opts.scoring);
   el.innerHTML = `
-    <div class="judge-scene-note">${escapeHtml(note)}</div>
-    <div class="judge-scene">
+    ${note ? `<div class="judge-scene-note">${escapeHtml(note)}</div>` : ""}
+    <div class="judge-scene${compact ? " is-compact" : ""}">
       <div class="judge-table" aria-hidden="true"></div>
       ${judges.map((j) => `
       <article class="judge-seat judge-seat-${escapeHtml(j.id)}${animated ? "" : " is-in"}" data-judge-id="${escapeHtml(j.id)}">
@@ -2295,19 +2306,19 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
             <span class="judge-score"><span class="judge-score-num">${animated ? "···" : j.score100}</span><small>/100</small></span>
           </div>
           <div class="judge-bubble-quote">“${escapeHtml(j.comment)}”</div>
-          <div class="judge-bubble-reason">${escapeHtml(j.reason)}</div>
-          <div class="judge-bubble-tip"><strong>Tip:</strong> ${escapeHtml(j.tip)}</div>
-          ${j.likes ? `<div class="judge-bubble-prefs"><span class="pref-like">Loves:</span> ${escapeHtml(j.likes)}</div>` : ""}
-          ${j.dislikes ? `<div class="judge-bubble-prefs pref-avoid"><span class="pref-hate">Avoids:</span> ${escapeHtml(j.dislikes)}</div>` : ""}
+          ${compact ? "" : `<div class="judge-bubble-reason">${escapeHtml(j.reason)}</div>`}
+          ${compact ? "" : `<div class="judge-bubble-tip"><strong>Tip:</strong> ${escapeHtml(j.tip)}</div>`}
+          ${!compact && j.likes ? `<div class="judge-bubble-prefs"><span class="pref-like">Loves:</span> ${escapeHtml(j.likes)}</div>` : ""}
+          ${!compact && j.dislikes ? `<div class="judge-bubble-prefs pref-avoid"><span class="pref-hate">Avoids:</span> ${escapeHtml(j.dislikes)}</div>` : ""}
         </div>
         <div class="judge-avatar-wrap">
           <div class="judge-portrait">
             <img src="assets/judges/${escapeHtml(j.id)}.png" alt="${escapeHtml(j.name)}" loading="lazy">
           </div>
-          <span class="judge-avatar-name">${escapeHtml(j.name)}</span>
-          <span class="judge-avatar-title">${escapeHtml(j.title || j.blurb)}</span>
-          ${j.breed ? `<span class="judge-avatar-breed">${escapeHtml(j.breed)}</span>` : ""}
-          ${j.character ? `<span class="judge-avatar-character">${escapeHtml(j.character)}</span>` : ""}
+          ${compact ? "" : `<span class="judge-avatar-name">${escapeHtml(j.name)}</span>`}
+          ${compact ? "" : `<span class="judge-avatar-title">${escapeHtml(j.title || j.blurb)}</span>`}
+          ${!compact && j.breed ? `<span class="judge-avatar-breed">${escapeHtml(j.breed)}</span>` : ""}
+          ${!compact && j.character ? `<span class="judge-avatar-character">${escapeHtml(j.character)}</span>` : ""}
         </div>
       </article>`).join("")}
     </div>`;
@@ -2533,16 +2544,21 @@ function showResult(result) {
 
   // Judges' reaction panel (every served cocktail except the tutorial).
   const jWrap = $("#result-judges-wrap");
+  const phone = isPhonePlay();
+  document.body.classList.toggle("is-phone-play", phone);
   if (result.judgePanel) {
     const p = result.judgePanel;
-    const label = result.blended != null
-      ? `⚖️ Tonight's panel: ${p.verdict} (3 of ${JUDGES.length} judges, avg ${p.total})`
-      : `⚖️ Tonight's panel: flavour check (3 of ${JUDGES.length} judges, avg ${p.total})`;
+    const label = phone
+      ? `⚖️ Judges · ${p.verdict} · avg ${p.total}`
+      : result.blended != null
+        ? `⚖️ Tonight's panel: ${p.verdict} (3 of ${JUDGES.length} judges, avg ${p.total})`
+        : `⚖️ Tonight's panel: flavour check (3 of ${JUDGES.length} judges, avg ${p.total})`;
     $("#result-judges-title").textContent = label;
     jWrap.style.display = "";
     renderJudgesInteractive(p.judges, "#result-judges", {
       scoring: result.judgeScoring,
       animated: true,
+      compact: phone,
       onDone: () => revealResultVerdict(result, recipe),
     });
   } else {
