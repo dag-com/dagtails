@@ -894,16 +894,53 @@ body {
   letter-spacing: 0.5px;
   color: var(--muted);
   font-weight: 600;
+  z-index: 4;
 }
 
+.station-bench {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 18px;
+  width: 100%;
+  margin-bottom: 70px;
+  min-height: 250px;
+  padding: 0 8px;
+}
+.station-bench.is-dual .prep-mount,
+.station-bench.is-dual .glass-mount {
+  flex: 1 1 0;
+  max-width: 46%;
+}
+
+.prep-mount,
 .glass-mount {
   position: relative;
   z-index: 2;
-  margin-bottom: 70px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
   min-height: 240px;
+  width: 100%;
+  max-width: 220px;
+  margin-bottom: 0;
+}
+.prep-mount .tool,
+.glass-mount .tool {
+  z-index: 6;
+}
+.prep-mount[hidden] {
+  display: none !important;
+}
+.prep-mount .prep-svg {
+  width: 100%;
+  max-height: 260px;
+}
+.glass-mount .glass-svg {
+  width: 100%;
+  max-height: 280px;
 }
 
 /* placeholder when no glass chosen */
@@ -926,7 +963,13 @@ body {
   height: 100%;
   display: block;
   animation: glassIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3);
-  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.5));
+  filter: drop-shadow(0 16px 20px rgba(0, 0, 0, 0.55));
+}
+.glass-svg .surface {
+  mix-blend-mode: soft-light;
+}
+.glass-svg .condensation {
+  pointer-events: none;
 }
 @keyframes glassIn {
   0% { opacity: 0; transform: translateY(24px) scale(0.85); }
@@ -946,7 +989,10 @@ body {
   inset: 0 0 56px 0;
   z-index: 0;
   overflow: hidden;
-  background: radial-gradient(75% 65% at 50% 16%, rgba(80, 45, 100, 0.55), transparent 72%);
+  background:
+    radial-gradient(70% 55% at 50% 8%, rgba(255, 190, 120, 0.14), transparent 70%),
+    radial-gradient(75% 65% at 50% 20%, rgba(80, 45, 100, 0.45), transparent 72%),
+    linear-gradient(180deg, #120c1c 0%, #1a1228 100%);
 }
 .bar-bg::before {
   content: "";
@@ -1011,17 +1057,19 @@ body {
 /* ---- Pour stream ---- */
 .pour-stream {
   position: absolute;
-  top: 30px;
+  top: 24px;
   left: 50%;
-  width: 6px;
-  height: 150px;
+  width: 7px;
+  height: 160px;
   transform: translateX(-50%) scaleY(0);
   transform-origin: top center;
-  border-radius: 3px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), currentColor);
+  border-radius: 4px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.35), currentColor 40%, currentColor);
+  box-shadow: 0 0 8px currentColor;
   color: #fff;
   opacity: 0;
-  z-index: 1;
+  z-index: 6;
+  pointer-events: none;
 }
 .pour-stream.is-pouring {
   animation: pour 0.7s ease;
@@ -1032,7 +1080,7 @@ body {
     transform: translateX(-50%) scaleY(0);
   }
   25% {
-    opacity: 0.9;
+    opacity: 0.95;
     transform: translateX(-50%) scaleY(1);
   }
   85% {
@@ -1052,42 +1100,25 @@ body {
   opacity: 0;
   pointer-events: none;
 }
-.tool-shaker {
-  top: 40px;
-  left: 50%;
-  width: 70px;
-  margin-left: -35px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.shaker-cap {
-  width: 54px;
-  height: 22px;
-  border-radius: 8px 8px 4px 4px;
-  background: linear-gradient(180deg, #d9dde3, #9aa2ad);
-}
-.shaker-body {
-  width: 70px;
-  height: 110px;
-  border-radius: 10px 10px 22px 22px;
-  background: linear-gradient(100deg, #eef1f4, #aab2bd 50%, #ced4dc);
-  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.2);
-}
 .tool-spoon {
-  top: 50px;
+  top: auto;
+  bottom: 42%;
   left: 50%;
   width: 6px;
-  height: 150px;
+  height: 58%;
+  max-height: 160px;
   margin-left: -3px;
   border-radius: 3px;
   background: linear-gradient(180deg, #cfd5dd, #9aa2ad);
-  transform-origin: top center;
+  transform-origin: 50% 12%;
+}
+.station.has-prep .tool-spoon {
+  left: 50%;
 }
 .tool-spoon::after {
   content: "";
   position: absolute;
-  bottom: -6px;
+  bottom: -4px;
   left: -7px;
   width: 20px;
   height: 12px;
@@ -1095,22 +1126,25 @@ body {
   background: #cfd5dd;
 }
 .tool-muddler {
-  top: 36px;
+  top: auto;
+  bottom: 38%;
   left: 50%;
   width: 16px;
-  height: 130px;
+  height: 55%;
+  max-height: 140px;
   margin-left: -8px;
   border-radius: 8px 8px 5px 5px;
   background: linear-gradient(90deg, #6b4a2f, #8a6240 50%, #5e3f28);
+  transform-origin: 50% 0%;
 }
 
-/* shake */
-.station.anim-shake .tool-shaker {
-  opacity: 1;
+/* shake — animate prep vessel, keep glass waiting */
+.station.anim-shake .prep-mount {
   animation: shake 0.7s ease-in-out infinite;
+  transform-origin: center bottom;
 }
-.station.anim-shake .glass-svg {
-  opacity: 0;
+.station.anim-shake .prep-mount .prep-lid {
+  opacity: 1;
 }
 @keyframes shake {
   0%, 100% { transform: translate(0, 0) rotate(-6deg); }
@@ -1123,12 +1157,14 @@ body {
   opacity: 1;
   animation: stir 0.6s linear infinite;
 }
+.station.anim-stir .prep-mount {
+  animation: swirl 0.6s ease-in-out infinite;
+}
 @keyframes stir {
   0% { transform: rotate(-16deg); }
   50% { transform: rotate(16deg); }
   100% { transform: rotate(-16deg); }
 }
-.station.anim-stir .glass-svg { animation: swirl 0.6s ease-in-out infinite; }
 @keyframes swirl {
   0%, 100% { transform: rotate(0deg); }
   50% { transform: rotate(2deg); }
@@ -1143,17 +1179,36 @@ body {
   50% { transform: translateY(26px) rotate(-4deg); }
 }
 /* blend */
-.station.anim-blend .glass-svg { animation: blend 0.12s linear infinite; }
+.station.anim-blend .prep-mount {
+  animation: blend 0.12s linear infinite;
+}
 @keyframes blend {
   0% { transform: translate(-1px, 0); }
   50% { transform: translate(1px, -1px); }
   100% { transform: translate(-1px, 1px); }
 }
 /* build */
-.station.anim-build .glass-svg { animation: bounce 0.5s ease; }
+.station.anim-build .glass-mount { animation: bounce 0.5s ease; }
 @keyframes bounce {
   0%, 100% { transform: translateY(0); }
   40% { transform: translateY(-10px); }
+}
+/* strain / transfer into serving glass */
+.station.anim-strain .prep-mount {
+  animation: tipStrain 0.75s ease forwards;
+  transform-origin: 70% 20%;
+}
+.station.anim-strain .glass-mount {
+  animation: glassCatch 0.75s ease;
+}
+@keyframes tipStrain {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  40% { transform: translate(18px, -12px) rotate(28deg); opacity: 1; }
+  100% { transform: translate(22px, -8px) rotate(32deg); opacity: 0.85; }
+}
+@keyframes glassCatch {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(4px); }
 }
 
 /* ============================ Step panel ============================ */
@@ -1308,14 +1363,20 @@ body {
 .station::after {
   display: none;
 }
+.station-bench {
+  flex: 1 1 auto;
+  min-height: 0;
+  margin-bottom: 54px;
+  width: 100%;
+}
+.prep-mount,
 .glass-mount {
   position: relative;
   z-index: 2;
   flex: 1 1 auto;
   min-height: 0;
-  width: 100%;
   margin: 0;
-  padding: 12px 12px 54px;
+  padding: 12px 8px 8px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -1704,8 +1765,15 @@ body {
   .topbar-right .btn-sm {
     padding: 6px 10px;
   }
-  .glass-mount {
-    padding-bottom: 50px;
+  .glass-mount,
+  .prep-mount {
+    padding-bottom: 40px;
+    min-height: 160px;
+  }
+  .station-bench {
+    margin-bottom: 52px;
+    min-height: 180px;
+    gap: 8px;
   }
 }
 @media (max-width: 420px) {
@@ -1748,10 +1816,20 @@ body {
   margin: 2px 0 6px;
 }
 .cust-avatar {
-  font-size: 26px;
-  line-height: 1;
   flex: 0 0 auto;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.25);
+}
+.cust-avatar-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
 }
 .cust-meta {
   display: flex;
@@ -1762,6 +1840,14 @@ body {
   font-size: 12px;
   font-weight: 700;
   color: var(--gold);
+}
+.cust-sub {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.9;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .cust-line {
   font-size: 13px;
@@ -1791,10 +1877,34 @@ body {
 
 /* Customer reaction on the result screen */
 .result-customer {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   font-size: 14px;
   color: var(--gold-soft);
   font-style: italic;
   margin: 8px 0 4px;
+  text-align: left;
+}
+.result-cust-img {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center top;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+}
+.result-cust-text {
+  min-width: 0;
+}
+.result-cust-text strong {
+  font-style: normal;
+  color: var(--gold);
+}
+.result-tip {
+  font-style: normal;
+  white-space: nowrap;
 }
 
 /* Recipe book */
@@ -4024,8 +4134,14 @@ body {
   .station {
     min-height: 0;
   }
-  .glass-mount {
-    padding: 6px 8px 42px;
+  .glass-mount,
+  .prep-mount {
+    padding: 6px 4px 36px;
+    min-height: 140px;
+  }
+  .station-bench {
+    margin-bottom: 48px;
+    min-height: 160px;
   }
   .step-panel {
     padding: 10px 12px;

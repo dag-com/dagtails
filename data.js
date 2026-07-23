@@ -1302,21 +1302,164 @@ export const JUDGES = [
 ];
 
 // ============================================================================
-// Customers — the people who order drinks. Adds personality to each round.
-// `lines` use {drink} as a placeholder for the cocktail name.
+// Customers — guest ducks assembled at runtime from pre-created portrait bases
+// + taste-tagged name / vibe / order-line pools. Never reuse JUDGES.
+// Order lines use {drink} as a placeholder for the cocktail name.
 // ============================================================================
-export const CUSTOMERS = [
-  { name: "Marco", emoji: "🧔", lines: ["Rough day. Make me a {drink}, would you?", "A {drink} — and don't be shy with it."] },
-  { name: "Lena", emoji: "👩", lines: ["Ooh, I'll have a {drink}, please!", "Feeling fancy tonight — a {drink} for me."] },
-  { name: "Sofia", emoji: "👩‍🦰", lines: ["Could I get a {drink} when you have a sec?", "One {drink}, easy on the rush."] },
-  { name: "James", emoji: "👨‍💼", lines: ["A {drink}, my good bartender.", "Long meeting. I've earned a {drink}."] },
-  { name: "Priya", emoji: "👩‍🦱", lines: ["I've heard your {drink} is the best — prove it!", "Make it a {drink}, please."] },
-  { name: "Tomás", emoji: "🧑", lines: ["Hit me with a {drink}.", "A {drink}, and keep 'em coming."] },
-  { name: "Yuki", emoji: "🧑‍🎤", lines: ["A {drink} to celebrate!", "Let's do a {drink} tonight."] },
-  { name: "Greta", emoji: "👵", lines: ["Back in my day we made a proper {drink}. Let's see yours.", "A {drink}, dear, when you're ready."] },
-  { name: "Dmitri", emoji: "🕴️", lines: ["One {drink}. Make it count.", "A {drink}. I'm watching the technique."] },
-  { name: "Nina", emoji: "💁‍♀️", lines: ["Surprise me— actually, a {drink}.", "A {drink} sounds perfect right now."] },
+export const CUSTOMER_BASES = [
+  { id: "mallard_petite", src: "assets/customers/mallard_petite.png", gender: "female", body: "petite", breed: "Mallard", taste: ["sweet", "dessert"] },
+  { id: "pekin_stocky", src: "assets/customers/pekin_stocky.png", gender: "male", body: "stocky", breed: "Pekin", taste: ["boozy", "classic"] },
+  { id: "runner_tall", src: "assets/customers/runner_tall.png", gender: "neutral", body: "tall", breed: "Indian Runner", taste: ["dry", "bitter"] },
+  { id: "call_bright", src: "assets/customers/call_bright.png", gender: "female", body: "average", breed: "Call Duck", taste: ["fizzy", "sweet"] },
+  { id: "rouen_broad", src: "assets/customers/rouen_broad.png", gender: "male", body: "broad", breed: "Rouen", taste: ["sour", "classic"] },
+  { id: "mandarin_slim", src: "assets/customers/mandarin_slim.png", gender: "female", body: "slim", breed: "Mandarin", taste: ["tropical", "dessert"] },
+  { id: "teal_beanie", src: "assets/customers/teal_beanie.png", gender: "male", body: "petite", breed: "Teal", taste: ["spicy", "boozy"] },
+  { id: "muscovy_athletic", src: "assets/customers/muscovy_athletic.png", gender: "female", body: "athletic", breed: "Muscovy", taste: ["sour", "fizzy"] },
+  { id: "aylesbury_elder", src: "assets/customers/aylesbury_elder.png", gender: "male", body: "stocky", breed: "Aylesbury", taste: ["bitter", "classic"] },
+  { id: "cayuga_turtleneck", src: "assets/customers/cayuga_turtleneck.png", gender: "female", body: "average", breed: "Cayuga", taste: ["dry", "bitter"] },
 ];
+
+export const CUSTOMER_FIRST_NAMES = [
+  { name: "Honey", gender: "female", tags: ["sweet", "dessert"] },
+  { name: "Candy", gender: "female", tags: ["sweet", "dessert"] },
+  { name: "Lila", gender: "female", tags: ["sweet", "fizzy"] },
+  { name: "Pippa", gender: "female", tags: ["fizzy", "sweet"] },
+  { name: "Fizz", gender: "female", tags: ["fizzy", "sweet"] },
+  { name: "Coco", gender: "female", tags: ["tropical", "dessert"] },
+  { name: "Mango", gender: "female", tags: ["tropical", "dessert"] },
+  { name: "Isla", gender: "female", tags: ["tropical", "fizzy"] },
+  { name: "Zest", gender: "female", tags: ["sour", "fizzy"] },
+  { name: "Citrus", gender: "female", tags: ["sour", "fizzy"] },
+  { name: "Pepper", gender: "female", tags: ["spicy", "boozy"] },
+  { name: "Noir", gender: "female", tags: ["dry", "bitter"] },
+  { name: "Ash", gender: "female", tags: ["dry", "bitter"] },
+  { name: "Brick", gender: "male", tags: ["boozy", "classic"] },
+  { name: "Hank", gender: "male", tags: ["boozy", "classic"] },
+  { name: "Burt", gender: "male", tags: ["classic", "boozy"] },
+  { name: "Puck", gender: "male", tags: ["sour", "classic"] },
+  { name: "Tart", gender: "male", tags: ["sour", "classic"] },
+  { name: "Chip", gender: "male", tags: ["spicy", "boozy"] },
+  { name: "Spike", gender: "male", tags: ["spicy", "boozy"] },
+  { name: "Bitter", gender: "male", tags: ["bitter", "classic"] },
+  { name: "Clive", gender: "male", tags: ["bitter", "classic"] },
+  { name: "Dryden", gender: "male", tags: ["dry", "bitter"] },
+  { name: "Reed", gender: "male", tags: ["dry", "classic"] },
+  { name: "Quinn", gender: "neutral", tags: ["dry", "bitter"] },
+  { name: "Sage", gender: "neutral", tags: ["dry", "bitter"] },
+  { name: "Remy", gender: "neutral", tags: ["bitter", "classic"] },
+  { name: "Ari", gender: "neutral", tags: ["dry", "classic"] },
+  { name: "Kit", gender: "neutral", tags: ["spicy", "boozy"] },
+  { name: "Jules", gender: "neutral", tags: ["sour", "fizzy"] },
+];
+
+export const CUSTOMER_LAST_NAMES = [
+  { name: "Sugarman", tags: ["sweet", "dessert"] },
+  { name: "Honeywell", tags: ["sweet", "dessert"] },
+  { name: "Spritz", tags: ["fizzy", "sweet"] },
+  { name: "Bubbles", tags: ["fizzy", "sweet"] },
+  { name: "Palm", tags: ["tropical", "dessert"] },
+  { name: "Lagoon", tags: ["tropical", "fizzy"] },
+  { name: "Lime", tags: ["sour", "fizzy"] },
+  { name: "Wedge", tags: ["sour", "classic"] },
+  { name: "Neat", tags: ["boozy", "classic"] },
+  { name: "Rocks", tags: ["boozy", "classic"] },
+  { name: "Chile", tags: ["spicy", "boozy"] },
+  { name: "Ember", tags: ["spicy", "boozy"] },
+  { name: "Amaro", tags: ["bitter", "classic"] },
+  { name: "Fernet", tags: ["bitter", "dry"] },
+  { name: "Martini", tags: ["dry", "classic"] },
+  { name: "Olive", tags: ["dry", "bitter"] },
+  { name: "Bitters", tags: ["bitter", "classic"] },
+  { name: "Collins", tags: ["fizzy", "classic"] },
+  { name: "Sourwood", tags: ["sour", "classic"] },
+  { name: "Orchard", tags: ["sweet", "classic"] },
+];
+
+export const CUSTOMER_VIBES = [
+  { text: "Dessert-menu regular", tags: ["sweet", "dessert"] },
+  { text: "Sugar-rim softie", tags: ["sweet", "dessert"] },
+  { text: "Spritz-hour butterfly", tags: ["fizzy", "sweet"] },
+  { text: "Bubbles-before-business", tags: ["fizzy", "sweet"] },
+  { text: "Tiki-postcard dreamer", tags: ["tropical", "dessert"] },
+  { text: "Palm-frond romantic", tags: ["tropical", "dessert"] },
+  { text: "Citrus-forward regular", tags: ["sour", "classic"] },
+  { text: "Eyes-water, then smile", tags: ["sour", "fizzy"] },
+  { text: "Neat-pour workhorse", tags: ["boozy", "classic"] },
+  { text: "Two fingers, no chatter", tags: ["boozy", "classic"] },
+  { text: "Heat-seeker", tags: ["spicy", "boozy"] },
+  { text: "Chili-rim daredevil", tags: ["spicy", "boozy"] },
+  { text: "Amaro hour regular", tags: ["bitter", "classic"] },
+  { text: "Digestif philosopher", tags: ["bitter", "classic"] },
+  { text: "Bone-dry traditionalist", tags: ["dry", "bitter"] },
+  { text: "Extra-dry, zero apology", tags: ["dry", "bitter"] },
+];
+
+export const CUSTOMER_ORDER_LINES = [
+  { text: "Something sweet — a {drink}, please.", tags: ["sweet", "dessert"] },
+  { text: "Make my {drink} dessert-soft, yeah?", tags: ["sweet", "dessert"] },
+  { text: "A bubbly {drink} to keep me light!", tags: ["fizzy", "sweet"] },
+  { text: "Fizz me a {drink}, bartender.", tags: ["fizzy", "sweet"] },
+  { text: "Tropical vibes — I'll take a {drink}.", tags: ["tropical", "dessert"] },
+  { text: "Make the {drink} taste like vacation.", tags: ["tropical", "dessert"] },
+  { text: "Sharp and bright — a {drink}, please.", tags: ["sour", "classic"] },
+  { text: "I want that {drink} with a real citrus kick.", tags: ["sour", "fizzy"] },
+  { text: "A proper {drink}. Don't water it down.", tags: ["boozy", "classic"] },
+  { text: "Hit me with a {drink} — strong.", tags: ["boozy", "classic"] },
+  { text: "Spice it up: one {drink}.", tags: ["spicy", "boozy"] },
+  { text: "Make my {drink} warm in the chest.", tags: ["spicy", "boozy"] },
+  { text: "Bitter and honest — a {drink}.", tags: ["bitter", "classic"] },
+  { text: "I'll take a {drink}. Lean into the amaro.", tags: ["bitter", "classic"] },
+  { text: "Bone-dry {drink}. No sweetness.", tags: ["dry", "bitter"] },
+  { text: "A {drink}, extra dry — I'm watching.", tags: ["dry", "bitter"] },
+];
+
+function pickTagged(pool, taste, extraFilter) {
+  const tags = taste || [];
+  let matched = pool.filter((item) => {
+    if (extraFilter && !extraFilter(item)) return false;
+    return (item.tags || []).some((t) => tags.includes(t));
+  });
+  if (!matched.length) {
+    matched = pool.filter((item) => {
+      if (extraFilter && !extraFilter(item)) return false;
+      return (item.tags || []).includes("classic") || !(item.tags || []).length;
+    });
+  }
+  if (!matched.length) {
+    matched = extraFilter ? pool.filter(extraFilter) : pool.slice();
+  }
+  return matched[Math.floor(Math.random() * matched.length)];
+}
+
+function genderOk(item, gender) {
+  if (gender === "neutral") return item.gender === "neutral" || item.gender === "female" || item.gender === "male";
+  return item.gender === gender || item.gender === "neutral";
+}
+
+/** Assemble a guest from a pre-created base + taste-matched text pools. */
+export function generateCustomer(opts = {}) {
+  const exclude = new Set(opts.excludeIds || []);
+  const bases = CUSTOMER_BASES.filter((b) => !exclude.has(b.id));
+  const pool = bases.length ? bases : CUSTOMER_BASES;
+  const base = pool[Math.floor(Math.random() * pool.length)];
+  const first = pickTagged(CUSTOMER_FIRST_NAMES, base.taste, (n) => genderOk(n, base.gender));
+  const last = pickTagged(CUSTOMER_LAST_NAMES, base.taste);
+  const vibe = pickTagged(CUSTOMER_VIBES, base.taste);
+  const linePool = CUSTOMER_ORDER_LINES.filter((l) => (l.tags || []).some((t) => base.taste.includes(t)));
+  const lines = (linePool.length ? linePool : CUSTOMER_ORDER_LINES).map((l) => l.text);
+
+  return {
+    id: base.id,
+    name: `${first.name} ${last.name}`,
+    gender: base.gender,
+    body: base.body,
+    breed: base.breed,
+    taste: base.taste.slice(),
+    vibe: vibe.text,
+    portrait: base.src,
+    lines,
+  };
+}
 
 // ============================================================================
 // Classic cocktails for the Mixologist "you (re)invented…" detector.

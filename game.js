@@ -6,7 +6,7 @@
   RECIPES,
   MOCKTAILS,
   SHOTS,
-  CUSTOMERS,
+  generateCustomer,
   TOOLS,
   JUDGES,
   INGREDIENT_BY_ID,
@@ -41,6 +41,7 @@ const state = {
   endlessRecipe: null,
   lastEndlessIdx: -1,
   customer: null,
+  recentCustomerIds: [],
   trainingRecipe: null,
   cotdRecipe: null, // Cocktail of the Day target
   mixJudges: null, // judging panel result for the current invention
@@ -1131,20 +1132,83 @@ function currentGlass() {
   return state.build.glass ? GLASS_BY_ID[state.build.glass] : null;
 }
 
+function activeMethod() {
+  return state.build.method || currentRecipe()?.method || null;
+}
+
+function usesPrepVessel(method = activeMethod()) {
+  return ["shake", "stir", "blend"].includes(method);
+}
+
+function prepKindFor(method = activeMethod()) {
+  if (method === "stir") return "mixing";
+  if (method === "blend") return "blender";
+  return "shaker";
+}
+
+/** Liquid lives in the prep vessel until shake/stir/blend finishes (then transfers). */
+function liquidInPrep() {
+  return usesPrepVessel() && !state.mixed;
+}
+
 function renderStation() {
   const mount = $("#glass-mount");
+  const prepMount = $("#prep-mount");
+  const bench = $("#station-bench");
+  const station = $(".station");
+  const spoon = $("#tool-spoon");
+  const muddler = $("#tool-muddler");
   mount.innerHTML = "";
+  if (muddler) mount.appendChild(muddler);
+  if (prepMount) {
+    prepMount.innerHTML = "";
+    if (spoon) prepMount.appendChild(spoon);
+    prepMount.hidden = true;
+  }
+  station?.classList.remove("has-prep", "anim-shake", "anim-stir", "anim-muddle", "anim-blend", "anim-build", "anim-strain");
+
   const g = currentGlass();
   if (!g) {
     mount.innerHTML = `<div class="glass-ghost"><span>🍸</span>Select a glass<br />to begin</div>`;
+    if (muddler) mount.appendChild(muddler);
+    setStatus("Choose a glass");
     return;
   }
+
   const svg = Glass.buildGlass(g);
   mount.appendChild(svg);
+  if (muddler) mount.appendChild(muddler);
+
+  if (usesPrepVessel() && prepMount) {
+    const prep = Glass.buildPrepVessel(prepKindFor());
+    prepMount.appendChild(prep);
+    if (spoon) prepMount.appendChild(spoon);
+    prepMount.hidden = false;
+    station?.classList.add("has-prep");
+    bench?.classList.add("is-dual");
+  } else {
+    bench?.classList.remove("is-dual");
+  }
+
   updateLiquid(false);
-  // Auto garnish is held back until the drink is mixed so it doesn't float on
-  // an empty glass; a player-chosen garnish step manages its own visual.
   if (state.steps.includes("garnish") || state.mixed) applyGarnishVisual();
+  refreshStationStatus();
+}
+
+function refreshStationStatus() {
+  const step = state.steps[state.stepIndex];
+  if (!currentGlass()) return;
+  if (liquidInPrep()) {
+    const kind = prepKindFor();
+    const label = kind === "mixing" ? "mixing glass" : kind === "blender" ? "blender" : "shaker";
+    if (step === "ingredients") setStatus(`Pour into the ${label}`);
+    else if (step === "method") setStatus(`Ready to ${activeMethod()}`);
+    else setStatus(`In the ${label}`);
+  } else if (state.mixed && usesPrepVessel()) {
+    setStatus("Strained — finish & serve");
+  } else if (step === "ingredients") {
+    setStatus("Pour into the glass");
+  }
 }
 
 // Compute the liquid bands + fill fraction for the current build.
@@ -1171,29 +1235,50 @@ function computeLiquid(g) {
 }
 
 function updateLiquid(animate = true) {
-  const svg = $("#glass-mount svg.glass-svg");
+  const glassSvg = $("#glass-mount svg.glass-svg");
+  const prepSvg = $("#prep-mount svg.glass-svg");
   const g = currentGlass();
-  if (!svg || !g) return;
+  if (!g) return;
   const { bands, fillFrac } = computeLiquid(g);
-  Glass.setLiquid(svg, bands, fillFrac, animate);
+  const foam = state.mixed && activeMethod() === "shake";
+
+  if (liquidInPrep() && prepSvg) {
+    Glass.setLiquid(prepSvg, bands, Math.min(0.9, fillFrac * 1.05), animate);
+    if (glassSvg) Glass.setLiquid(glassSvg, [], 0, false);
+  } else {
+    if (prepSvg) Glass.setLiquid(prepSvg, [], 0, animate);
+    if (glassSvg) Glass.setLiquid(glassSvg, bands, fillFrac, animate, { foam });
+  }
 }
 
 function animatePour(id) {
   const stream = $("#pour-stream");
+  const target = liquidInPrep() ? $("#prep-mount") : $("#glass-mount");
   stream.style.color = INGREDIENT_BY_ID[id].color;
+  // Aim the stream at the active vessel
+  if (target && stream.parentElement) {
+    const station = $(".station");
+    const sRect = station.getBoundingClientRect();
+    const tRect = target.getBoundingClientRect();
+    const cx = tRect.left + tRect.width / 2 - sRect.left;
+    stream.style.left = cx + "px";
+    stream.style.transform = "translateX(-50%) scaleY(0)";
+  } else {
+    stream.style.left = "50%";
+  }
   stream.classList.remove("is-pouring");
-  void stream.offsetWidth; // reflow to restart animation
+  void stream.offsetWidth;
   stream.classList.add("is-pouring");
   setTimeout(() => stream.classList.remove("is-pouring"), 720);
-  spawnSplash(INGREDIENT_BY_ID[id].color);
+  spawnSplash(INGREDIENT_BY_ID[id].color, target);
   Sound.pour();
   updateLiquid(true);
+  refreshStationStatus();
 }
 
-// Splash droplets at the glass mouth.
-function spawnSplash(color) {
+function spawnSplash(color, mouthEl) {
   const station = $(".station");
-  const mouth = $("#glass-mount");
+  const mouth = mouthEl || $("#glass-mount");
   if (!station || !mouth) return;
   const sRect = station.getBoundingClientRect();
   const mRect = mouth.getBoundingClientRect();
@@ -1222,14 +1307,68 @@ function applyGarnishVisual() {
 
 // ============================ Method animation ============================
 function setStatus(text) {
-  $("#station-status").textContent = text;
+  const el = $("#station-status");
+  if (el) el.textContent = text;
+}
+
+async function animateStrainTransfer(methodId) {
+  const station = $(".station");
+  const prepMount = $("#prep-mount");
+  const glassMount = $("#glass-mount");
+  const stream = $("#pour-stream");
+  if (!station || !prepMount || prepMount.hidden) {
+    state.mixed = true;
+    updateLiquid(true);
+    return;
+  }
+
+  setStatus(methodId === "blend" ? "Pouring into the glass…" : "Straining into the glass…");
+  station.classList.add("anim-strain");
+
+  const color = mixColor(state.build.ingredients);
+  stream.style.color = color;
+  if (glassMount) {
+    const sRect = station.getBoundingClientRect();
+    const tRect = glassMount.getBoundingClientRect();
+    stream.style.left = (tRect.left + tRect.width / 2 - sRect.left) + "px";
+  }
+  stream.classList.remove("is-pouring");
+  void stream.offsetWidth;
+  stream.classList.add("is-pouring");
+  Sound.pour();
+  spawnSplash(color, glassMount);
+
+  // Empty prep while filling glass
+  const prepSvg = prepMount.querySelector("svg.glass-svg");
+  const glassSvg = glassMount.querySelector("svg.glass-svg");
+  const g = currentGlass();
+  const { fillFrac } = computeLiquid(g);
+  if (prepSvg) Glass.setLiquid(prepSvg, [], 0, true);
+  state.mixed = true;
+  if (glassSvg && g) {
+    Glass.setLiquid(glassSvg, [{ color, frac: 1 }], fillFrac, true, { foam: methodId === "shake" });
+  }
+
+  await wait(780);
+  stream.classList.remove("is-pouring");
+  station.classList.remove("anim-strain");
 }
 
 async function runMethod(methodId) {
   const station = $(".station");
   state.mixed = false;
-  updateLiquid();
-  const labels = { shake: "Shaking…", stir: "Stirring…", build: "Building…", muddle: "Muddling…", blend: "Blending…" };
+  // Rebuild so prep vessel matches the chosen method
+  if (state.build.method !== methodId) state.build.method = methodId;
+  renderStation();
+  updateLiquid(false);
+
+  const labels = {
+    shake: "Shaking…",
+    stir: "Stirring…",
+    build: "Building in the glass…",
+    muddle: "Muddling…",
+    blend: "Blending…",
+  };
   setStatus(labels[methodId] || "Mixing…");
 
   setNavDisabled(true);
@@ -1239,14 +1378,21 @@ async function runMethod(methodId) {
   await wait(durations[methodId] || 1000);
   station.classList.remove("anim-" + methodId);
 
-  // Shake / stir / blend blend the liquids into one colour.
   if (["shake", "stir", "blend"].includes(methodId)) {
-    state.mixed = true;
+    await animateStrainTransfer(methodId);
+  } else {
+    // build / muddle stay in-glass
+    if (methodId === "build") {
+      // no color blend required
+    }
+    updateLiquid(true);
   }
-  updateLiquid();
+
   applyGarnishVisual();
   setNavDisabled(false);
-  setStatus("Ready for the next step");
+  refreshStationStatus();
+  if (!liquidInPrep() && state.mixed) setStatus("Ready for the next step");
+  else if (!usesPrepVessel(methodId)) setStatus("Ready for the next step");
 }
 
 // ============================ Step tracker ============================
@@ -1748,8 +1894,12 @@ function currentRecipe() {
 
 // ============================ Customers ============================
 function pickCustomer() {
-  state.customer = CUSTOMERS[Math.floor(Math.random() * CUSTOMERS.length)];
-  return state.customer;
+  const exclude = state.recentCustomerIds || [];
+  const c = generateCustomer({ excludeIds: exclude });
+  state.customer = c;
+  const next = [...exclude, c.id];
+  state.recentCustomerIds = next.slice(-2);
+  return c;
 }
 
 function renderCustomer(drinkName) {
@@ -1759,7 +1909,11 @@ function renderCustomer(drinkName) {
   if (!c) { el.innerHTML = ""; el.style.display = "none"; return; }
   el.style.display = "";
   const line = c.lines[Math.floor(Math.random() * c.lines.length)].replace("{drink}", drinkName);
-  el.innerHTML = `<span class="cust-avatar">${c.emoji}</span><span class="cust-meta"><span class="cust-name">${c.name}</span><span class="cust-line">"${line}"</span></span>`;
+  const sub = [c.breed, c.vibe].filter(Boolean).join(" · ");
+  const img = c.portrait
+    ? `<img class="cust-avatar-img" src="${c.portrait}" alt="${c.name}" width="48" height="48" />`
+    : "";
+  el.innerHTML = `<span class="cust-avatar">${img}</span><span class="cust-meta"><span class="cust-name">${c.name}</span><span class="cust-sub">${sub}</span><span class="cust-line">"${line}"</span></span>`;
 }
 
 function clearCustomer() {
@@ -2430,9 +2584,12 @@ function revealResultVerdict(result, recipe) {
   // Customer reaction (campaign & endless only)
   const custEl = $("#result-customer");
   if (state.customer && state.mode !== "challenge") {
-    let line = `${state.customer.emoji} ${state.customer.name}: "${reactionFor(result.stars, recipe.name)}"`;
-    if (result.tip) line += `  💵 +${result.tip} tip`;
-    custEl.textContent = line;
+    const c = state.customer;
+    const tip = result.tip ? ` <span class="result-tip">💵 +${result.tip} tip</span>` : "";
+    const img = c.portrait
+      ? `<img class="result-cust-img" src="${c.portrait}" alt="" width="40" height="40" />`
+      : "";
+    custEl.innerHTML = `${img}<span class="result-cust-text"><strong>${c.name}</strong>: "${reactionFor(result.stars, recipe.name)}"${tip}</span>`;
     custEl.style.display = "";
   } else {
     custEl.style.display = "none";
