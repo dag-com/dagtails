@@ -1163,6 +1163,18 @@ function liquidInPrep() {
   return usesPrepVessel() && !state.mixed;
 }
 
+function ensureVesselShadow(el) {
+  if (!el) return;
+  let sh = el.querySelector(":scope > .vessel-shadow");
+  if (!sh) {
+    sh = document.createElement("span");
+    sh.className = "vessel-shadow";
+    sh.setAttribute("aria-hidden", "true");
+    el.insertBefore(sh, el.firstChild);
+  }
+  return sh;
+}
+
 function renderStation() {
   const mount = $("#glass-mount");
   const prepMount = $("#prep-mount");
@@ -1170,11 +1182,11 @@ function renderStation() {
   const station = $(".station");
   const spoon = $("#tool-spoon");
   const muddler = $("#tool-muddler");
-  mount.innerHTML = "";
-  if (muddler) mount.appendChild(muddler);
+
+  // Clear vessel contents but keep tools + contact shadows in the mount.
+  [...mount.querySelectorAll(".glass-svg, .glass-photo-stack, .glass-ghost, .prep-svg")].forEach((n) => n.remove());
   if (prepMount) {
-    prepMount.innerHTML = "";
-    if (spoon) prepMount.appendChild(spoon);
+    [...prepMount.querySelectorAll(".glass-svg, .prep-svg")].forEach((n) => n.remove());
     prepMount.hidden = true;
   }
   station?.classList.remove(
@@ -1183,18 +1195,26 @@ function renderStation() {
   );
   bench?.classList.remove("is-dual");
 
+  ensureVesselShadow(mount);
+  ensureVesselShadow(prepMount);
+  if (muddler && muddler.parentElement !== mount) mount.appendChild(muddler);
+  if (spoon && prepMount && spoon.parentElement !== prepMount) prepMount.appendChild(spoon);
+
   const g = currentGlass();
   if (!g) {
-    mount.innerHTML = `<div class="glass-ghost"><span>🍸</span>Select a glass<br />to begin</div>`;
-    if (muddler) mount.appendChild(muddler);
+    const ghost = document.createElement("div");
+    ghost.className = "glass-ghost";
+    ghost.innerHTML = `<span>🍸</span>Select a glass<br />to begin`;
+    mount.appendChild(ghost);
     setStatus("Choose a glass");
     return;
   }
 
-  const svg = Glass.buildGlass(g);
-  mount.appendChild(svg);
+  const vessel = Glass.buildGlass(g);
+  mount.appendChild(vessel);
   if (muddler) mount.appendChild(muddler);
 
+  // Auto-selected methods (early stages) still park the right tools.
   const method = activeMethod();
   if (station) {
     if (method) station.setAttribute("data-method", method);
@@ -1211,7 +1231,6 @@ function renderStation() {
   if (method === "muddle") station?.classList.add("has-muddle");
   if (method === "build") station?.classList.add("has-build");
 
-  // Parked on the counter until the mix animation runs.
   mount.classList.add("is-on-counter");
   if (prepMount) prepMount.classList.add("is-on-counter");
 
@@ -1236,7 +1255,16 @@ function refreshStationStatus() {
   } else if (state.mixed && usesPrepVessel()) {
     setStatus("Strained into the glass");
   } else if (step === "ingredients") {
-    setStatus(method === "muddle" ? "Pour into the glass — muddler ready" : "Pour into the glass");
+    if (method === "muddle") setStatus("Pour into the glass — muddler ready");
+    else if (usesPrepVessel(method)) {
+      const kind = prepKindFor(method);
+      const label = kind === "mixing" ? "mixing glass" : kind === "blender" ? "blender" : "shaker";
+      setStatus(`${label[0].toUpperCase()}${label.slice(1)} is on the counter — pour`);
+    } else {
+      setStatus("Pour into the glass");
+    }
+  } else if (method && step === "glass") {
+    setStatus("Glass set — tools waiting on the bar");
   }
 }
 

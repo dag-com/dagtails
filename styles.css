@@ -860,64 +860,140 @@ body {
   align-items: stretch;
 }
 
-/* ============================ Bar station ============================ */
+/* ============================ Bar station (3D counter workspace) ============================ */
 .station {
   position: relative;
-  background: linear-gradient(180deg, #140e22 0%, #1c1430 70%, #241a3d 100%);
+  background: #0a0610;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   min-height: 420px;
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   justify-content: flex-end;
-  padding: 24px 16px 0;
+  padding: 0;
   overflow: hidden;
+  isolation: isolate;
 }
-/* bar counter line */
 .station::after {
-  content: "";
+  display: none;
+}
+
+.bar-scene {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+.bar-bg {
+  position: absolute;
+  inset: 0;
+  /* Shelves + empty wood counter — vessels sit on the CSS bar-top above this */
+  background:
+    linear-gradient(180deg, rgba(8, 5, 14, 0.15) 0%, transparent 35%, rgba(8, 5, 14, 0.25) 100%),
+    url("assets/station/bar-stage.png") center 28% / cover no-repeat,
+    #120c1c;
+}
+.bar-fog {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 65% 50% at 50% 35%, transparent 30%, rgba(8, 5, 14, 0.4) 85%),
+    linear-gradient(180deg, rgba(10, 6, 18, 0.2) 0%, transparent 22%, transparent 48%, rgba(10, 6, 18, 0.35) 100%),
+    linear-gradient(90deg, rgba(8, 5, 14, 0.5) 0%, transparent 18%, transparent 82%, rgba(8, 5, 14, 0.5) 100%);
+}
+
+/* Perspective stage — wood plane + vessels in the same 3D space */
+.counter-stage {
+  position: relative;
+  z-index: 2;
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 8px 12px 48px;
+  perspective: 900px;
+  perspective-origin: 50% 85%;
+}
+
+/* Physical counter slab vessels rest on */
+.bar-top {
+  position: absolute;
+  left: -8%;
+  right: -8%;
+  bottom: 36px;
+  height: min(38%, 168px);
+  z-index: 1;
+  transform-origin: center bottom;
+  transform: rotateX(58deg) translateZ(0);
+  transform-style: preserve-3d;
+  border-radius: 4px 4px 2px 2px;
+  background:
+    linear-gradient(180deg, rgba(255, 200, 120, 0.14) 0%, transparent 28%),
+    linear-gradient(90deg, #1a1008 0%, #2a1a0e 18%, #3a2414 42%, #2c1c10 68%, #181008 100%);
+  box-shadow:
+    0 -1px 0 rgba(255, 210, 140, 0.22),
+    inset 0 18px 40px rgba(0, 0, 0, 0.45),
+    inset 0 -8px 16px rgba(0, 0, 0, 0.5),
+    0 18px 28px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+.bar-top-shine {
+  position: absolute;
+  inset: 8% 12% auto;
+  height: 28%;
+  border-radius: 40%;
+  background: radial-gradient(ellipse at center, rgba(255, 220, 150, 0.22), transparent 70%);
+  filter: blur(2px);
+}
+.bar-top-edge {
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 52px;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(233, 185, 73, 0.4), transparent);
+  bottom: 0;
+  height: 22%;
+  background: linear-gradient(180deg, transparent, rgba(0, 0, 0, 0.55));
+  box-shadow: inset 0 1px 0 rgba(233, 185, 73, 0.18);
 }
+
 .station-status {
   position: absolute;
-  bottom: 16px;
+  bottom: 10px;
   left: 0;
   right: 0;
   text-align: center;
   font-size: 13px;
   letter-spacing: 0.5px;
-  color: var(--muted);
+  color: rgba(255, 236, 200, 0.78);
   font-weight: 600;
-  z-index: 4;
+  z-index: 5;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.85);
+  pointer-events: none;
 }
 
 .station-bench {
   position: relative;
-  z-index: 2;
+  z-index: 3;
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  gap: 18px;
-  width: 100%;
-  /* Sit vessels on the wooden bar counter */
-  margin-bottom: 52px;
-  min-height: 250px;
+  gap: 32px;
+  width: min(100%, 540px);
+  min-height: 210px;
   padding: 0 8px;
-  transition: gap 0.25s ease;
+  transform: rotateX(8deg) translateY(-2px);
+  transform-style: preserve-3d;
+  transition: gap 0.3s ease, transform 0.35s ease;
 }
 .station-bench.is-dual {
-  justify-content: space-evenly;
+  gap: 40px;
+  justify-content: center;
 }
 .station-bench.is-dual .prep-mount,
 .station-bench.is-dual .glass-mount {
-  flex: 1 1 0;
-  max-width: 46%;
+  flex: 0 1 auto;
+  max-width: 190px;
 }
 
 .prep-mount,
@@ -927,28 +1003,65 @@ body {
   display: flex;
   align-items: flex-end;
   justify-content: center;
-  min-height: 240px;
+  min-height: 190px;
   width: 100%;
-  max-width: 220px;
+  max-width: 190px;
   margin-bottom: 0;
+  padding-bottom: 4px;
+  transform-style: preserve-3d;
   transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.35s ease, opacity 0.3s ease;
+}
+.vessel-shadow {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 78%;
+  height: 18px;
+  transform: translateX(-50%) rotateX(68deg) translateZ(-2px);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.72) 0%, rgba(0, 0, 0, 0.28) 42%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(0.5px);
+}
+/* Soft amber bounce-light under the glass base */
+.vessel-shadow::after {
+  content: "";
+  position: absolute;
+  inset: -40% -10%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(255, 190, 100, 0.18), transparent 65%);
+  opacity: 0.7;
+}
+.prep-mount > .glass-svg,
+.prep-mount > .prep-svg,
+.glass-mount > .glass-svg,
+.glass-mount > .glass-photo-stack {
+  position: relative;
+  z-index: 1;
 }
 .prep-mount.is-on-counter,
 .glass-mount.is-on-counter {
-  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.55));
+  filter: drop-shadow(0 10px 8px rgba(0, 0, 0, 0.35));
 }
-/* Idle: tools rest on the counter; working: lift into action */
+/* Idle: planted on the wood; working: lift into air */
 .station:not(.is-working) .prep-mount.is-on-counter {
-  transform: translateY(4px) scale(0.96);
+  transform: translateZ(8px) translateY(0) scale(0.98);
 }
 .station:not(.is-working).has-prep .glass-mount.is-on-counter {
-  transform: translateY(10px) scale(0.9);
+  /* Serving glass waits slightly deeper / smaller while prep is active */
+  transform: translateZ(-12px) translateY(8px) scale(0.86);
   opacity: 0.9;
+  filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.3)) blur(0.2px);
+}
+.station:not(.is-working).has-prep .glass-mount .vessel-shadow {
+  opacity: 0.5;
+  width: 55%;
 }
 .station.is-working .prep-mount.is-on-counter,
 .station.is-working .glass-mount.is-on-counter {
-  transform: translateY(-14px) scale(1);
-  filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.6));
+  transform: translateZ(48px) translateY(-22px) scale(1.02);
+  filter: drop-shadow(0 26px 18px rgba(0, 0, 0, 0.5));
   opacity: 1;
 }
 .prep-mount .tool,
@@ -960,55 +1073,31 @@ body {
 }
 .prep-mount .prep-svg {
   width: 100%;
-  max-height: 260px;
+  max-height: 230px;
 }
 .glass-mount .glass-svg {
   width: 100%;
-  max-height: 280px;
+  max-height: 250px;
 }
 .glass-photo-stack {
-  position: relative;
-  width: 100%;
-  max-width: 220px;
-  max-height: 280px;
-  aspect-ratio: 3 / 4;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.glass-photo-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
-  pointer-events: none;
-  user-select: none;
-  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.5));
-}
-.glass-photo-stack .glass-liquid-layer {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 100%;
-  max-height: none;
-  filter: none;
-  animation: none;
+  display: none; /* retired cutout plates — SVG vessels sit in-scene */
 }
 
 /* placeholder when no glass chosen */
 .glass-ghost {
+  position: relative;
+  z-index: 1;
   width: 120px;
   height: 170px;
-  border: 2px dashed var(--line);
+  border: 2px dashed rgba(233, 185, 73, 0.35);
   border-radius: 10px 10px 16px 16px;
   display: grid;
   place-items: center;
-  color: var(--muted);
+  color: rgba(255, 236, 200, 0.55);
   font-size: 13px;
   text-align: center;
   padding: 10px;
+  background: rgba(0, 0, 0, 0.2);
 }
 
 /* ---- SVG glass ---- */
@@ -1017,7 +1106,8 @@ body {
   height: 100%;
   display: block;
   animation: glassIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3);
-  filter: drop-shadow(0 16px 20px rgba(0, 0, 0, 0.55));
+  /* Contact shadow is .vessel-shadow — keep SVG clean */
+  filter: none;
 }
 .glass-svg .surface {
   mix-blend-mode: soft-light;
@@ -1026,7 +1116,7 @@ body {
   pointer-events: none;
 }
 @keyframes glassIn {
-  0% { opacity: 0; transform: translateY(24px) scale(0.85); }
+  0% { opacity: 0; transform: translateY(28px) scale(0.82); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 .glass-svg .garnish-emoji {
@@ -1035,52 +1125,6 @@ body {
 @keyframes garnishDrop {
   0% { transform: translateY(-30px) rotate(-22deg); opacity: 0; }
   100% { transform: translateY(0) rotate(0); opacity: 1; }
-}
-
-/* ---- Bar scene ---- */
-.bar-bg {
-  position: absolute;
-  inset: 0 0 56px 0;
-  z-index: 0;
-  overflow: hidden;
-  background:
-    linear-gradient(180deg, rgba(12, 8, 20, 0.35) 0%, rgba(12, 8, 20, 0.15) 40%, rgba(12, 8, 20, 0.72) 100%),
-    radial-gradient(70% 55% at 50% 12%, rgba(255, 190, 120, 0.12), transparent 68%),
-    url("assets/station/bar-backbar.png") center 35% / cover no-repeat,
-    linear-gradient(180deg, #120c1c 0%, #1a1228 100%);
-}
-.bar-bg::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse 90% 70% at 50% 40%, transparent 35%, rgba(8, 5, 14, 0.45) 100%);
-  pointer-events: none;
-}
-.bar-bg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(180deg, rgba(255, 200, 120, 0.08) 0%, transparent 28%),
-    linear-gradient(90deg, rgba(8, 5, 14, 0.35) 0%, transparent 18%, transparent 82%, rgba(8, 5, 14, 0.35) 100%);
-  pointer-events: none;
-}
-.bar-counter {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 58px;
-  z-index: 1;
-  background: linear-gradient(180deg, #2c1e12 0%, #1a1009 60%, #120a06 100%);
-  box-shadow: inset 0 2px 0 rgba(233, 185, 73, 0.35), inset 0 14px 24px rgba(0, 0, 0, 0.5);
-}
-.bar-counter::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(60% 130% at 50% -10%, rgba(255, 255, 255, 0.1), transparent 60%);
 }
 
 /* ---- Splash droplets ---- */
@@ -1144,25 +1188,29 @@ body {
   z-index: 5;
   opacity: 0;
   pointer-events: none;
+  filter: drop-shadow(0 6px 4px rgba(0, 0, 0, 0.45));
 }
 .tool-spoon {
   top: auto;
-  bottom: 42%;
-  left: 50%;
-  width: 6px;
-  height: 58%;
-  max-height: 160px;
+  bottom: 18%;
+  left: calc(50% + 28px);
+  width: 7px;
+  height: 62%;
+  max-height: 150px;
   margin-left: -3px;
   border-radius: 3px;
-  background: linear-gradient(180deg, #cfd5dd, #9aa2ad);
+  background: linear-gradient(180deg, #e8ecf0, #9aa2ad 55%, #7a828c);
   transform-origin: 50% 12%;
   opacity: 0;
+  box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.35);
 }
 .station.has-prep[data-method="stir"] .tool-spoon {
-  opacity: 0.85;
+  opacity: 0.92;
 }
 .station.anim-stir .tool-spoon {
   opacity: 1;
+  left: 50%;
+  bottom: 42%;
 }
 .tool-spoon::after {
   content: "";
@@ -1172,26 +1220,29 @@ body {
   width: 20px;
   height: 12px;
   border-radius: 50%;
-  background: #cfd5dd;
+  background: linear-gradient(180deg, #dfe4ea, #9aa2ad);
 }
 .tool-muddler {
   top: auto;
-  bottom: 38%;
-  left: 50%;
-  width: 16px;
-  height: 55%;
-  max-height: 140px;
+  bottom: 16%;
+  left: calc(50% + 36px);
+  width: 15px;
+  height: 52%;
+  max-height: 130px;
   margin-left: -8px;
   border-radius: 8px 8px 5px 5px;
-  background: linear-gradient(90deg, #6b4a2f, #8a6240 50%, #5e3f28);
+  background: linear-gradient(90deg, #5a3a22, #8a6240 45%, #4a3018);
   transform-origin: 50% 0%;
   opacity: 0;
+  box-shadow: inset 1px 0 0 rgba(255, 210, 150, 0.25);
 }
 .station.has-muddle .tool-muddler {
-  opacity: 0.9;
+  opacity: 0.95;
 }
 .station.anim-muddle .tool-muddler {
   opacity: 1;
+  left: 50%;
+  bottom: 38%;
 }
 
 /* shake — lift prep vessel off the counter, keep glass waiting */
@@ -1422,10 +1473,17 @@ body {
 .station::after {
   display: none;
 }
+.counter-stage {
+  padding-bottom: 36px;
+}
+.bar-top {
+  bottom: 28px;
+  height: min(36%, 120px);
+}
 .station-bench {
   flex: 1 1 auto;
   min-height: 0;
-  margin-bottom: 54px;
+  margin-bottom: 0;
   width: 100%;
 }
 .prep-mount,
@@ -1435,7 +1493,7 @@ body {
   flex: 1 1 auto;
   min-height: 0;
   margin: 0;
-  padding: 12px 8px 8px;
+  padding: 8px 6px 2px;
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -4214,15 +4272,23 @@ body {
     min-height: 0;
     overflow: hidden;
   }
+  .counter-stage {
+    padding: 4px 6px 28px;
+  }
+  .bar-top {
+    bottom: 20px;
+    height: min(34%, 88px);
+  }
   .glass-mount,
   .prep-mount {
-    padding: 2px 2px 4px;
+    padding: 2px 2px 0;
     min-height: 0;
   }
   .station-bench {
-    margin-bottom: 22px;
+    margin-bottom: 0;
     min-height: 0;
-    gap: 4px;
+    gap: 10px;
+    transform: rotateX(6deg);
   }
   .station-bench.is-dual .prep-mount,
   .station-bench.is-dual .glass-mount {

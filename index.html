@@ -255,15 +255,25 @@
         <div class="stage-area">
           <!-- Bar station with the animated glass -->
           <div class="station">
-            <div class="bar-bg"></div>
-            <div class="bar-counter"></div>
-            <div class="pour-stream" id="pour-stream"></div>
-            <div class="station-bench" id="station-bench">
-              <div class="prep-mount" id="prep-mount" hidden>
-                <div class="tool tool-spoon" id="tool-spoon"></div>
+            <div class="bar-scene" aria-hidden="true">
+              <div class="bar-bg"></div>
+              <div class="bar-fog"></div>
+            </div>
+            <div class="counter-stage">
+              <div class="bar-top" aria-hidden="true">
+                <span class="bar-top-shine"></span>
+                <span class="bar-top-edge"></span>
               </div>
-              <div class="glass-mount" id="glass-mount">
-                <div class="tool tool-muddler" id="tool-muddler"></div>
+              <div class="pour-stream" id="pour-stream"></div>
+              <div class="station-bench" id="station-bench">
+                <div class="prep-mount" id="prep-mount" hidden>
+                  <span class="vessel-shadow" aria-hidden="true"></span>
+                  <div class="tool tool-spoon" id="tool-spoon"></div>
+                </div>
+                <div class="glass-mount" id="glass-mount">
+                  <span class="vessel-shadow" aria-hidden="true"></span>
+                  <div class="tool tool-muddler" id="tool-muddler"></div>
+                </div>
               </div>
             </div>
             <div class="station-status" id="station-status">Choose a glass</div>
