@@ -905,9 +905,14 @@ body {
   justify-content: center;
   gap: 18px;
   width: 100%;
-  margin-bottom: 70px;
+  /* Sit vessels on the wooden bar counter */
+  margin-bottom: 52px;
   min-height: 250px;
   padding: 0 8px;
+  transition: gap 0.25s ease;
+}
+.station-bench.is-dual {
+  justify-content: space-evenly;
 }
 .station-bench.is-dual .prep-mount,
 .station-bench.is-dual .glass-mount {
@@ -926,6 +931,25 @@ body {
   width: 100%;
   max-width: 220px;
   margin-bottom: 0;
+  transition: transform 0.35s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.35s ease, opacity 0.3s ease;
+}
+.prep-mount.is-on-counter,
+.glass-mount.is-on-counter {
+  filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.55));
+}
+/* Idle: tools rest on the counter; working: lift into action */
+.station:not(.is-working) .prep-mount.is-on-counter {
+  transform: translateY(4px) scale(0.96);
+}
+.station:not(.is-working).has-prep .glass-mount.is-on-counter {
+  transform: translateY(10px) scale(0.9);
+  opacity: 0.9;
+}
+.station.is-working .prep-mount.is-on-counter,
+.station.is-working .glass-mount.is-on-counter {
+  transform: translateY(-14px) scale(1);
+  filter: drop-shadow(0 18px 20px rgba(0, 0, 0, 0.6));
+  opacity: 1;
 }
 .prep-mount .tool,
 .glass-mount .tool {
@@ -941,6 +965,36 @@ body {
 .glass-mount .glass-svg {
   width: 100%;
   max-height: 280px;
+}
+.glass-photo-stack {
+  position: relative;
+  width: 100%;
+  max-width: 220px;
+  max-height: 280px;
+  aspect-ratio: 3 / 4;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.glass-photo-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  pointer-events: none;
+  user-select: none;
+  filter: drop-shadow(0 12px 16px rgba(0, 0, 0, 0.5));
+}
+.glass-photo-stack .glass-liquid-layer {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  filter: none;
+  animation: none;
 }
 
 /* placeholder when no glass chosen */
@@ -990,36 +1044,27 @@ body {
   z-index: 0;
   overflow: hidden;
   background:
-    radial-gradient(70% 55% at 50% 8%, rgba(255, 190, 120, 0.14), transparent 70%),
-    radial-gradient(75% 65% at 50% 20%, rgba(80, 45, 100, 0.45), transparent 72%),
+    linear-gradient(180deg, rgba(12, 8, 20, 0.35) 0%, rgba(12, 8, 20, 0.15) 40%, rgba(12, 8, 20, 0.72) 100%),
+    radial-gradient(70% 55% at 50% 12%, rgba(255, 190, 120, 0.12), transparent 68%),
+    url("assets/station/bar-backbar.png") center 35% / cover no-repeat,
     linear-gradient(180deg, #120c1c 0%, #1a1228 100%);
 }
 .bar-bg::before {
   content: "";
   position: absolute;
-  left: -6%;
-  right: -6%;
-  top: 6%;
-  height: 64%;
+  inset: 0;
   background:
-    repeating-linear-gradient(90deg, rgba(20, 12, 34, 0) 0 9px, rgba(255, 255, 255, 0.05) 9px 11px, rgba(20, 12, 34, 0) 11px 48px),
-    linear-gradient(180deg, rgba(46, 30, 70, 0.55), rgba(20, 12, 34, 0.15));
-  -webkit-mask: linear-gradient(180deg, #000 58%, transparent);
-  mask: linear-gradient(180deg, #000 58%, transparent);
-  filter: blur(2px);
-  opacity: 0.75;
+    radial-gradient(ellipse 90% 70% at 50% 40%, transparent 35%, rgba(8, 5, 14, 0.45) 100%);
+  pointer-events: none;
 }
 .bar-bg::after {
   content: "";
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 16% 28%, rgba(233, 185, 73, 0.55) 0 5px, transparent 8px),
-    radial-gradient(circle at 30% 20%, rgba(255, 210, 120, 0.4) 0 4px, transparent 7px),
-    radial-gradient(circle at 68% 26%, rgba(233, 185, 73, 0.45) 0 6px, transparent 10px),
-    radial-gradient(circle at 84% 18%, rgba(255, 160, 90, 0.32) 0 4px, transparent 8px),
-    radial-gradient(circle at 52% 32%, rgba(255, 220, 140, 0.28) 0 3px, transparent 7px);
-  filter: blur(1.6px);
+    linear-gradient(180deg, rgba(255, 200, 120, 0.08) 0%, transparent 28%),
+    linear-gradient(90deg, rgba(8, 5, 14, 0.35) 0%, transparent 18%, transparent 82%, rgba(8, 5, 14, 0.35) 100%);
+  pointer-events: none;
 }
 .bar-counter {
   position: absolute;
@@ -1111,9 +1156,13 @@ body {
   border-radius: 3px;
   background: linear-gradient(180deg, #cfd5dd, #9aa2ad);
   transform-origin: 50% 12%;
+  opacity: 0;
 }
-.station.has-prep .tool-spoon {
-  left: 50%;
+.station.has-prep[data-method="stir"] .tool-spoon {
+  opacity: 0.85;
+}
+.station.anim-stir .tool-spoon {
+  opacity: 1;
 }
 .tool-spoon::after {
   content: "";
@@ -1136,9 +1185,16 @@ body {
   border-radius: 8px 8px 5px 5px;
   background: linear-gradient(90deg, #6b4a2f, #8a6240 50%, #5e3f28);
   transform-origin: 50% 0%;
+  opacity: 0;
+}
+.station.has-muddle .tool-muddler {
+  opacity: 0.9;
+}
+.station.anim-muddle .tool-muddler {
+  opacity: 1;
 }
 
-/* shake — animate prep vessel, keep glass waiting */
+/* shake — lift prep vessel off the counter, keep glass waiting */
 .station.anim-shake .prep-mount {
   animation: shake 0.7s ease-in-out infinite;
   transform-origin: center bottom;
@@ -1147,10 +1203,10 @@ body {
   opacity: 1;
 }
 @keyframes shake {
-  0%, 100% { transform: translate(0, 0) rotate(-6deg); }
-  25% { transform: translate(-10px, -6px) rotate(-12deg); }
-  50% { transform: translate(0, 4px) rotate(0deg); }
-  75% { transform: translate(10px, -6px) rotate(12deg); }
+  0%, 100% { transform: translateY(-14px) rotate(-6deg); }
+  25% { transform: translate(-10px, -20px) rotate(-12deg); }
+  50% { transform: translate(0, -10px) rotate(0deg); }
+  75% { transform: translate(10px, -20px) rotate(12deg); }
 }
 /* stir */
 .station.anim-stir .tool-spoon {
@@ -1166,13 +1222,16 @@ body {
   100% { transform: rotate(-16deg); }
 }
 @keyframes swirl {
-  0%, 100% { transform: rotate(0deg); }
-  50% { transform: rotate(2deg); }
+  0%, 100% { transform: translateY(-14px) rotate(0deg); }
+  50% { transform: translateY(-14px) rotate(2deg); }
 }
 /* muddle */
 .station.anim-muddle .tool-muddler {
   opacity: 1;
   animation: muddle 0.4s ease-in-out infinite;
+}
+.station.anim-muddle .glass-mount {
+  transform: translateY(-10px);
 }
 @keyframes muddle {
   0%, 100% { transform: translateY(0) rotate(4deg); }
@@ -1183,15 +1242,15 @@ body {
   animation: blend 0.12s linear infinite;
 }
 @keyframes blend {
-  0% { transform: translate(-1px, 0); }
-  50% { transform: translate(1px, -1px); }
-  100% { transform: translate(-1px, 1px); }
+  0% { transform: translateY(-14px) translate(-1px, 0); }
+  50% { transform: translateY(-14px) translate(1px, -1px); }
+  100% { transform: translateY(-14px) translate(-1px, 1px); }
 }
 /* build */
 .station.anim-build .glass-mount { animation: bounce 0.5s ease; }
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-10px); }
+  0%, 100% { transform: translateY(-8px); }
+  40% { transform: translateY(-18px); }
 }
 /* strain / transfer into serving glass */
 .station.anim-strain .prep-mount {

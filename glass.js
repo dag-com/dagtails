@@ -225,8 +225,21 @@ function condensationOnGlass(p) {
   return `<g class="condensation" opacity="0.85">${drops.join("")}</g>`;
 }
 
-/** Build a photoreal-leaning 3/4 glass SVG. */
-export function buildGlass(glass) {
+/** Photoreal empty glass plates (transparent PNG). Liquid overlays via SVG. */
+export const GLASS_PHOTO = {
+  rocks: "assets/glasses/rocks.png",
+  highball: "assets/glasses/highball.png",
+  collins: "assets/glasses/highball.png",
+  shot: "assets/glasses/rocks.png",
+  martini: "assets/glasses/martini.png",
+  coupe: "assets/glasses/coupe.png",
+  wine: "assets/glasses/coupe.png",
+  margarita: "assets/glasses/margarita.png",
+  hurricane: "assets/glasses/hurricane.png",
+};
+
+function buildGlassSvg(glass, opts = {}) {
+  const liquidOnly = !!opts.liquidOnly;
   const pad = 20;
   const p = buildProfile(glass, pad);
   const uid = "g" + _uid++;
@@ -235,15 +248,36 @@ export function buildGlass(glass) {
   const edgeGrad = uid + "edge";
   const shineGrad = uid + "shine";
   const stemGrad = uid + "stem";
-  const { stem, foot } = stemFootMarkup(p, stemGrad);
+  const { stem, foot } = liquidOnly ? { stem: "", foot: "" } : stemFootMarkup(p, stemGrad);
   const shadowRx = Math.max(p.oBot, p.oTop * 0.55) + 8;
   const shadowCy = p.vbH - 8;
-
-  // Evenodd: outer ring minus cavity = thick glass walls
   const glassBody = `${p.outer} ${p.inner}`;
 
+  const shell = liquidOnly
+    ? `<!-- photo provides the glass shell -->
+  <path d="${p.inner}" fill="rgba(160,200,230,0.04)"/>`
+    : `<ellipse cx="${p.cx}" cy="${shadowCy}" rx="${shadowRx}" ry="10" fill="rgba(0,0,0,0.5)"/>
+  ${foot}
+  ${stem}
+  <path d="${glassBody}" fill-rule="evenodd" fill="url(#${glassGrad})" stroke="rgba(255,255,255,0.55)" stroke-width="1.6" stroke-linejoin="round"/>
+  <path d="${glassBody}" fill-rule="evenodd" fill="url(#${edgeGrad})" opacity="0.55"/>
+  <path d="${p.inner}" fill="rgba(160,200,230,0.06)"/>
+  ${condensationOnGlass(p)}
+  <path d="M ${p.cx - p.oTop * 0.62} ${p.rimY + 8}
+           L ${p.cx - p.oBot * 0.55} ${p.botY - 6}"
+        stroke="url(#${shineGrad})" stroke-width="7" stroke-linecap="round" opacity="0.55" fill="none"/>
+  <path d="M ${p.cx + p.oTop * 0.55} ${p.rimY + 14}
+           L ${p.cx + p.oBot * 0.48} ${p.botY - 18}"
+        stroke="rgba(255,255,255,0.2)" stroke-width="3" stroke-linecap="round" fill="none"/>
+  <ellipse cx="${p.cx}" cy="${p.rimY}" rx="${p.oTop}" ry="${p.rimRy}"
+           fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+  <ellipse class="rim" cx="${p.cx}" cy="${p.rimY}" rx="${p.oTop}" ry="${p.rimRy}"
+           fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.85)" stroke-width="2.4"/>
+  <ellipse class="rim-inner" cx="${p.cx}" cy="${p.rimY + 1.5}" rx="${p.iTop}" ry="${p.rimRy * 0.78}"
+           fill="none" stroke="rgba(200,220,240,0.45)" stroke-width="1.4"/>`;
+
   const svg =
-`<svg class="glass-svg" viewBox="0 0 ${p.vbW} ${p.vbH}" xmlns="${NS}" preserveAspectRatio="xMidYMax meet">
+`<svg class="glass-svg${liquidOnly ? " glass-liquid-layer" : ""}" viewBox="0 0 ${p.vbW} ${p.vbH}" xmlns="${NS}" preserveAspectRatio="xMidYMax meet">
   <defs>
     <linearGradient id="${glassGrad}" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="rgba(220,235,255,0.55)"/>
@@ -270,47 +304,14 @@ export function buildGlass(glass) {
     </linearGradient>
     <clipPath id="${clipId}"><path d="${p.inner}"/></clipPath>
   </defs>
-
-  <ellipse cx="${p.cx}" cy="${shadowCy}" rx="${shadowRx}" ry="10" fill="rgba(0,0,0,0.5)"/>
-  ${foot}
-  ${stem}
-
-  <!-- glass mass (thickness) -->
-  <path d="${glassBody}" fill-rule="evenodd" fill="url(#${glassGrad})" stroke="rgba(255,255,255,0.55)" stroke-width="1.6" stroke-linejoin="round"/>
-  <path d="${glassBody}" fill-rule="evenodd" fill="url(#${edgeGrad})" opacity="0.55"/>
-
-  <!-- inner cavity tint -->
-  <path d="${p.inner}" fill="rgba(160,200,230,0.06)"/>
-
-  <!-- liquid + ice (clipped to cavity) -->
+  ${shell}
   <g clip-path="url(#${clipId})">
     <g class="bands"></g>
     <ellipse class="foam" cx="${p.cx}" cy="${p.botY}" rx="${p.iTop * 0.9}" ry="${p.rimRy * 0.7}" fill="rgba(255,252,245,0.7)" opacity="0"/>
     <g class="ice" opacity="0">${iceMarkup(p.ice)}</g>
   </g>
-
-  <!-- meniscus drawn above liquid clip so it reads on top -->
   <ellipse class="surface" cx="${p.cx}" cy="${p.botY}" rx="${p.iTop}" ry="${p.rimRy * 0.75}" fill="rgba(255,255,255,0.35)" opacity="0"/>
   <ellipse class="surface-shine" cx="${p.cx}" cy="${p.botY}" rx="${p.iTop * 0.45}" ry="${p.rimRy * 0.35}" fill="rgba(255,255,255,0.45)" opacity="0"/>
-
-  ${condensationOnGlass(p)}
-
-  <!-- specular streak on the glass wall -->
-  <path d="M ${p.cx - p.oTop * 0.62} ${p.rimY + 8}
-           L ${p.cx - p.oBot * 0.55} ${p.botY - 6}"
-        stroke="url(#${shineGrad})" stroke-width="7" stroke-linecap="round" opacity="0.55" fill="none"/>
-  <path d="M ${p.cx + p.oTop * 0.55} ${p.rimY + 14}
-           L ${p.cx + p.oBot * 0.48} ${p.botY - 18}"
-        stroke="rgba(255,255,255,0.2)" stroke-width="3" stroke-linecap="round" fill="none"/>
-
-  <!-- rim: far edge + near edge for thickness -->
-  <ellipse cx="${p.cx}" cy="${p.rimY}" rx="${p.oTop}" ry="${p.rimRy}"
-           fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
-  <ellipse class="rim" cx="${p.cx}" cy="${p.rimY}" rx="${p.oTop}" ry="${p.rimRy}"
-           fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.85)" stroke-width="2.4"/>
-  <ellipse class="rim-inner" cx="${p.cx}" cy="${p.rimY + 1.5}" rx="${p.iTop}" ry="${p.rimRy * 0.78}"
-           fill="none" stroke="rgba(200,220,240,0.45)" stroke-width="1.4"/>
-
   <g class="garnish-group"></g>
 </svg>`;
 
@@ -319,6 +320,23 @@ export function buildGlass(glass) {
   const el = tmp.firstElementChild;
   geom.set(el, { ...p, clipId, _fill: 0, _raf: 0, _bands: [], _foam: false });
   return el;
+}
+
+/** Build glass — photoreal PNG shell when available, SVG liquid overlay. */
+export function buildGlass(glass) {
+  const photo = GLASS_PHOTO[glass.id];
+  if (!photo) return buildGlassSvg(glass);
+
+  const wrap = document.createElement("div");
+  wrap.className = "glass-photo-stack";
+  const img = document.createElement("img");
+  img.className = "glass-photo-img";
+  img.src = photo;
+  img.alt = "";
+  img.draggable = false;
+  wrap.appendChild(img);
+  wrap.appendChild(buildGlassSvg(glass, { liquidOnly: true }));
+  return wrap;
 }
 
 // ---- Prep vessels (simpler metal/glass tools; share setLiquid) ----

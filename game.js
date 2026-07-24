@@ -403,7 +403,7 @@ function mapUnlocked() { return getMap().cleared >= STAGES_TO_UNLOCK; }
 const TIER_INTRO = {
   "Guess": { emoji: "🔎", eyebrow: "Your first stage", title: "Spot the ingredients", body: "Tap the ingredients you think belong in the drink — no measuring yet. Get the right ones in the glass, add a garnish, then serve.", button: "Let's pour →" },
   "Pour": { emoji: "🥤", eyebrow: "Level up — new rule", title: "Now measure your pours", body: "From here on you set how much of each ingredient goes in. Tap to add, then use − / + to dial each amount. Get close to the recipe for more stars.", button: "Got it →" },
-  "Mix": { emoji: "🍸", eyebrow: "Level up — new rule", title: "Now choose the method", body: "A new step appears: pick how to combine the drink — shake, stir, build, muddle or blend. Choose the technique that suits the cocktail.", button: "Got it →" },
+  "Mix": { emoji: "🍸", eyebrow: "Level up — new rule", title: "Tools before the pour", body: "From here you choose the method first — shaker, stir, muddle, and more. Tools land on the counter, then you pour into them, then prepare.", button: "Got it →" },
   "Garnish": { emoji: "🍋", eyebrow: "Level up — new rule", title: "Now add the garnish", body: "Until now the garnish was added for you. From here you finish the drink yourself — pick the garnish that matches the cocktail for that last star.", button: "Got it →" },
   "Full bar": { emoji: "🍷", eyebrow: "Level up — full bar", title: "Now pick the glass too", body: "You're running the full bar: choose the glassware, the pour, the method and the garnish yourself. Every choice counts toward your stars.", button: "Got it →" },
 };
@@ -438,8 +438,10 @@ function buildMenu(recipe, decoys) {
 function stepsFor(cx) {
   const s = [];
   if (cx.chooseGlass) s.push("glass");
-  s.push("ingredients");
+  // Tools / method first so the shaker, mixing glass, or muddler is on the
+  // counter before anything is poured.
   if (cx.chooseMethod) s.push("method");
+  s.push("ingredients");
   if (cx.chooseGarnish) s.push("garnish");
   return s;
 }
@@ -1029,9 +1031,9 @@ function renderStartBest() {
 }
 
 const STEP_META = {
-  glass: { label: "Glass", title: "Choose your glass", sub: "Pick the right vessel for the drink.", status: "Choose a glass" },
-  ingredients: { label: "Pour", title: "Pour your ingredients", sub: "Tap to add, then dial each amount. Watch them pour in.", status: "Pour your ingredients" },
-  method: { label: "Mix", title: "Prepare the drink", sub: "Choose how to combine the ingredients.", status: "Pick a preparation method" },
+  glass: { label: "Glass", title: "Choose your glass", sub: "Pick the right vessel — it lands on the counter.", status: "Choose a glass" },
+  method: { label: "Tools", title: "Set up your tools", sub: "Pick how you'll prepare. Shaker, spoon, or muddler — tools hit the counter before you pour.", status: "Choose your tools" },
+  ingredients: { label: "Pour", title: "Pour your ingredients", sub: "Tap to add, then dial each amount. Watch them pour into the right vessel.", status: "Pour your ingredients" },
   garnish: { label: "Garnish", title: "Add a garnish", sub: "Finish it with the right flourish.", status: "Add a garnish" },
 };
 
@@ -1175,7 +1177,11 @@ function renderStation() {
     if (spoon) prepMount.appendChild(spoon);
     prepMount.hidden = true;
   }
-  station?.classList.remove("has-prep", "anim-shake", "anim-stir", "anim-muddle", "anim-blend", "anim-build", "anim-strain");
+  station?.classList.remove(
+    "has-prep", "has-muddle", "has-build", "is-working",
+    "anim-shake", "anim-stir", "anim-muddle", "anim-blend", "anim-build", "anim-strain"
+  );
+  bench?.classList.remove("is-dual");
 
   const g = currentGlass();
   if (!g) {
@@ -1189,16 +1195,25 @@ function renderStation() {
   mount.appendChild(svg);
   if (muddler) mount.appendChild(muddler);
 
-  if (usesPrepVessel() && prepMount) {
-    const prep = Glass.buildPrepVessel(prepKindFor());
+  const method = activeMethod();
+  if (station) {
+    if (method) station.setAttribute("data-method", method);
+    else station.removeAttribute("data-method");
+  }
+  if (usesPrepVessel(method) && prepMount) {
+    const prep = Glass.buildPrepVessel(prepKindFor(method));
     prepMount.appendChild(prep);
     if (spoon) prepMount.appendChild(spoon);
     prepMount.hidden = false;
     station?.classList.add("has-prep");
     bench?.classList.add("is-dual");
-  } else {
-    bench?.classList.remove("is-dual");
   }
+  if (method === "muddle") station?.classList.add("has-muddle");
+  if (method === "build") station?.classList.add("has-build");
+
+  // Parked on the counter until the mix animation runs.
+  mount.classList.add("is-on-counter");
+  if (prepMount) prepMount.classList.add("is-on-counter");
 
   updateLiquid(false);
   if (state.steps.includes("garnish") || state.mixed) applyGarnishVisual();
@@ -1208,16 +1223,20 @@ function renderStation() {
 function refreshStationStatus() {
   const step = state.steps[state.stepIndex];
   if (!currentGlass()) return;
+  const method = activeMethod();
+  if (step === "method") {
+    setStatus(method ? "Tools on the counter — Next to pour" : "Choose your tools");
+    return;
+  }
   if (liquidInPrep()) {
     const kind = prepKindFor();
     const label = kind === "mixing" ? "mixing glass" : kind === "blender" ? "blender" : "shaker";
     if (step === "ingredients") setStatus(`Pour into the ${label}`);
-    else if (step === "method") setStatus(`Ready to ${activeMethod()}`);
     else setStatus(`In the ${label}`);
   } else if (state.mixed && usesPrepVessel()) {
-    setStatus("Strained — finish & serve");
+    setStatus("Strained into the glass");
   } else if (step === "ingredients") {
-    setStatus("Pour into the glass");
+    setStatus(method === "muddle" ? "Pour into the glass — muddler ready" : "Pour into the glass");
   }
 }
 
@@ -1367,7 +1386,6 @@ async function animateStrainTransfer(methodId) {
 async function runMethod(methodId) {
   const station = $(".station");
   state.mixed = false;
-  // Rebuild so prep vessel matches the chosen method
   if (state.build.method !== methodId) state.build.method = methodId;
   renderStation();
   updateLiquid(false);
@@ -1383,7 +1401,7 @@ async function runMethod(methodId) {
 
   setNavDisabled(true);
   if (Sound[methodId]) Sound[methodId]();
-  station.classList.add("anim-" + methodId);
+  station.classList.add("is-working", "anim-" + methodId);
   const durations = { shake: 1100, stir: 1100, muddle: 1100, blend: 1200, build: 600 };
   await wait(durations[methodId] || 1000);
   station.classList.remove("anim-" + methodId);
@@ -1391,13 +1409,10 @@ async function runMethod(methodId) {
   if (["shake", "stir", "blend"].includes(methodId)) {
     await animateStrainTransfer(methodId);
   } else {
-    // build / muddle stay in-glass
-    if (methodId === "build") {
-      // no color blend required
-    }
     updateLiquid(true);
   }
 
+  station.classList.remove("is-working");
   applyGarnishVisual();
   setNavDisabled(false);
   refreshStationStatus();
@@ -1485,12 +1500,18 @@ function renderMethodPanel(body) {
   grid.className = "chip-grid";
   METHODS.forEach((m) => {
     const c = chip(m, state.build.method === m.id, true);
-    c.addEventListener("click", async () => {
+    c.addEventListener("click", () => {
       Sound.select();
       state.build.method = m.id;
+      state.mixed = false;
+      // Park the tool on the counter — don't shake/stir until after the pour.
+      renderStation();
       renderMethodPanel(body);
       updateNav();
-      await runMethod(m.id);
+      const kind = usesPrepVessel(m.id)
+        ? (m.id === "stir" ? "mixing glass" : m.id === "blend" ? "blender" : "shaker")
+        : m.id === "muddle" ? "muddler" : "glass";
+      setStatus(m.id === "build" ? "Build in the glass — ready to pour" : `${METHOD_BY_ID[m.id].name} set — ${kind} on the counter`);
     });
     grid.appendChild(c);
   });
@@ -1665,8 +1686,8 @@ function changeAmount(id, value, pour) {
 // ============================ Step navigation ============================
 function getSteps(difficulty) {
   return difficulty === "basic"
-    ? ["ingredients", "garnish"]
-    : ["glass", "ingredients", "method", "garnish"];
+    ? ["method", "ingredients", "garnish"]
+    : ["glass", "method", "ingredients", "garnish"];
 }
 
 function stepSatisfied(step) {
@@ -1709,12 +1730,12 @@ function enterStep() {
 
 async function goNext() {
   const cur = state.steps[state.stepIndex];
-  // When the method step is auto (not chosen by the player), apply it
-  // automatically when leaving the pour step so the drink still gets mixed —
-  // even if ingredients is the last step (early tiers have no garnish step).
-  if (cur === "ingredients" && !state.steps.includes("method") && state.build.method) {
+  // After pouring, run the method animation (shake / stir / muddle / …)
+  // whether the player chose tools earlier or the recipe auto-set them.
+  if (cur === "ingredients" && state.build.method && !state.mixed) {
     const panel = $("#step-panel");
-    panel.innerHTML = `<div class="auto-note">Auto-preparing with the <strong>${METHOD_BY_ID[state.build.method].name}</strong> method…</div>`;
+    const name = METHOD_BY_ID[state.build.method]?.name || "method";
+    panel.innerHTML = `<div class="auto-note">Working the drink — <strong>${name}</strong>…</div>`;
     await runMethod(state.build.method);
   }
   if (state.stepIndex < state.steps.length - 1) {
@@ -1985,16 +2006,17 @@ function coachHTML() {
     const gname = GLASS_BY_ID[r.glass].name;
     title = "👋 Welcome to bartending school!";
     body = `We'll make a <strong>${r.name}</strong> together. Every cocktail has its own glass — a ${r.name} is served in a <strong>${gname}</strong>. Tap the glowing ${gname}, then hit <strong>Next →</strong>.`;
+  } else if (step === "method") {
+    const mname = METHOD_BY_ID[r.method].name;
+    title = "🧰 Set up your tools";
+    body = `Before pouring, pick how you'll prepare. A ${r.name} is <strong>${mname.toLowerCase()}ed</strong> — tap glowing <strong>${mname}</strong> so the tools land on the counter, then hit <strong>Next →</strong>.`;
   } else if (step === "ingredients") {
     const list = r.ingredients
       .map((i) => `<strong>${i.amount} ${INGREDIENT_BY_ID[i.id].unit} ${INGREDIENT_BY_ID[i.id].name}</strong>`)
       .join(", ");
+    const into = ["shake", "stir", "blend"].includes(r.method) ? "into the prep tool" : "into the glass";
     title = "🫗 Now build the drink";
-    body = `Tap each glowing ingredient to pour it, then use the <strong>− / +</strong> buttons to set the amount: ${list}. Don't worry about being exact — anything within ~20% still scores.`;
-  } else if (step === "method") {
-    const mname = METHOD_BY_ID[r.method].name;
-    title = "🍸 Mix it up";
-    body = `Time to combine everything. A ${r.name} is <strong>${mname.toLowerCase()}ed</strong> with ice — tap the glowing <strong>${mname}</strong> and watch the bartender work.`;
+    body = `Pour ${into}. Tap each glowing ingredient, then use <strong>− / +</strong> to set amounts: ${list}. When you hit Next, we'll ${METHOD_BY_ID[r.method].name.toLowerCase()} it.`;
   } else if (step === "garnish") {
     const gid = r.garnish[0];
     const gname = GARNISH_BY_ID[gid].name;
