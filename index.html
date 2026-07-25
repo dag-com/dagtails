@@ -199,20 +199,67 @@
         </div>
       </section>
 
-      <!-- ============================== STAGE MAP (journey) ============================== -->
+      <!-- ============================== STAGE MAP (bar-hop crawl) ============================== -->
       <section id="screen-map" class="screen">
         <header class="map-topbar">
           <button id="btn-map-back" class="btn btn-ghost btn-sm">← Menu</button>
           <div class="map-rank" id="map-rank">
-            <span class="map-rank-emoji" id="map-rank-emoji">🧽</span>
-            <span class="map-rank-name" id="map-rank-name">Trainee</span>
+            <span class="map-rank-emoji" id="map-rank-emoji">🇬🇧</span>
+            <span class="map-rank-name" id="map-rank-name">The Snug</span>
           </div>
           <span class="map-stars-total" id="map-stars-total">★ 0</span>
         </header>
-        <div class="map-scroll" id="map-scroll">
-          <div class="map-path" id="map-path"></div>
+        <p class="map-hint" id="map-hint">Tap the glowing bar to pour · cleared bars to replay</p>
+        <div class="map-stage" id="map-stage">
+          <div class="map-scroll" id="map-scroll">
+            <div class="map-canvas" id="map-path">
+              <img class="map-plate" id="map-plate" src="assets/maps/dag-tails-bar-hop-map.jpg?v=3" alt="Bar hop journey map" draggable="false" />
+              <div class="map-hubs" id="map-hubs"></div>
+              <div class="map-duck" id="map-duck" aria-hidden="true">
+                <img id="map-duck-img" src="assets/duck-hub-mascot.png" alt="" draggable="false" />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="map-dock" id="map-dock">
+          <button type="button" class="btn btn-primary btn-lg map-cta" id="btn-map-play">Enter bar →</button>
+        </div>
+        <div class="map-sheet" id="map-sheet" hidden>
+          <div class="map-sheet-card">
+            <header class="map-sheet-head">
+              <div>
+                <p class="map-sheet-kind" id="map-sheet-kind">Bar</p>
+                <h3 class="map-sheet-title" id="map-sheet-title">Venue</h3>
+              </div>
+              <button type="button" class="map-sheet-close" id="map-sheet-close" aria-label="Close">×</button>
+            </header>
+            <p class="map-sheet-blurb" id="map-sheet-blurb"></p>
+            <ul class="map-sheet-drinks" id="map-sheet-drinks"></ul>
+          </div>
         </div>
       </section>
+
+      <!-- Travel / farewell overlay between venues -->
+      <div id="travel-overlay" class="travel-overlay" hidden aria-live="polite">
+        <div class="travel-card">
+          <p class="travel-eyebrow" id="travel-eyebrow">Leaving the bar</p>
+          <div class="travel-master">
+            <span class="travel-master-emoji" id="travel-master-emoji">🍸</span>
+            <div>
+              <strong id="travel-master-name">Bar master</strong>
+              <span id="travel-master-title" class="travel-master-title"></span>
+            </div>
+          </div>
+          <p class="travel-quote" id="travel-quote"></p>
+          <div class="travel-flight" id="travel-flight" aria-hidden="true">
+            <span class="travel-from-flag" id="travel-from-flag"></span>
+            <span class="travel-plane">✈️</span>
+            <span class="travel-to-flag" id="travel-to-flag"></span>
+          </div>
+          <p class="travel-dest" id="travel-dest"></p>
+          <button type="button" class="btn btn-primary" id="btn-travel-continue">Continue the crawl →</button>
+        </div>
+      </div>
 
       <!-- ============================== GAME SCREEN ============================== -->
       <section id="screen-game" class="screen">
@@ -243,6 +290,7 @@
           </div>
           <div class="ticket-customer" id="ticket-customer"></div>
           <h2 class="ticket-name" id="order-name">Cocktail</h2>
+          <p class="ticket-origin" id="ticket-origin" hidden></p>
           <p class="ticket-desc" id="order-desc">Order description…</p>
         </div>
 
@@ -257,6 +305,10 @@
           <div class="station">
             <div class="bar-scene" aria-hidden="true">
               <div class="bar-bg"></div>
+              <div class="bar-guest" id="bar-guest" hidden>
+                <img id="bar-guest-img" src="" alt="" draggable="false" />
+                <span class="bar-guest-drink" aria-hidden="true">🍹</span>
+              </div>
               <div class="bar-fog"></div>
             </div>
             <div class="counter-stage">
