@@ -1072,6 +1072,7 @@ function openVenueSheet(venue) {
 }
 
 function renderMap(opts = {}) {
+  ensureMapAssets();
   const canvas = $("#map-path");
   const hubsEl = $("#map-hubs");
   if (!canvas || !hubsEl) return;
@@ -1238,6 +1239,58 @@ function clearMapFlightZoom() {
   applyMapZoom();
 }
 
+let mapCamRaf = 0;
+function stopMapCameraFollow() {
+  if (mapCamRaf) {
+    cancelAnimationFrame(mapCamRaf);
+    mapCamRaf = 0;
+  }
+  const duck = $("#map-duck");
+  if (duck) duck.classList.remove("is-tracking");
+}
+
+/** Keep #map-scroll centered on the mascot while it moves. */
+function startMapCameraFollow(ms) {
+  stopMapCameraFollow();
+  const duck = $("#map-duck");
+  const scroll = $("#map-scroll");
+  if (!duck || !scroll) return;
+  duck.classList.add("is-tracking");
+  const end = performance.now() + (ms || 1200);
+  const tick = (now) => {
+    const duckRect = duck.getBoundingClientRect();
+    const scrollRect = scroll.getBoundingClientRect();
+    const x = scroll.scrollLeft + (duckRect.left + duckRect.width / 2 - scrollRect.left);
+    const y = scroll.scrollTop + (duckRect.top + duckRect.height / 2 - scrollRect.top);
+    scroll.scrollLeft = Math.max(0, x - scroll.clientWidth / 2);
+    scroll.scrollTop = Math.max(0, y - scroll.clientHeight / 2);
+    if (now < end) mapCamRaf = requestAnimationFrame(tick);
+    else {
+      mapCamRaf = 0;
+      duck.classList.remove("is-tracking");
+    }
+  };
+  mapCamRaf = requestAnimationFrame(tick);
+}
+
+function ensureMapAssets() {
+  const plate = $("#map-plate");
+  if (plate && !plate.getAttribute("src")) {
+    const src = plate.dataset.src || "assets/maps/dag-tails-bar-hop-map.jpg?v=4";
+    plate.src = src;
+  }
+  const img = $("#map-duck-img");
+  if (img && !img.getAttribute("src")) {
+    const rankIdx = rankForCleared(getMap().cleared || 0);
+    const tier = mascotTierClass(rankIdx);
+    img.src = tier === "tier-3"
+      ? "assets/duck-hub-mascot-ace.png"
+      : tier === "tier-2"
+        ? "assets/duck-hub-mascot-jacket.png"
+        : "assets/duck-hub-mascot.png";
+  }
+}
+
 function pinPoint(venueId) {
   const venue = venueList().find((v) => v.id === venueId);
   const canvas = $("#map-path");
@@ -1290,11 +1343,16 @@ function animateDuckToStop(stopEl, mode) {
   void duck.offsetWidth;
   duck.classList.add(mode === "fly" ? "is-flying" : "is-walking");
   if (Sound.step) Sound.step(); else Sound.click();
+  const ms = mode === "fly" ? 1200 : 550;
+  startMapCameraFollow(ms);
   requestAnimationFrame(() => {
     duck.style.left = b.x + "px";
     duck.style.top = b.y + "px";
   });
-  setTimeout(() => duck.classList.remove("is-walking", "is-flying"), mode === "fly" ? 1640 : 740);
+  setTimeout(() => {
+    duck.classList.remove("is-walking", "is-flying");
+    stopMapCameraFollow();
+  }, ms + 40);
 }
 
 function animateDuckTravel(fromVenueId, toVenueId, mode) {
@@ -1309,14 +1367,17 @@ function animateDuckTravel(fromVenueId, toVenueId, mode) {
   void duck.offsetWidth;
   duck.classList.add(mode === "fly" ? "is-flying" : "is-walking");
   if (Sound.step) Sound.step(); else Sound.click();
+  const ms = mode === "fly" ? 1200 : 550;
+  startMapCameraFollow(ms);
   requestAnimationFrame(() => {
     duck.style.left = b.x + "px";
     duck.style.top = b.y + "px";
   });
-  const ms = mode === "fly" ? 1600 : 700;
-  setTimeout(() => duck.classList.remove("is-walking", "is-flying"), ms + 40);
-  const hub = mapHubEls[toVenueId];
-  if (hub) setTimeout(() => hub.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" }), 100);
+  setTimeout(() => {
+    duck.classList.remove("is-walking", "is-flying");
+    stopMapCameraFollow();
+    if (toVenueId) centerOnVenue(toVenueId, "smooth");
+  }, ms + 40);
 }
 
 function playVenueFarewell(fromVenue, toVenue) {
@@ -1470,6 +1531,7 @@ function showScreen(id) {
   document.body.classList.toggle("is-phone-play", isPhonePlay());
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
   if (id === "screen-start") onShowStart();
+  if (id === "screen-map") ensureMapAssets();
 }
 
 function isPhonePlay() {
@@ -3798,17 +3860,23 @@ const INTRO_COMIC = [
 
 let comicIndex = 0;
 let comicOnDone = null;
-let comicPreloaded = false;
+const comicWarmed = new Set();
 
-function preloadComic() {
-  if (comicPreloaded) return;
-  comicPreloaded = true;
-  INTRO_COMIC.forEach((p) => { const im = new Image(); im.src = p.img; });
+function preloadComicAround(i) {
+  const idxs = [i, i + 1].filter((n) => n >= 0 && n < INTRO_COMIC.length);
+  idxs.forEach((n) => {
+    const src = INTRO_COMIC[n].img;
+    if (comicWarmed.has(src)) return;
+    comicWarmed.add(src);
+    const im = new Image();
+    im.src = src;
+  });
 }
 
 function renderComicPanel(i) {
   const p = INTRO_COMIC[i];
   if (!p) return;
+  preloadComicAround(i);
   const img = $("#comic-img");
   const cap = $("#comic-caption");
   img.src = p.img;
@@ -3840,7 +3908,7 @@ function renderComicPanel(i) {
 function playIntro(onDone) {
   comicOnDone = onDone || null;
   comicIndex = 0;
-  preloadComic();
+  preloadComicAround(0);
   renderComicPanel(0);
   showScreen("screen-intro");
 }
