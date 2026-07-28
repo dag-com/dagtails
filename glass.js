@@ -249,58 +249,55 @@ function buildGlassSvg(glass, opts = {}) {
   const shineGrad = uid + "shine";
   const stemGrad = uid + "stem";
   const { stem, foot } = liquidOnly ? { stem: "", foot: "" } : stemFootMarkup(p, stemGrad);
-  const shadowRx = Math.max(p.oBot, p.oTop * 0.55) + 8;
-  const shadowCy = p.vbH - 8;
   const glassBody = `${p.outer} ${p.inner}`;
 
+  // No baked ellipse shadow — contact shadow lives in the 3D counter CSS.
   const shell = liquidOnly
-    ? `<!-- photo provides the glass shell -->
-  <path d="${p.inner}" fill="rgba(160,200,230,0.04)"/>`
-    : `<ellipse cx="${p.cx}" cy="${shadowCy}" rx="${shadowRx}" ry="10" fill="rgba(0,0,0,0.5)"/>
-  ${foot}
+    ? `<path d="${p.inner}" fill="rgba(160,200,230,0.04)"/>`
+    : `${foot}
   ${stem}
-  <path d="${glassBody}" fill-rule="evenodd" fill="url(#${glassGrad})" stroke="rgba(255,255,255,0.55)" stroke-width="1.6" stroke-linejoin="round"/>
-  <path d="${glassBody}" fill-rule="evenodd" fill="url(#${edgeGrad})" opacity="0.55"/>
-  <path d="${p.inner}" fill="rgba(160,200,230,0.06)"/>
+  <path d="${glassBody}" fill-rule="evenodd" fill="url(#${glassGrad})" stroke="rgba(255,236,210,0.45)" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="${glassBody}" fill-rule="evenodd" fill="url(#${edgeGrad})" opacity="0.5"/>
+  <path d="${p.inner}" fill="rgba(180,150,100,0.05)"/>
   ${condensationOnGlass(p)}
   <path d="M ${p.cx - p.oTop * 0.62} ${p.rimY + 8}
            L ${p.cx - p.oBot * 0.55} ${p.botY - 6}"
-        stroke="url(#${shineGrad})" stroke-width="7" stroke-linecap="round" opacity="0.55" fill="none"/>
+        stroke="url(#${shineGrad})" stroke-width="7" stroke-linecap="round" opacity="0.5" fill="none"/>
   <path d="M ${p.cx + p.oTop * 0.55} ${p.rimY + 14}
            L ${p.cx + p.oBot * 0.48} ${p.botY - 18}"
-        stroke="rgba(255,255,255,0.2)" stroke-width="3" stroke-linecap="round" fill="none"/>
+        stroke="rgba(255,220,170,0.18)" stroke-width="3" stroke-linecap="round" fill="none"/>
   <ellipse cx="${p.cx}" cy="${p.rimY}" rx="${p.oTop}" ry="${p.rimRy}"
-           fill="none" stroke="rgba(255,255,255,0.35)" stroke-width="1.2"/>
+           fill="none" stroke="rgba(255,230,190,0.3)" stroke-width="1.2"/>
   <ellipse class="rim" cx="${p.cx}" cy="${p.rimY}" rx="${p.oTop}" ry="${p.rimRy}"
-           fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.85)" stroke-width="2.4"/>
+           fill="rgba(255,240,210,0.04)" stroke="rgba(255,236,210,0.8)" stroke-width="2.2"/>
   <ellipse class="rim-inner" cx="${p.cx}" cy="${p.rimY + 1.5}" rx="${p.iTop}" ry="${p.rimRy * 0.78}"
-           fill="none" stroke="rgba(200,220,240,0.45)" stroke-width="1.4"/>`;
+           fill="none" stroke="rgba(220,190,140,0.35)" stroke-width="1.3"/>`;
 
   const svg =
 `<svg class="glass-svg${liquidOnly ? " glass-liquid-layer" : ""}" viewBox="0 0 ${p.vbW} ${p.vbH}" xmlns="${NS}" preserveAspectRatio="xMidYMax meet">
   <defs>
     <linearGradient id="${glassGrad}" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="rgba(220,235,255,0.55)"/>
-      <stop offset="0.12" stop-color="rgba(255,255,255,0.22)"/>
+      <stop offset="0" stop-color="rgba(255,230,190,0.48)"/>
+      <stop offset="0.12" stop-color="rgba(255,245,220,0.2)"/>
       <stop offset="0.35" stop-color="rgba(255,255,255,0.04)"/>
-      <stop offset="0.55" stop-color="rgba(180,210,240,0.06)"/>
-      <stop offset="0.78" stop-color="rgba(255,255,255,0.12)"/>
-      <stop offset="1" stop-color="rgba(210,230,255,0.5)"/>
+      <stop offset="0.55" stop-color="rgba(200,160,100,0.06)"/>
+      <stop offset="0.78" stop-color="rgba(255,236,200,0.12)"/>
+      <stop offset="1" stop-color="rgba(240,210,160,0.42)"/>
     </linearGradient>
     <linearGradient id="${edgeGrad}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="rgba(255,255,255,0.35)"/>
+      <stop offset="0" stop-color="rgba(255,236,200,0.32)"/>
       <stop offset="0.4" stop-color="rgba(255,255,255,0.05)"/>
-      <stop offset="1" stop-color="rgba(120,160,200,0.18)"/>
+      <stop offset="1" stop-color="rgba(140,100,60,0.16)"/>
     </linearGradient>
     <linearGradient id="${shineGrad}" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="rgba(255,255,255,0.7)"/>
-      <stop offset="0.4" stop-color="rgba(255,255,255,0.15)"/>
+      <stop offset="0" stop-color="rgba(255,245,220,0.7)"/>
+      <stop offset="0.4" stop-color="rgba(255,230,180,0.15)"/>
       <stop offset="1" stop-color="rgba(255,255,255,0)"/>
     </linearGradient>
     <linearGradient id="${stemGrad}" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="rgba(255,255,255,0.35)"/>
+      <stop offset="0" stop-color="rgba(255,236,200,0.32)"/>
       <stop offset="0.45" stop-color="rgba(255,255,255,0.08)"/>
-      <stop offset="1" stop-color="rgba(255,255,255,0.32)"/>
+      <stop offset="1" stop-color="rgba(255,230,180,0.28)"/>
     </linearGradient>
     <clipPath id="${clipId}"><path d="${p.inner}"/></clipPath>
   </defs>
@@ -322,21 +319,9 @@ function buildGlassSvg(glass, opts = {}) {
   return el;
 }
 
-/** Build glass — photoreal PNG shell when available, SVG liquid overlay. */
+/** Build glass as cohesive vector vessel (matches bar scene lighting). */
 export function buildGlass(glass) {
-  const photo = GLASS_PHOTO[glass.id];
-  if (!photo) return buildGlassSvg(glass);
-
-  const wrap = document.createElement("div");
-  wrap.className = "glass-photo-stack";
-  const img = document.createElement("img");
-  img.className = "glass-photo-img";
-  img.src = photo;
-  img.alt = "";
-  img.draggable = false;
-  wrap.appendChild(img);
-  wrap.appendChild(buildGlassSvg(glass, { liquidOnly: true }));
-  return wrap;
+  return buildGlassSvg(glass);
 }
 
 // ---- Prep vessels (simpler metal/glass tools; share setLiquid) ----
@@ -398,15 +383,14 @@ function assemblePrepSvg(p) {
   const metalId = uid + "metal";
   const bodyFill = p.metal ? `url(#${metalId})` : `url(#${ggId})`;
   const glassBody = `${p.outer} ${p.inner}`;
-  const shadowRx = Math.max(36, p.oTop * 0.7);
 
   const svg =
 `<svg class="glass-svg prep-svg" viewBox="0 0 ${p.vbW} ${p.vbH}" xmlns="${NS}" preserveAspectRatio="xMidYMax meet">
   <defs>
     <linearGradient id="${ggId}" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="rgba(255,255,255,0.4)"/>
+      <stop offset="0" stop-color="rgba(255,236,200,0.38)"/>
       <stop offset="0.5" stop-color="rgba(255,255,255,0.05)"/>
-      <stop offset="1" stop-color="rgba(255,255,255,0.38)"/>
+      <stop offset="1" stop-color="rgba(255,230,180,0.34)"/>
     </linearGradient>
     <linearGradient id="${metalId}" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#f4f6f8"/>
@@ -416,9 +400,8 @@ function assemblePrepSvg(p) {
     </linearGradient>
     <clipPath id="${clipId}"><path d="${p.inner}"/></clipPath>
   </defs>
-  <ellipse cx="${p.cx}" cy="${p.vbH - 6}" rx="${shadowRx}" ry="9" fill="rgba(0,0,0,0.48)"/>
-  <path d="${glassBody}" fill-rule="evenodd" fill="${bodyFill}" stroke="rgba(255,255,255,0.55)" stroke-width="1.8" stroke-linejoin="round"/>
-  <path d="${p.inner}" fill="rgba(180,210,240,0.05)"/>
+  <path d="${glassBody}" fill-rule="evenodd" fill="${bodyFill}" stroke="rgba(255,236,210,0.5)" stroke-width="1.7" stroke-linejoin="round"/>
+  <path d="${p.inner}" fill="rgba(180,150,100,0.05)"/>
   <g clip-path="url(#${clipId})">
     <g class="bands"></g>
     <ellipse class="foam" cx="${p.cx}" cy="${p.botY}" rx="${p.iTop * 0.9}" ry="6" fill="rgba(255,250,240,0.55)" opacity="0"/>
@@ -427,7 +410,7 @@ function assemblePrepSvg(p) {
   <ellipse class="surface" cx="${p.cx}" cy="${p.botY}" rx="${p.iTop}" ry="6" fill="rgba(255,255,255,0.4)" opacity="0"/>
   <ellipse class="surface-shine" cx="${p.cx}" cy="${p.botY}" rx="${p.iTop * 0.4}" ry="3" fill="rgba(255,255,255,0.35)" opacity="0"/>
   ${p.lid || ""}
-  <ellipse class="rim" cx="${p.cx}" cy="${p.rimY}" rx="${p.oTop}" ry="${p.rimRy}" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.7)" stroke-width="2"/>
+  <ellipse class="rim" cx="${p.cx}" cy="${p.rimY}" rx="${p.oTop}" ry="${p.rimRy}" fill="rgba(255,240,210,0.05)" stroke="rgba(255,236,210,0.65)" stroke-width="2"/>
   <g class="garnish-group"></g>
 </svg>`;
 

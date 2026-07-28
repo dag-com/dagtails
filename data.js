@@ -1475,9 +1475,252 @@ export const CLASSICS = [
   ...EXTRA_CLASSICS,
 ];
 
+// ============================================================================
+// Bar-hop crawl — cultural venues + per-drink origins.
+// Venue order defines the journey; drinkIds flatten into the stage pool.
+// Origins hydrate onto recipes as optional `origin` fields.
+// ============================================================================
+
+export const RECIPE_ORIGINS = {
+  gin_tonic: { country: "United Kingdom", flag: "🇬🇧", city: "London", era: "1920s", lore: "British officers in India mixed gin with quinine tonic — London made it a pub staple." },
+  tom_collins: { country: "United Kingdom", flag: "🇬🇧", city: "London", era: "1870s", lore: "A tall gin sour named after a Victorian prank — still the house cooler at any London gin bar." },
+  bramble: { country: "United Kingdom", flag: "🇬🇧", city: "London", era: "1980s", lore: "Dick Bradsell's modern classic: gin, lemon, and a blackberry liqueur drizzle." },
+  screwdriver: { country: "United States", flag: "🇺🇸", city: "Ankara", era: "1940s", lore: "American oil workers stirred vodka into orange juice with a screwdriver — the name stuck." },
+  moscow_mule: { country: "United States", flag: "🇺🇸", city: "Los Angeles", era: "1941", lore: "A copper-mug marketing hit that made vodka famous in America." },
+  black_russian: { country: "Belgium", flag: "🇧🇪", city: "Brussels", era: "1949", lore: "Vodka and coffee liqueur, invented for an American diplomat in Cold War Brussels." },
+  white_russian: { country: "United States", flag: "🇺🇸", city: "California", era: "1960s", lore: "The Black Russian with cream — later immortalized by The Dude." },
+  blue_lagoon: { country: "France", flag: "🇫🇷", city: "Paris", era: "1970s", lore: "Harry's New York Bar Paris: vodka, blue curaçao, and lemonade." },
+  sex_on_the_beach: { country: "United States", flag: "🇺🇸", city: "Florida", era: "1980s", lore: "A sun-soaked vodka fruit bomb from Florida beach-bar culture." },
+  tequila_sunrise: { country: "Mexico", flag: "🇲🇽", city: "Acapulco", era: "1970s", lore: "Tequila, orange, and grenadine sinking like a Pacific sunrise." },
+  paloma: { country: "Mexico", flag: "🇲🇽", city: "Jalisco", era: "1950s", lore: "Mexico's most-ordered tequila highball — grapefruit, lime, and soda." },
+  margarita: { country: "Mexico", flag: "🇲🇽", city: "Tijuana", era: "1930s", lore: "Tequila, Cointreau, and lime — the border classic that conquered the world." },
+  aperol_spritz: { country: "Italy", flag: "🇮🇹", city: "Veneto", era: "1950s", lore: "Aperol, prosecco, and soda — the golden hour ritual of northern Italy." },
+  americano: { country: "Italy", flag: "🇮🇹", city: "Milan", era: "1860s", lore: "Campari, sweet vermouth, and soda — Gaspare Campari's original aperitivo." },
+  bellini: { country: "Italy", flag: "🇮🇹", city: "Venice", era: "1948", lore: "Harry's Bar Venice: peach purée topped with prosecco." },
+  kir_royale: { country: "France", flag: "🇫🇷", city: "Burgundy", era: "1940s", lore: "Crème de cassis lifted with Champagne — named for a French mayor." },
+  mimosa: { country: "France", flag: "🇫🇷", city: "Paris", era: "1925", lore: "Equal parts Champagne and orange juice — brunch royalty." },
+  godfather: { country: "Italy", flag: "🇮🇹", city: "Milan", era: "1970s", lore: "Scotch and amaretto — a spirit-forward nod to Italian cinema." },
+  negroni: { country: "Italy", flag: "🇮🇹", city: "Florence", era: "1919", lore: "Equal parts gin, Campari, and sweet vermouth — Count Negroni's order." },
+  boulevardier: { country: "France", flag: "🇫🇷", city: "Paris", era: "1927", lore: "A Negroni with whiskey instead of gin — from Harry McElhone's Paris bar." },
+  cuba_libre: { country: "Cuba", flag: "🇨🇺", city: "Havana", era: "1900", lore: "Rum, cola, and lime — \"Free Cuba\" after the Spanish–American War." },
+  daiquiri: { country: "Cuba", flag: "🇨🇺", city: "Daiquirí", era: "1898", lore: "White rum, lime, and sugar — Hemingway's favourite shaken classic." },
+  mojito: { country: "Cuba", flag: "🇨🇺", city: "Havana", era: "1920s", lore: "Mint, lime, sugar, rum, and soda — Havana's cooling muddle." },
+  bloody_mary: { country: "France", flag: "🇫🇷", city: "Paris", era: "1921", lore: "Vodka and tomato — born at Harry's New York Bar, perfected as brunch fuel." },
+  long_island: { country: "United States", flag: "🇺🇸", city: "Long Island", era: "1970s", lore: "Five spirits under a cola top — a party-bar legend from New York." },
+  whiskey_sour: { country: "United States", flag: "🇺🇸", city: "Peruvian ports", era: "1860s", lore: "Whiskey, lemon, and sugar — the American sour template." },
+  cosmopolitan: { country: "United States", flag: "🇺🇸", city: "New York", era: "1980s", lore: "Citron vodka, Cointreau, cranberry, and lime — Sex and the City made it iconic." },
+  old_fashioned: { country: "United States", flag: "🇺🇸", city: "Louisville", era: "1880s", lore: "Whiskey, sugar, and bitters — the original \"cocktail\" definition." },
+  manhattan: { country: "United States", flag: "🇺🇸", city: "New York", era: "1870s", lore: "Rye, sweet vermouth, and bitters — Manhattan Club lore." },
+  sazerac: { country: "United States", flag: "🇺🇸", city: "New Orleans", era: "1850s", lore: "Rye, absinthe rinse, and Peychaud's — the official cocktail of New Orleans." },
+  mint_julep: { country: "United States", flag: "🇺🇸", city: "Kentucky", era: "1800s", lore: "Bourbon, mint, and sugar over crushed ice — Derby Day in a cup." },
+  espresso_martini: { country: "United Kingdom", flag: "🇬🇧", city: "London", era: "1983", lore: "Dick Bradsell shook vodka with fresh espresso for a model who wanted to \"wake up\"." },
+  kamikaze: { country: "United States", flag: "🇺🇸", city: "California", era: "1970s", lore: "Vodka, triple sec, and lime — a sharp shot-bar staple." },
+  baby_guinness: { country: "Ireland", flag: "🇮🇪", city: "Dublin", era: "1990s", lore: "Coffee liqueur topped with Irish cream — a tiny stout lookalike." },
+  lemon_drop_shot: { country: "United States", flag: "🇺🇸", city: "San Francisco", era: "1970s", lore: "Citron vodka with lemon and sugar — the shot cousin of the Lemon Drop Martini." },
+  b52: { country: "Canada", flag: "🇨🇦", city: "Alberta", era: "1970s", lore: "Layered coffee liqueur, Irish cream, and orange liqueur — named for the bomber." },
+  green_tea_shot: { country: "United States", flag: "🇺🇸", city: "Midwest", era: "2000s", lore: "Whiskey, peach schnapps, and citrus — tastes like sweet green tea." },
+  french_75: { country: "France", flag: "🇫🇷", city: "Paris", era: "1915", lore: "Gin, lemon, sugar, and Champagne — named for a WWI field gun." },
+  gimlet: { country: "United Kingdom", flag: "🇬🇧", city: "Royal Navy", era: "1920s", lore: "Gin and lime cordial — a sailor's scurvy cure turned cocktail." },
+  clover_club: { country: "United States", flag: "🇺🇸", city: "Philadelphia", era: "1910s", lore: "Gin, lemon, raspberry, and egg white — a pre-Prohibition pink classic." },
+  aviation: { country: "United States", flag: "🇺🇸", city: "New York", era: "1916", lore: "Gin, maraschino, lemon, and violet — a sky-blue Prohibition-era beauty." },
+  corpse_reviver: { country: "United Kingdom", flag: "🇬🇧", city: "London", era: "1930s", lore: "Gin, Lillet, Cointreau, lemon, and absinthe — Savoy Hotel's hangover cure #2." },
+  dry_martini: { country: "United States", flag: "🇺🇸", city: "New York", era: "1880s", lore: "Gin and dry vermouth, ice-cold — the template of elegance." },
+  dark_n_stormy: { country: "Bermuda", flag: "🇧🇲", city: "Hamilton", era: "1920s", lore: "Gosling's dark rum over ginger beer — Bermuda's national drink." },
+  rob_roy: { country: "United States", flag: "🇺🇸", city: "New York", era: "1894", lore: "A Manhattan made with Scotch — named for the Scottish folk hero." },
+  rusty_nail: { country: "United Kingdom", flag: "🇬🇧", city: "Scotland", era: "1930s", lore: "Scotch and Drambuie — a heather-honey nightcap." },
+  penicillin: { country: "United States", flag: "🇺🇸", city: "New York", era: "2005", lore: "Sam Ross's modern classic: blended Scotch, lemon, honey, and ginger, floated with Islay." },
+  amaretto_sour: { country: "Italy", flag: "🇮🇹", city: "Saronno", era: "1970s", lore: "Amaretto shaken sour — almond liqueur's brightest showcase." },
+  pisco_sour: { country: "Peru", flag: "🇵🇪", city: "Lima", era: "1920s", lore: "Pisco, lime, syrup, egg white, and bitters — Peru and Chile both claim it." },
+  caipirinha: { country: "Brazil", flag: "🇧🇷", city: "São Paulo", era: "1910s", lore: "Cachaça muddled with lime and sugar — Brazil's national cocktail." },
+  mai_tai: { country: "United States", flag: "🇺🇸", city: "Oakland", era: "1944", lore: "Trader Vic's rum masterpiece — \"mai tai\" means \"out of this world\" in Tahitian." },
+  painkiller: { country: "British Virgin Islands", flag: "🇻🇬", city: "Jost Van Dyke", era: "1970s", lore: "Pusser's rum, pineapple, orange, and coconut — born at the Soggy Dollar Bar." },
+  singapore_sling: { country: "Singapore", flag: "🇸🇬", city: "Singapore", era: "1915", lore: "Raffles Hotel's gin sling with cherry, citrus, and soda." },
+  hurricane_cocktail: { country: "United States", flag: "🇺🇸", city: "New Orleans", era: "1940s", lore: "Passion fruit and rum in a curvy glass — Pat O'Brien's Mardi Gras icon." },
+  pina_colada: { country: "Puerto Rico", flag: "🇵🇷", city: "San Juan", era: "1954", lore: "Rum, coconut, and pineapple — Puerto Rico's official drink." },
+  // Mocktails
+  virgin_sunrise: { country: "United States", flag: "🇺🇸", city: "California", era: "1970s", lore: "The sunrise without tequila — orange juice and grenadine." },
+  roy_rogers: { country: "United States", flag: "🇺🇸", city: "Hollywood", era: "1940s", lore: "Cola and grenadine for the cowboy star who didn't drink." },
+  shirley_temple: { country: "United States", flag: "🇺🇸", city: "Hollywood", era: "1930s", lore: "Ginger ale and grenadine — named for the child star." },
+  virgin_pina_colada: { country: "Puerto Rico", flag: "🇵🇷", city: "San Juan", era: "1950s", lore: "Coconut and pineapple, no rum — beach-shack sunshine." },
+  fresh_lemonade: { country: "United States", flag: "🇺🇸", city: "Midwest", era: "1800s", lore: "Lemon, sugar, and water — the soda-fountain classic." },
+  ginger_fizz: { country: "United Kingdom", flag: "🇬🇧", city: "London", era: "1900s", lore: "Spicy ginger ale with citrus — a soft highball." },
+  berry_fizz: { country: "United States", flag: "🇺🇸", city: "Portland", era: "2010s", lore: "Berry syrup and soda — modern juice-bar fizz." },
+  virgin_mary: { country: "United States", flag: "🇺🇸", city: "Chicago", era: "1930s", lore: "A Bloody Mary without vodka — spicy tomato brunch." },
+  virgin_mojito: { country: "Cuba", flag: "🇨🇺", city: "Havana", era: "1920s", lore: "Mint, lime, sugar, and soda — Havana cool without the rum." },
+  cinderella: { country: "United States", flag: "🇺🇸", city: "Tiki bars", era: "1930s", lore: "Orange, pineapple, lemon, and grenadine — a virgin tropical." },
+  tropical_cooler: { country: "Caribbean", flag: "🏝️", city: "Island bars", era: "1960s", lore: "Mixed tropical juices over ice — beach-shack hydration." },
+  nojito_berry: { country: "United States", flag: "🇺🇸", city: "Brooklyn", era: "2010s", lore: "A berry twist on the virgin mojito — mint and muddled fruit." },
+};
+
+export const VENUES = [
+  {
+    id: "snug", name: "The Snug", city: "London", country: "United Kingdom", flag: "🇬🇧",
+    kind: "Gin pub", accent: "#7ec8e3", sign: "THE SNUG",
+    bg: "assets/venues/snug.png",
+    blurb: "Oak booths, tonic bottles, and a proper London gin rail.",
+    mapPin: { x: 12, y: 16 },
+    master: {
+      name: "Old Tom", title: "Landlord of The Snug", emoji: "🥃",
+      farewell: "Steady hand on the tonic, mate. London's done with you — the next city's waiting. Off you hop!",
+    },
+    drinkIds: ["gin_tonic", "tom_collins", "bramble"],
+  },
+  {
+    id: "zavod", name: "Zavod", city: "Moscow", country: "Russia", flag: "🇷🇺",
+    kind: "Vodka bar", accent: "#9bb8ff", sign: "ЗАВОД",
+    bg: "assets/venues/zavod.png",
+    blurb: "Ice-cold vodka, copper mules, and neon snow light.",
+    mapPin: { x: 30, y: 18 },
+    master: {
+      name: "Irina Frost", title: "Mistress of Zavod", emoji: "❄️",
+      farewell: "You kept the ice honest. Fly warm — Mexico's waiting, and they don't chill the same way.",
+    },
+    drinkIds: ["screwdriver", "moscow_mule", "black_russian", "white_russian", "blue_lagoon", "sex_on_the_beach"],
+  },
+  {
+    id: "cantina", name: "La Cantina", city: "Mexico City", country: "Mexico", flag: "🇲🇽",
+    kind: "Cantina", accent: "#f0a35e", sign: "LA CANTINA",
+    bg: "assets/venues/cantina.png",
+    blurb: "Agave bottles, salt rims, and a sunset grapefruit glow.",
+    mapPin: { x: 52, y: 16 },
+    master: {
+      name: "Don Raúl", title: "Cantinero", emoji: "🌵",
+      farewell: "Salud, little duck. Wipe the salt from your beak — Milan wants you for golden hour.",
+    },
+    drinkIds: ["tequila_sunrise", "paloma", "margarita"],
+  },
+  {
+    id: "aperitivo", name: "Aperitivo Piazza", city: "Milan", country: "Italy", flag: "🇮🇹",
+    kind: "Aperitivo bar", accent: "#ff8a3d", sign: "APERITIVO",
+    bg: "assets/venues/aperitivo.png",
+    blurb: "Campari-red hour on a Milanese square.",
+    mapPin: { x: 78, y: 20 },
+    master: {
+      name: "Signora Rosa", title: "Queen of the Piazza", emoji: "🧡",
+      farewell: "Bellissimo. Take the bitter with you — Havana will sweeten the night.",
+    },
+    drinkIds: ["aperol_spritz", "americano", "bellini", "kir_royale", "mimosa", "godfather", "negroni", "boulevardier"],
+  },
+  {
+    id: "floridita", name: "El Floridita", city: "Havana", country: "Cuba", flag: "🇨🇺",
+    kind: "Rum bar", accent: "#e8c547", sign: "EL FLORIDITA",
+    bg: "assets/venues/floridita.png",
+    blurb: "Hemingway's rum cathedral — mint, lime, and white rum.",
+    mapPin: { x: 16, y: 48 },
+    master: {
+      name: "Constanza", title: "Cantinera of El Floridita", emoji: "🌴",
+      farewell: "Mint on your feathers, rum on your breath. Fly careful — New Orleans keeps secrets behind doors.",
+    },
+    drinkIds: ["cuba_libre", "daiquiri", "mojito"],
+  },
+  {
+    id: "speakeasy", name: "The Speakeasy", city: "New Orleans", country: "United States", flag: "🇺🇸",
+    kind: "Speakeasy", accent: "#d4a017", sign: "SPEAKEASY",
+    bg: "assets/venues/speakeasy.png",
+    blurb: "Jazz, rye, and passwords behind a unmarked door.",
+    mapPin: { x: 42, y: 50 },
+    master: {
+      name: "Silas Crowe", title: "Door man & deal maker", emoji: "🎷",
+      farewell: "Password worked. Now scram before the raid — Paris is velvet and louder secrets.",
+    },
+    drinkIds: ["bloody_mary", "long_island", "whiskey_sour", "cosmopolitan", "old_fashioned", "manhattan", "sazerac", "mint_julep", "espresso_martini", "kamikaze", "baby_guinness", "lemon_drop_shot", "b52", "green_tea_shot"],
+  },
+  {
+    id: "boudoir", name: "Le Boudoir", city: "Paris", country: "France", flag: "🇫🇷",
+    kind: "Champagne salon", accent: "#e8b4d4", sign: "LE BOUDOIR",
+    bg: "assets/venues/boudoir.png",
+    blurb: "Velvet booths, coupe glasses, and late-night Champagne.",
+    mapPin: { x: 70, y: 48 },
+    master: {
+      name: "Madame Colette", title: "Hostess of Le Boudoir", emoji: "🥂",
+      farewell: "Chérie, the coupe is empty and so is our night. Fly north — the Highlands are calling.",
+    },
+    drinkIds: ["french_75", "gimlet", "clover_club", "aviation", "corpse_reviver", "dry_martini"],
+  },
+  {
+    id: "still", name: "The Still", city: "Edinburgh", country: "Scotland", flag: "🏴󠁧󠁢󠁳󠁣󠁴󠁿",
+    kind: "Whisky bar", accent: "#c98a3a", sign: "THE STILL",
+    bg: "assets/venues/still.png",
+    blurb: "Peat smoke, heather honey, and a Highland pour.",
+    mapPin: { x: 48, y: 72 },
+    master: {
+      name: "Hamish MacPeck", title: "Keeper of The Still", emoji: "🌫️",
+      farewell: "Aye, that'll warm ye. Follow the torches — the beach still has a few rounds left.",
+    },
+    drinkIds: ["dark_n_stormy", "rob_roy", "rusty_nail", "penicillin"],
+  },
+  {
+    id: "sunset_tiki", name: "Sunset Tiki", city: "Waikiki", country: "Polynesia", flag: "🌺",
+    kind: "Tiki bar", accent: "#ff6b4a", sign: "SUNSET TIKI",
+    bg: "assets/venues/sunset_tiki.png",
+    blurb: "Torchlight, carved mugs, and rum from every island.",
+    mapPin: { x: 82, y: 80 },
+    master: {
+      name: "Koa", title: "Torch boss of Sunset Tiki", emoji: "🏝️",
+      farewell: "Torches out, cooler empty. You hopped every bar tonight — fly home proud.",
+    },
+    drinkIds: ["amaretto_sour", "pisco_sour", "caipirinha", "mai_tai", "painkiller", "singapore_sling", "hurricane_cocktail", "pina_colada"],
+  },
+];
+
+export const VENUES_UNDER = [
+  {
+    id: "soda_fountain", name: "Soda Fountain", city: "Hometown", country: "United States", flag: "🇺🇸",
+    kind: "Soda shop", accent: "#ff6b8a", sign: "SODA FOUNTAIN",
+    bg: "assets/venues/soda_fountain.png",
+    blurb: "Chrome stools, cherry syrup, and zero proof.",
+    mapPin: { x: 18, y: 48 },
+    master: {
+      name: "Miss Cherry", title: "Soda jerk", emoji: "🍒",
+      farewell: "Extra cherry for the road! Scoot along to the juice bar — they're blending already.",
+    },
+    drinkIds: ["roy_rogers", "shirley_temple", "virgin_sunrise"],
+  },
+  {
+    id: "juice_bar", name: "Juice Bar", city: "Portland", country: "United States", flag: "🇺🇸",
+    kind: "Juice bar", accent: "#7dce82", sign: "JUICE BAR",
+    bg: "assets/venues/juice_bar.png",
+    blurb: "Fresh citrus, ginger fizz, and green counters.",
+    mapPin: { x: 48, y: 36 },
+    master: {
+      name: "Green Jay", title: "Juice captain", emoji: "🥝",
+      farewell: "Fresh as a daisy. Beach shack's calling — bring your appetite for pineapple.",
+    },
+    drinkIds: ["fresh_lemonade", "ginger_fizz", "berry_fizz", "virgin_mary"],
+  },
+  {
+    id: "beach_shack", name: "Beach Shack", city: "San Juan", country: "Caribbean", flag: "🏝️",
+    kind: "Beach shack", accent: "#45c4e6", sign: "BEACH SHACK",
+    bg: "assets/venues/beach_shack.png",
+    blurb: "Sand underfoot and virgin tropicals on ice.",
+    mapPin: { x: 78, y: 70 },
+    master: {
+      name: "Sandy", title: "Shack boss", emoji: "🏖️",
+      farewell: "Sun's down, cooler's empty. You hopped the whole soft crawl — nice flying!",
+    },
+    drinkIds: ["virgin_pina_colada", "virgin_mojito", "cinderella", "tropical_cooler", "nojito_berry"],
+  },
+];
+
+function hydrateRecipeOrigins(list) {
+  list.forEach((r) => {
+    const o = RECIPE_ORIGINS[r.id];
+    if (o) r.origin = o;
+  });
+}
+hydrateRecipeOrigins(RECIPES);
+hydrateRecipeOrigins(SHOTS);
+hydrateRecipeOrigins(MOCKTAILS);
+
 // Convenience lookups
 export const INGREDIENT_BY_ID = Object.fromEntries(INGREDIENTS.map((i) => [i.id, i]));
 export const GLASS_BY_ID = Object.fromEntries(GLASSES.map((g) => [g.id, g]));
 export const METHOD_BY_ID = Object.fromEntries(METHODS.map((m) => [m.id, m]));
 export const GARNISH_BY_ID = Object.fromEntries(GARNISHES.map((g) => [g.id, g]));
 export const TOOL_BY_ID = Object.fromEntries(TOOLS.map((t) => [t.id, t]));
+export const RECIPE_BY_ID = Object.fromEntries(
+  [...RECIPES, ...SHOTS, ...MOCKTAILS].map((r) => [r.id, r])
+);
+export const VENUE_BY_ID = Object.fromEntries(
+  [...VENUES, ...VENUES_UNDER].map((v) => [v.id, v])
+);
