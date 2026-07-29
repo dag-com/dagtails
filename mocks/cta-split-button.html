@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DAG Tails — CTA split-button mock</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #fff7e6;
+      --muted: rgba(255, 236, 200, 0.62);
+      --gold: #e9b949;
+      --gold-deep: #c98412;
+      --line: rgba(255, 255, 255, 0.14);
+      --panel: #1a1228;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Nunito, system-ui, sans-serif;
+      color: var(--ink);
+      background: #120b1c;
+      padding: 28px 16px 48px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 18px;
+    }
+    h1 {
+      margin: 0;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 30px;
+      letter-spacing: 1px;
+      font-weight: 400;
+    }
+    .lede {
+      max-width: 640px;
+      margin: 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+    .lede strong { color: var(--gold); }
+
+    .board {
+      width: min(720px, 100%);
+      display: grid;
+      gap: 16px;
+    }
+    @media (min-width: 700px) {
+      .board { grid-template-columns: 1fr 1fr; }
+    }
+
+    .card {
+      background: linear-gradient(180deg, #221830, #120c1a);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .card h2 {
+      margin: 0 0 4px;
+      font-size: 12px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--gold);
+    }
+    .card p.sub {
+      margin: 0 0 14px;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+
+    /* —— BEFORE —— */
+    .before .fake-modes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .before .fake-modes span {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 10px 4px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+    }
+    .before .primary {
+      width: 100%;
+      border: 0;
+      border-radius: 999px;
+      padding: 14px;
+      font: inherit;
+      font-weight: 800;
+      font-size: 15px;
+      color: #1a1008;
+      background: linear-gradient(180deg, #f0c85a, var(--gold-deep));
+    }
+
+    /* —— AFTER: split CTA —— */
+    .cta-wrap {
+      position: relative;
+      width: 100%;
+    }
+    .cta-split {
+      display: grid;
+      grid-template-columns: 1fr 48px;
+      width: 100%;
+      border-radius: 999px;
+      overflow: hidden;
+      box-shadow: 0 10px 0 #7a4e08, 0 14px 24px rgba(0,0,0,0.35);
+    }
+    .cta-split .cta-main,
+    .cta-split .cta-caret {
+      border: 0;
+      font: inherit;
+      font-weight: 800;
+      color: #1a1008;
+      background: linear-gradient(180deg, #f0c85a, var(--gold-deep));
+      cursor: pointer;
+      padding: 14px 12px;
+    }
+    .cta-split .cta-main {
+      text-align: left;
+      padding-left: 20px;
+      font-size: 15px;
+    }
+    .cta-split .cta-caret {
+      border-left: 1px solid rgba(80, 45, 0, 0.35);
+      font-size: 14px;
+      line-height: 1;
+      display: grid;
+      place-items: center;
+    }
+    .cta-split .cta-caret[aria-expanded="true"] {
+      filter: brightness(0.92);
+    }
+    .cta-split .cta-caret:hover,
+    .cta-split .cta-main:hover {
+      filter: brightness(1.04);
+    }
+    .cta-meta {
+      margin: 8px 0 0;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(233,185,73,0.85);
+      text-align: center;
+    }
+
+    .cta-menu {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: calc(100% + 8px);
+      z-index: 5;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px;
+      border-radius: 16px;
+      border: 1px solid rgba(233,185,73,0.35);
+      background: linear-gradient(180deg, #2a1c3c, #16101f);
+      box-shadow: 0 16px 32px rgba(0,0,0,0.45);
+      animation: pop 0.18s ease;
+    }
+    .cta-menu.is-open { display: flex; }
+    .cta-menu button {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      width: 100%;
+      border: 0;
+      background: transparent;
+      color: var(--ink);
+      text-align: left;
+      padding: 10px 12px;
+      border-radius: 12px;
+      font: inherit;
+      cursor: pointer;
+    }
+    .cta-menu button:hover {
+      background: rgba(233,185,73,0.12);
+    }
+    .cta-menu .ico {
+      font-size: 18px;
+      line-height: 1.2;
+      width: 24px;
+      text-align: center;
+    }
+    .cta-menu strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 800;
+    }
+    .cta-menu small {
+      display: block;
+      margin-top: 2px;
+      font-size: 11px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+    .cta-menu .locked {
+      opacity: 0.45;
+    }
+    .cta-menu .locked small { color: #c9a24a; }
+
+    .after .kept {
+      display: flex;
+      justify-content: center;
+      gap: 18px;
+      margin-top: 28px;
+      padding-top: 4px;
+    }
+    .after .kept button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .legend {
+      width: min(720px, 100%);
+      border: 1px dashed rgba(233,185,73,0.35);
+      border-radius: 14px;
+      padding: 14px 16px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .legend ol { margin: 8px 0 0; padding-left: 18px; }
+    .legend li { margin: 4px 0; }
+    .legend em { color: var(--ink); font-style: normal; font-weight: 800; }
+
+    @keyframes pop {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: none; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Main CTA — split button mock</h1>
+  <p class="lede">
+    Understanding: one gold <strong>Continue / Play Journey</strong> button.
+    Its <strong>right end is a ▼</strong> that opens a small menu for
+    <strong>Endless</strong> and <strong>Mixologist</strong> — so those modes leave the mode row.
+  </p>
+
+  <div class="board">
+    <section class="card before">
+      <h2>Now (cluttered)</h2>
+      <p class="sub">Primary CTA + 4 mode buttons competing for attention.</p>
+      <button class="primary" type="button">▶ Continue Journey · Stage 3</button>
+      <div class="fake-modes" aria-hidden="true">
+        <span>🔥 Endless</span>
+        <span>🧪 Mix</span>
+        <span>📚 Learn</span>
+        <span>❓ Help</span>
+      </div>
+    </section>
+
+    <section class="card after">
+      <h2>Proposed</h2>
+      <p class="sub">Tap the mock — open the caret menu. Learn / Help stay as quiet text links.</p>
+
+      <div class="cta-wrap">
+        <div class="cta-split" role="group" aria-label="Play">
+          <button class="cta-main" type="button" id="btn-main">▶ Continue Journey · Stage 3</button>
+          <button class="cta-caret" type="button" id="btn-caret" aria-label="More game modes" aria-haspopup="menu" aria-expanded="false">▼</button>
+        </div>
+        <p class="cta-meta">Stop 3 of 55 · The Snug</p>
+
+        <div class="cta-menu" id="cta-menu" role="menu" hidden>
+          <button type="button" role="menuitem" class="locked">
+            <span class="ico">🔥</span>
+            <span>
+              <strong>Endless</strong>
+              <small>Locked · clear 3 more stages</small>
+            </span>
+          </button>
+          <button type="button" role="menuitem" class="locked">
+            <span class="ico">🧪</span>
+            <span>
+              <strong>Mixologist</strong>
+              <small>Locked · clear 3 more stages</small>
+            </span>
+          </button>
+        </div>
+      </div>
+
+      <div class="kept">
+        <button type="button">📚 Learn</button>
+        <button type="button">❓ Help</button>
+      </div>
+    </section>
+  </div>
+
+  <aside class="legend">
+    <strong style="color:var(--gold)">What I would build (after you approve)</strong>
+    <ol>
+      <li><em>Main segment</em> — same action as today’s “Play / Continue Journey”.</li>
+      <li><em>Caret segment</em> — toggles a dropdown anchored under the button.</li>
+      <li>Dropdown items: <em>Endless</em> + <em>Mixologist</em> (with lock state / “N to go” when locked).</li>
+      <li>Remove Endless + Mix from the <em>hub-modes</em> row; keep Learn / Help quieter (or later fold into More).</li>
+      <li>Outside click / Esc closes the menu; caret flips ▲ while open.</li>
+    </ol>
+  </aside>
+
+  <script>
+    const menu = document.getElementById("cta-menu");
+    const caret = document.getElementById("btn-caret");
+    const wrap = document.querySelector(".cta-wrap");
+
+    function setOpen(open) {
+      menu.hidden = !open;
+      menu.classList.toggle("is-open", open);
+      caret.setAttribute("aria-expanded", open ? "true" : "false");
+      caret.textContent = open ? "▲" : "▼";
+    }
+
+    caret.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setOpen(menu.hidden);
+    });
+    document.getElementById("btn-main").addEventListener("click", () => {
+      setOpen(false);
+      alert("Would start Journey (unchanged).");
+    });
+    document.addEventListener("click", (e) => {
+      if (!wrap.contains(e.target)) setOpen(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setOpen(false);
+    });
+    // Start open so the idea is obvious at a glance
+    setOpen(true);
+  </script>
+</body>
+</html>

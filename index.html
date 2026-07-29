@@ -13,6 +13,8 @@
     />
   </head>
   <body>
+    <div class="game-shell">
+      <div class="game-stage" id="game-stage">
     <div class="app">
       <!-- ============================== PROFILE / IDENTIFICATION MODAL ============================== -->
       <div id="modal-profile" class="modal">
@@ -118,26 +120,40 @@
               </div>
 
               <div class="hub-cta">
-                <button id="btn-start" class="btn btn-primary btn-lg">▶ Play the Journey</button>
+                <div class="cta-wrap" id="cta-wrap">
+                  <div class="cta-split" role="group" aria-label="Play">
+                    <button id="btn-start" class="cta-main" type="button">▶ Play the Journey</button>
+                    <button id="btn-cta-caret" class="cta-caret" type="button" aria-label="More game modes" aria-haspopup="menu" aria-expanded="false">▼</button>
+                  </div>
+                  <div class="cta-menu" id="cta-menu" role="menu" hidden>
+                    <button id="btn-endless" class="cta-menu-item" type="button" role="menuitem">
+                      <span class="ico" aria-hidden="true">🔥</span>
+                      <span class="cta-menu-text">
+                        <strong>Endless</strong>
+                        <small id="endless-menu-sub">Survive the rush</small>
+                      </span>
+                    </button>
+                    <button id="btn-mixologist" class="cta-menu-item" type="button" role="menuitem">
+                      <span class="ico" aria-hidden="true">🧪</span>
+                      <span class="cta-menu-text">
+                        <strong>Mixologist</strong>
+                        <small id="mix-menu-sub">Invent &amp; share</small>
+                      </span>
+                    </button>
+                  </div>
+                </div>
                 <span class="play-meta" id="play-meta"></span>
               </div>
 
-              <div class="hub-modes">
-                <button id="btn-endless" class="hub-mode-btn"><span class="ico">🔥</span>Endless</button>
-                <button id="btn-mixologist" class="hub-mode-btn"><span class="ico">🧪</span>Mix</button>
-                <button id="btn-training" class="hub-mode-btn"><span class="ico">📚</span>Learn</button>
-                <button id="btn-how" class="hub-mode-btn"><span class="ico">❓</span>Help</button>
+              <div class="hub-modes hub-modes--quiet">
+                <button id="btn-training" class="hub-link-btn" type="button">📚 Learn</button>
+                <button id="btn-how" class="hub-link-btn" type="button">❓ Help</button>
               </div>
             </div>
           </div>
 
-          <nav class="hub-nav">
-            <button id="btn-shop" class="hub-nav-btn"><span class="ico">🛍</span>Shop</button>
-            <button id="btn-recipes" class="hub-nav-btn"><span class="ico">📖</span>Recipes</button>
-            <button id="btn-badges" class="hub-nav-btn"><span class="ico">🏅</span>Badges</button>
-            <button id="btn-mybar" class="hub-nav-btn"><span class="ico">🍹</span>My Bar</button>
-            <button id="btn-community" class="hub-nav-btn"><span class="ico">🌐</span>Community</button>
-            <button id="btn-leaderboard" class="hub-nav-btn"><span class="ico">🏆</span>Ranks</button>
+          <nav class="hub-nav" aria-label="Progress">
+            <button id="btn-badges" class="hub-nav-btn" type="button"><span class="ico">🏅</span>Badges</button>
           </nav>
 
           <p class="best-score" id="start-best"></p>
@@ -397,6 +413,13 @@
             <button id="btn-mix-share" class="btn btn-ghost">🌐 Share</button>
             <button id="btn-mix-another" class="btn btn-primary">Make another →</button>
           </div>
+          <nav class="mix-lounge" id="mix-lounge" aria-label="Mixologist lounge">
+            <button id="btn-shop" class="mix-lounge-btn" type="button"><span class="ico">🛍</span>Shop</button>
+            <button id="btn-recipes" class="mix-lounge-btn" type="button"><span class="ico">📖</span>Recipes</button>
+            <button id="btn-mybar" class="mix-lounge-btn" type="button"><span class="ico">🍹</span>My Bar</button>
+            <button id="btn-community" class="mix-lounge-btn" type="button"><span class="ico">🌐</span>Community</button>
+            <button id="btn-leaderboard" class="mix-lounge-btn" type="button"><span class="ico">🏆</span>Ranks</button>
+          </nav>
           <button id="btn-mix-quit" class="btn btn-ghost btn-sm mix-quit">Quit to menu</button>
         </div>
       </section>
@@ -572,6 +595,7 @@
           <p class="rankup-body" id="rankup-body"></p>
           <button id="btn-rankup-ok" class="btn btn-primary btn-lg">Keep climbing →</button>
         </div>
+      </div>
       </div>
     </div>
 

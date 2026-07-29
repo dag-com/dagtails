@@ -492,7 +492,7 @@ body {
   transition: opacity 0.5s ease, transform 0.5s ease;
 }
 /* The final verdict (stars/score/checklist) and the retry/next controls
-   stay hidden until the judges have had their say — see the reveal
+   stay hidden until the judges have had their say ? see the reveal
    choreography in showResult()/revealResultVerdict(). */
 .result-top.is-pending,
 .result-actions.is-pending {
@@ -888,7 +888,7 @@ body {
 .bar-bg {
   position: absolute;
   inset: 0;
-  /* Shelves + empty wood counter — vessels sit on the CSS bar-top above this */
+  /* Shelves + empty wood counter ? vessels sit on the CSS bar-top above this */
   background:
     linear-gradient(180deg, rgba(8, 5, 14, 0.15) 0%, transparent 35%, rgba(8, 5, 14, 0.25) 100%),
     url("assets/station/bar-stage.png") center 28% / cover no-repeat,
@@ -904,7 +904,7 @@ body {
     linear-gradient(90deg, rgba(8, 5, 14, 0.5) 0%, transparent 18%, transparent 82%, rgba(8, 5, 14, 0.5) 100%);
 }
 
-/* Guest across the counter — soft-masked into the back-bar, not a floating photo */
+/* Guest across the counter ? soft-masked into the back-bar, not a floating photo */
 .bar-guest {
   position: absolute;
   z-index: 1;
@@ -997,7 +997,7 @@ body {
   100% { transform: translateX(-50%) rotate(0deg); opacity: 1; }
 }
 
-/* Perspective stage — wood plane + vessels in the same 3D space */
+/* Perspective stage ? wood plane + vessels in the same 3D space */
 .counter-stage {
   position: relative;
   z-index: 2;
@@ -1174,7 +1174,7 @@ body {
   max-height: 250px;
 }
 .glass-photo-stack {
-  display: none; /* retired cutout plates — SVG vessels sit in-scene */
+  display: none; /* retired cutout plates ? SVG vessels sit in-scene */
 }
 
 /* placeholder when no glass chosen */
@@ -1200,7 +1200,7 @@ body {
   height: 100%;
   display: block;
   animation: glassIn 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.3);
-  /* Contact shadow is .vessel-shadow — keep SVG clean */
+  /* Contact shadow is .vessel-shadow ? keep SVG clean */
   filter: none;
 }
 .glass-svg .surface {
@@ -1339,7 +1339,7 @@ body {
   bottom: 38%;
 }
 
-/* shake — lift prep vessel off the counter, keep glass waiting */
+/* shake ? lift prep vessel off the counter, keep glass waiting */
 .station.anim-shake .prep-mount {
   animation: shake 0.7s ease-in-out infinite;
   transform-origin: center bottom;
@@ -1798,7 +1798,7 @@ body {
   position: relative;
 }
 .mix-tips li::before {
-  content: "•";
+  content: "?";
   position: absolute;
   left: 4px;
   color: var(--gold);
@@ -1976,7 +1976,7 @@ body {
   .topbar-right .btn-sm {
     padding: 6px 10px;
   }
-  /* Keep vessels planted on .bar-top — do not lift with padding/margin */
+  /* Keep vessels planted on .bar-top ? do not lift with padding/margin */
   .station-bench {
     gap: 8px;
   }
@@ -2994,7 +2994,7 @@ body {
   color: var(--muted);
 }
 .judge-tip-list li::before {
-  content: "•";
+  content: "?";
   position: absolute;
   left: 4px;
   color: var(--gold);
@@ -3262,7 +3262,7 @@ body {
     radial-gradient(800px 700px at -10% 110%, #3a1430 0%, transparent 55%),
     var(--bg);
 }
-/* The duck mascot — the brand centrepiece at the top of the menu. */
+/* The duck mascot ? the brand centrepiece at the top of the menu. */
 .brand-duck {
   width: min(62vw, 220px);
   height: min(46vw, 168px);
@@ -3681,7 +3681,7 @@ body {
   50% { transform: rotate(52deg) scaleY(0.75) translateY(-4px); }
 }
 
-/* SF2-style hop chrome — lives on the map, not a modal dialog */
+/* SF2-style hop chrome ? lives on the map, not a modal dialog */
 .map-hop {
   position: absolute;
   inset: 0;
@@ -4785,7 +4785,7 @@ body {
   }
 }
 
-/* Phone landscape: lock game + result to the viewport — no page scroll */
+/* Phone landscape: lock game + result to the viewport ? no page scroll */
 body.is-phone-play {
   overflow: hidden;
   overscroll-behavior: none;
@@ -5027,7 +5027,7 @@ body.is-phone-play .chip {
 }
 
 /* ============================ Start hub (main menu) ============================ */
-/* Hub-style layout (à la Homescapes/Coin Master corner-anchored hub +
+/* Hub-style layout (� la Homescapes/Coin Master corner-anchored hub +
    Duolingo's compact single-row status HUD): one open stage for the mascot,
    a single dominant "Play" action, and everything else tucked to the edges
    so the page reads as neither empty nor crowded. */
@@ -5301,8 +5301,114 @@ body.is-phone-play .chip {
 .hub-cta {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: stretch;
   gap: 4px;
+  width: 100%;
+  max-width: 420px;
+  justify-self: center;
+}
+.cta-wrap {
+  position: relative;
+  width: 100%;
+}
+.cta-split {
+  display: grid;
+  grid-template-columns: 1fr 48px;
+  width: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 12px 0 #7a4e08, 0 18px 36px rgba(233, 185, 73, 0.26);
+}
+.cta-main,
+.cta-caret {
+  font-family: inherit;
+  font-weight: 800;
+  color: #1a1008;
+  background: linear-gradient(180deg, #f0c85a, #c98412);
+  border: 0;
+  cursor: pointer;
+  padding: 15px 14px;
+}
+.cta-main {
+  text-align: left;
+  padding-left: 18px;
+  font-size: 15px;
+  line-height: 1.2;
+}
+.cta-caret {
+  border-left: 1px solid rgba(80, 45, 0, 0.35);
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+}
+.cta-main:hover,
+.cta-caret:hover {
+  filter: brightness(1.04);
+}
+.cta-caret[aria-expanded="true"] {
+  filter: brightness(0.94);
+}
+.cta-menu {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 8px);
+  z-index: 20;
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(233, 185, 73, 0.35);
+  background: linear-gradient(180deg, #2a1c3c, #16101f);
+  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.45);
+}
+.cta-menu.is-open {
+  display: flex;
+}
+.cta-menu[hidden] {
+  display: none !important;
+}
+.cta-menu-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font: inherit;
+  cursor: pointer;
+}
+.cta-menu-item:hover {
+  background: rgba(233, 185, 73, 0.12);
+}
+.cta-menu-item.is-locked {
+  opacity: 0.55;
+}
+.cta-menu-item .ico {
+  font-size: 18px;
+  line-height: 1.2;
+  width: 24px;
+  text-align: center;
+}
+.cta-menu-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.cta-menu-text strong {
+  font-size: 14px;
+  font-weight: 800;
+}
+.cta-menu-text small {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 600;
 }
 .hub-cta .btn {
   padding: 17px 38px;
@@ -5326,6 +5432,26 @@ body.is-phone-play .chip {
   border: 1px solid var(--line);
   border-radius: 14px;
   overflow: hidden;
+}
+.hub-modes--quiet {
+  justify-self: center;
+  background: transparent;
+  border: 0;
+  gap: 16px;
+  overflow: visible;
+}
+.hub-link-btn {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 6px 2px;
+}
+.hub-link-btn:hover {
+  color: var(--text);
 }
 .hub-mode-btn {
   display: flex;
@@ -5387,6 +5513,37 @@ body.is-phone-play .chip {
 }
 .hub-nav-btn:hover {
   color: var(--gold-soft);
+}
+
+.mix-lounge {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 4px 0 2px;
+  padding: 8px 4px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.mix-lounge-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 7px 11px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.mix-lounge-btn .ico {
+  font-size: 13px;
+}
+.mix-lounge-btn:hover {
+  color: var(--text);
+  border-color: rgba(233, 185, 73, 0.45);
 }
 
 #screen-start .best-score {
@@ -5498,4 +5655,207 @@ body.is-phone-play .chip {
   #screen-start .best-score {
     display: none;
   }
+}
+
+/* ============================ Unified game stage (PC = mobile) ============================ */
+/* Fixed design canvas (phone-landscape). JS scales it to fit any viewport. */
+:root {
+  --stage-w: 1100px;
+  --stage-h: 508px;
+  --stage-scale: 1;
+}
+.game-shell {
+  width: 100vw;
+  height: 100dvh;
+  height: 100svh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #08060e;
+}
+.game-stage {
+  width: var(--stage-w);
+  height: var(--stage-h);
+  position: relative;
+  transform-origin: center center;
+  overflow: hidden;
+  background: var(--bg);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
+}
+.game-stage .app {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  min-height: 0;
+  margin: 0;
+  padding: 8px 12px;
+  overflow: hidden;
+}
+body.has-game-stage {
+  overflow: hidden;
+  overscroll-behavior: none;
+  background: #08060e;
+}
+body.has-game-stage .app {
+  height: 100%;
+  max-height: 100%;
+}
+
+/* Stage-relative heights ? never use the real viewport inside the canvas */
+.game-stage .screen.is-active {
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+}
+.game-stage #screen-splash,
+.game-stage #screen-splash.is-active {
+  min-height: 100%;
+  height: 100%;
+}
+.game-stage #screen-start.is-active,
+.game-stage #screen-map.is-active,
+.game-stage #screen-result.is-active,
+.game-stage #screen-mix-result.is-active,
+.game-stage #screen-endless.is-active,
+.game-stage #screen-finish.is-active,
+.game-stage #screen-settings.is-active,
+.game-stage #screen-mybar.is-active,
+.game-stage #screen-badges.is-active,
+.game-stage #screen-community.is-active,
+.game-stage #screen-leaderboard.is-active,
+.game-stage #screen-recipes.is-active,
+.game-stage #screen-shop.is-active,
+.game-stage #screen-intro.is-active,
+.game-stage #screen-game.is-active {
+  min-height: 0;
+  height: 100%;
+  max-height: 100%;
+}
+.game-stage .comic {
+  max-width: none;
+  min-height: 0;
+  height: 100%;
+}
+.game-stage .result-card,
+.game-stage .mix-card {
+  max-height: 100%;
+  max-width: none;
+}
+.game-stage .modal {
+  position: absolute;
+}
+.game-stage .rankup,
+.game-stage .map-sheet {
+  position: absolute;
+}
+
+/* Hub: always phone-landscape side-by-side (ignore tall desktop media queries) */
+.game-stage .hub-mid {
+  flex-direction: row;
+  align-items: stretch;
+  gap: 14px;
+}
+.game-stage .hub-stage {
+  flex: 0 0 auto;
+  justify-content: center;
+  padding: 0;
+}
+.game-stage .hub-duck {
+  flex: none;
+  width: auto;
+  height: 100%;
+  max-height: 280px;
+  max-width: 36%;
+  aspect-ratio: 0.65;
+  margin-bottom: 0;
+}
+.game-stage .hub-status {
+  display: none;
+}
+.game-stage .hub-bottom {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-items: stretch;
+  align-content: center;
+  justify-items: stretch;
+  margin-top: 0;
+  padding-top: 0;
+  gap: 8px;
+}
+.game-stage .hub-quest,
+.game-stage .hub-modes {
+  justify-self: stretch;
+  max-width: 100%;
+}
+.game-stage .hub-modes {
+  justify-content: center;
+}
+.game-stage .hub-nav {
+  margin-top: 4px;
+  padding-top: 4px;
+}
+.game-stage #screen-start .best-score {
+  display: none;
+}
+.game-stage .start-hub {
+  height: 100%;
+  max-height: 100%;
+  padding: 10px 14px 8px;
+}
+
+/* Game station: keep side-by-side layout even when the phone viewport is narrow */
+.game-stage #screen-game.is-active {
+  display: grid;
+  grid-template-columns: minmax(200px, 34%) minmax(0, 1fr);
+  grid-template-rows: auto auto auto auto 1fr auto;
+  grid-template-areas:
+    "topbar topbar"
+    "progress progress"
+    "ticket stage"
+    "steps stage"
+    "coach stage"
+    "nav stage";
+  gap: 6px 8px;
+  align-items: stretch;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+.game-stage #screen-game.is-active .topbar { grid-area: topbar; }
+.game-stage #screen-game.is-active .progress-wrap { grid-area: progress; }
+.game-stage #screen-game.is-active .order-ticket { grid-area: ticket; }
+.game-stage #screen-game.is-active .step-tracker { grid-area: steps; }
+.game-stage #screen-game.is-active .coach { grid-area: coach; margin: 0; }
+.game-stage #screen-game.is-active .stage-area {
+  grid-area: stage;
+  display: grid;
+  grid-template-columns: minmax(160px, 42%) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
+  min-height: 0;
+  height: 100%;
+  gap: 8px;
+  overflow: hidden;
+}
+.game-stage #screen-game.is-active .step-nav {
+  grid-area: nav;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 6px;
+  align-self: end;
+}
+.game-stage .station {
+  min-height: 0;
+  height: 100%;
+}
+.game-stage .glass-mount .glass-svg,
+.game-stage .prep-mount .prep-svg {
+  max-height: min(46%, 170px);
+}
+
+/* Toast lives outside the stage ? keep it readable on the shell */
+body.has-game-stage .toast {
+  z-index: 10001;
 }

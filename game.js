@@ -730,14 +730,20 @@ function renderStartMeta() {
   const ok = mapUnlocked();
   const left = Math.max(0, STAGES_TO_UNLOCK - map.cleared);
   const endlessBtn = $("#btn-endless");
+  const endlessSub = $("#endless-menu-sub");
   if (endlessBtn) {
     endlessBtn.classList.toggle("is-locked", !ok);
-    endlessBtn.textContent = ok ? "🔥 Endless Shift" : `🔒 Endless · ${left} to go`;
+    if (endlessSub) {
+      endlessSub.textContent = ok ? "No recipe — survive the rush" : `Locked · ${left} to go`;
+    }
   }
   const mixBtn = $("#btn-mixologist");
+  const mixSub = $("#mix-menu-sub");
   if (mixBtn) {
     mixBtn.classList.toggle("is-locked", !ok);
-    mixBtn.textContent = ok ? "🧪 Mixologist" : `🔒 Mixologist · ${left} to go`;
+    if (mixSub) {
+      mixSub.textContent = ok ? "Invent & share your own drinks" : `Locked · ${left} to go`;
+    }
   }
   const badgeBtn = $("#btn-badges");
   if (badgeBtn) badgeBtn.textContent = `🏅 Badges (${getEarned().length}/${BADGES.length})`;
@@ -1553,9 +1559,27 @@ function showScreen(id) {
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
   if (id === "screen-start") onShowStart();
   if (id === "screen-map") ensureMapAssets();
+  if (id === "screen-mix-result") {
+    const commBtn = $("#btn-community");
+    if (commBtn) commBtn.style.display = isUnderage() ? "none" : "";
+  }
+}
+
+/** Design canvas for the unified stage (phone-landscape proportions). */
+const STAGE_W = 1100;
+const STAGE_H = 508;
+
+function fitGameStage() {
+  const stage = document.getElementById("game-stage");
+  if (!stage) return;
+  const scale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
+  stage.style.transform = `scale(${Math.max(0.2, scale)})`;
+  document.documentElement.style.setProperty("--stage-scale", String(scale));
 }
 
 function isPhonePlay() {
+  // Stage is locked to phone-landscape density so PC and mobile match.
+  if (document.getElementById("game-stage")) return true;
   try {
     return window.matchMedia("(pointer: coarse) and (orientation: landscape) and (max-height: 560px)").matches
       || window.matchMedia("(pointer: coarse) and (max-width: 920px) and (max-height: 500px)").matches;
@@ -3327,10 +3351,36 @@ function showFinish() {
 }
 
 // ============================ Event wiring ============================
+function setCtaMenuOpen(open) {
+  const menu = $("#cta-menu");
+  const caret = $("#btn-cta-caret");
+  if (!menu || !caret) return;
+  menu.hidden = !open;
+  menu.classList.toggle("is-open", !!open);
+  caret.setAttribute("aria-expanded", open ? "true" : "false");
+  caret.textContent = open ? "▲" : "▼";
+}
+
+$("#btn-cta-caret")?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  Sound.init();
+  Sound.click();
+  const menu = $("#cta-menu");
+  setCtaMenuOpen(!!(menu && menu.hidden));
+});
+document.addEventListener("click", (e) => {
+  const wrap = $("#cta-wrap");
+  if (wrap && !wrap.contains(e.target)) setCtaMenuOpen(false);
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") setCtaMenuOpen(false);
+});
+
 // Play the journey → open the stage map.
 $("#btn-start").addEventListener("click", () => {
   Sound.init();
   Sound.click();
+  setCtaMenuOpen(false);
   // Ensure the story plays before the very first level (covers players who
   // registered before the intro existed).
   maybePlayIntro(() => {
@@ -3376,6 +3426,7 @@ $("#btn-rankup-ok").addEventListener("click", () => { Sound.click(); $("#rankup"
 
 $("#btn-mixologist").addEventListener("click", () => {
   Sound.init();
+  setCtaMenuOpen(false);
   if (!mapUnlocked()) { Sound.fail(); showToast(`🔒 Clear ${STAGES_TO_UNLOCK} stages to unlock Mixologist`); return; }
   Sound.coin();
   track("mixologist_started");
@@ -3384,6 +3435,7 @@ $("#btn-mixologist").addEventListener("click", () => {
 
 $("#btn-endless").addEventListener("click", () => {
   Sound.init();
+  setCtaMenuOpen(false);
   if (!mapUnlocked()) { Sound.fail(); showToast(`🔒 Clear ${STAGES_TO_UNLOCK} stages to unlock Endless Shift`); return; }
   Sound.coin();
   track("endless_started");
@@ -3538,10 +3590,11 @@ $("#btn-badges-back").addEventListener("click", () => showScreen("screen-start")
 $("#btn-mybar").addEventListener("click", () => {
   Sound.init();
   Sound.click();
+  rememberSecondaryReturn();
   renderMyBar();
   showScreen("screen-mybar");
 });
-$("#btn-mybar-back").addEventListener("click", () => showScreen("screen-start"));
+$("#btn-mybar-back").addEventListener("click", () => backFromSecondary());
 
 // Name modal
 $("#btn-name-cancel").addEventListener("click", () => $("#modal-name").classList.remove("is-open"));
@@ -3636,10 +3689,11 @@ function renderRecipeBook() {
 $("#btn-recipes").addEventListener("click", () => {
   Sound.init();
   Sound.click();
+  rememberSecondaryReturn();
   renderRecipeBook();
   showScreen("screen-recipes");
 });
-$("#btn-recipes-back").addEventListener("click", () => showScreen("screen-start"));
+$("#btn-recipes-back").addEventListener("click", () => backFromSecondary());
 
 // ============================ Shop (demo store) ============================
 // Fake storefront: links each drink to the glassware and tools that make it —
@@ -3727,6 +3781,7 @@ function renderShopScreen() {
   renderShopCart();
 }
 function openShop(recipe) {
+  rememberSecondaryReturn();
   shopScopeRecipe = recipe || null;
   shopKindFilter = "all";
   renderShopScreen();
@@ -3734,12 +3789,27 @@ function openShop(recipe) {
   track("shop_open", { recipe: recipe ? recipe.name : null });
 }
 
+/** Where secondary screens (shop / recipes / lounge) should return. */
+let secondaryReturn = "screen-start";
+function rememberSecondaryReturn() {
+  const cur = document.querySelector(".screen.is-active");
+  if (cur && cur.id && cur.id !== "screen-shop" && cur.id !== "screen-recipes"
+    && cur.id !== "screen-mybar" && cur.id !== "screen-community" && cur.id !== "screen-leaderboard") {
+    secondaryReturn = cur.id;
+  }
+}
+function backFromSecondary() {
+  const dest = secondaryReturn || "screen-start";
+  showScreen(dest);
+  if (dest === "screen-start") onShowStart();
+}
+
 $("#btn-shop").addEventListener("click", () => {
   Sound.init();
   Sound.click();
   openShop(null);
 });
-$("#btn-shop-back").addEventListener("click", () => showScreen("screen-start"));
+$("#btn-shop-back").addEventListener("click", () => backFromSecondary());
 $("#shop-context-clear").addEventListener("click", () => {
   shopScopeRecipe = null;
   renderShopScreen();
@@ -4129,6 +4199,11 @@ $("#screen-splash").addEventListener("click", () => { Sound.init(); Sound.click(
 
 // Boot: everyone sees the brand splash first. New players then get the
 // credentials modal; returning players continue to the hub.
+fitGameStage();
+window.addEventListener("resize", fitGameStage);
+window.addEventListener("orientationchange", () => setTimeout(fitGameStage, 120));
+document.body.classList.add("has-game-stage");
+document.body.classList.toggle("is-phone-play", isPhonePlay());
 Sound.enabled = getSettings().sound !== false; // restore the saved sound preference
 syncSoundButtons();
 checkBadges();
@@ -4154,10 +4229,11 @@ if (getProfile()) {
 $("#btn-community").addEventListener("click", () => {
   Sound.init();
   Sound.click();
+  rememberSecondaryReturn();
   renderCommunity();
   showScreen("screen-community");
 });
-$("#btn-community-back").addEventListener("click", () => showScreen("screen-start"));
+$("#btn-community-back").addEventListener("click", () => backFromSecondary());
 document.querySelectorAll("#community-tabs .seg-tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     document.querySelectorAll("#community-tabs .seg-tab").forEach((t) => t.classList.remove("is-active"));
@@ -4172,10 +4248,11 @@ document.querySelectorAll("#community-tabs .seg-tab").forEach((tab) => {
 $("#btn-leaderboard").addEventListener("click", () => {
   Sound.init();
   Sound.click();
+  rememberSecondaryReturn();
   renderLeaderboard();
   showScreen("screen-leaderboard");
 });
-$("#btn-leaderboard-back").addEventListener("click", () => showScreen("screen-start"));
+$("#btn-leaderboard-back").addEventListener("click", () => backFromSecondary());
 document.querySelectorAll("#leaderboard-tabs .seg-tab").forEach((tab) => {
   tab.addEventListener("click", () => {
     document.querySelectorAll("#leaderboard-tabs .seg-tab").forEach((t) => t.classList.remove("is-active"));
