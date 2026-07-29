@@ -216,7 +216,22 @@
               <img class="map-plate" id="map-plate" data-src="assets/maps/dag-tails-bar-hop-map.jpg?v=4" alt="Bar hop journey map" draggable="false" />
               <div class="map-hubs" id="map-hubs"></div>
               <div class="map-duck" id="map-duck" aria-hidden="true">
+                <span class="map-duck-wing map-duck-wing--l" aria-hidden="true"></span>
                 <img id="map-duck-img" alt="" draggable="false" />
+                <span class="map-duck-wing map-duck-wing--r" aria-hidden="true"></span>
+              </div>
+            </div>
+          </div>
+          <div class="map-hop" id="map-hop" hidden aria-live="polite">
+            <div class="map-hop-shade" aria-hidden="true"></div>
+            <div class="map-hop-bar map-hop-bar--top" aria-hidden="true"></div>
+            <div class="map-hop-bar map-hop-bar--bottom" aria-hidden="true"></div>
+            <div class="map-hop-banner">
+              <span class="map-hop-eyebrow" id="map-hop-eyebrow">Next stop</span>
+              <div class="map-hop-names">
+                <span class="map-hop-from" id="map-hop-from"></span>
+                <span class="map-hop-arrow" aria-hidden="true">▸</span>
+                <span class="map-hop-to" id="map-hop-to"></span>
               </div>
             </div>
           </div>
@@ -238,28 +253,6 @@
           </div>
         </div>
       </section>
-
-      <!-- Travel / farewell overlay between venues -->
-      <div id="travel-overlay" class="travel-overlay" hidden aria-live="polite">
-        <div class="travel-card">
-          <p class="travel-eyebrow" id="travel-eyebrow">Leaving the bar</p>
-          <div class="travel-master">
-            <span class="travel-master-emoji" id="travel-master-emoji">🍸</span>
-            <div>
-              <strong id="travel-master-name">Bar master</strong>
-              <span id="travel-master-title" class="travel-master-title"></span>
-            </div>
-          </div>
-          <p class="travel-quote" id="travel-quote"></p>
-          <div class="travel-flight" id="travel-flight" aria-hidden="true">
-            <span class="travel-from-flag" id="travel-from-flag"></span>
-            <span class="travel-plane">✈️</span>
-            <span class="travel-to-flag" id="travel-to-flag"></span>
-          </div>
-          <p class="travel-dest" id="travel-dest"></p>
-          <button type="button" class="btn btn-primary" id="btn-travel-continue">Continue the crawl →</button>
-        </div>
-      </div>
 
       <!-- ============================== GAME SCREEN ============================== -->
       <section id="screen-game" class="screen">

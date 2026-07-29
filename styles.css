@@ -3367,10 +3367,10 @@ body {
   color: var(--muted);
   text-align: center;
 }
-.map-stage {
-  flex: 1 1 auto;
-  min-height: 0;
-  display: block;
+.map-stage.is-hopping .map-dock,
+.map-stage.is-hopping ~ .map-dock {
+  pointer-events: none;
+  opacity: 0.55;
 }
 .map-dock {
   flex: 0 0 auto;
@@ -3618,6 +3618,8 @@ body {
   will-change: left, top;
 }
 .map-duck img {
+  position: relative;
+  z-index: 2;
   width: 100%;
   height: 100%;
   object-fit: contain;
@@ -3627,22 +3629,154 @@ body {
   pointer-events: none;
   user-select: none;
 }
+.map-duck-wing {
+  display: none;
+  position: absolute;
+  top: 28%;
+  width: 34px;
+  height: 22px;
+  z-index: 1;
+  background:
+    radial-gradient(ellipse 70% 55% at 50% 45%, #ffe07a 0%, #f0b429 55%, #c98412 100%);
+  border-radius: 60% 60% 40% 40%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
+  transform-origin: center center;
+}
+.map-duck-wing--l { left: -10%; }
+.map-duck-wing--r { right: -10%; }
 .map-duck.is-walking {
   transition-duration: 0.55s;
   animation: duckWaddle 0.28s ease-in-out infinite;
 }
 .map-duck.is-flying {
-  transition-duration: 1.2s;
-  animation: duckFly 0.4s ease-in-out infinite;
+  width: 88px;
+  height: 110px;
+  transition-duration: 1.55s;
+  animation: duckSoar 0.35s ease-in-out infinite;
   z-index: 8;
+}
+.map-duck.is-flying .map-duck-wing {
+  display: block;
+}
+.map-duck.is-flying .map-duck-wing--l {
+  animation: wingFlapL 0.22s ease-in-out infinite;
+}
+.map-duck.is-flying .map-duck-wing--r {
+  animation: wingFlapR 0.22s ease-in-out infinite;
 }
 @keyframes duckWaddle {
   0%, 100% { transform: translate(-50%, -92%) rotate(-5deg); }
   50% { transform: translate(-50%, -102%) rotate(5deg); }
 }
-@keyframes duckFly {
-  0%, 100% { transform: translate(-50%, -110%) rotate(-10deg) scale(1.06); }
-  50% { transform: translate(-50%, -135%) rotate(8deg) scale(1.1); }
+@keyframes duckSoar {
+  0%, 100% { transform: translate(-50%, -120%) rotate(-8deg) scale(1.08); }
+  50% { transform: translate(-50%, -145%) rotate(6deg) scale(1.14); }
+}
+@keyframes wingFlapL {
+  0%, 100% { transform: rotate(-18deg) scaleY(1); }
+  50% { transform: rotate(-52deg) scaleY(0.75) translateY(-4px); }
+}
+@keyframes wingFlapR {
+  0%, 100% { transform: rotate(18deg) scaleY(1); }
+  50% { transform: rotate(52deg) scaleY(0.75) translateY(-4px); }
+}
+
+/* SF2-style hop chrome — lives on the map, not a modal dialog */
+.map-hop {
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  pointer-events: none;
+  overflow: hidden;
+}
+.map-hop[hidden] { display: none !important; }
+.map-hop-shade {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 3, 12, 0.12);
+  animation: hopShadeIn 0.35s ease;
+}
+.map-hop-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 11%;
+  background: linear-gradient(180deg, #0a0612, #1a1028);
+  border-color: rgba(233, 185, 73, 0.45);
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.55);
+}
+.map-hop-bar--top {
+  top: 0;
+  border-bottom: 2px solid rgba(233, 185, 73, 0.5);
+  animation: hopBarTop 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.map-hop-bar--bottom {
+  bottom: 0;
+  border-top: 2px solid rgba(233, 185, 73, 0.5);
+  animation: hopBarBot 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.map-hop-banner {
+  position: absolute;
+  left: 50%;
+  top: 14%;
+  transform: translate(-50%, 0);
+  min-width: min(92%, 420px);
+  text-align: center;
+  padding: 12px 20px;
+  background: linear-gradient(180deg, rgba(20, 12, 32, 0.92), rgba(10, 6, 18, 0.94));
+  border: 2px solid rgba(233, 185, 73, 0.55);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.55), inset 0 0 24px rgba(233, 185, 73, 0.08);
+  animation: hopBannerIn 0.45s cubic-bezier(0.2, 0.85, 0.25, 1);
+}
+.map-hop-eyebrow {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 800;
+  margin-bottom: 6px;
+}
+.map-hop-names {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.map-hop-from,
+.map-hop-to {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(22px, 5vw, 34px);
+  letter-spacing: 1px;
+  line-height: 1;
+  color: #fff7e6;
+  text-shadow: 0 0 12px rgba(233, 185, 73, 0.35);
+}
+.map-hop-arrow {
+  font-size: 22px;
+  color: var(--gold);
+  animation: hopArrowPulse 0.7s ease-in-out infinite;
+}
+@keyframes hopShadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes hopBarTop {
+  from { transform: translateY(-110%); }
+  to { transform: translateY(0); }
+}
+@keyframes hopBarBot {
+  from { transform: translateY(110%); }
+  to { transform: translateY(0); }
+}
+@keyframes hopBannerIn {
+  from { opacity: 0; transform: translate(-50%, 0) scaleX(0.2); }
+  to { opacity: 1; transform: translate(-50%, 0) scaleX(1); }
+}
+@keyframes hopArrowPulse {
+  0%, 100% { transform: translateX(0); opacity: 0.7; }
+  50% { transform: translateX(6px); opacity: 1; }
 }
 
 .map-stops {
@@ -3744,86 +3878,10 @@ body {
   border-color: rgba(255,255,255,0.12);
 }
 
-.travel-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 70;
-  display: grid;
-  place-items: center;
-  padding: 20px;
-  background: rgba(6, 3, 12, 0.72);
-  backdrop-filter: blur(6px);
-}
-.travel-overlay[hidden] { display: none !important; }
-.travel-card {
-  width: min(440px, 100%);
-  padding: 22px 22px 18px;
-  border-radius: 16px;
-  border: 1px solid rgba(233,185,73,0.35);
-  background:
-    radial-gradient(80% 60% at 50% 0%, rgba(233,185,73,0.14), transparent 60%),
-    linear-gradient(180deg, #241838, #120c1c);
-  box-shadow: 0 24px 48px rgba(0,0,0,0.55);
-  text-align: center;
-  animation: travelIn 0.35s ease;
-}
 @keyframes travelIn {
   from { opacity: 0; transform: translateY(16px) scale(0.96); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
-.travel-eyebrow {
-  margin: 0 0 12px;
-  font-size: 11px;
-  letter-spacing: 1.6px;
-  text-transform: uppercase;
-  color: var(--gold);
-  font-weight: 800;
-}
-.travel-master {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  margin-bottom: 12px;
-  text-align: left;
-}
-.travel-master-emoji {
-  font-size: 36px;
-  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4));
-}
-.travel-master strong { display: block; font-size: 16px; }
-.travel-master-title { display: block; font-size: 12px; color: var(--muted); }
-.travel-quote {
-  margin: 0 0 16px;
-  font-size: 15px;
-  line-height: 1.45;
-  font-style: italic;
-  color: rgba(255,236,200,0.92);
-}
-.travel-flight {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  margin-bottom: 8px;
-  font-size: 28px;
-}
-.travel-plane {
-  display: inline-block;
-  animation: planeHop 1.1s ease-in-out infinite;
-}
-.travel-flight.is-final .travel-plane { display: none; }
-@keyframes planeHop {
-  0%, 100% { transform: translateX(-6px) translateY(2px) rotate(-8deg); }
-  50% { transform: translateX(6px) translateY(-6px) rotate(8deg); }
-}
-.travel-dest {
-  margin: 0 0 16px;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--gold);
-}
-.travel-card .btn { width: 100%; }
 
 @media (max-width: 900px) {
   .map-stop-card strong { max-width: 88px; font-size: 10.5px; }

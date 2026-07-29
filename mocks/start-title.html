@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>DAG Tails — Title screen mock</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0c0814;
+      --ink: #fff7e6;
+      --muted: rgba(255, 236, 200, 0.62);
+      --gold: #e9b949;
+      --gold-deep: #c98412;
+      --line: rgba(255, 255, 255, 0.12);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+    }
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: Nunito, system-ui, sans-serif;
+      background: #1a1424;
+      color: var(--ink);
+    }
+    body {
+      display: grid;
+      place-items: start center;
+      padding: 24px 12px 40px;
+      gap: 18px;
+    }
+    h1.doc {
+      margin: 0;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 28px;
+      letter-spacing: 1px;
+      font-weight: 400;
+      color: #fff7e6;
+    }
+    .note {
+      max-width: 390px;
+      margin: 0;
+      font-size: 13px;
+      line-height: 1.45;
+      color: rgba(255, 236, 200, 0.7);
+    }
+    .note strong { color: var(--gold); font-weight: 800; }
+
+    /* Phone frame */
+    .phone {
+      width: min(390px, 100%);
+      aspect-ratio: 390 / 844;
+      max-height: 92vh;
+      border-radius: 36px;
+      border: 2px solid rgba(255,255,255,0.14);
+      box-shadow: 0 30px 60px rgba(0,0,0,0.55);
+      overflow: hidden;
+      position: relative;
+      background: var(--bg);
+    }
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      padding: 14px 18px calc(18px + var(--safe-b));
+      background:
+        radial-gradient(120% 70% at 50% 100%, rgba(233, 185, 73, 0.18), transparent 55%),
+        radial-gradient(80% 50% at 70% 20%, rgba(180, 90, 40, 0.18), transparent 60%),
+        linear-gradient(180deg, #1a1020 0%, #100a16 55%, #08060c 100%);
+    }
+    .screen::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,0.15), transparent 28%),
+        linear-gradient(0deg, rgba(0,0,0,0.55), transparent 42%);
+      pointer-events: none;
+    }
+
+    .top {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+      min-height: 36px;
+    }
+    .star-chip {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--gold);
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,0.25);
+    }
+    .gear {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: rgba(0,0,0,0.25);
+      color: var(--muted);
+      font-size: 15px;
+      cursor: pointer;
+    }
+
+    .hero {
+      position: relative;
+      z-index: 2;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 10px;
+      min-height: 0;
+      padding-bottom: 8px;
+    }
+    .logo {
+      width: min(72%, 260px);
+      height: auto;
+      filter: drop-shadow(0 10px 22px rgba(0,0,0,0.55));
+      animation: brandIn 0.7s ease both;
+    }
+    .tag {
+      margin: 0;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+      animation: fadeUp 0.7s 0.15s ease both;
+    }
+    .mascot-wrap {
+      position: relative;
+      width: min(70%, 260px);
+      margin-top: 4px;
+      animation: fadeUp 0.75s 0.22s ease both;
+    }
+    .mascot {
+      display: block;
+      width: 100%;
+      height: auto;
+      filter: drop-shadow(0 18px 18px rgba(0,0,0,0.55));
+      animation: idle 3.2s ease-in-out infinite;
+    }
+    .bar-glow {
+      position: absolute;
+      left: 10%;
+      right: 10%;
+      bottom: 4%;
+      height: 28%;
+      background: radial-gradient(ellipse at center, rgba(233,185,73,0.35), transparent 70%);
+      filter: blur(8px);
+      z-index: -1;
+    }
+
+    .actions {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding-top: 4px;
+    }
+    .btn-play {
+      width: 100%;
+      max-width: 320px;
+      border: 0;
+      border-radius: 999px;
+      padding: 16px 22px;
+      font-family: inherit;
+      font-size: 17px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+      color: #1a1008;
+      background: linear-gradient(180deg, #f0c85a, var(--gold-deep));
+      box-shadow: 0 10px 0 #7a4e08, 0 16px 28px rgba(0,0,0,0.4);
+      cursor: pointer;
+      animation: fadeUp 0.7s 0.3s ease both;
+      transition: transform 0.12s ease;
+    }
+    .btn-play:active { transform: translateY(3px); box-shadow: 0 7px 0 #7a4e08, 0 10px 18px rgba(0,0,0,0.35); }
+    .play-meta {
+      margin: -4px 0 0;
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(233,185,73,0.85);
+      animation: fadeUp 0.7s 0.35s ease both;
+    }
+    .secondary {
+      display: flex;
+      gap: 18px;
+      justify-content: center;
+      animation: fadeUp 0.7s 0.4s ease both;
+    }
+    .secondary button {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 6px 2px;
+      opacity: 0.9;
+    }
+    .secondary button:hover { color: var(--ink); }
+    .more-row {
+      display: flex;
+      gap: 10px;
+      animation: fadeUp 0.7s 0.45s ease both;
+    }
+    .more-row button {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--muted);
+      border-radius: 999px;
+      padding: 8px 14px;
+      font: inherit;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    /* Sheet for buried destinations */
+    .sheet {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      display: none;
+      align-items: flex-end;
+      background: rgba(0,0,0,0.45);
+    }
+    .sheet.is-open { display: flex; }
+    .sheet-card {
+      width: 100%;
+      border-radius: 20px 20px 0 0;
+      padding: 16px 16px calc(18px + var(--safe-b));
+      background: linear-gradient(180deg, #241830, #120c1a);
+      border-top: 1px solid rgba(233,185,73,0.3);
+      animation: sheetUp 0.28s ease;
+    }
+    .sheet-card h2 {
+      margin: 0 0 12px;
+      font-family: "Bebas Neue", sans-serif;
+      font-size: 28px;
+      letter-spacing: 1px;
+      font-weight: 400;
+    }
+    .sheet-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .sheet-grid button {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color: var(--ink);
+      border-radius: 14px;
+      padding: 14px 10px;
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: left;
+    }
+    .sheet-close {
+      width: 100%;
+      margin-top: 10px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font: inherit;
+      font-weight: 800;
+      padding: 10px;
+      cursor: pointer;
+    }
+
+    .compare {
+      width: min(390px, 100%);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 16px;
+      padding: 14px 16px;
+      background: rgba(0,0,0,0.25);
+      font-size: 13px;
+      line-height: 1.45;
+      color: rgba(255,236,200,0.75);
+    }
+    .compare h2 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: var(--gold);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+    .compare ul { margin: 0; padding-left: 18px; }
+    .compare li { margin: 4px 0; }
+
+    @keyframes brandIn {
+      from { opacity: 0; transform: translateY(-10px) scale(0.96); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: none; }
+    }
+    @keyframes idle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes sheetUp {
+      from { transform: translateY(24px); opacity: 0.6; }
+      to { transform: none; opacity: 1; }
+    }
+
+    @media (orientation: landscape) and (max-height: 500px) {
+      body { padding: 8px; }
+      .phone {
+        width: min(844px, 100%);
+        aspect-ratio: 844 / 390;
+        max-height: 88vh;
+      }
+      .hero { flex-direction: row; justify-content: space-around; gap: 8px; }
+      .logo { width: min(36%, 220px); }
+      .mascot-wrap { width: min(28%, 160px); margin: 0; }
+      .actions { flex: 0 0 42%; align-items: stretch; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+  <h1 class="doc">Title screen mock — recommended</h1>
+  <p class="note">
+    Pattern borrowed from big titles: <strong>one job on first paint</strong> —
+    brand + world + Continue. Modes and meta live one tap away.
+  </p>
+
+  <div class="phone" aria-label="Proposed start screen">
+    <div class="screen">
+      <header class="top">
+        <span class="star-chip">★ 12</span>
+        <button class="gear" type="button" title="Settings" aria-label="Settings">⚙</button>
+      </header>
+
+      <div class="hero">
+        <img class="logo" src="../assets/brand/dag-tails-logo.png" alt="DAG Tails" />
+        <p class="tag" id="tag">Your next shift is ready.</p>
+        <div class="mascot-wrap">
+          <div class="bar-glow" aria-hidden="true"></div>
+          <img class="mascot" src="../assets/duck-hub-mascot.png" alt="" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn-play" type="button">Continue →</button>
+        <p class="play-meta">The Snug · drink 2 of 3</p>
+        <div class="secondary">
+          <button type="button">Endless</button>
+          <button type="button">Mix</button>
+          <button type="button" id="btn-more">More…</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="sheet" id="sheet" hidden>
+      <div class="sheet-card">
+        <h2>Lounge</h2>
+        <div class="sheet-grid">
+          <button type="button">🛍 Shop</button>
+          <button type="button">📖 Recipes</button>
+          <button type="button">🏅 Badges</button>
+          <button type="button">🍹 My Bar</button>
+          <button type="button">🌐 Community</button>
+          <button type="button">🏆 Ranks</button>
+          <button type="button">📚 Learn</button>
+          <button type="button">❓ Help</button>
+          <button type="button">🍹 Cocktail of the Day</button>
+        </div>
+        <button class="sheet-close" type="button" id="sheet-close">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <aside class="compare">
+    <h2>What this cuts vs today</h2>
+    <ul>
+      <li>No chip strip (streak / level / stars as a cluster)</li>
+      <li>No Cocktail-of-the-Day card on the home surface</li>
+      <li>No 6-tab bottom nav</li>
+      <li>No tagline footer competing with the brand</li>
+      <li>Learn / Help / meta → <em>More</em> sheet</li>
+    </ul>
+  </aside>
+
+  <script>
+    const sheet = document.getElementById("sheet");
+    const open = () => { sheet.hidden = false; sheet.classList.add("is-open"); };
+    const close = () => { sheet.classList.remove("is-open"); sheet.hidden = true; };
+    document.getElementById("btn-more").addEventListener("click", open);
+    document.getElementById("sheet-close").addEventListener("click", close);
+    sheet.addEventListener("click", (e) => { if (e.target === sheet) close(); });
+  </script>
+</body>
+</html>

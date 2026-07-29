@@ -1009,7 +1009,7 @@ function updateMapCta() {
   btn.textContent = `Pour at ${at.venue.name}: ${recipe?.name || "next drink"} →`;
   if (hint) {
     hint.textContent = pendingTravel
-      ? "Duck is flying — wait for the hop, then continue."
+      ? "Duck is taking wing — watch the hop."
       : `Next: drink ${local}/${at.count} at ${at.venue.name}. Tap the glowing bar or the button below.`;
   }
 }
@@ -1176,7 +1176,7 @@ function renderMap(opts = {}) {
     pendingTravel = null;
     setTimeout(() => {
       enableMapFlightZoom(trip.fromVenue, trip.toVenue);
-      playVenueFarewell(trip.fromVenue, trip.toVenue);
+      playVenueHop(trip.fromVenue, trip.toVenue);
       updateMapCta();
     }, 180);
   }
@@ -1357,70 +1357,83 @@ function animateDuckToStop(stopEl, mode) {
 
 function animateDuckTravel(fromVenueId, toVenueId, mode) {
   const duck = $("#map-duck");
-  if (!duck) return;
+  if (!duck) return Promise.resolve();
   const a = pinPoint(fromVenueId);
   const b = pinPoint(toVenueId) || a;
-  if (!a || !b) return;
+  if (!a || !b) return Promise.resolve();
   duck.style.left = a.x + "px";
   duck.style.top = a.y + "px";
   duck.classList.remove("is-walking", "is-flying");
   void duck.offsetWidth;
   duck.classList.add(mode === "fly" ? "is-flying" : "is-walking");
   if (Sound.step) Sound.step(); else Sound.click();
-  const ms = mode === "fly" ? 1200 : 550;
+  const ms = mode === "fly" ? 1600 : 550;
   startMapCameraFollow(ms);
   requestAnimationFrame(() => {
     duck.style.left = b.x + "px";
     duck.style.top = b.y + "px";
   });
-  setTimeout(() => {
-    duck.classList.remove("is-walking", "is-flying");
-    stopMapCameraFollow();
-    if (toVenueId) centerOnVenue(toVenueId, "smooth");
-  }, ms + 40);
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      duck.classList.remove("is-walking", "is-flying");
+      stopMapCameraFollow();
+      if (toVenueId) centerOnVenue(toVenueId, "smooth");
+      resolve();
+    }, ms + 40);
+  });
 }
 
-function playVenueFarewell(fromVenue, toVenue) {
-  const overlay = $("#travel-overlay");
-  if (!overlay || !fromVenue) {
-    if (toVenue) animateDuckTravel(fromVenue?.id, toVenue.id, "fly");
+/** Street Fighter–style hop on the map: letterbox + banner + winged flight. No dialog. */
+function playVenueHop(fromVenue, toVenue) {
+  if (!fromVenue) {
+    if (toVenue) animateDuckTravel(fromVenue?.id, toVenue.id, "fly").then(finishVenueHop);
+    else finishVenueHop();
     return;
   }
-  const master = fromVenue.master || {};
   selectedVenueId = toVenue ? toVenue.id : fromVenue.id;
-  $("#travel-eyebrow").textContent = toVenue
-    ? `Leaving ${fromVenue.city}`
-    : `Farewell from ${fromVenue.name}`;
-  $("#travel-master-emoji").textContent = master.emoji || "🍸";
-  $("#travel-master-name").textContent = master.name || "Bar master";
-  $("#travel-master-title").textContent = master.title || "";
-  $("#travel-quote").textContent = master.farewell
-    || `Safe travels from ${fromVenue.name}.`;
-  $("#travel-from-flag").textContent = fromVenue.flag || "";
-  $("#travel-to-flag").textContent = (toVenue && toVenue.flag) || "✨";
-  $("#travel-dest").textContent = toVenue
-    ? `Flying to ${toVenue.name} · ${toVenue.city}`
-    : "Crawl complete — well hopped.";
-  $("#travel-flight").classList.toggle("is-final", !toVenue);
-  overlay.hidden = false;
-  overlay.classList.add("is-open");
+  const stage = $("#map-stage");
+  if (stage) stage.classList.add("is-hopping");
+  const hop = $("#map-hop");
+  if (hop) {
+    $("#map-hop-eyebrow").textContent = toVenue ? "Next stop" : "Crawl complete";
+    $("#map-hop-from").textContent = `${fromVenue.flag || ""} ${fromVenue.name}`.trim();
+    $("#map-hop-to").textContent = toVenue
+      ? `${toVenue.flag || ""} ${toVenue.name}`.trim()
+      : "Home roost";
+    hop.hidden = false;
+    hop.classList.add("is-open");
+  }
   Sound.coin();
 
-  if (toVenue) {
-    setTimeout(() => animateDuckTravel(fromVenue.id, toVenue.id, "fly"), 500);
-  }
+  const fly = () => {
+    if (toVenue) {
+      return animateDuckTravel(fromVenue.id, toVenue.id, "fly");
+    }
+    return Promise.resolve();
+  };
+
+  // Brief banner beat, then take wing.
+  setTimeout(() => {
+    fly().then(() => {
+      setTimeout(finishVenueHop, 280);
+    });
+  }, 420);
 }
 
-function dismissTravelOverlay() {
-  const overlay = $("#travel-overlay");
-  if (!overlay) return;
-  overlay.classList.remove("is-open");
-  overlay.hidden = true;
+function hideMapHop() {
+  const hop = $("#map-hop");
+  if (!hop) return;
+  hop.classList.remove("is-open");
+  hop.hidden = true;
+  $("#map-stage")?.classList.remove("is-hopping");
+}
+
+function finishVenueHop() {
+  hideMapHop();
   clearMapFlightZoom();
   const cleared = getMap().cleared || 0;
   const pool = drinkPool();
   if (cleared < pool.length) {
-    // Land on the next venue's first drink after the flight.
     state.totalScore = state.totalScore || 0;
     loadStage(cleared);
     return;
@@ -1428,6 +1441,14 @@ function dismissTravelOverlay() {
   const at = venueForStage(Math.min(cleared, Math.max(0, pool.length - 1)));
   selectedVenueId = at.venue.id;
   renderMap({ openVenueId: at.venue.id });
+}
+
+// Legacy aliases — keep old call sites working.
+function playVenueFarewell(fromVenue, toVenue) {
+  playVenueHop(fromVenue, toVenue);
+}
+function dismissTravelOverlay() {
+  finishVenueHop();
 }
 
 function startStageFromMap(index) {
@@ -1476,12 +1497,12 @@ function showAnnounce({ emoji, eyebrow, title, body, button }) {
   Sound.coin();
 }
 function showRankUp(venueIdx) {
-  // Legacy hook — venue hops now use the travel overlay instead.
+  // Legacy hook — venue hops use the on-map SF2 flight.
   const venues = venueList();
   const v = venues[Math.min(Math.max(0, venueIdx), venues.length - 1)];
   if (!v) return;
   const prev = venues[Math.max(0, venueIdx - 1)] || v;
-  playVenueFarewell(prev, v);
+  playVenueHop(prev, v);
 }
 // When a stage introduces new rules, explain them once.
 function maybeShowTierIntro(label) {
@@ -3350,10 +3371,6 @@ $("#btn-result-shop").addEventListener("click", () => {
   Sound.click();
   const recipe = currentRecipe();
   if (recipe) openShop(recipe);
-});
-$("#btn-travel-continue")?.addEventListener("click", () => {
-  Sound.click();
-  dismissTravelOverlay();
 });
 $("#btn-rankup-ok").addEventListener("click", () => { Sound.click(); $("#rankup").classList.remove("is-open"); });
 
