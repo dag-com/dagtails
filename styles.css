@@ -5027,7 +5027,7 @@ body.is-phone-play .chip {
 }
 
 /* ============================ Start hub (main menu) ============================ */
-/* Hub-style layout (à la Homescapes/Coin Master corner-anchored hub +
+/* Hub-style layout (? la Homescapes/Coin Master corner-anchored hub +
    Duolingo's compact single-row status HUD): one open stage for the mascot,
    a single dominant "Play" action, and everything else tucked to the edges
    so the page reads as neither empty nor crowded. */
@@ -5317,17 +5317,22 @@ body.is-phone-play .chip {
   width: 100%;
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 12px 0 #7a4e08, 0 18px 36px rgba(233, 185, 73, 0.26);
+  box-shadow: 0 10px 0 #7a4e08, 0 16px 28px rgba(233, 185, 73, 0.26);
 }
 .cta-main,
 .cta-caret {
+  -webkit-appearance: none;
+  appearance: none;
   font-family: inherit;
   font-weight: 800;
   color: #1a1008;
   background: linear-gradient(180deg, #f0c85a, #c98412);
   border: 0;
+  border-radius: 0;
   cursor: pointer;
-  padding: 15px 14px;
+  padding: 14px 12px;
+  margin: 0;
+  box-shadow: none;
 }
 .cta-main {
   text-align: left;
@@ -5340,6 +5345,7 @@ body.is-phone-play .chip {
   font-size: 13px;
   display: grid;
   place-items: center;
+  min-width: 48px;
 }
 .cta-main:hover,
 .cta-caret:hover {
@@ -5370,6 +5376,8 @@ body.is-phone-play .chip {
   display: none !important;
 }
 .cta-menu-item {
+  -webkit-appearance: none;
+  appearance: none;
   display: flex;
   align-items: flex-start;
   gap: 10px;
@@ -5435,12 +5443,16 @@ body.is-phone-play .chip {
 }
 .hub-modes--quiet {
   justify-self: center;
-  background: transparent;
-  border: 0;
-  gap: 16px;
+  background: transparent !important;
+  border: 0 !important;
+  gap: 18px;
   overflow: visible;
+  padding: 0;
+  margin-top: 2px;
 }
 .hub-link-btn {
+  -webkit-appearance: none;
+  appearance: none;
   border: 0;
   background: transparent;
   color: var(--muted);
@@ -5448,10 +5460,17 @@ body.is-phone-play .chip {
   font-size: 13px;
   font-weight: 800;
   cursor: pointer;
-  padding: 6px 2px;
+  padding: 4px 2px;
+  margin: 0;
+  box-shadow: none;
+  border-radius: 0;
 }
 .hub-link-btn:hover {
   color: var(--text);
+}
+.hub-nav-btn {
+  -webkit-appearance: none;
+  appearance: none;
 }
 .hub-mode-btn {
   display: flex;
@@ -5752,23 +5771,29 @@ body.has-game-stage .app {
 
 /* Hub: always phone-landscape side-by-side (ignore tall desktop media queries) */
 .game-stage .hub-mid {
+  flex: 1 1 auto;
+  min-height: 0;
   flex-direction: row;
   align-items: stretch;
-  gap: 14px;
+  gap: 12px;
+  overflow: hidden;
 }
 .game-stage .hub-stage {
   flex: 0 0 auto;
   justify-content: center;
-  padding: 0;
+  padding: 0 0 4px;
+  overflow: hidden;
 }
 .game-stage .hub-duck {
   flex: none;
   width: auto;
   height: 100%;
-  max-height: 280px;
-  max-width: 36%;
+  max-height: 210px;
+  max-width: 32%;
   aspect-ratio: 0.65;
   margin-bottom: 0;
+  background-position: center bottom;
+  background-size: contain;
 }
 .game-stage .hub-status {
   display: none;
@@ -5776,26 +5801,33 @@ body.has-game-stage .app {
 .game-stage .hub-bottom {
   flex: 1;
   min-width: 0;
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   align-items: stretch;
-  align-content: center;
-  justify-items: stretch;
+  justify-content: center;
   margin-top: 0;
   padding-top: 0;
   gap: 8px;
+  overflow: visible;
 }
 .game-stage .hub-quest,
+.game-stage .hub-cta,
 .game-stage .hub-modes {
   justify-self: stretch;
   max-width: 100%;
+  width: 100%;
+}
+.game-stage .hub-cta {
+  max-width: none;
 }
 .game-stage .hub-modes {
   justify-content: center;
 }
 .game-stage .hub-nav {
-  margin-top: 4px;
-  padding-top: 4px;
+  flex: 0 0 auto;
+  margin-top: 6px;
+  padding-top: 6px;
+  z-index: 2;
 }
 .game-stage #screen-start .best-score {
   display: none;
@@ -5803,7 +5835,12 @@ body.has-game-stage .app {
 .game-stage .start-hub {
   height: 100%;
   max-height: 100%;
-  padding: 10px 14px 8px;
+  padding: 8px 12px 6px;
+  gap: 4px;
+  overflow: hidden;
+}
+.game-stage #screen-start .bar-footer {
+  display: none;
 }
 
 /* Game station: keep side-by-side layout even when the phone viewport is narrow */
