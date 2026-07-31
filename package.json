@@ -8,6 +8,8 @@
     "cap:sync": "npm run build && npx cap sync",
     "android:open": "npm run cap:sync && npx cap open android",
     "ios:open": "npm run cap:sync && npx cap open ios",
+    "expo:start": "npm --prefix mobile start",
+    "expo:tunnel": "npm --prefix mobile run tunnel",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:perf": "playwright test tests/performance.spec.js"
