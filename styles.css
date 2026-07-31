@@ -3498,187 +3498,156 @@ body {
   -webkit-overflow-scrolling: touch;
   border: 1px solid var(--line);
   border-radius: 14px;
-  background: #0a0612;
-  box-shadow: inset 0 0 40px rgba(0,0,0,0.45);
+  background:
+    radial-gradient(80% 60% at 50% 0%, rgba(233, 185, 73, 0.08), transparent 55%),
+    linear-gradient(180deg, #14101f, #0a0612);
+  box-shadow: inset 0 0 40px rgba(0,0,0,0.35);
+  padding: 10px;
 }
-.map-canvas {
-  position: relative;
-  width: 235%;
-  margin: 0 auto;
-  line-height: 0;
-  transition: width 0.45s ease;
-}
-.map-plate {
-  width: 100%;
-  height: auto;
-  display: block;
-  user-select: none;
-  pointer-events: none;
-}
-.map-hubs {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-.map-hub {
-  pointer-events: auto;
-  position: absolute;
-  transform: translate(-50%, -70%);
+.map-crawl {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 3px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  color: var(--text);
-  z-index: 3;
-  transition: transform 0.15s ease;
+  gap: 10px;
+  min-height: 100%;
 }
-.map-hub:hover { transform: translate(-50%, -78%) scale(1.06); }
-.map-hub-pin {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
+.map-venue {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-left: 3px solid var(--venue-accent, var(--gold));
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 12px;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+.map-venue.is-current {
+  background: rgba(233, 185, 73, 0.08);
+  border-color: rgba(233, 185, 73, 0.45);
+  box-shadow: 0 0 0 1px rgba(233, 185, 73, 0.2);
+}
+.map-venue.is-locked {
+  opacity: 0.55;
+}
+.map-venue.is-done {
+  border-left-color: rgba(79, 209, 139, 0.75);
+}
+.map-venue-head {
   display: grid;
-  place-items: center;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.map-venue-flag {
   font-size: 22px;
-  background: radial-gradient(circle at 35% 30%, #3a2a55, #1a1028);
-  border: 3px solid color-mix(in srgb, var(--venue-accent, var(--gold)) 70%, #fff);
-  box-shadow: 0 8px 18px rgba(0,0,0,0.55), 0 0 12px color-mix(in srgb, var(--venue-accent, var(--gold)) 35%, transparent);
+  line-height: 1;
 }
-.map-hub-label {
-  font-size: 10.5px;
+.map-venue-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.map-venue-titles strong {
+  font-size: 15px;
   font-weight: 800;
-  letter-spacing: 0.3px;
-  max-width: 92px;
-  text-align: center;
-  line-height: 1.15;
-  padding: 2px 6px;
-  border-radius: 6px;
-  background: rgba(8,5,14,0.78);
-  color: #ffe9c0;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+  color: var(--text);
 }
-.map-hub-stars {
+.map-venue-titles span {
   font-size: 11px;
+  color: var(--muted);
+}
+.map-venue-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.map-venue.is-current .map-venue-status {
   color: var(--gold);
+}
+.map-venue.is-done .map-venue-status {
+  color: var(--green);
+}
+.map-stages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.map-stage-btn {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 8px;
+  align-items: center;
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.22);
+  color: var(--text);
+  padding: 8px 10px;
+  font: inherit;
+  cursor: pointer;
+}
+.map-stage-btn:hover:not(.is-locked) {
+  border-color: rgba(233, 185, 73, 0.4);
+  background: rgba(233, 185, 73, 0.08);
+}
+.map-stage-btn.is-current {
+  border-color: rgba(233, 185, 73, 0.55);
+  background: rgba(233, 185, 73, 0.14);
+}
+.map-stage-btn.is-locked {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.map-stage-btn.is-done {
+  border-color: rgba(79, 209, 139, 0.25);
+}
+.msb-num {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--gold);
+  text-align: center;
+}
+.msb-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.msb-body strong {
+  font-size: 13px;
+  font-weight: 800;
+}
+.msb-meta {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.msb-stars {
+  font-size: 11px;
   letter-spacing: 1px;
-  height: 12px;
+  color: #4a4060;
 }
-.map-hub.is-locked { opacity: 0.55; cursor: not-allowed; }
-.map-hub.is-locked .map-hub-pin {
-  border-color: rgba(255,255,255,0.12);
-  filter: grayscale(0.4);
-}
-.map-hub.is-current .map-hub-pin {
-  animation: hubPulse 1.4s ease-in-out infinite;
-  border-color: #fff;
-  background: linear-gradient(180deg, var(--gold-soft), var(--gold));
-}
-.map-hub.is-current .map-hub-pin::after {
-  content: "";
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  border: 2px solid rgba(233, 185, 73, 0.55);
-  animation: hubRing 1.4s ease-out infinite;
-  pointer-events: none;
-}
-.map-hub-pin { position: relative; }
-.map-hub.is-done .map-hub-pin {
-  background: linear-gradient(180deg, #3aa76d, #1f8050);
-}
-.map-hub.is-selected { z-index: 4; }
-.map-hub.is-selected .map-hub-label {
-  color: #fff;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--venue-accent, var(--gold)) 60%, transparent);
-}
-@keyframes hubPulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(233,185,73,0.55), 0 8px 18px rgba(0,0,0,0.55); }
-  50% { box-shadow: 0 0 0 12px rgba(233,185,73,0), 0 8px 18px rgba(0,0,0,0.55); }
-}
-@keyframes hubRing {
-  0% { transform: scale(0.85); opacity: 0.9; }
-  100% { transform: scale(1.45); opacity: 0; }
+.msb-stars .on {
+  color: var(--gold);
 }
 
+/* Legacy plate map styles kept inert if referenced */
+.map-canvas,
+.map-plate,
 .map-duck {
-  position: absolute;
-  z-index: 5;
-  width: 72px;
-  height: 96px;
-  transform: translate(-50%, -92%);
-  transition: left 0.55s cubic-bezier(0.45, 0.05, 0.3, 1), top 0.55s ease-in-out;
-  pointer-events: none;
+  display: none !important;
 }
-.map-duck.is-tracking {
-  will-change: left, top;
-}
-.map-duck img {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
-  display: block;
-  filter: drop-shadow(0 8px 10px rgba(0, 0, 0, 0.6));
-  pointer-events: none;
-  user-select: none;
-}
-.map-duck-wing {
-  display: none;
-  position: absolute;
-  top: 28%;
-  width: 34px;
-  height: 22px;
-  z-index: 1;
-  background:
-    radial-gradient(ellipse 70% 55% at 50% 45%, #ffe07a 0%, #f0b429 55%, #c98412 100%);
-  border-radius: 60% 60% 40% 40%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
-  transform-origin: center center;
-}
-.map-duck-wing--l { left: -10%; }
-.map-duck-wing--r { right: -10%; }
-.map-duck.is-walking {
-  transition-duration: 0.55s;
-  animation: duckWaddle 0.28s ease-in-out infinite;
-}
-.map-duck.is-flying {
-  width: 88px;
-  height: 110px;
-  transition-duration: 1.55s;
-  animation: duckSoar 0.35s ease-in-out infinite;
-  z-index: 8;
-}
-.map-duck.is-flying .map-duck-wing {
-  display: block;
-}
-.map-duck.is-flying .map-duck-wing--l {
-  animation: wingFlapL 0.22s ease-in-out infinite;
-}
-.map-duck.is-flying .map-duck-wing--r {
-  animation: wingFlapR 0.22s ease-in-out infinite;
-}
-@keyframes duckWaddle {
-  0%, 100% { transform: translate(-50%, -92%) rotate(-5deg); }
-  50% { transform: translate(-50%, -102%) rotate(5deg); }
-}
-@keyframes duckSoar {
-  0%, 100% { transform: translate(-50%, -120%) rotate(-8deg) scale(1.08); }
-  50% { transform: translate(-50%, -145%) rotate(6deg) scale(1.14); }
-}
-@keyframes wingFlapL {
-  0%, 100% { transform: rotate(-18deg) scaleY(1); }
-  50% { transform: rotate(-52deg) scaleY(0.75) translateY(-4px); }
-}
-@keyframes wingFlapR {
-  0%, 100% { transform: rotate(18deg) scaleY(1); }
-  50% { transform: rotate(52deg) scaleY(0.75) translateY(-4px); }
+.map-crawl {
+  display: flex;
 }
 
 /* SF2-style hop chrome ? lives on the map, not a modal dialog */
@@ -5027,7 +4996,7 @@ body.is-phone-play .chip {
 }
 
 /* ============================ Start hub (main menu) ============================ */
-/* Hub-style layout (à la Homescapes/Coin Master corner-anchored hub +
+/* Hub-style layout (? la Homescapes/Coin Master corner-anchored hub +
    Duolingo's compact single-row status HUD): one open stage for the mascot,
    a single dominant "Play" action, and everything else tucked to the edges
    so the page reads as neither empty nor crowded. */

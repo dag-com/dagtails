@@ -11,20 +11,20 @@ test.describe("gameplay smoke", () => {
     await expect(page.locator("#btn-map-play")).toBeVisible();
     await expect(page.locator("#btn-map-play")).toContainText(/Pour at|Enter|Snug/i);
 
-    const current = page.locator(".map-hub.is-current");
+    const current = page.locator(".map-venue.is-current");
     await expect(current).toHaveCount(1);
     await expect(current).toContainText(/Snug/i);
 
-    // Lazy-loaded plate should resolve to a real src
-    const plateSrc = await page.locator("#map-plate").getAttribute("src");
-    expect(plateSrc).toMatch(/dag-tails-bar-hop-map\.jpg/);
+    // Venue list shows stages for the current bar
+    await expect(current.locator(".map-stage-btn").first()).toBeVisible();
   });
 
-  test("map plate has no eager src before map opens", async ({ page }) => {
+  test("map has no background plate image", async ({ page }) => {
     await seedPlayer(page, { cleared: 0 });
     await gotoHub(page);
-    const src = await page.locator("#map-plate").getAttribute("src");
-    expect(src == null || src === "").toBeTruthy();
+    await openMap(page);
+    await expect(page.locator("#map-plate")).toHaveCount(0);
+    expect(await page.locator("#map-hubs .map-venue").count()).toBeGreaterThan(0);
   });
 
   test("glass mount sits near bar-top at 800px width", async ({ page }, testInfo) => {

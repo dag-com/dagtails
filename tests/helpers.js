@@ -63,7 +63,7 @@ async function gotoHub(page) {
 async function openMap(page) {
   await page.locator("#btn-start").click({ force: true });
   await page.locator("#screen-map.is-active").waitFor({ state: "visible", timeout: 15_000 });
-  await page.locator("#map-plate").waitFor({ state: "attached" });
+  await page.locator("#map-hubs .map-venue").first().waitFor({ state: "attached" });
 }
 
 module.exports = { seedPlayer, gotoHub, openMap, PROFILE };

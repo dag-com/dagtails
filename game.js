@@ -1005,7 +1005,7 @@ function updateMapCta() {
   if (cleared >= pool.length) {
     btn.textContent = "Crawl complete ★";
     btn.disabled = true;
-    if (hint) hint.textContent = "You finished every bar — open a cleared venue to replay.";
+    if (hint) hint.textContent = "You finished every bar — open a cleared drink to replay.";
     return;
   }
   btn.disabled = false;
@@ -1015,8 +1015,8 @@ function updateMapCta() {
   btn.textContent = `Pour at ${at.venue.name}: ${recipe?.name || "next drink"} →`;
   if (hint) {
     hint.textContent = pendingTravel
-      ? "Duck is taking wing — watch the hop."
-      : `Next: drink ${local}/${at.count} at ${at.venue.name}. Tap the glowing bar or the button below.`;
+      ? "Hopping to the next bar…"
+      : `Next: drink ${local}/${at.count} at ${at.venue.name}. Tap a stage or the button below.`;
   }
 }
 
@@ -1026,6 +1026,7 @@ function closeMapSheet() {
 }
 
 function openVenueSheet(venue) {
+  // Replay sheet kept for deep-links; list UI is the primary surface.
   const sheet = $("#map-sheet");
   const list = $("#map-sheet-drinks");
   if (!sheet || !list || !venue) return;
@@ -1078,10 +1079,8 @@ function openVenueSheet(venue) {
 }
 
 function renderMap(opts = {}) {
-  ensureMapAssets();
-  const canvas = $("#map-path");
   const hubsEl = $("#map-hubs");
-  if (!canvas || !hubsEl) return;
+  if (!hubsEl) return;
   const pool = drinkPool();
   const map = getMap();
   const cleared = map.cleared || 0;
@@ -1098,302 +1097,125 @@ function renderMap(opts = {}) {
   mapDrinkEls = {};
   closeMapSheet();
 
-  // Zoom is only for venue-to-venue flights.
-  if (!pendingTravel) clearMapFlightZoom();
-
   const focusId = opts.openVenueId || selectedVenueId || curV.id;
   selectedVenueId = focusId;
 
-  venues.forEach((venue, vIdx) => {
+  venues.forEach((venue) => {
     const range = venueRange(venue);
     const locked = range.start > cleared;
     const current = cleared >= range.start && cleared <= range.end;
     const done = range.end < cleared;
-    const pin = venue.mapPin || { x: 10 + vIdx * 10, y: 50 };
     const stars = venueStars(map, venue);
     const maxStars = range.count * 3;
     const selected = !locked && venue.id === focusId;
 
-    const hub = document.createElement("button");
-    hub.type = "button";
-    hub.className = "map-hub"
+    const card = document.createElement("article");
+    card.className = "map-venue"
       + (locked ? " is-locked" : "")
       + (current ? " is-current" : "")
       + (done ? " is-done" : "")
       + (selected ? " is-selected" : "");
-    hub.style.left = pin.x + "%";
-    hub.style.top = pin.y + "%";
-    hub.style.setProperty("--venue-accent", venue.accent || "#e9b949");
-    hub.dataset.venue = venue.id;
-    hub.innerHTML =
-      `<span class="map-hub-pin">${locked ? "🔒" : venue.flag || "🍸"}</span>` +
-      `<span class="map-hub-label">${venue.name}</span>` +
-      (done || current
-        ? `<span class="map-hub-stars">${"★".repeat(Math.min(3, Math.round((stars / Math.max(1, maxStars)) * 3))) || "☆"}</span>`
-        : "");
-    hub.title = locked
-      ? `Locked — clear earlier bars first`
-      : current
-        ? `Enter ${venue.name} — pour the next drink`
-        : `Open ${venue.name} — replay drinks`;
+    card.dataset.venue = venue.id;
+    card.style.setProperty("--venue-accent", venue.accent || "#e9b949");
+    card.setAttribute("role", "listitem");
 
-    hub.addEventListener("click", () => {
-      if (locked) {
-        Sound.fail();
-        showToast("🔒 Clear the bars before this one to unlock it.");
-        return;
-      }
-      Sound.click();
-      selectedVenueId = venue.id;
-      // Current bar → play next drink. Cleared bars → replay sheet.
-      if (current && cleared < pool.length) {
-        startStageFromMap(cleared);
-        return;
-      }
-      if (done || range.start <= cleared) {
-        renderMap({ openVenueId: venue.id });
-        openVenueSheet(venue);
-        return;
-      }
-      renderMap({ openVenueId: venue.id });
+    const head = document.createElement("header");
+    head.className = "map-venue-head";
+    const status = locked ? "Locked" : current ? "Now pouring" : done ? "Cleared" : "Open";
+    head.innerHTML =
+      `<span class="map-venue-flag">${locked ? "🔒" : (venue.flag || "🍸")}</span>` +
+      `<div class="map-venue-titles">` +
+        `<strong>${venue.name}</strong>` +
+        `<span>${venue.city}${venue.kind ? " · " + venue.kind : ""}</span>` +
+      `</div>` +
+      `<div class="map-venue-meta">` +
+        `<span class="map-venue-status">${status}</span>` +
+        `<span class="map-venue-stars">${stars}/${maxStars} ★</span>` +
+      `</div>`;
+    card.appendChild(head);
+
+    const stages = document.createElement("ol");
+    stages.className = "map-stages";
+    (venue.drinkIds || []).forEach((id, localIdx) => {
+      const i = range.start + localIdx;
+      const recipe = pool[i] || RECIPE_BY_ID[id];
+      if (!recipe) return;
+      const stageLocked = i > cleared;
+      const stageCurrent = i === cleared;
+      const best = stageRecordOf(map, recipe);
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "map-stage-btn"
+        + (stageLocked ? " is-locked" : "")
+        + (stageCurrent ? " is-current" : "")
+        + (i < cleared ? " is-done" : "");
+      const starHtml = [0, 1, 2].map((s) => `<span class="${s < best.stars ? "on" : ""}">★</span>`).join("");
+      btn.innerHTML =
+        `<span class="msb-num">${stageLocked ? "🔒" : localIdx + 1}</span>` +
+        `<span class="msb-body"><strong>${recipe.name}</strong>` +
+        (best.pct > 0 ? `<span class="msb-meta">${best.pct}% best</span>` : (stageCurrent ? `<span class="msb-meta">Up next</span>` : "")) +
+        `</span>` +
+        `<span class="msb-stars">${starHtml}</span>`;
+      btn.addEventListener("click", () => {
+        if (stageLocked || locked) {
+          Sound.fail();
+          showToast("🔒 Clear earlier drinks first.");
+          return;
+        }
+        Sound.click();
+        selectedVenueId = venue.id;
+        startStageFromMap(i);
+      });
+      li.appendChild(btn);
+      stages.appendChild(li);
+      mapDrinkEls[i] = btn;
     });
+    card.appendChild(stages);
 
-    hubsEl.appendChild(hub);
-    mapHubEls[venue.id] = hub;
+    hubsEl.appendChild(card);
+    mapHubEls[venue.id] = card;
   });
 
   updateMapCta();
-  if (!pendingTravel) applyMapZoom();
-  setTimeout(() => {
-    placeDuckOnMap(cleared);
-    if (!pendingTravel) centerOnVenue(focusId, "auto");
-  }, 60);
-  const plate = $("#map-plate");
-  if (plate && !plate.dataset.bound) {
-    plate.dataset.bound = "1";
-    plate.addEventListener("load", () => {
-      placeDuckOnMap(getMap().cleared || 0);
-      centerOnVenue(selectedVenueId, "auto");
-    });
-  }
+  setTimeout(() => centerOnVenue(focusId, "auto"), 40);
 
   if (pendingTravel) {
     const trip = pendingTravel;
     pendingTravel = null;
     setTimeout(() => {
-      enableMapFlightZoom(trip.fromVenue, trip.toVenue);
       playVenueHop(trip.fromVenue, trip.toVenue);
       updateMapCta();
     }, 180);
   }
 }
 
-// Zoom in tight at the start of the crawl, then reveal more of the map as
-// venues are cleared. Returns a width percentage for .map-canvas relative to
-// the scroll viewport (>100% means it overflows and can be panned).
-function mapZoomPercent() {
-  const venues = venueList();
-  const cleared = getMap().cleared || 0;
-  const curIdx = venueIndexForCleared(cleared);
-  const span = Math.max(1, venues.length - 1);
-  const progress = Math.min(1, curIdx / span);
-  const startZoom = 235; // early: focus on the first bars
-  const endZoom = 120;   // late: nearly the whole map in view
-  return Math.round(startZoom + (endZoom - startZoom) * progress);
-}
-
-function applyMapZoom(pct) {
-  const canvas = $("#map-path");
-  if (!canvas) return;
-  const z = pct != null ? pct : mapZoomPercent();
-  canvas.style.width = z + "%";
-}
+// Legacy no-ops — world map plate removed; crawl is a venue/stage list.
+function mapZoomPercent() { return 100; }
+function applyMapZoom() { /* no plate zoom */ }
+function enableMapFlightZoom() { /* no plate zoom */ }
+function clearMapFlightZoom() { /* no plate zoom */ }
+function pinPoint() { return null; }
+function placeDuckOnMap() { /* no map duck */ }
+function ensureMapAssets() { /* no map plate */ }
 
 function centerOnVenue(venueId, behavior = "smooth") {
-  const scroll = $("#map-scroll");
-  const pt = venueId ? pinPoint(venueId) : null;
-  if (!scroll || !pt) return;
-  scroll.scrollTo({
-    left: Math.max(0, pt.x - scroll.clientWidth / 2),
-    top: Math.max(0, pt.y - scroll.clientHeight / 2),
-    behavior,
-  });
+  const card = venueId ? mapHubEls[venueId] : null;
+  if (!card || typeof card.scrollIntoView !== "function") return;
+  card.scrollIntoView({ behavior: behavior === "auto" ? "auto" : "smooth", block: "nearest" });
 }
 
-function enableMapFlightZoom(fromVenue, toVenue) {
-  const canvas = $("#map-path");
-  const scroll = $("#map-scroll");
-  if (!canvas || !scroll) return;
-  // Give the flight extra room: zoom out a touch from the current level.
-  const flightZoom = Math.max(150, mapZoomPercent() + 30);
-  applyMapZoom(flightZoom);
-  requestAnimationFrame(() => {
-    const a = fromVenue ? pinPoint(fromVenue.id) : null;
-    const b = toVenue ? pinPoint(toVenue.id) : a;
-    if (!a && !b) return;
-    const mx = ((a?.x || b.x) + (b?.x || a.x)) / 2;
-    const my = ((a?.y || b.y) + (b?.y || a.y)) / 2;
-    scroll.scrollTo({
-      left: Math.max(0, mx - scroll.clientWidth / 2),
-      top: Math.max(0, my - scroll.clientHeight / 2),
-      behavior: "smooth",
-    });
-  });
+function stopMapCameraFollow() { /* no map camera */ }
+function startMapCameraFollow() { /* no map camera */ }
+
+function animateDuckTravel() {
+  return Promise.resolve();
 }
 
-function clearMapFlightZoom() {
-  applyMapZoom();
-}
-
-let mapCamRaf = 0;
-function stopMapCameraFollow() {
-  if (mapCamRaf) {
-    cancelAnimationFrame(mapCamRaf);
-    mapCamRaf = 0;
-  }
-  const duck = $("#map-duck");
-  if (duck) duck.classList.remove("is-tracking");
-}
-
-/** Keep #map-scroll centered on the mascot while it moves. */
-function startMapCameraFollow(ms) {
-  stopMapCameraFollow();
-  const duck = $("#map-duck");
-  const scroll = $("#map-scroll");
-  if (!duck || !scroll) return;
-  duck.classList.add("is-tracking");
-  const end = performance.now() + (ms || 1200);
-  const tick = (now) => {
-    const duckRect = duck.getBoundingClientRect();
-    const scrollRect = scroll.getBoundingClientRect();
-    const x = scroll.scrollLeft + (duckRect.left + duckRect.width / 2 - scrollRect.left);
-    const y = scroll.scrollTop + (duckRect.top + duckRect.height / 2 - scrollRect.top);
-    scroll.scrollLeft = Math.max(0, x - scroll.clientWidth / 2);
-    scroll.scrollTop = Math.max(0, y - scroll.clientHeight / 2);
-    if (now < end) mapCamRaf = requestAnimationFrame(tick);
-    else {
-      mapCamRaf = 0;
-      duck.classList.remove("is-tracking");
-    }
-  };
-  mapCamRaf = requestAnimationFrame(tick);
-}
-
-function ensureMapAssets() {
-  const plate = $("#map-plate");
-  if (plate && !plate.getAttribute("src")) {
-    const src = plate.dataset.src || "assets/maps/dag-tails-bar-hop-map.jpg?v=4";
-    plate.src = src;
-  }
-  const img = $("#map-duck-img");
-  if (img && !img.getAttribute("src")) {
-    const rankIdx = rankForCleared(getMap().cleared || 0);
-    const tier = mascotTierClass(rankIdx);
-    img.src = tier === "tier-3"
-      ? "assets/duck-hub-mascot-ace.png"
-      : tier === "tier-2"
-        ? "assets/duck-hub-mascot-jacket.png"
-        : "assets/duck-hub-mascot.png";
-  }
-}
-
-function pinPoint(venueId) {
-  const venue = venueList().find((v) => v.id === venueId);
-  const canvas = $("#map-path");
-  if (!venue || !canvas) return null;
-  const pin = venue.mapPin || { x: 50, y: 50 };
-  return {
-    x: (pin.x / 100) * canvas.offsetWidth,
-    y: (pin.y / 100) * canvas.offsetHeight,
-  };
-}
-
-function placeDuckOnMap(cleared) {
-  const duck = $("#map-duck");
-  const img = $("#map-duck-img");
-  const canvas = $("#map-path");
-  if (!duck || !canvas) return;
-  const rankIdx = rankForCleared(cleared || 0);
-  const tier = mascotTierClass(rankIdx);
-  if (img) {
-    const src = tier === "tier-3"
-      ? "assets/duck-hub-mascot-ace.png"
-      : tier === "tier-2"
-        ? "assets/duck-hub-mascot-jacket.png"
-        : "assets/duck-hub-mascot.png";
-    if (!img.getAttribute("src") || !img.getAttribute("src").includes(src.split("/").pop())) {
-      img.src = src;
-    }
-  }
-  duck.classList.toggle("tier-2", tier === "tier-2");
-  duck.classList.toggle("tier-3", tier === "tier-3");
-  const at = venueForStage(Math.min(cleared, Math.max(0, drinkPool().length - 1)));
-  const pt = pinPoint(at.venue.id);
-  if (!pt) return;
-  duck.classList.remove("is-walking", "is-flying");
-  duck.style.left = pt.x + "px";
-  duck.style.top = pt.y + "px";
-}
-
-function animateDuckToStop(stopEl, mode) {
-  // Legacy helper — world map no longer places drink stops.
-  const duck = $("#map-duck");
-  if (!duck || !stopEl) return;
-  const canvas = $("#map-path");
-  if (!canvas) return;
-  const b = {
-    x: (parseFloat(stopEl.style.left) / 100) * canvas.offsetWidth,
-    y: (parseFloat(stopEl.style.top) / 100) * canvas.offsetHeight,
-  };
-  duck.classList.remove("is-walking", "is-flying");
-  void duck.offsetWidth;
-  duck.classList.add(mode === "fly" ? "is-flying" : "is-walking");
-  if (Sound.step) Sound.step(); else Sound.click();
-  const ms = mode === "fly" ? 1200 : 550;
-  startMapCameraFollow(ms);
-  requestAnimationFrame(() => {
-    duck.style.left = b.x + "px";
-    duck.style.top = b.y + "px";
-  });
-  setTimeout(() => {
-    duck.classList.remove("is-walking", "is-flying");
-    stopMapCameraFollow();
-  }, ms + 40);
-}
-
-function animateDuckTravel(fromVenueId, toVenueId, mode) {
-  const duck = $("#map-duck");
-  if (!duck) return Promise.resolve();
-  const a = pinPoint(fromVenueId);
-  const b = pinPoint(toVenueId) || a;
-  if (!a || !b) return Promise.resolve();
-  duck.style.left = a.x + "px";
-  duck.style.top = a.y + "px";
-  duck.classList.remove("is-walking", "is-flying");
-  void duck.offsetWidth;
-  duck.classList.add(mode === "fly" ? "is-flying" : "is-walking");
-  if (Sound.step) Sound.step(); else Sound.click();
-  const ms = mode === "fly" ? 1600 : 550;
-  startMapCameraFollow(ms);
-  requestAnimationFrame(() => {
-    duck.style.left = b.x + "px";
-    duck.style.top = b.y + "px";
-  });
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      duck.classList.remove("is-walking", "is-flying");
-      stopMapCameraFollow();
-      if (toVenueId) centerOnVenue(toVenueId, "smooth");
-      resolve();
-    }, ms + 40);
-  });
-}
-
-/** Street Fighter–style hop on the map: letterbox + banner + winged flight. No dialog. */
+/** Brief hop banner between venues (no map flight). */
 function playVenueHop(fromVenue, toVenue) {
   if (!fromVenue) {
-    if (toVenue) animateDuckTravel(fromVenue?.id, toVenue.id, "fly").then(finishVenueHop);
-    else finishVenueHop();
+    finishVenueHop();
     return;
   }
   selectedVenueId = toVenue ? toVenue.id : fromVenue.id;
@@ -1410,20 +1232,8 @@ function playVenueHop(fromVenue, toVenue) {
     hop.classList.add("is-open");
   }
   Sound.coin();
-
-  const fly = () => {
-    if (toVenue) {
-      return animateDuckTravel(fromVenue.id, toVenue.id, "fly");
-    }
-    return Promise.resolve();
-  };
-
-  // Brief banner beat, then take wing.
-  setTimeout(() => {
-    fly().then(() => {
-      setTimeout(finishVenueHop, 280);
-    });
-  }, 420);
+  centerOnVenue(selectedVenueId, "smooth");
+  setTimeout(finishVenueHop, 1100);
 }
 
 function hideMapHop() {
@@ -1449,7 +1259,7 @@ function finishVenueHop() {
   renderMap({ openVenueId: at.venue.id });
 }
 
-// Legacy aliases — keep old call sites working.
+// Legacy aliases
 function playVenueFarewell(fromVenue, toVenue) {
   playVenueHop(fromVenue, toVenue);
 }
