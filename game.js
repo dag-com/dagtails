@@ -540,6 +540,9 @@ function mapUnlocked() { return getMap().cleared >= STAGES_TO_UNLOCK; }
 // Flip to true to restore amount steppers + pour scoring. Held off for now —
 // the base game is ingredient guessing only (recipe amounts auto-fill).
 const MEASURE_ENABLED = false;
+// Flip to true to restore the tools / method picker step. Held off — recipe
+// method is auto-applied (shake/stir/build still run on Serve).
+const TOOLS_ENABLED = false;
 
 // What's new at each complexity tier — shown once when first reached.
 const TIER_INTRO = {
@@ -547,7 +550,7 @@ const TIER_INTRO = {
   "Pour": { emoji: "🥤", eyebrow: "Level up — new rule", title: "Now measure your pours", body: "From here on you set how much of each ingredient goes in. Tap to add, then use − / + to dial each amount. Get close to the recipe for more stars.", button: "Got it →" },
   "Mix": { emoji: "🍸", eyebrow: "Level up — new rule", title: "Tools before the pour", body: "From here you choose the method first — shaker, stir, muddle, and more. Tools land on the counter, then you pour into them, then prepare.", button: "Got it →" },
   "Garnish": { emoji: "🍋", eyebrow: "Level up — new rule", title: "Now add the garnish", body: "Until now the garnish was added for you. From here you finish the drink yourself — pick the garnish that matches the cocktail for that last star.", button: "Got it →" },
-  "Full bar": { emoji: "🍷", eyebrow: "Level up — full bar", title: "Now pick the glass too", body: "You're running the full bar: choose the glassware, the method and the garnish yourself. Every choice counts toward your stars.", button: "Got it →" },
+  "Full bar": { emoji: "🍷", eyebrow: "Level up — full bar", title: "Now pick the glass too", body: "You're running the full bar: choose the glassware and the garnish yourself. Every choice counts toward your stars.", button: "Got it →" },
 };
 function tierSeen(label) { const m = getMap(); return !!(m.seenTiers && m.seenTiers[label]); }
 function markTierSeen(label) { const m = getMap(); m.seenTiers = m.seenTiers || {}; m.seenTiers[label] = 1; setMap(m); }
@@ -560,15 +563,16 @@ function isGuessMode() {
 }
 
 // Complexity ramp — start simple, scale up. stageNo is 1-based.
-// Mechanics unlock: (measure when MEASURE_ENABLED) → method → garnish → glass.
+// Mechanics unlock: measure / tools when enabled → garnish → glass.
 function complexityForStage(stageNo) {
   const portions = MEASURE_ENABLED;
+  const chooseMethod = TOOLS_ENABLED;
   if (stageNo <= 5)  return { portions: false, chooseGlass: false, chooseMethod: false, chooseGarnish: false, decoys: 3,  label: "Guess" };
-  // When measuring is held, keep the "Guess" label so the Pour intro never fires.
+  // When measuring/tools are held, keep the "Guess" label so Pour/Mix intros never fire.
   if (stageNo <= 12) return { portions, chooseGlass: false, chooseMethod: false, chooseGarnish: false, decoys: 6,  label: portions ? "Pour" : "Guess" };
-  if (stageNo <= 19) return { portions, chooseGlass: false, chooseMethod: true,  chooseGarnish: false, decoys: 10, label: "Mix" };
-  if (stageNo <= 26) return { portions, chooseGlass: false, chooseMethod: true,  chooseGarnish: true,  decoys: 12, label: "Garnish" };
-  return { portions, chooseGlass: true, chooseMethod: true, chooseGarnish: true, decoys: Infinity, label: "Full bar" };
+  if (stageNo <= 19) return { portions, chooseGlass: false, chooseMethod, chooseGarnish: false, decoys: 10, label: chooseMethod ? "Mix" : "Guess" };
+  if (stageNo <= 26) return { portions, chooseGlass: false, chooseMethod, chooseGarnish: true,  decoys: 12, label: "Garnish" };
+  return { portions, chooseGlass: true, chooseMethod, chooseGarnish: true, decoys: Infinity, label: "Full bar" };
 }
 
 function shuffleArr(a) {
@@ -2066,9 +2070,12 @@ function changeAmount(id, value, pour) {
 
 // ============================ Step navigation ============================
 function getSteps(difficulty) {
-  return difficulty === "basic"
+  const steps = difficulty === "basic"
     ? ["method", "ingredients", "garnish"]
     : ["glass", "method", "ingredients", "garnish"];
+  // Mixologist keeps the full flow; other modes honor the tools hold flag.
+  if (state.mode === "mixologist" || TOOLS_ENABLED) return steps;
+  return steps.filter((s) => s !== "method");
 }
 
 function stepSatisfied(step) {
@@ -2471,6 +2478,7 @@ function loadTraining() {
   state.mixed = false;
   state.complexity = null;
   state.menuIds = null;
+  if (!TOOLS_ENABLED) state.build.method = state.trainingRecipe.method;
   state.steps = getSteps("advanced");
   state.stepIndex = 0;
   state.totalScore = 0;
@@ -2588,7 +2596,8 @@ function scoreBuild() {
   // manual, e.g. training/challenge/full-bar tier).
   const cx = state.complexity;
   const glassChosen = !cx || cx.chooseGlass;
-  const methodChosen = !cx || cx.chooseMethod;
+  // Tools held off: method is auto-set — don't grade a choice the player never made.
+  const methodChosen = TOOLS_ENABLED && (!cx || cx.chooseMethod);
   const garnishChosen = !cx || cx.chooseGarnish;
 
   // Glass
@@ -3035,6 +3044,7 @@ function loadChallenge(recipe) {
   state.mixed = false;
   state.complexity = null;
   state.menuIds = null;
+  if (!TOOLS_ENABLED) state.build.method = recipe.method;
   state.steps = getSteps("advanced");
   state.stepIndex = 0;
   $(".progress-wrap").style.display = "none";
@@ -3042,9 +3052,11 @@ function loadChallenge(recipe) {
   $("#stage-pill").textContent = "Challenge";
   $("#diff-pill").textContent = "Recreate";
   $("#order-name").textContent = recipe.name;
-  $("#order-desc").textContent = MEASURE_ENABLED
-    ? "Recreate this invention from memory — match the glass, pour, method & garnish."
-    : "Recreate this invention from memory — match the glass, ingredients, method & garnish.";
+  $("#order-desc").textContent = TOOLS_ENABLED
+    ? (MEASURE_ENABLED
+      ? "Recreate this invention from memory — match the glass, pour, method & garnish."
+      : "Recreate this invention from memory — match the glass, ingredients, method & garnish.")
+    : "Recreate this invention from memory — match the glass, ingredients & garnish.";
   setTicketOrigin(null);
   renderTicketRecipe(recipe);
   setTicketFlipped(false);
