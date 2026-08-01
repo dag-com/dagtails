@@ -9,4 +9,4 @@ cd mobile
 npm run tunnel
 ```
 
-Scan the QR with Expo Go. Default content URL is GitHub Pages.
+Scan the QR with Expo Go (App Store build = SDK 54; this shell matches that). Default content URL is GitHub Pages.

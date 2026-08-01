@@ -198,16 +198,50 @@ body {
 
 /* ============================ Order ticket ============================ */
 .order-ticket {
-  background: linear-gradient(180deg, #fffaf0, #f5ead2);
+  background: transparent;
   color: #2a2118;
   border-radius: 14px;
-  padding: 18px 22px;
+  padding: 0;
   margin-bottom: 22px;
+  box-shadow: none;
+  position: relative;
+  perspective: 1200px;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+}
+.order-ticket:focus-visible {
+  box-shadow: 0 0 0 2px var(--gold);
+}
+.ticket-flip {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0.1, 0.2, 1);
+  min-height: 100%;
+}
+.order-ticket.is-flipped .ticket-flip {
+  transform: rotateY(180deg);
+}
+.ticket-face {
+  background: linear-gradient(180deg, #fffaf0, #f5ead2);
+  border-radius: 14px;
+  padding: 18px 22px;
   box-shadow: var(--shadow);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
   position: relative;
 }
-.order-ticket::before,
-.order-ticket::after {
+.ticket-face--back {
+  position: absolute;
+  inset: 0;
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  text-align: left;
+}
+.ticket-face::before,
+.ticket-face::after {
   content: "";
   position: absolute;
   bottom: -9px;
@@ -215,12 +249,61 @@ body {
   height: 18px;
   background: var(--bg);
   border-radius: 50%;
+  z-index: 2;
 }
-.order-ticket::before {
+.ticket-face::before {
   left: -9px;
 }
-.order-ticket::after {
+.ticket-face::after {
   right: -9px;
+}
+.ticket-flip-hint {
+  margin: 8px 0 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #9a7b3d;
+  opacity: 0.85;
+}
+.ticket-recipe-drink {
+  margin: 0 0 6px;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 22px;
+  letter-spacing: 0.5px;
+  color: #2a2118;
+}
+.ticket-recipe {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+.ticket-recipe li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px dashed #e0d2b8;
+  font-size: 12.5px;
+  color: #3a2f22;
+}
+.ticket-recipe li:last-child {
+  border-bottom: none;
+}
+.ticket-recipe .tr-k {
+  font-weight: 700;
+}
+.ticket-recipe .tr-v {
+  color: #6a5840;
+  text-align: right;
+}
+.ticket-recipe-empty {
+  font-style: italic;
+  color: #6a5840;
+  border: none !important;
 }
 .ticket-head {
   display: flex;
@@ -330,6 +413,9 @@ body {
   max-height: 360px;
   overflow-y: auto;
   padding-right: 6px;
+}
+.cat-group {
+  margin-bottom: 4px;
 }
 .cat-group-title {
   font-size: 11px;
@@ -898,37 +984,32 @@ body {
   position: absolute;
   inset: 0;
   z-index: 2;
+  /* Keep center clear so the guest portrait stays readable */
   background:
-    radial-gradient(ellipse 65% 50% at 50% 35%, transparent 30%, rgba(8, 5, 14, 0.4) 85%),
-    linear-gradient(180deg, rgba(10, 6, 18, 0.2) 0%, transparent 22%, transparent 48%, rgba(10, 6, 18, 0.35) 100%),
-    linear-gradient(90deg, rgba(8, 5, 14, 0.5) 0%, transparent 18%, transparent 82%, rgba(8, 5, 14, 0.5) 100%);
+    radial-gradient(ellipse 55% 48% at 50% 32%, transparent 52%, rgba(8, 5, 14, 0.28) 100%),
+    linear-gradient(180deg, rgba(10, 6, 18, 0.12) 0%, transparent 20%, transparent 55%, rgba(10, 6, 18, 0.28) 100%),
+    linear-gradient(90deg, rgba(8, 5, 14, 0.42) 0%, transparent 22%, transparent 78%, rgba(8, 5, 14, 0.42) 100%);
+  pointer-events: none;
 }
 
-/* Guest across the counter ? soft-masked into the back-bar, not a floating photo */
+/* Guest across the counter — cutout sprite over the bar shelves */
 .bar-guest {
   position: absolute;
   z-index: 1;
   left: 50%;
-  top: 4%;
-  width: min(52%, 220px);
-  height: 58%;
+  top: 0;
+  width: min(52%, 240px);
+  height: 62%;
   transform: translateX(-50%);
   pointer-events: none;
   overflow: hidden;
-  /* Soft oval so portrait edges dissolve into the shelves */
-  -webkit-mask-image:
-    radial-gradient(ellipse 72% 78% at 50% 42%, #000 42%, transparent 78%),
-    linear-gradient(180deg, #000 0%, #000 55%, transparent 92%);
-  mask-image:
-    radial-gradient(ellipse 72% 78% at 50% 42%, #000 42%, transparent 78%),
-    linear-gradient(180deg, #000 0%, #000 55%, transparent 92%);
-  -webkit-mask-composite: source-in;
-  mask-composite: intersect;
+  /* Soft bottom fade into the counter only — sides stay open to the bar */
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(180deg, #000 0%, #000 78%, transparent 100%);
   filter:
-    drop-shadow(0 18px 22px rgba(0, 0, 0, 0.55))
-    saturate(0.92)
-    contrast(0.96)
-    brightness(0.9);
+    drop-shadow(0 10px 14px rgba(0, 0, 0, 0.45))
+    saturate(1.02)
+    brightness(1.02);
   transition: transform 0.42s cubic-bezier(0.45, 0.05, 0.3, 1), opacity 0.42s ease;
   opacity: 1;
   animation: guestIdle 4.2s ease-in-out infinite;
@@ -939,18 +1020,19 @@ body {
   position: absolute;
   inset: 0;
   pointer-events: none;
+  /* Warm bar light wash so the cutout matches shelf lighting */
   background:
-    radial-gradient(ellipse 55% 45% at 50% 28%, rgba(255, 186, 96, 0.18), transparent 70%),
-    linear-gradient(180deg, transparent 40%, rgba(18, 10, 6, 0.45) 88%);
+    radial-gradient(ellipse 60% 45% at 50% 18%, rgba(255, 190, 110, 0.14), transparent 72%),
+    linear-gradient(180deg, transparent 62%, rgba(18, 10, 6, 0.18) 100%);
   mix-blend-mode: soft-light;
+  opacity: 0.7;
 }
 .bar-guest img {
   width: 100%;
   height: 100%;
   display: block;
-  object-fit: cover;
-  object-position: center 18%;
-  transform: scale(1.08);
+  object-fit: contain;
+  object-position: center bottom;
 }
 .bar-guest-drink {
   position: absolute;
@@ -1537,19 +1619,40 @@ body {
 }
 .order-ticket-compact {
   margin: 0;
-  padding: 9px 16px;
+  padding: 0;
+  height: 100%;
+  min-height: 0;
+}
+.order-ticket-compact .ticket-flip,
+.order-ticket-compact .ticket-face--front {
+  height: 100%;
+  min-height: 0;
+}
+.order-ticket-compact .ticket-face {
+  padding: 9px 14px 8px;
 }
 .order-ticket-compact .ticket-head {
   padding-bottom: 5px;
   margin-bottom: 5px;
 }
 .order-ticket-compact .ticket-name {
-  font-size: clamp(22px, 4.4vw, 32px);
+  font-size: clamp(20px, 4vw, 28px);
   margin: 2px 0;
 }
 .order-ticket-compact .ticket-desc {
-  font-size: 12.5px;
-  line-height: 1.35;
+  font-size: 12px;
+  line-height: 1.3;
+}
+.order-ticket-compact .ticket-flip-hint {
+  margin-top: 6px;
+  font-size: 10px;
+}
+.order-ticket-compact .ticket-recipe-drink {
+  font-size: 18px;
+}
+.order-ticket-compact .ticket-recipe li {
+  font-size: 11.5px;
+  padding: 3px 0;
 }
 
 .stage-area {
@@ -4824,28 +4927,35 @@ body.is-phone-play .judge-bubble-quote {
   font-size: 10.5px;
 }
 body.is-phone-play .result-top {
-  flex: 0 0 auto;
-  gap: 8px;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 10px;
   margin-top: 4px;
+  align-items: stretch;
+}
+body.is-phone-play .result-left {
+  justify-content: center;
+  gap: 6px;
 }
 body.is-phone-play .result-right {
-  max-height: 72px;
-  padding: 6px 8px;
+  max-height: none;
+  min-height: 0;
+  padding: 8px 10px;
   overflow: hidden;
 }
 body.is-phone-play .result-right .feedback {
-  overflow: hidden;
-}
-body.is-phone-play .feedback li:nth-child(n + 3) {
-  display: none;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 body.is-phone-play .result-actions {
   flex: 0 0 auto;
-  margin-top: 4px;
-  gap: 6px;
+  margin-top: auto;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 body.is-phone-play .result-actions .btn {
-  padding: 8px 12px;
+  padding: 10px 14px;
   font-size: 13px;
 }
 body.is-phone-play .chip-grid {
@@ -5006,11 +5116,25 @@ body.is-phone-play .chip {
 }
 #screen-start.is-active {
   align-items: stretch;
-  justify-content: flex-start;
-  padding-top: 10px;
-  padding-bottom: 10px;
+  justify-content: stretch;
+  padding: 0;
 }
-#screen-start .hero-bg {
+#hub-root,
+.hub-shell {
+  flex: 1 1 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+#screen-start .hero-bg,
+.hub-shell .hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
   background:
     radial-gradient(620px 280px at 68% 50%, rgba(233, 185, 73, 0.16), transparent 62%),
     radial-gradient(900px 360px at 80% 14%, rgba(130, 70, 255, 0.16), transparent 52%),
@@ -5022,18 +5146,20 @@ body.is-phone-play .chip {
   position: relative;
   z-index: 1;
   width: 100%;
-  max-width: 1100px;
-  margin: 0 auto;
-  flex: 1;
+  max-width: none;
+  margin: 0;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  border-radius: 28px;
+  gap: 6px;
+  border-radius: 0;
   overflow: hidden;
-  padding: 14px 20px 12px;
-  background: linear-gradient(180deg, rgba(18, 12, 31, 0.9), rgba(11, 8, 19, 0.92));
-  border: 1px solid rgba(233, 185, 73, 0.22);
-  box-shadow: 0 22px 50px rgba(0, 0, 0, 0.38), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  padding: 12px 16px 10px;
+  background: linear-gradient(180deg, rgba(18, 12, 31, 0.72), rgba(11, 8, 19, 0.88));
+  border: 0;
+  box-shadow: none;
   backdrop-filter: blur(7px);
   -webkit-backdrop-filter: blur(7px);
 }
@@ -5057,8 +5183,22 @@ body.is-phone-play .chip {
   z-index: 1;
   display: flex;
   align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
+  gap: 8px;
+  flex-wrap: nowrap;
+  flex: 0 0 auto;
+  min-width: 0;
+  width: 100%;
+}
+.hub-topbar .hub-profile {
+  min-width: 0;
+  flex: 0 1 auto;
+  max-width: min(46%, 320px);
+}
+.hub-topbar .profile-chip {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
 }
 .hub-brand-title {
   font-family: "Bebas Neue", sans-serif;
@@ -5138,7 +5278,9 @@ body.is-phone-play .chip {
   align-items: center;
   gap: 6px;
   margin-left: auto;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  flex: 0 0 auto;
+  min-width: 0;
 }
 .hub-chip {
   display: flex;
@@ -5147,15 +5289,17 @@ body.is-phone-play .chip {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid var(--line);
   border-radius: 999px;
-  padding: 6px 12px;
-  font-size: 12.5px;
+  padding: 5px 10px;
+  font-size: 12px;
   font-weight: 700;
   color: var(--gold-soft);
   white-space: nowrap;
+  flex: 0 0 auto;
 }
 .hub-icon-btn {
   width: 32px;
   height: 32px;
+  flex: 0 0 auto;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -5282,11 +5426,13 @@ body.is-phone-play .chip {
 }
 .cta-split {
   display: grid;
-  grid-template-columns: 1fr 48px;
+  grid-template-columns: 1fr 44px;
   width: 100%;
-  border-radius: 18px;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 12px 0 #7a4e08, 0 18px 36px rgba(233, 185, 73, 0.26);
+  /* Keep the 3D lip inside the CTA box so it never paints over #play-meta */
+  box-shadow: 0 6px 0 #7a4e08, 0 10px 22px rgba(233, 185, 73, 0.22);
+  margin-bottom: 6px;
 }
 .cta-main,
 .cta-caret {
@@ -5296,12 +5442,12 @@ body.is-phone-play .chip {
   background: linear-gradient(180deg, #f0c85a, #c98412);
   border: 0;
   cursor: pointer;
-  padding: 15px 14px;
+  padding: 12px 12px;
 }
 .cta-main {
   text-align: left;
-  padding-left: 18px;
-  font-size: 15px;
+  padding-left: 16px;
+  font-size: 14px;
   line-height: 1.2;
 }
 .cta-caret {
@@ -5386,10 +5532,13 @@ body.is-phone-play .chip {
   box-shadow: 0 18px 36px rgba(233, 185, 73, 0.26);
 }
 .play-meta {
-  margin: 0;
+  position: relative;
+  z-index: 2;
+  margin: 2px 0 0;
+  padding: 0 4px;
   font-size: 12px;
-  line-height: 1.4;
-  color: var(--muted);
+  line-height: 1.35;
+  color: #d8ccec;
   text-align: center;
 }
 
@@ -5641,6 +5790,10 @@ body.is-phone-play .chip {
   place-items: center;
   overflow: hidden;
   background: #08060e;
+  /* Safe areas on notched iOS / Android gesture bars */
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
+    env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+  box-sizing: border-box;
 }
 .game-stage {
   width: var(--stage-w);
@@ -5649,7 +5802,7 @@ body.is-phone-play .chip {
   transform-origin: center center;
   overflow: hidden;
   background: var(--bg);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04);
+  box-shadow: none;
 }
 .game-stage .app {
   width: 100%;
@@ -5658,7 +5811,7 @@ body.is-phone-play .chip {
   max-height: none;
   min-height: 0;
   margin: 0;
-  padding: 8px 12px;
+  padding: 0;
   overflow: hidden;
 }
 body.has-game-stage {
@@ -5706,10 +5859,97 @@ body.has-game-stage .app {
   min-height: 0;
   height: 100%;
 }
+.game-stage #screen-result.is-active,
+.game-stage #screen-mix-result.is-active,
+.game-stage #screen-finish.is-active {
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  padding: 0;
+}
 .game-stage .result-card,
 .game-stage .mix-card {
-  max-height: 100%;
+  width: 100%;
+  height: 100%;
+  max-height: none;
   max-width: none;
+  border-radius: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 14px 18px 12px;
+  gap: 10px;
+  box-shadow: none;
+}
+.game-stage .result-header {
+  flex: 0 0 auto;
+}
+.game-stage .result-name {
+  font-size: clamp(28px, 5.2vw, 42px);
+  margin: 2px 0 0;
+}
+.game-stage #result-judges-wrap {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.game-stage .result-top {
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 14px;
+  align-items: stretch;
+}
+.game-stage .result-left {
+  justify-content: center;
+  gap: 8px;
+}
+.game-stage .stars {
+  font-size: clamp(36px, 6vw, 56px);
+}
+.game-stage .result-score {
+  font-size: clamp(28px, 4.5vw, 40px);
+}
+.game-stage .result-right {
+  max-height: none;
+  min-height: 0;
+  padding: 12px 14px;
+}
+.game-stage .result-right .feedback {
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.game-stage .feedback li {
+  padding: 8px 0;
+  font-size: 13.5px;
+}
+.game-stage .result-customer {
+  font-size: 14px;
+}
+.game-stage .result-actions {
+  flex: 0 0 auto;
+  width: 100%;
+  margin-top: auto;
+  padding-top: 10px;
+  gap: 10px;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+.game-stage .result-actions .btn {
+  padding: 11px 16px;
+  font-size: 14px;
+}
+.game-stage .result-actions .btn-primary {
+  min-width: 168px;
+  margin-left: auto;
+}
+.game-stage .result-left .stars {
+  margin-bottom: 4px;
+}
+.game-stage .result-customer {
+  margin-top: 10px;
+  max-width: 36ch;
 }
 .game-stage .modal {
   position: absolute;
@@ -5720,51 +5960,77 @@ body.has-game-stage .app {
 }
 
 /* Hub: always phone-landscape side-by-side (ignore tall desktop media queries) */
+.game-stage #hub-root,
+.game-stage .hub-shell {
+  height: 100%;
+}
 .game-stage .hub-mid {
+  flex: 1 1 auto;
+  min-height: 0;
   flex-direction: row;
   align-items: stretch;
-  gap: 14px;
+  gap: 16px;
+  padding: 4px 0;
 }
 .game-stage .hub-stage {
-  flex: 0 0 auto;
-  justify-content: center;
-  padding: 0;
+  flex: 0 0 34%;
+  max-width: 340px;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 0 8px;
+  /* Ground the duck so it doesn't float in empty purple */
+  background:
+    radial-gradient(ellipse 70% 28% at 50% 92%, rgba(233, 185, 73, 0.18), transparent 70%),
+    radial-gradient(ellipse 80% 40% at 50% 100%, rgba(0, 0, 0, 0.35), transparent 72%);
 }
 .game-stage .hub-duck {
   flex: none;
   width: auto;
-  height: 100%;
-  max-height: 280px;
-  max-width: 36%;
+  height: min(100%, 300px);
+  max-height: none;
+  max-width: 92%;
   aspect-ratio: 0.65;
   margin-bottom: 0;
+  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.45));
 }
 .game-stage .hub-status {
   display: none;
 }
 .game-stage .hub-bottom {
-  flex: 1;
+  flex: 1 1 auto;
   min-width: 0;
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-direction: column;
   align-items: stretch;
-  align-content: center;
-  justify-items: stretch;
+  justify-content: space-between;
   margin-top: 0;
-  padding-top: 0;
-  gap: 8px;
+  padding: 4px 0 0;
+  gap: 10px;
 }
 .game-stage .hub-quest,
-.game-stage .hub-modes {
+.game-stage .hub-modes,
+.game-stage .hub-cta {
   justify-self: stretch;
-  max-width: 100%;
+  max-width: min(560px, 100%);
+  width: 100%;
 }
 .game-stage .hub-modes {
   justify-content: center;
 }
+.game-stage .hub-cta {
+  max-width: min(560px, 100%);
+  gap: 6px;
+  margin: auto 0;
+}
 .game-stage .hub-nav {
-  margin-top: 4px;
-  padding-top: 4px;
+  margin-top: 0;
+  padding-top: 6px;
+  flex: 0 0 auto;
+  align-self: stretch;
+}
+.game-stage .hub-nav-btn {
+  width: 100%;
+  max-width: min(560px, 100%);
 }
 .game-stage #screen-start .best-score {
   display: none;
@@ -5772,7 +6038,56 @@ body.has-game-stage .app {
 .game-stage .start-hub {
   height: 100%;
   max-height: 100%;
-  padding: 10px 14px 8px;
+  padding: 10px 14px 10px;
+  gap: 8px;
+}
+.game-stage .hub-topbar {
+  padding-right: 2px;
+  gap: 6px;
+}
+.game-stage .hub-topbar .hub-profile {
+  max-width: min(42%, 280px);
+}
+.game-stage .hub-chip {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+.game-stage .hub-icon-btn {
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+}
+.game-stage .hub-profile .btn-sm {
+  padding: 4px 10px;
+  font-size: 11px;
+}
+.game-stage .cta-split {
+  margin-bottom: 8px;
+}
+.game-stage .play-meta {
+  flex: 0 0 auto;
+  color: #e4daf5;
+}
+
+/* Very short phone landscapes (iOS / Android): keep CTA + meta stacked cleanly */
+@media (max-height: 460px) {
+  .game-stage .start-hub {
+    padding: 8px 12px 8px;
+    gap: 6px;
+  }
+  .game-stage .hub-duck {
+    height: min(100%, 220px);
+  }
+  .game-stage .cta-main,
+  .game-stage .cta-caret {
+    padding: 10px 10px;
+  }
+  .game-stage .cta-main {
+    font-size: 13px;
+  }
+  .game-stage .hub-quest {
+    padding: 7px 10px;
+  }
 }
 
 /* Game station: keep side-by-side layout even when the phone viewport is narrow */
@@ -5795,7 +6110,11 @@ body.has-game-stage .app {
 }
 .game-stage #screen-game.is-active .topbar { grid-area: topbar; }
 .game-stage #screen-game.is-active .progress-wrap { grid-area: progress; }
-.game-stage #screen-game.is-active .order-ticket { grid-area: ticket; }
+.game-stage #screen-game.is-active .order-ticket {
+  grid-area: ticket;
+  align-self: stretch;
+  min-height: 0;
+}
 .game-stage #screen-game.is-active .step-tracker { grid-area: steps; }
 .game-stage #screen-game.is-active .coach { grid-area: coach; margin: 0; }
 .game-stage #screen-game.is-active .stage-area {
@@ -5818,10 +6137,46 @@ body.has-game-stage .app {
 .game-stage .station {
   min-height: 0;
   height: 100%;
+  overflow: hidden;
+}
+.game-stage .counter-stage {
+  overflow: visible;
+  padding-bottom: 42px;
+  z-index: 3;
+}
+.game-stage .station-bench {
+  min-height: 0;
+  height: 100%;
+  max-height: none;
+  overflow: visible;
+  align-items: flex-end;
+  width: min(100%, 580px);
+}
+.game-stage .glass-mount,
+.game-stage .prep-mount {
+  max-width: min(46%, 240px);
+  min-height: 0;
+  height: 100%;
+  overflow: visible;
+  align-items: flex-end;
+  padding-bottom: 6px;
 }
 .game-stage .glass-mount .glass-svg,
 .game-stage .prep-mount .prep-svg {
-  max-height: min(46%, 170px);
+  /* Full vessel in frame — was capped at ~46%/170px and looked cut off */
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: min(88%, 300px);
+}
+.game-stage .station:not(.is-working) .glass-mount.is-on-counter {
+  transform: translateZ(8px) translateY(0) scale(1);
+  opacity: 1;
+}
+.game-stage .station:not(.is-working).has-prep .glass-mount.is-on-counter {
+  transform: translateZ(-6px) translateY(4px) scale(0.94);
+  opacity: 0.95;
+  filter: drop-shadow(0 8px 6px rgba(0, 0, 0, 0.3));
 }
 
 /* Toast lives outside the stage ? keep it readable on the shell */

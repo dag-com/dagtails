@@ -1,8 +1,7 @@
 # Dependencies
 node_modules/
 
-# Generated web bundle (rebuilt via `npm run build` from the source files
-# at the repo root — see scripts/copy-web.js)
+# Generated web bundle (Vite → www/; see `npm run build`)
 www/
 
 # Android

@@ -176,7 +176,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#0c0814",
   },
   overlay: {
-    ...StyleSheet.absoluteFill,
+    ...StyleSheet.absoluteFillObject,
     zIndex: 2,
     alignItems: "center",
     justifyContent: "center",

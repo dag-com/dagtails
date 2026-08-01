@@ -11,7 +11,8 @@ npm start
 npm run expo:tunnel
 ```
 
-1. Install **Expo Go** on your phone.
+1. Install **Expo Go** on your phone (App Store / Play Store — currently **SDK 54**).
+   This shell targets SDK 54 on purpose: store Expo Go has not shipped 55+ yet.
 2. Run with tunnel so the Metro URL is public:
    ```bash
    npx expo start --tunnel

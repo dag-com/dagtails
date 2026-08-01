@@ -4,7 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
     <title>DAG Tails — Bartending Game</title>
-    <link rel="stylesheet" href="styles.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -81,84 +80,9 @@
         </div>
       </section>
 
-      <!-- ============================== START SCREEN (hub layout) ============================== -->
+      <!-- ============================== START SCREEN (React hub) ============================== -->
       <section id="screen-start" class="screen">
-        <div class="hero-bg" aria-hidden="true"></div>
-        <div class="start-hub">
-          <div class="hub-topbar">
-            <div class="profile-bar hub-profile" id="profile-bar" style="display:none">
-              <span class="hub-avatar" aria-hidden="true"></span>
-              <span class="profile-chip" id="profile-chip"></span>
-              <button id="btn-edit-profile" class="btn btn-ghost btn-sm">Edit</button>
-            </div>
-            <div class="hub-chips">
-              <span class="hub-chip">🔥 <span id="hero-streak-value">0</span></span>
-              <span class="hub-chip"><span id="hero-level-big">Lv 1</span> · <span id="hero-level-main">Trainee</span></span>
-              <span class="hub-chip">⭐ <span id="hero-stars-total">0</span></span>
-              <button id="btn-settings" class="hub-icon-btn" title="Settings">⚙</button>
-            </div>
-          </div>
-
-          <p class="mocktail-banner" id="mocktail-banner" style="display:none">🧃 Mocktail mode — alcohol-free menu</p>
-
-          <div class="hub-mid">
-            <div class="hub-stage">
-              <div class="hub-duck mascot-duck" id="hub-duck" aria-hidden="true"></div>
-              <p class="hub-status">
-                <span class="hub-status-main" id="welcome-back">Welcome back.</span>
-                <span class="hub-status-sub" id="welcome-sub">Your next shift is ready.</span>
-              </p>
-            </div>
-
-            <div class="hub-bottom">
-              <div class="hub-quest cotd-card" id="cotd-card">
-                <div class="hub-quest-info">
-                  <span class="hub-quest-eyebrow">🍹 Cocktail of the Day</span>
-                  <span class="hub-quest-name" id="cotd-name">—</span>
-                </div>
-                <button id="btn-cotd" class="btn btn-cotd">Make it →</button>
-              </div>
-
-              <div class="hub-cta">
-                <div class="cta-wrap" id="cta-wrap">
-                  <div class="cta-split" role="group" aria-label="Play">
-                    <button id="btn-start" class="cta-main" type="button">▶ Play the Journey</button>
-                    <button id="btn-cta-caret" class="cta-caret" type="button" aria-label="More game modes" aria-haspopup="menu" aria-expanded="false">▼</button>
-                  </div>
-                  <div class="cta-menu" id="cta-menu" role="menu" hidden>
-                    <button id="btn-endless" class="cta-menu-item" type="button" role="menuitem">
-                      <span class="ico" aria-hidden="true">🔥</span>
-                      <span class="cta-menu-text">
-                        <strong>Endless</strong>
-                        <small id="endless-menu-sub">Survive the rush</small>
-                      </span>
-                    </button>
-                    <button id="btn-mixologist" class="cta-menu-item" type="button" role="menuitem">
-                      <span class="ico" aria-hidden="true">🧪</span>
-                      <span class="cta-menu-text">
-                        <strong>Mixologist</strong>
-                        <small id="mix-menu-sub">Invent &amp; share</small>
-                      </span>
-                    </button>
-                  </div>
-                </div>
-                <span class="play-meta" id="play-meta"></span>
-              </div>
-
-              <div class="hub-modes hub-modes--quiet">
-                <button id="btn-training" class="hub-link-btn" type="button">📚 Learn</button>
-                <button id="btn-how" class="hub-link-btn" type="button">❓ Help</button>
-              </div>
-            </div>
-          </div>
-
-          <nav class="hub-nav" aria-label="Progress">
-            <button id="btn-badges" class="hub-nav-btn" type="button"><span class="ico">🏅</span>Badges</button>
-          </nav>
-
-          <p class="best-score" id="start-best"></p>
-        </div>
-        <footer class="bar-footer" id="start-footer">🍸 cocktails &nbsp;•&nbsp; precision pours &nbsp;•&nbsp; earn your stars</footer>
+        <div id="hub-root"></div>
       </section>
 
       <!-- ============================== INTRO COMIC REEL ============================== -->
@@ -284,15 +208,36 @@
           <div class="points" id="points-counter">★ 0 pts</div>
         </div>
 
-        <div class="order-ticket order-ticket-compact">
-          <div class="ticket-head">
-            <span class="ticket-label" id="ticket-label">Customer Order</span>
-            <span class="ticket-dots">• • •</span>
+        <div
+          class="order-ticket order-ticket-compact"
+          id="order-ticket"
+          role="button"
+          tabindex="0"
+          aria-pressed="false"
+          aria-label="Order ticket — tap to flip for recipe"
+        >
+          <div class="ticket-flip">
+            <div class="ticket-face ticket-face--front">
+              <div class="ticket-head">
+                <span class="ticket-label" id="ticket-label">Customer Order</span>
+                <span class="ticket-dots">• • •</span>
+              </div>
+              <div class="ticket-customer" id="ticket-customer"></div>
+              <h2 class="ticket-name" id="order-name">Cocktail</h2>
+              <p class="ticket-origin" id="ticket-origin" hidden></p>
+              <p class="ticket-desc" id="order-desc">Order description…</p>
+              <p class="ticket-flip-hint">Tap for recipe ▸</p>
+            </div>
+            <div class="ticket-face ticket-face--back" aria-hidden="true">
+              <div class="ticket-head">
+                <span class="ticket-label">Recipe card</span>
+                <span class="ticket-dots">• • •</span>
+              </div>
+              <p class="ticket-recipe-drink" id="ticket-recipe-drink"></p>
+              <ul class="ticket-recipe" id="ticket-recipe"></ul>
+              <p class="ticket-flip-hint">◂ Tap for order</p>
+            </div>
           </div>
-          <div class="ticket-customer" id="ticket-customer"></div>
-          <h2 class="ticket-name" id="order-name">Cocktail</h2>
-          <p class="ticket-origin" id="ticket-origin" hidden></p>
-          <p class="ticket-desc" id="order-desc">Order description…</p>
         </div>
 
         <!-- Step tracker -->
@@ -627,6 +572,6 @@
       </div>
     </div>
 
-    <script type="module" src="game.js"></script>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
