@@ -173,15 +173,41 @@ body {
 
 /* ============================ Top bar ============================ */
 .topbar {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
+  gap: 8px;
   margin-bottom: 18px;
 }
 .topbar-left {
   display: flex;
   gap: 10px;
   align-items: center;
+  justify-self: start;
+  min-width: 0;
+}
+.topbar-center {
+  justify-self: center;
+  text-align: center;
+  min-width: 0;
+  max-width: min(42vw, 280px);
+  padding: 0 6px;
+}
+.game-venue {
+  display: block;
+  font-family: "Bebas Neue", sans-serif;
+  font-size: clamp(15px, 2.4vw, 22px);
+  letter-spacing: 1px;
+  color: var(--gold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.topbar-right {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-self: end;
 }
 .stage-pill,
 .score-pill {
@@ -257,6 +283,24 @@ body {
 .ticket-face::after {
   right: -9px;
 }
+.ticket-title-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 4px 0;
+}
+.ticket-title-row .ticket-name {
+  margin: 0;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.ticket-title-row .ticket-flip-hint {
+  flex: 0 0 auto;
+  margin: 0;
+  text-align: right;
+  white-space: nowrap;
+}
 .ticket-flip-hint {
   margin: 8px 0 0;
   font-size: 11px;
@@ -266,12 +310,11 @@ body {
   color: #9a7b3d;
   opacity: 0.85;
 }
-.ticket-recipe-drink {
-  margin: 0 0 6px;
-  font-family: "Bebas Neue", sans-serif;
-  font-size: 22px;
-  letter-spacing: 0.5px;
-  color: #2a2118;
+.order-ticket.is-no-flip {
+  cursor: default;
+}
+.order-ticket.is-no-flip .ticket-flip-hint {
+  display: none;
 }
 .ticket-recipe {
   list-style: none;
@@ -312,6 +355,10 @@ body {
   border-bottom: 1px dashed #c9b89a;
   padding-bottom: 8px;
   margin-bottom: 8px;
+  min-height: 0;
+}
+.ticket-head:has(.ticket-origin[hidden]):not(:has(.ticket-label)) {
+  display: none;
 }
 .ticket-label {
   text-transform: uppercase;
@@ -319,6 +366,19 @@ body {
   font-size: 11px;
   font-weight: 700;
   color: #9a7b3d;
+}
+.ticket-head .ticket-origin {
+  margin: 0;
+  width: 100%;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #9a7b3d;
+}
+.ticket-head .ticket-origin-place {
+  color: #9a7b3d;
+  font-weight: 700;
 }
 .ticket-dots {
   color: #c9b89a;
@@ -444,9 +504,24 @@ body {
   border-color: var(--gold);
   transform: translateY(-1px);
 }
-.cat-item.is-added {
-  opacity: 0.45;
-  pointer-events: none;
+.cat-item.is-added,
+.cat-item.is-selected {
+  border-color: rgba(233, 185, 73, 0.75);
+  background: rgba(233, 185, 73, 0.18);
+  color: #fff8e6;
+  box-shadow: inset 0 0 0 1px rgba(233, 185, 73, 0.25);
+}
+.cat-item.is-selected:hover {
+  border-color: var(--gold);
+  transform: none;
+}
+.ingredient-layout.is-catalog-only {
+  grid-template-columns: 1fr;
+}
+.ingredient-layout.is-catalog-only .ingredient-catalog {
+  max-height: none;
+  height: 100%;
+  overflow-y: auto;
 }
 
 .ingredient-build {
@@ -587,10 +662,50 @@ body {
   pointer-events: none;
 }
 .result-left {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex: 1 1 220px;
   justify-content: center;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 160px;
+}
+.result-guest-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+.result-guest-bg[hidden] {
+  display: none !important;
+}
+.result-guest-backdrop {
+  width: min(100%, 360px);
+  height: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  opacity: 0.95;
+  filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.55));
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 78%, transparent 100%);
+}
+.result-verdict-fore {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px 8px;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.75);
 }
 .result-right {
   flex: 1.3 1 260px;
@@ -601,10 +716,14 @@ body {
   padding: 12px 16px;
   display: flex;
   flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
 }
 .result-right .feedback {
   flex: 1 1 auto;
   overflow-y: auto;
+  min-height: 0;
+  overscroll-behavior: contain;
 }
 .result-right-title {
   margin: 0 0 4px;
@@ -835,12 +954,6 @@ body {
   font-size: 13px;
 }
 
-.topbar-right {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-}
-
 /* ============================ Progress bar + points ============================ */
 .progress-wrap {
   display: flex;
@@ -941,9 +1054,16 @@ body {
 /* ============================ Stage area ============================ */
 .stage-area {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 34%);
   gap: 18px;
   align-items: stretch;
+}
+.game-side {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 10px;
+  min-width: 0;
+  min-height: 0;
 }
 
 /* ============================ Bar station (3D counter workspace) ============================ */
@@ -974,10 +1094,10 @@ body {
 .bar-bg {
   position: absolute;
   inset: 0;
-  /* Shelves + empty wood counter ? vessels sit on the CSS bar-top above this */
+  /* Per-venue art via --venue-bar-bg; vessels sit on the CSS bar-top above this */
   background:
-    linear-gradient(180deg, rgba(8, 5, 14, 0.15) 0%, transparent 35%, rgba(8, 5, 14, 0.25) 100%),
-    url("assets/station/bar-stage.png") center 28% / cover no-repeat,
+    linear-gradient(180deg, rgba(8, 5, 14, 0.22) 0%, transparent 38%, rgba(8, 5, 14, 0.4) 100%),
+    var(--venue-bar-bg, url("assets/station/bar-stage.png")) center 32% / cover no-repeat,
     #120c1c;
 }
 .bar-fog {
@@ -992,7 +1112,7 @@ body {
   pointer-events: none;
 }
 
-/* Guest across the counter — cutout sprite over the bar shelves */
+/* Guest across the counter ? cutout sprite over the bar shelves */
 .bar-guest {
   position: absolute;
   z-index: 1;
@@ -1003,7 +1123,7 @@ body {
   transform: translateX(-50%);
   pointer-events: none;
   overflow: hidden;
-  /* Soft bottom fade into the counter only — sides stay open to the bar */
+  /* Soft bottom fade into the counter only ? sides stay open to the bar */
   -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 78%, transparent 100%);
   mask-image: linear-gradient(180deg, #000 0%, #000 78%, transparent 100%);
   filter:
@@ -1636,12 +1756,19 @@ body {
   margin-bottom: 5px;
 }
 .order-ticket-compact .ticket-name {
-  font-size: clamp(20px, 4vw, 28px);
-  margin: 2px 0;
+  font-size: clamp(18px, 3.6vw, 26px);
+  margin: 2px 0 4px;
 }
 .order-ticket-compact .ticket-desc {
   font-size: 12px;
-  line-height: 1.3;
+  line-height: 1.35;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  /* Wrap normally ? no single-line ellipsis on the order request */
+  white-space: normal;
 }
 .order-ticket-compact .ticket-flip-hint {
   margin-top: 6px;
@@ -2057,10 +2184,16 @@ body {
 
 /* ---- Mobile: stack station over controls, still no page scroll ---- */
 @media (max-width: 860px) {
+  /* Landscape game-stage keeps bar | sheet; portrait stacks */
   .stage-area {
     display: grid;
     grid-template-columns: 1fr;
     grid-template-rows: minmax(128px, 34%) 1fr;
+  }
+  .game-stage #screen-game.is-active .stage-area,
+  body.is-phone-play #screen-game.is-active .stage-area {
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 32%);
+    grid-template-rows: minmax(0, 1fr);
   }
   .difficulty-grid {
     grid-template-columns: 1fr;
@@ -2088,9 +2221,6 @@ body {
   .app {
     padding: 8px 10px;
   }
-  .order-ticket-compact .ticket-desc {
-    display: none;
-  }
   .points {
     font-size: 14px;
     min-width: 84px;
@@ -2116,56 +2246,6 @@ body {
   filter: brightness(1.08);
 }
 
-/* Customer line in the order ticket */
-.ticket-customer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 2px 0 6px;
-}
-.cust-avatar {
-  flex: 0 0 auto;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
-  background: rgba(0, 0, 0, 0.25);
-}
-.cust-avatar-img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center top;
-}
-.cust-meta {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-.cust-name {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--gold);
-}
-.cust-sub {
-  font-size: 11px;
-  color: var(--muted);
-  opacity: 0.9;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.cust-line {
-  font-size: 13px;
-  color: var(--muted);
-  font-style: italic;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 /* Endless HUD */
 .endless-hud {
   display: flex;
@@ -2183,25 +2263,21 @@ body {
   font-size: 14px;
 }
 
-/* Customer reaction on the result screen */
+/* Customer reaction on the result screen (portrait lives in .result-guest-bg) */
 .result-customer {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
   font-size: 14px;
   color: var(--gold-soft);
   font-style: italic;
   margin: 8px 0 4px;
-  text-align: left;
+  text-align: center;
+  max-width: 34ch;
 }
 .result-cust-img {
-  flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-  object-position: center top;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  display: none;
 }
 .result-cust-text {
   min-width: 0;
@@ -3428,6 +3504,15 @@ body {
   flex-direction: column;
   min-height: 100dvh;
   gap: 0;
+  overflow: hidden;
+}
+.map-stage {
+  flex: 1 1 auto;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 .map-topbar {
   display: flex;
@@ -3594,11 +3679,15 @@ body {
 .msd-stars { font-size: 12px; letter-spacing: 1px; color: #4a4060; }
 .msd-stars .on { color: var(--gold); }
 .map-scroll {
-  height: 100%;
+  flex: 1 1 auto;
+  height: auto;
   min-width: 0;
   min-height: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   border: 1px solid var(--line);
   border-radius: 14px;
   background:
@@ -3606,12 +3695,22 @@ body {
     linear-gradient(180deg, #14101f, #0a0612);
   box-shadow: inset 0 0 40px rgba(0,0,0,0.35);
   padding: 10px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(233, 185, 73, 0.45) rgba(255, 255, 255, 0.04);
+}
+.map-scroll::-webkit-scrollbar { width: 10px; }
+.map-scroll::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.04); }
+.map-scroll::-webkit-scrollbar-thumb {
+  background: rgba(233, 185, 73, 0.45);
+  border-radius: 8px;
 }
 .map-crawl {
   display: flex;
   flex-direction: column;
   gap: 10px;
   min-height: 100%;
+  /* Room below so the last/current stage can sit mid-viewport */
+  padding-bottom: min(42vh, 240px);
 }
 .map-venue {
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -4743,15 +4842,13 @@ body {
 
   #screen-game.is-active {
     display: grid;
-    grid-template-columns: minmax(200px, 30%) minmax(0, 1fr);
-    grid-template-rows: auto auto auto auto auto 1fr;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr);
     grid-template-areas:
-      "topbar topbar"
-      "progress progress"
-      "ticket stage"
-      "steps stage"
-      "coach stage"
-      "nav stage";
+      "topbar"
+      "progress"
+      "coach"
+      "main";
     gap: 6px 8px;
     align-items: stretch;
     min-height: 0;
@@ -4760,9 +4857,12 @@ body {
   }
   #screen-game.is-active .topbar { grid-area: topbar; }
   #screen-game.is-active .progress-wrap { grid-area: progress; }
-  #screen-game.is-active .order-ticket { grid-area: ticket; }
   #screen-game.is-active .step-tracker {
-    grid-area: steps;
+    display: none;
+  }
+  #screen-game.is-active .step-tracker:not([hidden]) {
+    display: flex;
+    grid-area: progress;
     overflow-x: auto;
     overflow-y: hidden;
     padding-bottom: 2px;
@@ -4772,43 +4872,38 @@ body {
     margin: 0;
   }
   #screen-game.is-active .stage-area {
-    grid-area: stage;
+    grid-area: main;
     display: grid;
-    grid-template-columns: minmax(160px, 42%) minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) minmax(200px, 32%);
     grid-template-rows: minmax(0, 1fr);
     min-height: 0;
     height: 100%;
     gap: 8px;
     overflow: hidden;
   }
-  #screen-game.is-active .step-nav {
-    grid-area: nav;
+  #screen-game.is-active .game-side {
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    gap: 8px;
+    overflow: hidden;
+  }
+  #screen-game.is-active .game-side .step-nav {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 6px;
-    align-self: end;
+    margin: 0;
   }
-  #screen-game.is-active .step-nav .btn {
+  #screen-game.is-active .game-side .step-nav .btn {
     width: 100%;
+    min-height: 44px;
   }
   .order-ticket-compact {
     padding: 6px 10px;
   }
-  .order-ticket-compact .ticket-desc {
-    display: none;
-  }
   .ticket-origin-lore {
     display: none;
-  }
-  .cust-sub {
-    display: none;
-  }
-  .cust-line {
-    font-size: 11px;
-  }
-  .cust-avatar {
-    width: 36px;
-    height: 36px;
   }
   .station {
     min-height: 0;
@@ -4929,17 +5024,23 @@ body.is-phone-play .judge-bubble-quote {
 body.is-phone-play .result-top {
   flex: 1 1 auto;
   min-height: 0;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(240px, 46%);
+  gap: 10px 16px;
   margin-top: 4px;
   align-items: stretch;
+  overflow: hidden;
 }
 body.is-phone-play .result-left {
   justify-content: center;
   gap: 6px;
+  min-height: 0;
+  overflow: hidden;
 }
 body.is-phone-play .result-right {
   max-height: none;
   min-height: 0;
+  height: 100%;
   padding: 8px 10px;
   overflow: hidden;
 }
@@ -4947,6 +5048,7 @@ body.is-phone-play .result-right .feedback {
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
+  overscroll-behavior: contain;
 }
 body.is-phone-play .result-actions {
   flex: 0 0 auto;
@@ -5880,6 +5982,14 @@ body.has-game-stage .app {
   padding: 14px 18px 12px;
   gap: 10px;
   box-shadow: none;
+  overflow: hidden;
+  min-height: 0;
+}
+.game-stage .result-card.has-venue-bg {
+  background:
+    linear-gradient(180deg, rgba(14, 10, 22, 0.9) 0%, rgba(10, 6, 18, 0.94) 100%),
+    var(--venue-bar-bg) center 30% / cover no-repeat,
+    var(--panel);
 }
 .game-stage .result-header {
   flex: 0 0 auto;
@@ -5889,18 +5999,30 @@ body.has-game-stage .app {
   margin: 2px 0 0;
 }
 .game-stage #result-judges-wrap {
-  flex: 1 1 auto;
+  flex: 0 1 auto;
   min-height: 0;
+  max-height: 36%;
+  overflow: hidden;
 }
 .game-stage .result-top {
   flex: 1 1 auto;
   min-height: 0;
-  gap: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 46%);
+  gap: 16px 28px;
   align-items: stretch;
+  overflow: hidden;
+  flex-wrap: nowrap;
 }
 .game-stage .result-left {
   justify-content: center;
   gap: 8px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.game-stage .result-guest-backdrop {
+  width: min(100%, 420px);
 }
 .game-stage .stars {
   font-size: clamp(36px, 6vw, 56px);
@@ -5911,12 +6033,20 @@ body.has-game-stage .app {
 .game-stage .result-right {
   max-height: none;
   min-height: 0;
+  height: 100%;
+  width: 100%;
+  max-width: none;
+  justify-self: stretch;
   padding: 12px 14px;
+  overflow: hidden;
 }
 .game-stage .result-right .feedback {
   overflow-y: auto;
   flex: 1 1 auto;
   min-height: 0;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(233, 185, 73, 0.45) rgba(255, 255, 255, 0.04);
 }
 .game-stage .feedback li {
   padding: 8px 0;
@@ -6090,18 +6220,16 @@ body.has-game-stage .app {
   }
 }
 
-/* Game station: keep side-by-side layout even when the phone viewport is narrow */
+/* Game station: bar-first ? tall bar + right sheet with Serve under ingredients */
 .game-stage #screen-game.is-active {
   display: grid;
-  grid-template-columns: minmax(200px, 34%) minmax(0, 1fr);
-  grid-template-rows: auto auto auto auto 1fr auto;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto minmax(0, 1fr);
   grid-template-areas:
-    "topbar topbar"
-    "progress progress"
-    "ticket stage"
-    "steps stage"
-    "coach stage"
-    "nav stage";
+    "topbar"
+    "progress"
+    "coach"
+    "main";
   gap: 6px 8px;
   align-items: stretch;
   min-height: 0;
@@ -6110,30 +6238,207 @@ body.has-game-stage .app {
 }
 .game-stage #screen-game.is-active .topbar { grid-area: topbar; }
 .game-stage #screen-game.is-active .progress-wrap { grid-area: progress; }
-.game-stage #screen-game.is-active .order-ticket {
-  grid-area: ticket;
-  align-self: stretch;
-  min-height: 0;
+.game-stage #screen-game.is-active .step-tracker { display: none; }
+.game-stage #screen-game.is-active .step-tracker:not([hidden]) {
+  display: flex;
+  grid-area: progress;
+  align-self: center;
 }
-.game-stage #screen-game.is-active .step-tracker { grid-area: steps; }
 .game-stage #screen-game.is-active .coach { grid-area: coach; margin: 0; }
 .game-stage #screen-game.is-active .stage-area {
-  grid-area: stage;
+  grid-area: main;
   display: grid;
-  grid-template-columns: minmax(160px, 42%) minmax(0, 1fr);
+  /* Wider bar ? Serve no longer steals a full-width dock */
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 32%);
   grid-template-rows: minmax(0, 1fr);
   min-height: 0;
   height: 100%;
   gap: 8px;
   overflow: hidden;
 }
-.game-stage #screen-game.is-active .step-nav {
-  grid-area: nav;
+.game-stage #screen-game.is-active .game-side {
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 8px;
+  overflow: hidden;
+}
+.game-stage #screen-game.is-active .game-side .step-panel {
+  min-height: 0;
+  height: auto;
+  overflow: hidden;
+}
+.game-stage #screen-game.is-active .game-side .step-nav {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 6px;
-  align-self: end;
+  gap: 0;
+  margin: 0;
 }
+.game-stage #screen-game.is-active .game-side .step-nav #btn-next {
+  width: 100%;
+  min-height: 48px;
+}
+
+/* Bar column: full-bleed station + floating ticket (match bar-first mock) */
+.game-bar {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.game-bar .station {
+  height: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+/* Back ? topbar, before Stop counter */
+.topbar-left .btn-back-arrow {
+  position: relative;
+  top: auto;
+  left: auto;
+  z-index: 1;
+  flex: 0 0 auto;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
+  background: rgba(12, 8, 20, 0.72);
+  color: #f5ead2;
+  font-size: 18px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: none;
+}
+.topbar-left .btn-back-arrow:hover {
+  background: rgba(20, 14, 32, 0.9);
+  border-color: rgba(232, 197, 71, 0.55);
+  color: var(--gold, #e8c547);
+}
+.topbar-left .btn-back-arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Ticket ? flush to the left of the bar (mock) */
+.game-bar .order-ticket.order-ticket-compact {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 6;
+  width: min(260px, 42%);
+  height: auto !important;
+  max-height: none !important;
+  margin: 0;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.4));
+  overflow: visible;
+}
+.game-bar .order-ticket .ticket-flip,
+.game-bar .order-ticket .ticket-face--front {
+  height: auto !important;
+  max-height: none !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+}
+.game-bar .order-ticket .ticket-face {
+  padding: 8px 12px 8px;
+  overflow: visible !important;
+}
+.game-bar .order-ticket .ticket-face--back {
+  overflow: auto;
+  max-height: min(52vh, 240px);
+}
+.game-bar .order-ticket .ticket-name {
+  font-size: clamp(16px, 3vw, 22px);
+  margin: 0;
+  line-height: 1.05;
+}
+.game-bar .order-ticket .ticket-title-row {
+  margin: 2px 0 3px;
+  gap: 6px;
+}
+.game-bar .order-ticket .ticket-desc {
+  display: block !important;
+  -webkit-line-clamp: unset !important;
+  line-clamp: unset !important;
+  overflow: visible !important;
+  font-size: 11.5px;
+  line-height: 1.35;
+  white-space: normal !important;
+}
+.game-bar .order-ticket .ticket-flip-hint {
+  margin: 0;
+  font-size: 9px;
+}
+.game-bar .order-ticket .ticket-face--back .ticket-flip-hint {
+  margin-top: 4px;
+}
+.game-bar .order-ticket .ticket-head {
+  padding-bottom: 3px;
+  margin-bottom: 3px;
+}
+.game-bar .order-ticket .ticket-label {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+}
+.game-bar .ticket-origin-lore {
+  display: none !important;
+}
+.game-bar .ticket-head .ticket-origin {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  margin: 0;
+}
+.game-bar .order-ticket .ticket-face::before,
+.game-bar .order-ticket .ticket-face::after {
+  display: none;
+}
+
+/* Guest + glass in the clear band right of the ticket */
+.game-bar .bar-guest {
+  left: 62%;
+  top: 1%;
+  width: min(38%, 190px);
+  height: 56%;
+  z-index: 1;
+}
+.game-bar .counter-stage {
+  padding-left: min(38%, 220px);
+  padding-right: 4%;
+  padding-bottom: 36px;
+  box-sizing: border-box;
+}
+.game-bar .station-bench {
+  width: min(72%, 380px);
+  margin-left: auto;
+  margin-right: 6%;
+  justify-content: center;
+}
+.game-bar .glass-mount,
+.game-bar .prep-mount {
+  max-width: min(48%, 200px);
+}
+.game-bar .glass-mount .glass-svg,
+.game-bar .prep-mount .prep-svg {
+  max-height: min(72%, 240px);
+}
+
+/* Guess mode: station status carries the prompt ? drop duplicate panel chrome */
+.step-panel.is-guess-compact .step-panel-title,
+.step-panel.is-guess-compact .step-panel-sub {
+  display: none;
+}
+.step-panel.is-guess-compact {
+  padding-top: 10px;
+}
+
 .game-stage .station {
   min-height: 0;
   height: 100%;
@@ -6144,6 +6449,11 @@ body.has-game-stage .app {
   padding-bottom: 42px;
   z-index: 3;
 }
+.game-stage .game-bar .counter-stage {
+  padding-left: min(38%, 220px);
+  padding-right: 4%;
+  padding-bottom: 36px;
+}
 .game-stage .station-bench {
   min-height: 0;
   height: 100%;
@@ -6151,6 +6461,12 @@ body.has-game-stage .app {
   overflow: visible;
   align-items: flex-end;
   width: min(100%, 580px);
+}
+.game-stage .game-bar .station-bench {
+  width: min(72%, 380px);
+  margin-left: auto;
+  margin-right: 6%;
+  justify-content: center;
 }
 .game-stage .glass-mount,
 .game-stage .prep-mount {
@@ -6161,13 +6477,20 @@ body.has-game-stage .app {
   align-items: flex-end;
   padding-bottom: 6px;
 }
+.game-stage .game-bar .glass-mount,
+.game-stage .game-bar .prep-mount {
+  max-width: min(48%, 200px);
+}
 .game-stage .glass-mount .glass-svg,
 .game-stage .prep-mount .prep-svg {
-  /* Full vessel in frame — was capped at ~46%/170px and looked cut off */
   width: auto;
   max-width: 100%;
   height: auto;
   max-height: min(88%, 300px);
+}
+.game-stage .game-bar .glass-mount .glass-svg,
+.game-stage .game-bar .prep-mount .prep-svg {
+  max-height: min(72%, 240px);
 }
 .game-stage .station:not(.is-working) .glass-mount.is-on-counter {
   transform: translateZ(8px) translateY(0) scale(1);

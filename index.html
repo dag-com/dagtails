@@ -54,8 +54,7 @@
       </div>
 
       <!-- ============================== BRAND SPLASH ============================== -->
-      <!-- Always shown on boot. New players then get the profile modal; returning
-           players continue to the hub. Tap anywhere (or wait) to continue. -->
+      <!-- Always shown on boot. Continues only via Enter the bar (no auto-advance). -->
       <section id="screen-splash" class="screen is-active">
         <div class="hero-bg" aria-hidden="true"></div>
         <div class="splash-card">
@@ -76,7 +75,6 @@
             <span class="splash-chip" id="splash-chip-stars"></span>
           </div>
           <button id="btn-splash-continue" class="btn btn-primary btn-lg" type="button">Enter the bar →</button>
-          <span class="splash-hint">tap anywhere to continue</span>
         </div>
       </section>
 
@@ -190,8 +188,12 @@
       <section id="screen-game" class="screen">
         <header class="topbar">
           <div class="topbar-left">
+            <button id="btn-back" class="btn-back-arrow" type="button" aria-label="Back" title="Back">←</button>
             <span class="stage-pill" id="stage-pill">Stage 1 / 8</span>
             <span class="diff-pill" id="diff-pill">Basic</span>
+          </div>
+          <div class="topbar-center">
+            <span class="game-venue" id="game-venue"></span>
           </div>
           <div class="topbar-right">
             <button id="btn-ambient" class="btn btn-ghost btn-sm" title="Toggle bar ambience">🎵</button>
@@ -208,83 +210,81 @@
           <div class="points" id="points-counter">★ 0 pts</div>
         </div>
 
-        <div
-          class="order-ticket order-ticket-compact"
-          id="order-ticket"
-          role="button"
-          tabindex="0"
-          aria-pressed="false"
-          aria-label="Order ticket — tap to flip for recipe"
-        >
-          <div class="ticket-flip">
-            <div class="ticket-face ticket-face--front">
-              <div class="ticket-head">
-                <span class="ticket-label" id="ticket-label">Customer Order</span>
-                <span class="ticket-dots">• • •</span>
-              </div>
-              <div class="ticket-customer" id="ticket-customer"></div>
-              <h2 class="ticket-name" id="order-name">Cocktail</h2>
-              <p class="ticket-origin" id="ticket-origin" hidden></p>
-              <p class="ticket-desc" id="order-desc">Order description…</p>
-              <p class="ticket-flip-hint">Tap for recipe ▸</p>
-            </div>
-            <div class="ticket-face ticket-face--back" aria-hidden="true">
-              <div class="ticket-head">
-                <span class="ticket-label">Recipe card</span>
-                <span class="ticket-dots">• • •</span>
-              </div>
-              <p class="ticket-recipe-drink" id="ticket-recipe-drink"></p>
-              <ul class="ticket-recipe" id="ticket-recipe"></ul>
-              <p class="ticket-flip-hint">◂ Tap for order</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Step tracker -->
+        <!-- Step tracker (hidden when the flow is short) -->
         <div class="step-tracker" id="step-tracker"></div>
 
         <!-- Training coach (only shown in Training mode) -->
         <div class="coach" id="coach" style="display:none"></div>
 
         <div class="stage-area">
-          <!-- Bar station with the animated glass -->
-          <div class="station">
-            <div class="bar-scene" aria-hidden="true">
-              <div class="bar-bg"></div>
-              <div class="bar-guest" id="bar-guest" hidden>
-                <img id="bar-guest-img" src="" alt="" draggable="false" />
-                <span class="bar-guest-drink" aria-hidden="true">🍹</span>
-              </div>
-              <div class="bar-fog"></div>
-            </div>
-            <div class="counter-stage">
-              <div class="bar-top" aria-hidden="true">
-                <span class="bar-top-shine"></span>
-                <span class="bar-top-edge"></span>
-              </div>
-              <div class="pour-stream" id="pour-stream"></div>
-              <div class="station-bench" id="station-bench">
-                <div class="prep-mount" id="prep-mount" hidden>
-                  <span class="vessel-shadow" aria-hidden="true"></span>
-                  <div class="tool tool-spoon" id="tool-spoon"></div>
+          <!-- Bar + ticket (mock) -->
+          <div class="game-bar">
+            <div
+              class="order-ticket order-ticket-compact"
+              id="order-ticket"
+              role="button"
+              tabindex="0"
+              aria-pressed="false"
+              aria-label="Order ticket — tap to flip for recipe"
+            >
+              <div class="ticket-flip">
+                <div class="ticket-face ticket-face--front">
+                  <div class="ticket-head">
+                    <p class="ticket-origin" id="ticket-origin" hidden></p>
+                  </div>
+                  <div class="ticket-title-row">
+                    <h2 class="ticket-name" id="order-name">Cocktail</h2>
+                    <span class="ticket-flip-hint">Tap ▸</span>
+                  </div>
+                  <p class="ticket-desc" id="order-desc">Order description…</p>
                 </div>
-                <div class="glass-mount" id="glass-mount">
-                  <span class="vessel-shadow" aria-hidden="true"></span>
-                  <div class="tool tool-muddler" id="tool-muddler"></div>
+                <div class="ticket-face ticket-face--back" aria-hidden="true">
+                  <div class="ticket-head">
+                    <span class="ticket-label">Recipe card</span>
+                  </div>
+                  <ul class="ticket-recipe" id="ticket-recipe"></ul>
+                  <p class="ticket-flip-hint">◂ Tap</p>
                 </div>
               </div>
             </div>
-            <div class="station-status" id="station-status">Choose a glass</div>
+            <div class="station">
+              <div class="bar-scene" aria-hidden="true">
+                <div class="bar-bg"></div>
+                <div class="bar-guest" id="bar-guest" hidden>
+                  <img id="bar-guest-img" src="" alt="" draggable="false" />
+                  <span class="bar-guest-drink" aria-hidden="true">🍹</span>
+                </div>
+                <div class="bar-fog"></div>
+              </div>
+              <div class="counter-stage">
+                <div class="bar-top" aria-hidden="true">
+                  <span class="bar-top-shine"></span>
+                  <span class="bar-top-edge"></span>
+                </div>
+                <div class="pour-stream" id="pour-stream"></div>
+                <div class="station-bench" id="station-bench">
+                  <div class="prep-mount" id="prep-mount" hidden>
+                    <span class="vessel-shadow" aria-hidden="true"></span>
+                    <div class="tool tool-spoon" id="tool-spoon"></div>
+                  </div>
+                  <div class="glass-mount" id="glass-mount">
+                    <span class="vessel-shadow" aria-hidden="true"></span>
+                    <div class="tool tool-muddler" id="tool-muddler"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="station-status" id="station-status">Choose a glass</div>
+            </div>
           </div>
 
-          <!-- Step controls (rendered per step) -->
-          <div class="step-panel" id="step-panel"></div>
+          <!-- Ingredients sheet + Serve -->
+          <div class="game-side">
+            <div class="step-panel" id="step-panel"></div>
+            <nav class="step-nav">
+              <button id="btn-next" class="btn btn-primary btn-lg">Next →</button>
+            </nav>
+          </div>
         </div>
-
-        <nav class="step-nav">
-          <button id="btn-back" class="btn btn-ghost">← Back</button>
-          <button id="btn-next" class="btn btn-primary btn-lg">Next →</button>
-        </nav>
       </section>
 
       <!-- ============================== RESULT SCREEN ============================== -->
@@ -300,12 +300,17 @@
           </div>
           <div class="result-top is-pending" id="result-verdict">
             <div class="result-left">
-              <div class="stars" id="result-stars">★★★</div>
-              <div class="result-score">
-                <span id="result-pct">0</span><span class="result-pct-sign">%</span>
-                <span class="result-points">+<span id="result-points">0</span> pts<span class="result-bonus" id="result-bonus" style="display:none"></span></span>
+              <div class="result-guest-bg" id="result-guest-bg" hidden aria-hidden="true">
+                <img class="result-guest-backdrop" id="result-guest-img" src="" alt="" draggable="false" />
               </div>
-              <p class="result-customer" id="result-customer"></p>
+              <div class="result-verdict-fore">
+                <div class="stars" id="result-stars">★★★</div>
+                <div class="result-score">
+                  <span id="result-pct">0</span><span class="result-pct-sign">%</span>
+                  <span class="result-points">+<span id="result-points">0</span> pts<span class="result-bonus" id="result-bonus" style="display:none"></span></span>
+                </div>
+                <p class="result-customer" id="result-customer"></p>
+              </div>
             </div>
             <div class="result-right">
               <p class="result-right-title">Bartender checklist</p>

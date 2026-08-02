@@ -334,13 +334,7 @@ function renderSplash() {
   if (chipStars) chipStars.textContent = `⭐ ${totalStars()} stars`;
 }
 
-let splashTimer = null;
-let splashShownAt = 0;
-const SPLASH_MIN_MS = 3000;
-
-function dismissSplash(force = false) {
-  if (!force && splashShownAt && Date.now() - splashShownAt < SPLASH_MIN_MS) return;
-  if (splashTimer) { clearTimeout(splashTimer); splashTimer = null; }
+function dismissSplash() {
   onShowStart();
   showScreen("screen-start");
   if (!getProfile()) openProfileForm(true);
@@ -543,6 +537,8 @@ const MEASURE_ENABLED = false;
 // Flip to true to restore the tools / method picker step. Held off — recipe
 // method is auto-applied (shake/stir/build still run on Serve).
 const TOOLS_ENABLED = false;
+// Flip to true to restore the garnish picker step. Held off — recipe garnish auto-applies.
+const GARNISH_ENABLED = false;
 
 // What's new at each complexity tier — shown once when first reached.
 const TIER_INTRO = {
@@ -550,7 +546,7 @@ const TIER_INTRO = {
   "Pour": { emoji: "🥤", eyebrow: "Level up — new rule", title: "Now measure your pours", body: "From here on you set how much of each ingredient goes in. Tap to add, then use − / + to dial each amount. Get close to the recipe for more stars.", button: "Got it →" },
   "Mix": { emoji: "🍸", eyebrow: "Level up — new rule", title: "Tools before the pour", body: "From here you choose the method first — shaker, stir, muddle, and more. Tools land on the counter, then you pour into them, then prepare.", button: "Got it →" },
   "Garnish": { emoji: "🍋", eyebrow: "Level up — new rule", title: "Now add the garnish", body: "Until now the garnish was added for you. From here you finish the drink yourself — pick the garnish that matches the cocktail for that last star.", button: "Got it →" },
-  "Full bar": { emoji: "🍷", eyebrow: "Level up — full bar", title: "Now pick the glass too", body: "You're running the full bar: choose the glassware and the garnish yourself. Every choice counts toward your stars.", button: "Got it →" },
+  "Full bar": { emoji: "🍷", eyebrow: "Level up — full bar", title: "Now pick the glass too", body: "You're running the full bar: choose the glassware yourself. Every choice counts toward your stars.", button: "Got it →" },
 };
 function tierSeen(label) { const m = getMap(); return !!(m.seenTiers && m.seenTiers[label]); }
 function markTierSeen(label) { const m = getMap(); m.seenTiers = m.seenTiers || {}; m.seenTiers[label] = 1; setMap(m); }
@@ -563,16 +559,17 @@ function isGuessMode() {
 }
 
 // Complexity ramp — start simple, scale up. stageNo is 1-based.
-// Mechanics unlock: measure / tools when enabled → garnish → glass.
+// Mechanics unlock: measure / tools / garnish when enabled → glass.
 function complexityForStage(stageNo) {
   const portions = MEASURE_ENABLED;
   const chooseMethod = TOOLS_ENABLED;
+  const chooseGarnish = GARNISH_ENABLED;
   if (stageNo <= 5)  return { portions: false, chooseGlass: false, chooseMethod: false, chooseGarnish: false, decoys: 3,  label: "Guess" };
-  // When measuring/tools are held, keep the "Guess" label so Pour/Mix intros never fire.
+  // When held mechanics are off, keep the "Guess" label so their intros never fire.
   if (stageNo <= 12) return { portions, chooseGlass: false, chooseMethod: false, chooseGarnish: false, decoys: 6,  label: portions ? "Pour" : "Guess" };
   if (stageNo <= 19) return { portions, chooseGlass: false, chooseMethod, chooseGarnish: false, decoys: 10, label: chooseMethod ? "Mix" : "Guess" };
-  if (stageNo <= 26) return { portions, chooseGlass: false, chooseMethod, chooseGarnish: true,  decoys: 12, label: "Garnish" };
-  return { portions, chooseGlass: true, chooseMethod, chooseGarnish: true, decoys: Infinity, label: "Full bar" };
+  if (stageNo <= 26) return { portions, chooseGlass: false, chooseMethod, chooseGarnish, decoys: 12, label: chooseGarnish ? "Garnish" : "Guess" };
+  return { portions, chooseGlass: true, chooseMethod, chooseGarnish, decoys: Infinity, label: "Full bar" };
 }
 
 function shuffleArr(a) {
@@ -885,13 +882,15 @@ function loadCotd() {
   $(".progress-wrap").style.display = "none";
   $("#endless-hud").style.display = "none";
   clearCustomer();
-  $("#ticket-label").textContent = "Cocktail of the Day";
+  setGameVenue("Cocktail of the Day");
+  applyVenueChrome(venueForStage(getMap().cleared || 0)?.venue);
   $("#stage-pill").textContent = "🍹 Daily";
   $("#diff-pill").textContent = state.complexity.label;
   $("#order-name").textContent = recipe.name;
   $("#order-desc").textContent = recipe.order;
   setTicketOrigin(recipe);
   renderTicketRecipe(recipe);
+  setTicketFlippable(true);
   setTicketFlipped(false);
   recordPlayDay();
   renderStation();
@@ -1151,7 +1150,7 @@ function renderMap(opts = {}) {
   });
 
   updateMapCta();
-  setTimeout(() => centerOnVenue(focusId, "auto"), 40);
+  setTimeout(() => centerMapFocus(focusId, "auto"), 40);
 
   if (pendingTravel) {
     const trip = pendingTravel;
@@ -1173,9 +1172,27 @@ function placeDuckOnMap() { /* no map duck */ }
 function ensureMapAssets() { /* no map plate */ }
 
 function centerOnVenue(venueId, behavior = "smooth") {
+  centerMapFocus(venueId, behavior);
+}
+
+/** Scroll map list so the focused venue (and current stage) sits mid-viewport. */
+function centerMapFocus(venueId, behavior = "smooth") {
+  const scrollBehavior = behavior === "auto" ? "auto" : "smooth";
+  const map = getMap();
+  const cleared = map.cleared || 0;
+  const currentVenueId = venueForStage(cleared)?.venue?.id;
+  const stageBtn = mapDrinkEls[cleared];
+
+  // Prefer centering the active drink when viewing its venue
+  if (venueId && venueId === currentVenueId && stageBtn?.scrollIntoView) {
+    stageBtn.scrollIntoView({ behavior: scrollBehavior, block: "center", inline: "nearest" });
+    return;
+  }
+
   const card = venueId ? mapHubEls[venueId] : null;
-  if (!card || typeof card.scrollIntoView !== "function") return;
-  card.scrollIntoView({ behavior: behavior === "auto" ? "auto" : "smooth", block: "nearest" });
+  if (card?.scrollIntoView) {
+    card.scrollIntoView({ behavior: scrollBehavior, block: "center", inline: "nearest" });
+  }
 }
 
 function stopMapCameraFollow() { /* no map camera */ }
@@ -1580,7 +1597,7 @@ function renderStation() {
   if (prepMount) prepMount.classList.add("is-on-counter");
 
   updateLiquid(false);
-  if (state.steps.includes("garnish") || state.mixed) applyGarnishVisual();
+  if (state.build.garnish || state.steps.includes("garnish") || state.mixed) applyGarnishVisual();
   refreshStationStatus();
 }
 
@@ -1807,7 +1824,12 @@ async function runMethod(methodId) {
 // ============================ Step tracker ============================
 function renderTracker() {
   const el = $("#step-tracker");
+  if (!el) return;
+  // Short flows (ingredients → serve) don't need a tracker — frees chrome.
+  const show = (state.steps || []).length > 2;
+  el.hidden = !show;
   el.innerHTML = "";
+  if (!show) return;
   const nodes = [...state.steps, "serve"];
   nodes.forEach((step, i) => {
     if (i > 0) {
@@ -1834,9 +1856,11 @@ function renderStepPanel() {
   const panel = $("#step-panel");
   const meta = STEP_META[step];
   let sub = meta.sub;
-  if (step === "ingredients" && isGuessMode()) {
+  const guessCompact = step === "ingredients" && isGuessMode();
+  if (guessCompact) {
     sub = "Tap the ingredients you think belong in this drink — no measuring.";
   }
+  panel.classList.toggle("is-guess-compact", guessCompact);
   panel.innerHTML = `
     <h3 class="step-panel-title">${meta.title}</h3>
     <p class="step-panel-sub">${sub}</p>
@@ -1926,6 +1950,17 @@ function renderGarnishPanel(body) {
 
 // ---- Ingredients panel ----
 function renderIngredientsPanel(body) {
+  // Guess mode: catalog only — selection highlights + pours into the glass (toggleable).
+  // Measure mode (Mixologist): keep a pour list for −/+ amounts.
+  if (isGuessMode()) {
+    body.innerHTML = `
+      <div class="ingredient-layout is-catalog-only">
+        <div class="ingredient-catalog" id="ingredient-catalog"></div>
+      </div>
+    `;
+    fillCatalog();
+    return;
+  }
   body.innerHTML = `
     <div class="ingredient-layout">
       <div class="ingredient-catalog" id="ingredient-catalog"></div>
@@ -1946,6 +1981,7 @@ function ingredientCatOrder() {
 function appendCatalogGroups(el, list, added) {
   const order = ingredientCatOrder();
   const cats = order.filter((cat) => list.some((i) => i.cat === cat));
+  const guess = isGuessMode();
   cats.forEach((cat) => {
     const group = document.createElement("div");
     group.className = "cat-group";
@@ -1955,9 +1991,14 @@ function appendCatalogGroups(el, list, added) {
     list.filter((i) => i.cat === cat).forEach((ing) => {
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "cat-item" + (added.has(ing.id) ? " is-added" : "");
+      const on = added.has(ing.id);
+      btn.className = "cat-item" + (on ? " is-selected" : "");
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
       btn.textContent = ing.name;
-      btn.addEventListener("click", () => addIngredient(ing.id));
+      btn.addEventListener("click", () => {
+        if (guess) toggleIngredient(ing.id);
+        else addIngredient(ing.id);
+      });
       items.appendChild(btn);
     });
     group.appendChild(items);
@@ -2050,8 +2091,20 @@ function addIngredient(id) {
   updateNav();
 }
 
+/** Guess-mode tap: add to glass + highlight, or remove if already picked. */
+function toggleIngredient(id) {
+  if (state.build.ingredients.some((i) => i.id === id)) {
+    Sound.click();
+    removeIngredient(id);
+    return;
+  }
+  Sound.select();
+  addIngredient(id);
+}
+
 function removeIngredient(id) {
   state.build.ingredients = state.build.ingredients.filter((i) => i.id !== id);
+  state.mixed = false;
   fillCatalog();
   fillBuildList();
   updateLiquid();
@@ -2070,12 +2123,14 @@ function changeAmount(id, value, pour) {
 
 // ============================ Step navigation ============================
 function getSteps(difficulty) {
-  const steps = difficulty === "basic"
+  let steps = difficulty === "basic"
     ? ["method", "ingredients", "garnish"]
     : ["glass", "method", "ingredients", "garnish"];
-  // Mixologist keeps the full flow; other modes honor the tools hold flag.
-  if (state.mode === "mixologist" || TOOLS_ENABLED) return steps;
-  return steps.filter((s) => s !== "method");
+  // Mixologist keeps the full flow; campaign/training honor hold flags.
+  if (state.mode === "mixologist") return steps;
+  if (!TOOLS_ENABLED) steps = steps.filter((s) => s !== "method");
+  if (!GARNISH_ENABLED) steps = steps.filter((s) => s !== "garnish");
+  return steps;
 }
 
 function stepSatisfied(step) {
@@ -2090,7 +2145,8 @@ function stepSatisfied(step) {
 
 function setNavDisabled(disabled) {
   $("#btn-next").disabled = disabled;
-  $("#btn-back").disabled = disabled || state.stepIndex === 0;
+  // Back stays available — at step 0 it leaves the pour (map / menu).
+  $("#btn-back").disabled = !!disabled;
 }
 
 function updateNav() {
@@ -2098,7 +2154,7 @@ function updateNav() {
   const isLast = state.stepIndex === state.steps.length - 1;
   $("#btn-next").textContent = isLast ? "Serve Drink" : "Next →";
   $("#btn-next").disabled = !stepSatisfied(step);
-  $("#btn-back").disabled = state.stepIndex === 0;
+  $("#btn-back").disabled = false;
 }
 
 function enterStep() {
@@ -2152,15 +2208,76 @@ function goBack() {
   if (state.stepIndex > 0) {
     state.stepIndex--;
     enterStep();
+    return;
+  }
+  // First step: leave the station (same destinations as Quit).
+  Sound.click();
+  if (state.mode === "campaign") {
+    renderMap();
+    showScreen("screen-map");
+  } else {
+    renderStartBest();
+    showScreen("screen-start");
   }
 }
 
 // ============================ Stage loading ============================
+function setGameVenue(label) {
+  const el = $("#game-venue");
+  if (!el) return;
+  el.textContent = label || "";
+  el.hidden = !label;
+}
+
+const DEFAULT_BAR_BG = "assets/station/bar-stage.png";
+
+/** Swap the station (and result card) backdrop to the venue's interior art. */
+function applyVenueChrome(venue) {
+  const url = (venue && (venue.interior || venue.bg)) || DEFAULT_BAR_BG;
+  const cssUrl = `url("${url}")`;
+  const bar = $(".bar-bg");
+  if (bar) bar.style.setProperty("--venue-bar-bg", cssUrl);
+
+  const card = $("#screen-result .result-card");
+  if (card) {
+    if (venue && (venue.interior || venue.bg)) {
+      card.style.setProperty("--venue-bar-bg", cssUrl);
+      card.classList.add("has-venue-bg");
+    } else {
+      card.style.removeProperty("--venue-bar-bg");
+      card.classList.remove("has-venue-bg");
+    }
+  }
+}
+
+/** Mixologist / free pour has no recipe face — block flip and hide hints. */
+function setTicketFlippable(on) {
+  const ticket = $("#order-ticket");
+  if (!ticket) return;
+  const flippable = !!on;
+  ticket.classList.toggle("is-no-flip", !flippable);
+  if (!flippable) {
+    setTicketFlipped(false);
+    ticket.removeAttribute("tabindex");
+    ticket.setAttribute("role", "group");
+    ticket.removeAttribute("aria-pressed");
+    ticket.setAttribute("aria-label", "Order ticket");
+  } else {
+    ticket.setAttribute("tabindex", "0");
+    ticket.setAttribute("role", "button");
+    ticket.setAttribute("aria-pressed", ticket.classList.contains("is-flipped") ? "true" : "false");
+    ticket.setAttribute("aria-label", "Order ticket — tap to flip for recipe");
+  }
+}
+
 function setTicketFlipped(on) {
   const ticket = $("#order-ticket");
   if (!ticket) return;
+  if (ticket.classList.contains("is-no-flip")) on = false;
   ticket.classList.toggle("is-flipped", !!on);
-  ticket.setAttribute("aria-pressed", on ? "true" : "false");
+  if (!ticket.classList.contains("is-no-flip")) {
+    ticket.setAttribute("aria-pressed", on ? "true" : "false");
+  }
   const back = ticket.querySelector(".ticket-face--back");
   const front = ticket.querySelector(".ticket-face--front");
   if (back) back.setAttribute("aria-hidden", on ? "false" : "true");
@@ -2169,9 +2286,7 @@ function setTicketFlipped(on) {
 
 function renderTicketRecipe(recipe) {
   const list = $("#ticket-recipe");
-  const title = $("#ticket-recipe-drink");
   if (!list) return;
-  if (title) title.textContent = recipe?.name || "Your creation";
   if (!recipe || !Array.isArray(recipe.ingredients)) {
     list.innerHTML = `<li class="ticket-recipe-empty">Free pour — invent the recipe yourself.</li>`;
     return;
@@ -2235,9 +2350,10 @@ function loadStage(index) {
   applyComplexity(complexityForStage(index + 1), recipe);
 
   const stop = venueForStage(index);
-  $("#ticket-label").textContent = stop.venue
+  setGameVenue(stop.venue
     ? `${stop.venue.flag || ""} ${stop.venue.name}`.trim()
-    : "Customer Order";
+    : "");
+  applyVenueChrome(stop.venue);
   $("#stage-pill").textContent = `Stop ${index + 1} / ${pool.length}`;
   $("#diff-pill").textContent = state.complexity.label;
   pickCustomer();
@@ -2246,6 +2362,7 @@ function loadStage(index) {
   $("#order-desc").textContent = recipe.order;
   setTicketOrigin(recipe);
   renderTicketRecipe(recipe);
+  setTicketFlippable(true);
   setTicketFlipped(false);
   animatePoints(state.totalScore);
   updateProgress();
@@ -2291,7 +2408,8 @@ function loadEndless(next = false) {
   $("#endless-hud").style.display = "";
   renderEndlessHud();
 
-  $("#ticket-label").textContent = "Now serving";
+  setGameVenue("Now serving");
+  applyVenueChrome(venueOf(recipe) || venueForStage(getMap().cleared || 0)?.venue);
   $("#stage-pill").textContent = `Endless · 🍸 ${state.served}`;
   $("#diff-pill").textContent = state.complexity.label;
   pickCustomer();
@@ -2300,6 +2418,7 @@ function loadEndless(next = false) {
   $("#order-desc").textContent = recipe.order;
   setTicketOrigin(recipe);
   renderTicketRecipe(recipe);
+  setTicketFlippable(true);
   setTicketFlipped(false);
   animatePoints(state.totalScore);
 
@@ -2407,18 +2526,8 @@ function pickCustomer() {
   return c;
 }
 
-function renderCustomer(drinkName) {
-  const el = $("#ticket-customer");
-  if (!el) return;
-  const c = state.customer;
-  if (!c) { el.innerHTML = ""; el.style.display = "none"; return; }
-  el.style.display = "";
-  const line = c.lines[Math.floor(Math.random() * c.lines.length)].replace("{drink}", drinkName);
-  const sub = [c.breed, c.vibe].filter(Boolean).join(" · ");
-  const img = c.portrait
-    ? `<img class="cust-avatar-img" src="${c.portrait}" alt="${c.name}" width="48" height="48" />`
-    : "";
-  el.innerHTML = `<span class="cust-avatar">${img}</span><span class="cust-meta"><span class="cust-name">${c.name}</span><span class="cust-sub">${sub}</span><span class="cust-line">"${line}"</span></span>`;
+function renderCustomer(_drinkName) {
+  // Guest lives on the bar only — ticket shows the order text, not a second chip.
   renderBarGuest();
 }
 
@@ -2446,8 +2555,6 @@ function renderBarGuest(opts = {}) {
 
 function clearCustomer() {
   state.customer = null;
-  const el = $("#ticket-customer");
-  if (el) { el.innerHTML = ""; el.style.display = "none"; }
   renderBarGuest();
 }
 
@@ -2479,6 +2586,7 @@ function loadTraining() {
   state.complexity = null;
   state.menuIds = null;
   if (!TOOLS_ENABLED) state.build.method = state.trainingRecipe.method;
+  if (!GARNISH_ENABLED) state.build.garnish = state.trainingRecipe.garnish[0];
   state.steps = getSteps("advanced");
   state.stepIndex = 0;
   state.totalScore = 0;
@@ -2490,13 +2598,15 @@ function loadTraining() {
   clearCustomer();
 
   const r = state.trainingRecipe;
-  $("#ticket-label").textContent = "Training drink";
+  setGameVenue("Training drink");
+  applyVenueChrome(venueOf(r));
   $("#stage-pill").textContent = "📚 Training";
   $("#diff-pill").textContent = "Tutorial";
   $("#order-name").textContent = r.name;
   $("#order-desc").textContent = r.order;
   setTicketOrigin(r);
   renderTicketRecipe(r);
+  setTicketFlippable(true);
   setTicketFlipped(false);
 
   renderStation();
@@ -2596,9 +2706,9 @@ function scoreBuild() {
   // manual, e.g. training/challenge/full-bar tier).
   const cx = state.complexity;
   const glassChosen = !cx || cx.chooseGlass;
-  // Tools held off: method is auto-set — don't grade a choice the player never made.
+  // Held-off steps are auto-set — don't grade choices the player never made.
   const methodChosen = TOOLS_ENABLED && (!cx || cx.chooseMethod);
-  const garnishChosen = !cx || cx.chooseGarnish;
+  const garnishChosen = GARNISH_ENABLED && (!cx || cx.chooseGarnish);
 
   // Glass
   if (glassChosen) {
@@ -2611,7 +2721,7 @@ function scoreBuild() {
       feedback.push(fb("bad", "Glass", `You used ${chosen}; should be ${GLASS_BY_ID[recipe.glass].name}.`));
     }
   } else {
-    feedback.push(fb("auto", "Glass", `${GLASS_BY_ID[recipe.glass].name} — set for you at this stage.`));
+    feedback.push(fb("auto", "Glass", GLASS_BY_ID[recipe.glass].name));
   }
 
   // Method
@@ -2625,7 +2735,7 @@ function scoreBuild() {
       feedback.push(fb("bad", "Method", `You chose ${chosen}; should be ${METHOD_BY_ID[recipe.method].name}.`));
     }
   } else {
-    feedback.push(fb("auto", "Method", `${METHOD_BY_ID[recipe.method].name} — set for you at this stage.`));
+    feedback.push(fb("auto", "Method", METHOD_BY_ID[recipe.method].name));
   }
 
   // Ingredients
@@ -2690,7 +2800,7 @@ function scoreBuild() {
   } else {
     const gid = recipe.garnish[0];
     const gname = gid === "none" ? "None" : GARNISH_BY_ID[gid].name;
-    feedback.push(fb("auto", "Garnish", `${gname} — added automatically at this stage.`));
+    feedback.push(fb("auto", "Garnish", gname));
   }
 
   points = Math.max(0, points);
@@ -2789,13 +2899,15 @@ function startMixologist() {
   state.stepIndex = 0;
   $(".progress-wrap").style.display = "none";
   clearCustomer();
-  $("#ticket-label").textContent = "Mixologist";
+  setGameVenue("Mixologist");
+  applyVenueChrome(null);
   $("#stage-pill").textContent = "Mixologist";
   $("#diff-pill").textContent = "Sandbox";
   $("#order-name").textContent = "Invent a Cocktail";
   $("#order-desc").textContent = "Free pour — choose a glass, add anything you like, pick a method & garnish, then Serve to get it judged.";
   setTicketOrigin(null);
   renderTicketRecipe(null);
+  setTicketFlippable(false);
   setTicketFlipped(false);
   renderStation();
   enterStep();
@@ -3045,20 +3157,20 @@ function loadChallenge(recipe) {
   state.complexity = null;
   state.menuIds = null;
   if (!TOOLS_ENABLED) state.build.method = recipe.method;
+  if (!GARNISH_ENABLED) state.build.garnish = Array.isArray(recipe.garnish) ? recipe.garnish[0] : recipe.garnish;
   state.steps = getSteps("advanced");
   state.stepIndex = 0;
   $(".progress-wrap").style.display = "none";
   clearCustomer();
+  setGameVenue("Challenge");
+  applyVenueChrome(null);
   $("#stage-pill").textContent = "Challenge";
   $("#diff-pill").textContent = "Recreate";
   $("#order-name").textContent = recipe.name;
-  $("#order-desc").textContent = TOOLS_ENABLED
-    ? (MEASURE_ENABLED
-      ? "Recreate this invention from memory — match the glass, pour, method & garnish."
-      : "Recreate this invention from memory — match the glass, ingredients, method & garnish.")
-    : "Recreate this invention from memory — match the glass, ingredients & garnish.";
+  $("#order-desc").textContent = "Recreate this invention from memory — match the glass & ingredients.";
   setTicketOrigin(null);
   renderTicketRecipe(recipe);
+  setTicketFlippable(true);
   setTicketFlipped(false);
   renderStation();
   enterStep();
@@ -3161,17 +3273,30 @@ function revealResultVerdict(result, recipe) {
     }
   }
 
-  // Customer reaction (campaign & endless only)
+  // Guest portrait as score backdrop; quote sits in the foreground
+  const guestBg = $("#result-guest-bg");
+  const guestImg = $("#result-guest-img");
   const custEl = $("#result-customer");
   if (state.customer && state.mode !== "challenge") {
     const c = state.customer;
+    if (guestBg && guestImg && c.portrait) {
+      guestImg.src = c.portrait;
+      guestBg.hidden = false;
+      guestBg.setAttribute("aria-hidden", "false");
+    } else if (guestBg) {
+      guestBg.hidden = true;
+      guestBg.setAttribute("aria-hidden", "true");
+      if (guestImg) guestImg.removeAttribute("src");
+    }
     const tip = result.tip ? ` <span class="result-tip">💵 +${result.tip} tip</span>` : "";
-    const img = c.portrait
-      ? `<img class="result-cust-img" src="${c.portrait}" alt="" width="40" height="40" />`
-      : "";
-    custEl.innerHTML = `${img}<span class="result-cust-text"><strong>${c.name}</strong>: "${reactionFor(result.stars, recipe.name)}"${tip}</span>`;
+    custEl.innerHTML = `<span class="result-cust-text"><strong>${c.name}</strong>: "${reactionFor(result.stars, recipe.name)}"${tip}</span>`;
     custEl.style.display = "";
   } else {
+    if (guestBg) {
+      guestBg.hidden = true;
+      guestBg.setAttribute("aria-hidden", "true");
+    }
+    if (guestImg) guestImg.removeAttribute("src");
     custEl.style.display = "none";
   }
 
@@ -3518,14 +3643,16 @@ $("#btn-replay").addEventListener("click", () => {
 
 $("#order-ticket")?.addEventListener("click", () => {
   const ticket = $("#order-ticket");
-  if (!ticket) return;
+  if (!ticket || ticket.classList.contains("is-no-flip")) return;
   Sound.click();
   setTicketFlipped(!ticket.classList.contains("is-flipped"));
 });
 $("#order-ticket")?.addEventListener("keydown", (e) => {
   if (e.key !== "Enter" && e.key !== " ") return;
+  const ticket = $("#order-ticket");
+  if (!ticket || ticket.classList.contains("is-no-flip")) return;
   e.preventDefault();
-  $("#order-ticket").click();
+  ticket.click();
 });
 
 $("#btn-quit").addEventListener("click", () => {
@@ -4099,7 +4226,12 @@ $("#btn-diag-clear").addEventListener("click", () => {
   }
 });
 
-$("#screen-splash").addEventListener("click", () => { Sound.init(); Sound.click(); dismissSplash(); });
+// Splash stays until the player taps Enter — no auto-advance / tap-anywhere.
+$("#btn-splash-continue")?.addEventListener("click", () => {
+  Sound.init();
+  Sound.click();
+  dismissSplash();
+});
 
 // Boot: everyone sees the brand splash first. New players then get the
 // credentials modal; returning players continue to the hub.
@@ -4113,8 +4245,6 @@ syncSoundButtons();
 checkBadges();
 renderSplash();
 showScreen("screen-splash");
-splashShownAt = Date.now();
-splashTimer = setTimeout(() => dismissSplash(true), SPLASH_MIN_MS);
 track("app_open", { returning: !!getProfile() });
 
 // Debug-only deep link to preview the intro reel directly (localhost or ?debug).
