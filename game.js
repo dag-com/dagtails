@@ -539,6 +539,8 @@ const MEASURE_ENABLED = false;
 const TOOLS_ENABLED = false;
 // Flip to true to restore the garnish picker step. Held off — recipe garnish auto-applies.
 const GARNISH_ENABLED = false;
+// Flip to true to restore the glass picker step. Held off — recipe glass auto-applies.
+const GLASS_ENABLED = false;
 
 // What's new at each complexity tier — shown once when first reached.
 const TIER_INTRO = {
@@ -562,6 +564,7 @@ function isGuessMode() {
 // Mechanics unlock: measure / tools / garnish when enabled → glass.
 function complexityForStage(stageNo) {
   const portions = MEASURE_ENABLED;
+  const chooseGlass = GLASS_ENABLED;
   const chooseMethod = TOOLS_ENABLED;
   const chooseGarnish = GARNISH_ENABLED;
   if (stageNo <= 5)  return { portions: false, chooseGlass: false, chooseMethod: false, chooseGarnish: false, decoys: 3,  label: "Guess" };
@@ -569,7 +572,7 @@ function complexityForStage(stageNo) {
   if (stageNo <= 12) return { portions, chooseGlass: false, chooseMethod: false, chooseGarnish: false, decoys: 6,  label: portions ? "Pour" : "Guess" };
   if (stageNo <= 19) return { portions, chooseGlass: false, chooseMethod, chooseGarnish: false, decoys: 10, label: chooseMethod ? "Mix" : "Guess" };
   if (stageNo <= 26) return { portions, chooseGlass: false, chooseMethod, chooseGarnish, decoys: 12, label: chooseGarnish ? "Garnish" : "Guess" };
-  return { portions, chooseGlass: true, chooseMethod, chooseGarnish, decoys: Infinity, label: "Full bar" };
+  return { portions, chooseGlass, chooseMethod, chooseGarnish, decoys: Infinity, label: chooseGlass ? "Full bar" : "Guess" };
 }
 
 function shuffleArr(a) {
@@ -2128,6 +2131,7 @@ function getSteps(difficulty) {
     : ["glass", "method", "ingredients", "garnish"];
   // Mixologist keeps the full flow; campaign/training honor hold flags.
   if (state.mode === "mixologist") return steps;
+  if (!GLASS_ENABLED) steps = steps.filter((s) => s !== "glass");
   if (!TOOLS_ENABLED) steps = steps.filter((s) => s !== "method");
   if (!GARNISH_ENABLED) steps = steps.filter((s) => s !== "garnish");
   return steps;
@@ -2585,6 +2589,7 @@ function loadTraining() {
   state.mixed = false;
   state.complexity = null;
   state.menuIds = null;
+  if (!GLASS_ENABLED) state.build.glass = state.trainingRecipe.glass;
   if (!TOOLS_ENABLED) state.build.method = state.trainingRecipe.method;
   if (!GARNISH_ENABLED) state.build.garnish = state.trainingRecipe.garnish[0];
   state.steps = getSteps("advanced");
@@ -2705,8 +2710,8 @@ function scoreBuild() {
   // player is the one choosing them (cx === null means every step is
   // manual, e.g. training/challenge/full-bar tier).
   const cx = state.complexity;
-  const glassChosen = !cx || cx.chooseGlass;
   // Held-off steps are auto-set — don't grade choices the player never made.
+  const glassChosen = GLASS_ENABLED && (!cx || cx.chooseGlass);
   const methodChosen = TOOLS_ENABLED && (!cx || cx.chooseMethod);
   const garnishChosen = GARNISH_ENABLED && (!cx || cx.chooseGarnish);
 
@@ -3156,6 +3161,7 @@ function loadChallenge(recipe) {
   state.mixed = false;
   state.complexity = null;
   state.menuIds = null;
+  if (!GLASS_ENABLED) state.build.glass = recipe.glass;
   if (!TOOLS_ENABLED) state.build.method = recipe.method;
   if (!GARNISH_ENABLED) state.build.garnish = Array.isArray(recipe.garnish) ? recipe.garnish[0] : recipe.garnish;
   state.steps = getSteps("advanced");

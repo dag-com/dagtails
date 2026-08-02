@@ -953,6 +953,10 @@ body {
   font-weight: 600;
   font-size: 13px;
 }
+/* Complexity label (Guess / Pour / ?) ? hidden while modes stay available */
+#diff-pill {
+  display: none !important;
+}
 
 /* ============================ Progress bar + points ============================ */
 .progress-wrap {
