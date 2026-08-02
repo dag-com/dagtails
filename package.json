@@ -2,12 +2,18 @@
   "name": "dag-tails-bartending-game",
   "version": "1.14.1",
   "private": true,
-  "description": "DAG Tails — a stage-based bartending simulation game. Zero-build vanilla JS/HTML/CSS on the web, wrapped with Capacitor for iOS/Android testing builds.",
+  "description": "DAG Tails — bartending game. Vite + React hub; vanilla gameplay modules; Capacitor for iOS/Android; Expo WebView shell for remote preview.",
   "scripts": {
-    "build": "node scripts/copy-web.js",
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --host 127.0.0.1 --port 4173",
+    "serve:www": "vite build && npx --yes serve -l 4173 www",
     "cap:sync": "npm run build && npx cap sync",
     "android:open": "npm run cap:sync && npx cap open android",
     "ios:open": "npm run cap:sync && npx cap open ios",
+    "expo:start": "npm --prefix mobile start",
+    "expo:tunnel": "npm --prefix mobile run tunnel",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:perf": "playwright test tests/performance.spec.js"
@@ -28,11 +34,18 @@
     "@capacitor/android": "^8.4.1",
     "@capacitor/cli": "^8.4.1",
     "@capacitor/core": "^8.4.1",
-    "@capacitor/ios": "^8.4.1"
+    "@capacitor/ios": "^8.4.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@playwright/test": "^1.54.1",
-    "serve": "^14.2.4"
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitejs/plugin-react": "^6.0.5",
+    "serve": "^14.2.4",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.0"
   }
 }

@@ -35,14 +35,13 @@ async function seedPlayer(page, opts = {}) {
 
 /**
  * Boot past splash to the start hub.
- * Splash enforces a ~3s minimum, then auto-continues or accepts a tap.
+ * Splash waits for Enter the bar — no auto-advance.
  * @param {import('@playwright/test').Page} page
  */
 async function gotoHub(page) {
   await page.goto("/");
-  await page.waitForTimeout(3400);
   if (await page.locator("#screen-splash.is-active").isVisible().catch(() => false)) {
-    await page.locator("#screen-splash").click({ force: true });
+    await page.locator("#btn-splash-continue").click({ force: true });
   }
   await page.locator("#screen-start.is-active").waitFor({ state: "visible", timeout: 15_000 });
   // Portrait rotate-lock blocks taps on phone emulation — clear for automated play.
@@ -63,7 +62,7 @@ async function gotoHub(page) {
 async function openMap(page) {
   await page.locator("#btn-start").click({ force: true });
   await page.locator("#screen-map.is-active").waitFor({ state: "visible", timeout: 15_000 });
-  await page.locator("#map-plate").waitFor({ state: "attached" });
+  await page.locator("#map-hubs .map-venue").first().waitFor({ state: "attached" });
 }
 
 module.exports = { seedPlayer, gotoHub, openMap, PROFILE };

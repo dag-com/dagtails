@@ -152,35 +152,11 @@ const INTRO_KEY = "dagtails_intro_seen";
 function introSeen() { try { return localStorage.getItem(INTRO_KEY) === "1"; } catch (e) { return false; } }
 function markIntroSeen() { try { localStorage.setItem(INTRO_KEY, "1"); } catch (e) { /* ignore */ } }
 
-// Reflect the saved profile on the start screen (greeting + mocktail badge).
-function applyProfile() {
+// Reflect the saved profile + hub chrome via the React hub bridge.
+function welcomeCopy() {
   const p = getProfile();
-  const bar = $("#profile-bar");
-  const chip = $("#profile-chip");
-  const banner = $("#mocktail-banner");
-  if (p && bar && chip) {
-    bar.style.display = "";
-    chip.textContent = `👤 ${p.name}${p.age ? " · " + p.age : ""}${isUnderage() ? " · 🧃" : " · 🔞"}`;
-  } else if (bar) {
-    bar.style.display = "none";
-  }
-  if (banner) banner.style.display = isUnderage() ? "" : "none";
-  const footer = $("#start-footer");
-  if (footer) {
-    const noun = isUnderage() ? "mocktails" : "drinks";
-    footer.innerHTML = `🍸 ${drinkPool().length} ${noun} &nbsp;•&nbsp; precision pours &nbsp;•&nbsp; earn your stars`;
-  }
-}
-
-function renderStartWelcome() {
-  const p = getProfile();
-  const head = $("#welcome-back");
-  const sub = $("#welcome-sub");
-  if (!head || !sub) return;
   if (!p) {
-    head.textContent = "Welcome.";
-    sub.textContent = "Your next shift is ready.";
-    return;
+    return { main: "Welcome.", sub: "Your next shift is ready." };
   }
 
   const m = getMap();
@@ -192,34 +168,122 @@ function renderStartWelcome() {
   const firstTime = cleared === 0 && (prog.served || 0) === 0;
   const playedToday = d.last === todayStr();
 
-  head.textContent = `Welcome back, ${p.name}.`;
+  const main = `Welcome back, ${p.name}.`;
 
   if (firstTime) {
-    sub.textContent = isUnderage()
-      ? "Your first mocktail shift is ready."
-      : "Your first shift is ready. Old Tom is waiting at the bar.";
-    return;
+    return {
+      main,
+      sub: isUnderage()
+        ? "Your first mocktail shift is ready."
+        : "Your first shift is ready. Old Tom is waiting at the bar.",
+    };
   }
   if (cleared >= total) {
-    sub.textContent = "You cleared the whole journey. Replay a favorite, try today's cocktail, or head into Mixologist.";
-    return;
+    return {
+      main,
+      sub: "You cleared the whole journey. Replay a favorite, try today's cocktail, or head into Mixologist.",
+    };
   }
   if (playedToday && d.streak > 1) {
-    sub.textContent = `Your ${d.streak}-day streak is alive. Stage ${nextStage} is ready.`;
-    return;
+    return { main, sub: `Your ${d.streak}-day streak is alive. Stage ${nextStage} is ready.` };
   }
   if (playedToday) {
-    sub.textContent = `Stage ${nextStage} is ready whenever you are.`;
-    return;
+    return { main, sub: `Stage ${nextStage} is ready whenever you are.` };
   }
   if (d.streak > 1) {
-    sub.textContent = `Stage ${nextStage} is ready. Keep your ${d.streak}-day streak alive tonight.`;
-    return;
+    return { main, sub: `Stage ${nextStage} is ready. Keep your ${d.streak}-day streak alive tonight.` };
   }
-  sub.textContent = isUnderage()
-    ? `Stage ${nextStage} is ready in the mocktail bar.`
-    : `Stage ${nextStage} is ready. Cocktail of the Day is waiting too.`;
+  return {
+    main,
+    sub: isUnderage()
+      ? `Stage ${nextStage} is ready in the mocktail bar.`
+      : `Stage ${nextStage} is ready. Cocktail of the Day is waiting too.`,
+  };
 }
+
+function playMetaCopy() {
+  const pool = drinkPool();
+  if (!pool.length) return "";
+  const map = getMap();
+  const cleared = map.cleared || 0;
+  const isComplete = cleared >= pool.length;
+  const at = venueForStage(Math.min(cleared, pool.length - 1));
+  const v = at.venue;
+  return isComplete
+    ? `Crawl complete · ${v.flag} ${v.name} — tap to revisit any stop`
+    : `Stop ${Math.min(cleared + 1, pool.length)} of ${pool.length} · ${v.flag} ${v.name} — tap to open the map`;
+}
+
+function bestScoreCopy() {
+  const best = getHighScore();
+  const eb = getEndlessBest();
+  const parts = [];
+  if (best > 0) parts.push(`🏅 Best shift: ${best} pts`);
+  if (eb > 0) parts.push(`🔥 Endless: ${eb} pts`);
+  return parts.join("  ·  ");
+}
+
+function buildHubSnapshot() {
+  const p = getProfile();
+  const prog = getProgress();
+  const daily = getDaily();
+  const map = getMap();
+  const lvl = levelForXp(prog.xp);
+  const rk = rankInfo(rankForCleared(map.cleared || 0));
+  const welcome = welcomeCopy();
+  const { recipe, done } = todaysCotd();
+  const ok = mapUnlocked();
+  const left = Math.max(0, STAGES_TO_UNLOCK - (map.cleared || 0));
+  const noun = isUnderage() ? "mocktails" : "drinks";
+
+  let journeyLabel = "▶ Play the Journey";
+  if ((map.cleared || 0) === 0 && (prog.served || 0) === 0) {
+    journeyLabel = "▶ Start the Journey";
+  } else if ((map.cleared || 0) >= drinkPool().length) {
+    journeyLabel = "▶ Replay the Journey";
+  } else {
+    journeyLabel = `▶ Continue Journey · Stage ${Math.min((map.cleared || 0) + 1, drinkPool().length)}`;
+  }
+
+  return {
+    profileVisible: !!p,
+    profileChip: p
+      ? `👤 ${p.name}${p.age ? " · " + p.age : ""}${isUnderage() ? " · 🧃" : " · 🔞"}`
+      : "",
+    mocktailMode: isUnderage(),
+    streak: daily.streak || 0,
+    levelLabel: `Lv ${lvl}`,
+    rankName: rk.name,
+    stars: totalStars(),
+    welcomeMain: welcome.main,
+    welcomeSub: welcome.sub,
+    mascotTier: mascotTierClass(rankForCleared(map.cleared || 0)),
+    cotdName: recipe ? recipe.name : "—",
+    cotdDone: !!done,
+    cotdBtnLabel: done ? "Done today ✓" : "Make it →",
+    journeyLabel,
+    modesUnlocked: ok,
+    unlockLeft: left,
+    endlessSub: ok ? "No recipe — survive the rush" : `Locked · ${left} to go`,
+    mixSub: ok ? "Invent & share your own drinks" : `Locked · ${left} to go`,
+    playMeta: playMetaCopy(),
+    badgesLabel: `🏅 Badges (${getEarned().length}/${BADGES.length})`,
+    bestLine: bestScoreCopy(),
+    footerHtml: `🍸 ${drinkPool().length} ${noun} &nbsp;•&nbsp; ${MEASURE_ENABLED ? "precision pours" : "spot the ingredients"} &nbsp;•&nbsp; earn your stars`,
+  };
+}
+
+function refreshHub() {
+  try {
+    window.DagTailsHub?.refresh(buildHubSnapshot());
+  } catch (e) { /* hub not mounted yet */ }
+}
+
+/** @deprecated DOM hub removed — kept as alias for call sites. */
+function applyProfile() { refreshHub(); }
+function renderStartWelcome() { refreshHub(); }
+function renderPlayMeta() { refreshHub(); }
+function renderHubMascot() { refreshHub(); }
 
 // Brand splash shown on every boot before hub / credentials.
 function renderSplash() {
@@ -270,13 +334,7 @@ function renderSplash() {
   if (chipStars) chipStars.textContent = `⭐ ${totalStars()} stars`;
 }
 
-let splashTimer = null;
-let splashShownAt = 0;
-const SPLASH_MIN_MS = 3000;
-
-function dismissSplash(force = false) {
-  if (!force && splashShownAt && Date.now() - splashShownAt < SPLASH_MIN_MS) return;
-  if (splashTimer) { clearTimeout(splashTimer); splashTimer = null; }
+function dismissSplash() {
   onShowStart();
   showScreen("screen-start");
   if (!getProfile()) openProfileForm(true);
@@ -322,27 +380,6 @@ function applyMascotTier(el, rankIdx) {
   const tier = mascotTierClass(rankIdx);
   el.classList.toggle("tier-2", tier === "tier-2");
   el.classList.toggle("tier-3", tier === "tier-3");
-}
-function renderHubMascot() {
-  const rankIdx = rankForCleared(getMap().cleared || 0);
-  applyMascotTier($("#hub-duck"), rankIdx);
-}
-
-// Compact one-line summary shown under the "Play the Journey" button. The
-// full progress map itself now only opens when that button is pressed.
-function renderPlayMeta() {
-  const meta = $("#play-meta");
-  if (!meta) return;
-  const pool = drinkPool();
-  if (!pool.length) { meta.textContent = ""; return; }
-  const map = getMap();
-  const cleared = map.cleared || 0;
-  const isComplete = cleared >= pool.length;
-  const at = venueForStage(Math.min(cleared, pool.length - 1));
-  const v = at.venue;
-  meta.textContent = isComplete
-    ? `Crawl complete · ${v.flag} ${v.name} — tap to revisit any stop`
-    : `Stop ${Math.min(cleared + 1, pool.length)} of ${pool.length} · ${v.flag} ${v.name} — tap to open the map`;
 }
 
 // ============================ Drink pools & difficulty ============================
@@ -494,25 +531,45 @@ function totalStars() {
 }
 function mapUnlocked() { return getMap().cleared >= STAGES_TO_UNLOCK; }
 
+// Flip to true to restore amount steppers + pour scoring. Held off for now —
+// the base game is ingredient guessing only (recipe amounts auto-fill).
+const MEASURE_ENABLED = false;
+// Flip to true to restore the tools / method picker step. Held off — recipe
+// method is auto-applied (shake/stir/build still run on Serve).
+const TOOLS_ENABLED = false;
+// Flip to true to restore the garnish picker step. Held off — recipe garnish auto-applies.
+const GARNISH_ENABLED = false;
+
 // What's new at each complexity tier — shown once when first reached.
 const TIER_INTRO = {
-  "Guess": { emoji: "🔎", eyebrow: "Your first stage", title: "Spot the ingredients", body: "Tap the ingredients you think belong in the drink — no measuring yet. Get the right ones in the glass, add a garnish, then serve.", button: "Let's pour →" },
+  "Guess": { emoji: "🔎", eyebrow: "Your first stage", title: "Spot the ingredients", body: "Tap the ingredients you think belong in the drink — no measuring. Get the right ones in the glass, then serve.", button: "Let's go →" },
   "Pour": { emoji: "🥤", eyebrow: "Level up — new rule", title: "Now measure your pours", body: "From here on you set how much of each ingredient goes in. Tap to add, then use − / + to dial each amount. Get close to the recipe for more stars.", button: "Got it →" },
   "Mix": { emoji: "🍸", eyebrow: "Level up — new rule", title: "Tools before the pour", body: "From here you choose the method first — shaker, stir, muddle, and more. Tools land on the counter, then you pour into them, then prepare.", button: "Got it →" },
   "Garnish": { emoji: "🍋", eyebrow: "Level up — new rule", title: "Now add the garnish", body: "Until now the garnish was added for you. From here you finish the drink yourself — pick the garnish that matches the cocktail for that last star.", button: "Got it →" },
-  "Full bar": { emoji: "🍷", eyebrow: "Level up — full bar", title: "Now pick the glass too", body: "You're running the full bar: choose the glassware, the pour, the method and the garnish yourself. Every choice counts toward your stars.", button: "Got it →" },
+  "Full bar": { emoji: "🍷", eyebrow: "Level up — full bar", title: "Now pick the glass too", body: "You're running the full bar: choose the glassware yourself. Every choice counts toward your stars.", button: "Got it →" },
 };
 function tierSeen(label) { const m = getMap(); return !!(m.seenTiers && m.seenTiers[label]); }
 function markTierSeen(label) { const m = getMap(); m.seenTiers = m.seenTiers || {}; m.seenTiers[label] = 1; setMap(m); }
 
+/** True when the player only picks ingredients (no −/+ amounts). Mixologist stays free-pour. */
+function isGuessMode() {
+  if (state.mode === "mixologist") return false;
+  if (!MEASURE_ENABLED) return true;
+  return !!(state.complexity && state.complexity.portions === false);
+}
+
 // Complexity ramp — start simple, scale up. stageNo is 1-based.
-// New mechanics unlock one at a time: measure → method → garnish → glass.
+// Mechanics unlock: measure / tools / garnish when enabled → glass.
 function complexityForStage(stageNo) {
+  const portions = MEASURE_ENABLED;
+  const chooseMethod = TOOLS_ENABLED;
+  const chooseGarnish = GARNISH_ENABLED;
   if (stageNo <= 5)  return { portions: false, chooseGlass: false, chooseMethod: false, chooseGarnish: false, decoys: 3,  label: "Guess" };
-  if (stageNo <= 12) return { portions: true,  chooseGlass: false, chooseMethod: false, chooseGarnish: false, decoys: 6,  label: "Pour" };
-  if (stageNo <= 19) return { portions: true,  chooseGlass: false, chooseMethod: true,  chooseGarnish: false, decoys: 10, label: "Mix" };
-  if (stageNo <= 26) return { portions: true,  chooseGlass: false, chooseMethod: true,  chooseGarnish: true,  decoys: 12, label: "Garnish" };
-  return { portions: true, chooseGlass: true, chooseMethod: true, chooseGarnish: true, decoys: Infinity, label: "Full bar" };
+  // When held mechanics are off, keep the "Guess" label so their intros never fire.
+  if (stageNo <= 12) return { portions, chooseGlass: false, chooseMethod: false, chooseGarnish: false, decoys: 6,  label: portions ? "Pour" : "Guess" };
+  if (stageNo <= 19) return { portions, chooseGlass: false, chooseMethod, chooseGarnish: false, decoys: 10, label: chooseMethod ? "Mix" : "Guess" };
+  if (stageNo <= 26) return { portions, chooseGlass: false, chooseMethod, chooseGarnish, decoys: 12, label: chooseGarnish ? "Garnish" : "Guess" };
+  return { portions, chooseGlass: true, chooseMethod, chooseGarnish, decoys: Infinity, label: "Full bar" };
 }
 
 function shuffleArr(a) {
@@ -667,106 +724,17 @@ function applyLock(sel, unlocked, lvl) {
 }
 
 function renderStartMeta() {
-  const prog = getProgress();
-  const lvl = levelForXp(prog.xp);
-  const inLvl = (prog.xp || 0) % XP_PER_LEVEL;
-  const daily = getDaily();
-  const map = getMap();
-  const rk = rankInfo(rankForCleared(map.cleared || 0));
-
-  const lvlEl = $("#meta-level");
-  if (lvlEl) lvlEl.textContent = `Lv ${lvl}`;
-  const xpFill = $("#meta-xp-fill");
-  if (xpFill) xpFill.style.width = Math.round((inLvl / XP_PER_LEVEL) * 100) + "%";
-  const xpText = $("#meta-xp-text");
-  if (xpText) xpText.textContent = `${inLvl} / ${XP_PER_LEVEL} XP`;
-  const streakEl = $("#meta-streak");
-  if (streakEl) streakEl.textContent = daily.streak > 0 ? `🔥 ${daily.streak}-day streak` : "Play daily for a streak";
-  const rankName = $("#hero-rank-name");
-  if (rankName) rankName.textContent = rk.name;
-  const streakValue = $("#hero-streak-value");
-  if (streakValue) streakValue.textContent = String(daily.streak || 0);
-  const starsTotal = $("#hero-stars-total");
-  if (starsTotal) starsTotal.textContent = String(totalStars());
-  const heroLevelBig = $("#hero-level-big");
-  if (heroLevelBig) heroLevelBig.textContent = `Lv ${lvl}`;
-  const heroLevelMain = $("#hero-level-main");
-  if (heroLevelMain) heroLevelMain.textContent = rk.name;
-  const heroLevelSub = $("#hero-level-sub");
-  if (heroLevelSub) heroLevelSub.textContent = `${inLvl} / ${XP_PER_LEVEL} XP`;
-  const heroStreakBig = $("#hero-streak-big");
-  if (heroStreakBig) heroStreakBig.textContent = String(daily.streak || 0);
-  const heroStreakSub = $("#hero-streak-sub");
-  if (heroStreakSub) heroStreakSub.textContent = daily.streak > 0
-    ? `Best streak: ${daily.best || daily.streak} days`
-    : "Come back tomorrow to build one.";
-
-  // Cocktail of the Day
-  const { recipe, done } = todaysCotd();
-  const cotdName = $("#cotd-name");
-  if (cotdName && recipe) cotdName.textContent = recipe.name;
-  const cotdNote = $("#cotd-note");
-  if (cotdNote) cotdNote.textContent = done
-    ? "Done today — return tomorrow for a new featured drink."
-    : "Featured tonight with a daily bonus.";
-  const cotdBtn = $("#btn-cotd");
-  if (cotdBtn) {
-    cotdBtn.textContent = done ? "Done today ✓" : "Make it →";
-    cotdBtn.classList.toggle("is-done", !!done);
-  }
-
-  const startBtn = $("#btn-start");
-  if (startBtn) {
-    if ((map.cleared || 0) === 0 && (prog.served || 0) === 0) {
-      startBtn.textContent = "▶ Start the Journey";
-    } else if ((map.cleared || 0) >= drinkPool().length) {
-      startBtn.textContent = "▶ Replay the Journey";
-    } else {
-      startBtn.textContent = `▶ Continue Journey · Stage ${Math.min((map.cleared || 0) + 1, drinkPool().length)}`;
-    }
-  }
-
-  // Unlock gating — Endless & Mixologist open after a few cleared stages.
-  const ok = mapUnlocked();
-  const left = Math.max(0, STAGES_TO_UNLOCK - map.cleared);
-  const endlessBtn = $("#btn-endless");
-  const endlessSub = $("#endless-menu-sub");
-  if (endlessBtn) {
-    endlessBtn.classList.toggle("is-locked", !ok);
-    if (endlessSub) {
-      endlessSub.textContent = ok ? "No recipe — survive the rush" : `Locked · ${left} to go`;
-    }
-  }
-  const mixBtn = $("#btn-mixologist");
-  const mixSub = $("#mix-menu-sub");
-  if (mixBtn) {
-    mixBtn.classList.toggle("is-locked", !ok);
-    if (mixSub) {
-      mixSub.textContent = ok ? "Invent & share your own drinks" : `Locked · ${left} to go`;
-    }
-  }
-  const badgeBtn = $("#btn-badges");
-  if (badgeBtn) badgeBtn.textContent = `🏅 Badges (${getEarned().length}/${BADGES.length})`;
-  // Community surfaces user-shared cocktails, so hide it for underage players.
+  refreshHub();
+  // Community lives outside the React hub (mix result / secondary nav).
   const commBtn = $("#btn-community");
   if (commBtn) commBtn.style.display = isUnderage() ? "none" : "";
-
-  const nextReward = nextRewardCopy(map, prog);
-  const nextMain = $("#hero-next-reward-main");
-  if (nextMain) nextMain.textContent = nextReward.main;
-  const nextSub = $("#hero-next-reward-sub");
-  if (nextSub) nextSub.textContent = nextReward.sub;
-
-  renderPlayMeta();
-  renderHubMascot();
 }
 
 // Combined refresh whenever we land on the start screen.
 function onShowStart() {
-  applyProfile();
-  renderStartWelcome();
-  renderStartBest();
-  renderStartMeta();
+  refreshHub();
+  const commBtn = $("#btn-community");
+  if (commBtn) commBtn.style.display = isUnderage() ? "none" : "";
   syncBackendStats();
 }
 
@@ -914,12 +882,16 @@ function loadCotd() {
   $(".progress-wrap").style.display = "none";
   $("#endless-hud").style.display = "none";
   clearCustomer();
-  $("#ticket-label").textContent = "Cocktail of the Day";
+  setGameVenue("Cocktail of the Day");
+  applyVenueChrome(venueForStage(getMap().cleared || 0)?.venue);
   $("#stage-pill").textContent = "🍹 Daily";
   $("#diff-pill").textContent = state.complexity.label;
   $("#order-name").textContent = recipe.name;
   $("#order-desc").textContent = recipe.order;
   setTicketOrigin(recipe);
+  renderTicketRecipe(recipe);
+  setTicketFlippable(true);
+  setTicketFlipped(false);
   recordPlayDay();
   renderStation();
   enterStep();
@@ -1005,7 +977,7 @@ function updateMapCta() {
   if (cleared >= pool.length) {
     btn.textContent = "Crawl complete ★";
     btn.disabled = true;
-    if (hint) hint.textContent = "You finished every bar — open a cleared venue to replay.";
+    if (hint) hint.textContent = "You finished every bar — open a cleared drink to replay.";
     return;
   }
   btn.disabled = false;
@@ -1015,8 +987,8 @@ function updateMapCta() {
   btn.textContent = `Pour at ${at.venue.name}: ${recipe?.name || "next drink"} →`;
   if (hint) {
     hint.textContent = pendingTravel
-      ? "Duck is taking wing — watch the hop."
-      : `Next: drink ${local}/${at.count} at ${at.venue.name}. Tap the glowing bar or the button below.`;
+      ? "Hopping to the next bar…"
+      : `Next: drink ${local}/${at.count} at ${at.venue.name}. Tap a stage or the button below.`;
   }
 }
 
@@ -1026,6 +998,7 @@ function closeMapSheet() {
 }
 
 function openVenueSheet(venue) {
+  // Replay sheet kept for deep-links; list UI is the primary surface.
   const sheet = $("#map-sheet");
   const list = $("#map-sheet-drinks");
   if (!sheet || !list || !venue) return;
@@ -1078,10 +1051,8 @@ function openVenueSheet(venue) {
 }
 
 function renderMap(opts = {}) {
-  ensureMapAssets();
-  const canvas = $("#map-path");
   const hubsEl = $("#map-hubs");
-  if (!canvas || !hubsEl) return;
+  if (!hubsEl) return;
   const pool = drinkPool();
   const map = getMap();
   const cleared = map.cleared || 0;
@@ -1098,302 +1069,143 @@ function renderMap(opts = {}) {
   mapDrinkEls = {};
   closeMapSheet();
 
-  // Zoom is only for venue-to-venue flights.
-  if (!pendingTravel) clearMapFlightZoom();
-
   const focusId = opts.openVenueId || selectedVenueId || curV.id;
   selectedVenueId = focusId;
 
-  venues.forEach((venue, vIdx) => {
+  venues.forEach((venue) => {
     const range = venueRange(venue);
     const locked = range.start > cleared;
     const current = cleared >= range.start && cleared <= range.end;
     const done = range.end < cleared;
-    const pin = venue.mapPin || { x: 10 + vIdx * 10, y: 50 };
     const stars = venueStars(map, venue);
     const maxStars = range.count * 3;
     const selected = !locked && venue.id === focusId;
 
-    const hub = document.createElement("button");
-    hub.type = "button";
-    hub.className = "map-hub"
+    const card = document.createElement("article");
+    card.className = "map-venue"
       + (locked ? " is-locked" : "")
       + (current ? " is-current" : "")
       + (done ? " is-done" : "")
       + (selected ? " is-selected" : "");
-    hub.style.left = pin.x + "%";
-    hub.style.top = pin.y + "%";
-    hub.style.setProperty("--venue-accent", venue.accent || "#e9b949");
-    hub.dataset.venue = venue.id;
-    hub.innerHTML =
-      `<span class="map-hub-pin">${locked ? "🔒" : venue.flag || "🍸"}</span>` +
-      `<span class="map-hub-label">${venue.name}</span>` +
-      (done || current
-        ? `<span class="map-hub-stars">${"★".repeat(Math.min(3, Math.round((stars / Math.max(1, maxStars)) * 3))) || "☆"}</span>`
-        : "");
-    hub.title = locked
-      ? `Locked — clear earlier bars first`
-      : current
-        ? `Enter ${venue.name} — pour the next drink`
-        : `Open ${venue.name} — replay drinks`;
+    card.dataset.venue = venue.id;
+    card.style.setProperty("--venue-accent", venue.accent || "#e9b949");
+    card.setAttribute("role", "listitem");
 
-    hub.addEventListener("click", () => {
-      if (locked) {
-        Sound.fail();
-        showToast("🔒 Clear the bars before this one to unlock it.");
-        return;
-      }
-      Sound.click();
-      selectedVenueId = venue.id;
-      // Current bar → play next drink. Cleared bars → replay sheet.
-      if (current && cleared < pool.length) {
-        startStageFromMap(cleared);
-        return;
-      }
-      if (done || range.start <= cleared) {
-        renderMap({ openVenueId: venue.id });
-        openVenueSheet(venue);
-        return;
-      }
-      renderMap({ openVenueId: venue.id });
+    const head = document.createElement("header");
+    head.className = "map-venue-head";
+    const status = locked ? "Locked" : current ? "Now pouring" : done ? "Cleared" : "Open";
+    head.innerHTML =
+      `<span class="map-venue-flag">${locked ? "🔒" : (venue.flag || "🍸")}</span>` +
+      `<div class="map-venue-titles">` +
+        `<strong>${venue.name}</strong>` +
+        `<span>${venue.city}${venue.kind ? " · " + venue.kind : ""}</span>` +
+      `</div>` +
+      `<div class="map-venue-meta">` +
+        `<span class="map-venue-status">${status}</span>` +
+        `<span class="map-venue-stars">${stars}/${maxStars} ★</span>` +
+      `</div>`;
+    card.appendChild(head);
+
+    const stages = document.createElement("ol");
+    stages.className = "map-stages";
+    (venue.drinkIds || []).forEach((id, localIdx) => {
+      const i = range.start + localIdx;
+      const recipe = pool[i] || RECIPE_BY_ID[id];
+      if (!recipe) return;
+      const stageLocked = i > cleared;
+      const stageCurrent = i === cleared;
+      const best = stageRecordOf(map, recipe);
+      const li = document.createElement("li");
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "map-stage-btn"
+        + (stageLocked ? " is-locked" : "")
+        + (stageCurrent ? " is-current" : "")
+        + (i < cleared ? " is-done" : "");
+      const starHtml = [0, 1, 2].map((s) => `<span class="${s < best.stars ? "on" : ""}">★</span>`).join("");
+      btn.innerHTML =
+        `<span class="msb-num">${stageLocked ? "🔒" : localIdx + 1}</span>` +
+        `<span class="msb-body"><strong>${recipe.name}</strong>` +
+        (best.pct > 0 ? `<span class="msb-meta">${best.pct}% best</span>` : (stageCurrent ? `<span class="msb-meta">Up next</span>` : "")) +
+        `</span>` +
+        `<span class="msb-stars">${starHtml}</span>`;
+      btn.addEventListener("click", () => {
+        if (stageLocked || locked) {
+          Sound.fail();
+          showToast("🔒 Clear earlier drinks first.");
+          return;
+        }
+        Sound.click();
+        selectedVenueId = venue.id;
+        startStageFromMap(i);
+      });
+      li.appendChild(btn);
+      stages.appendChild(li);
+      mapDrinkEls[i] = btn;
     });
+    card.appendChild(stages);
 
-    hubsEl.appendChild(hub);
-    mapHubEls[venue.id] = hub;
+    hubsEl.appendChild(card);
+    mapHubEls[venue.id] = card;
   });
 
   updateMapCta();
-  if (!pendingTravel) applyMapZoom();
-  setTimeout(() => {
-    placeDuckOnMap(cleared);
-    if (!pendingTravel) centerOnVenue(focusId, "auto");
-  }, 60);
-  const plate = $("#map-plate");
-  if (plate && !plate.dataset.bound) {
-    plate.dataset.bound = "1";
-    plate.addEventListener("load", () => {
-      placeDuckOnMap(getMap().cleared || 0);
-      centerOnVenue(selectedVenueId, "auto");
-    });
-  }
+  setTimeout(() => centerMapFocus(focusId, "auto"), 40);
 
   if (pendingTravel) {
     const trip = pendingTravel;
     pendingTravel = null;
     setTimeout(() => {
-      enableMapFlightZoom(trip.fromVenue, trip.toVenue);
       playVenueHop(trip.fromVenue, trip.toVenue);
       updateMapCta();
     }, 180);
   }
 }
 
-// Zoom in tight at the start of the crawl, then reveal more of the map as
-// venues are cleared. Returns a width percentage for .map-canvas relative to
-// the scroll viewport (>100% means it overflows and can be panned).
-function mapZoomPercent() {
-  const venues = venueList();
-  const cleared = getMap().cleared || 0;
-  const curIdx = venueIndexForCleared(cleared);
-  const span = Math.max(1, venues.length - 1);
-  const progress = Math.min(1, curIdx / span);
-  const startZoom = 235; // early: focus on the first bars
-  const endZoom = 120;   // late: nearly the whole map in view
-  return Math.round(startZoom + (endZoom - startZoom) * progress);
-}
-
-function applyMapZoom(pct) {
-  const canvas = $("#map-path");
-  if (!canvas) return;
-  const z = pct != null ? pct : mapZoomPercent();
-  canvas.style.width = z + "%";
-}
+// Legacy no-ops — world map plate removed; crawl is a venue/stage list.
+function mapZoomPercent() { return 100; }
+function applyMapZoom() { /* no plate zoom */ }
+function enableMapFlightZoom() { /* no plate zoom */ }
+function clearMapFlightZoom() { /* no plate zoom */ }
+function pinPoint() { return null; }
+function placeDuckOnMap() { /* no map duck */ }
+function ensureMapAssets() { /* no map plate */ }
 
 function centerOnVenue(venueId, behavior = "smooth") {
-  const scroll = $("#map-scroll");
-  const pt = venueId ? pinPoint(venueId) : null;
-  if (!scroll || !pt) return;
-  scroll.scrollTo({
-    left: Math.max(0, pt.x - scroll.clientWidth / 2),
-    top: Math.max(0, pt.y - scroll.clientHeight / 2),
-    behavior,
-  });
+  centerMapFocus(venueId, behavior);
 }
 
-function enableMapFlightZoom(fromVenue, toVenue) {
-  const canvas = $("#map-path");
-  const scroll = $("#map-scroll");
-  if (!canvas || !scroll) return;
-  // Give the flight extra room: zoom out a touch from the current level.
-  const flightZoom = Math.max(150, mapZoomPercent() + 30);
-  applyMapZoom(flightZoom);
-  requestAnimationFrame(() => {
-    const a = fromVenue ? pinPoint(fromVenue.id) : null;
-    const b = toVenue ? pinPoint(toVenue.id) : a;
-    if (!a && !b) return;
-    const mx = ((a?.x || b.x) + (b?.x || a.x)) / 2;
-    const my = ((a?.y || b.y) + (b?.y || a.y)) / 2;
-    scroll.scrollTo({
-      left: Math.max(0, mx - scroll.clientWidth / 2),
-      top: Math.max(0, my - scroll.clientHeight / 2),
-      behavior: "smooth",
-    });
-  });
-}
+/** Scroll map list so the focused venue (and current stage) sits mid-viewport. */
+function centerMapFocus(venueId, behavior = "smooth") {
+  const scrollBehavior = behavior === "auto" ? "auto" : "smooth";
+  const map = getMap();
+  const cleared = map.cleared || 0;
+  const currentVenueId = venueForStage(cleared)?.venue?.id;
+  const stageBtn = mapDrinkEls[cleared];
 
-function clearMapFlightZoom() {
-  applyMapZoom();
-}
-
-let mapCamRaf = 0;
-function stopMapCameraFollow() {
-  if (mapCamRaf) {
-    cancelAnimationFrame(mapCamRaf);
-    mapCamRaf = 0;
+  // Prefer centering the active drink when viewing its venue
+  if (venueId && venueId === currentVenueId && stageBtn?.scrollIntoView) {
+    stageBtn.scrollIntoView({ behavior: scrollBehavior, block: "center", inline: "nearest" });
+    return;
   }
-  const duck = $("#map-duck");
-  if (duck) duck.classList.remove("is-tracking");
-}
 
-/** Keep #map-scroll centered on the mascot while it moves. */
-function startMapCameraFollow(ms) {
-  stopMapCameraFollow();
-  const duck = $("#map-duck");
-  const scroll = $("#map-scroll");
-  if (!duck || !scroll) return;
-  duck.classList.add("is-tracking");
-  const end = performance.now() + (ms || 1200);
-  const tick = (now) => {
-    const duckRect = duck.getBoundingClientRect();
-    const scrollRect = scroll.getBoundingClientRect();
-    const x = scroll.scrollLeft + (duckRect.left + duckRect.width / 2 - scrollRect.left);
-    const y = scroll.scrollTop + (duckRect.top + duckRect.height / 2 - scrollRect.top);
-    scroll.scrollLeft = Math.max(0, x - scroll.clientWidth / 2);
-    scroll.scrollTop = Math.max(0, y - scroll.clientHeight / 2);
-    if (now < end) mapCamRaf = requestAnimationFrame(tick);
-    else {
-      mapCamRaf = 0;
-      duck.classList.remove("is-tracking");
-    }
-  };
-  mapCamRaf = requestAnimationFrame(tick);
-}
-
-function ensureMapAssets() {
-  const plate = $("#map-plate");
-  if (plate && !plate.getAttribute("src")) {
-    const src = plate.dataset.src || "assets/maps/dag-tails-bar-hop-map.jpg?v=4";
-    plate.src = src;
-  }
-  const img = $("#map-duck-img");
-  if (img && !img.getAttribute("src")) {
-    const rankIdx = rankForCleared(getMap().cleared || 0);
-    const tier = mascotTierClass(rankIdx);
-    img.src = tier === "tier-3"
-      ? "assets/duck-hub-mascot-ace.png"
-      : tier === "tier-2"
-        ? "assets/duck-hub-mascot-jacket.png"
-        : "assets/duck-hub-mascot.png";
+  const card = venueId ? mapHubEls[venueId] : null;
+  if (card?.scrollIntoView) {
+    card.scrollIntoView({ behavior: scrollBehavior, block: "center", inline: "nearest" });
   }
 }
 
-function pinPoint(venueId) {
-  const venue = venueList().find((v) => v.id === venueId);
-  const canvas = $("#map-path");
-  if (!venue || !canvas) return null;
-  const pin = venue.mapPin || { x: 50, y: 50 };
-  return {
-    x: (pin.x / 100) * canvas.offsetWidth,
-    y: (pin.y / 100) * canvas.offsetHeight,
-  };
+function stopMapCameraFollow() { /* no map camera */ }
+function startMapCameraFollow() { /* no map camera */ }
+
+function animateDuckTravel() {
+  return Promise.resolve();
 }
 
-function placeDuckOnMap(cleared) {
-  const duck = $("#map-duck");
-  const img = $("#map-duck-img");
-  const canvas = $("#map-path");
-  if (!duck || !canvas) return;
-  const rankIdx = rankForCleared(cleared || 0);
-  const tier = mascotTierClass(rankIdx);
-  if (img) {
-    const src = tier === "tier-3"
-      ? "assets/duck-hub-mascot-ace.png"
-      : tier === "tier-2"
-        ? "assets/duck-hub-mascot-jacket.png"
-        : "assets/duck-hub-mascot.png";
-    if (!img.getAttribute("src") || !img.getAttribute("src").includes(src.split("/").pop())) {
-      img.src = src;
-    }
-  }
-  duck.classList.toggle("tier-2", tier === "tier-2");
-  duck.classList.toggle("tier-3", tier === "tier-3");
-  const at = venueForStage(Math.min(cleared, Math.max(0, drinkPool().length - 1)));
-  const pt = pinPoint(at.venue.id);
-  if (!pt) return;
-  duck.classList.remove("is-walking", "is-flying");
-  duck.style.left = pt.x + "px";
-  duck.style.top = pt.y + "px";
-}
-
-function animateDuckToStop(stopEl, mode) {
-  // Legacy helper — world map no longer places drink stops.
-  const duck = $("#map-duck");
-  if (!duck || !stopEl) return;
-  const canvas = $("#map-path");
-  if (!canvas) return;
-  const b = {
-    x: (parseFloat(stopEl.style.left) / 100) * canvas.offsetWidth,
-    y: (parseFloat(stopEl.style.top) / 100) * canvas.offsetHeight,
-  };
-  duck.classList.remove("is-walking", "is-flying");
-  void duck.offsetWidth;
-  duck.classList.add(mode === "fly" ? "is-flying" : "is-walking");
-  if (Sound.step) Sound.step(); else Sound.click();
-  const ms = mode === "fly" ? 1200 : 550;
-  startMapCameraFollow(ms);
-  requestAnimationFrame(() => {
-    duck.style.left = b.x + "px";
-    duck.style.top = b.y + "px";
-  });
-  setTimeout(() => {
-    duck.classList.remove("is-walking", "is-flying");
-    stopMapCameraFollow();
-  }, ms + 40);
-}
-
-function animateDuckTravel(fromVenueId, toVenueId, mode) {
-  const duck = $("#map-duck");
-  if (!duck) return Promise.resolve();
-  const a = pinPoint(fromVenueId);
-  const b = pinPoint(toVenueId) || a;
-  if (!a || !b) return Promise.resolve();
-  duck.style.left = a.x + "px";
-  duck.style.top = a.y + "px";
-  duck.classList.remove("is-walking", "is-flying");
-  void duck.offsetWidth;
-  duck.classList.add(mode === "fly" ? "is-flying" : "is-walking");
-  if (Sound.step) Sound.step(); else Sound.click();
-  const ms = mode === "fly" ? 1600 : 550;
-  startMapCameraFollow(ms);
-  requestAnimationFrame(() => {
-    duck.style.left = b.x + "px";
-    duck.style.top = b.y + "px";
-  });
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      duck.classList.remove("is-walking", "is-flying");
-      stopMapCameraFollow();
-      if (toVenueId) centerOnVenue(toVenueId, "smooth");
-      resolve();
-    }, ms + 40);
-  });
-}
-
-/** Street Fighter–style hop on the map: letterbox + banner + winged flight. No dialog. */
+/** Brief hop banner between venues (no map flight). */
 function playVenueHop(fromVenue, toVenue) {
   if (!fromVenue) {
-    if (toVenue) animateDuckTravel(fromVenue?.id, toVenue.id, "fly").then(finishVenueHop);
-    else finishVenueHop();
+    finishVenueHop();
     return;
   }
   selectedVenueId = toVenue ? toVenue.id : fromVenue.id;
@@ -1410,20 +1222,8 @@ function playVenueHop(fromVenue, toVenue) {
     hop.classList.add("is-open");
   }
   Sound.coin();
-
-  const fly = () => {
-    if (toVenue) {
-      return animateDuckTravel(fromVenue.id, toVenue.id, "fly");
-    }
-    return Promise.resolve();
-  };
-
-  // Brief banner beat, then take wing.
-  setTimeout(() => {
-    fly().then(() => {
-      setTimeout(finishVenueHop, 280);
-    });
-  }, 420);
+  centerOnVenue(selectedVenueId, "smooth");
+  setTimeout(finishVenueHop, 1100);
 }
 
 function hideMapHop() {
@@ -1449,7 +1249,7 @@ function finishVenueHop() {
   renderMap({ openVenueId: at.venue.id });
 }
 
-// Legacy aliases — keep old call sites working.
+// Legacy aliases
 function playVenueFarewell(fromVenue, toVenue) {
   playVenueHop(fromVenue, toVenue);
 }
@@ -1534,18 +1334,20 @@ function setEndlessBest(v) {
   try { localStorage.setItem(ENDLESS_BEST_KEY, String(v)); } catch (e) { /* ignore */ }
 }
 function renderStartBest() {
-  const best = getHighScore();
-  const eb = getEndlessBest();
-  const parts = [];
-  if (best > 0) parts.push(`🏅 Best shift: ${best} pts`);
-  if (eb > 0) parts.push(`🔥 Endless: ${eb} pts`);
-  $("#start-best").textContent = parts.join("  ·  ");
+  refreshHub();
 }
 
 const STEP_META = {
   glass: { label: "Glass", title: "Choose your glass", sub: "Pick the right vessel — it lands on the counter.", status: "Choose a glass" },
   method: { label: "Tools", title: "Set up your tools", sub: "Pick how you'll prepare. Shaker, spoon, or muddler — tools hit the counter before you pour.", status: "Choose your tools" },
-  ingredients: { label: "Pour", title: "Pour your ingredients", sub: "Tap to add, then dial each amount. Watch them pour into the right vessel.", status: "Pour your ingredients" },
+  ingredients: {
+    label: "Pour",
+    title: MEASURE_ENABLED ? "Pour your ingredients" : "Pick your ingredients",
+    sub: MEASURE_ENABLED
+      ? "Tap to add, then dial each amount. Watch them pour into the right vessel."
+      : "Tap the ingredients you think belong in this drink — no measuring.",
+    status: MEASURE_ENABLED ? "Pour your ingredients" : "Pick your ingredients",
+  },
   garnish: { label: "Garnish", title: "Add a garnish", sub: "Finish it with the right flourish.", status: "Add a garnish" },
 };
 
@@ -1572,9 +1374,17 @@ const STAGE_H = 508;
 function fitGameStage() {
   const stage = document.getElementById("game-stage");
   if (!stage) return;
-  const scale = Math.min(window.innerWidth / STAGE_W, window.innerHeight / STAGE_H);
-  stage.style.transform = `scale(${Math.max(0.2, scale)})`;
-  document.documentElement.style.setProperty("--stage-scale", String(scale));
+  const vw = Math.max(1, window.innerWidth);
+  const vh = Math.max(1, window.innerHeight);
+  // Size the stage to the live platform viewport (iOS / Android / PC) so the
+  // shell uses every pixel — no letterboxing and no cover-crop of chrome.
+  stage.style.width = `${vw}px`;
+  stage.style.height = `${vh}px`;
+  stage.style.transform = "none";
+  const scale = Math.min(vw / STAGE_W, vh / STAGE_H);
+  document.documentElement.style.setProperty("--stage-scale", String(Math.max(0.2, scale)));
+  document.documentElement.style.setProperty("--stage-w", `${vw}px`);
+  document.documentElement.style.setProperty("--stage-h", `${vh}px`);
 }
 
 function isPhonePlay() {
@@ -1694,6 +1504,27 @@ function liquidInPrep() {
   return usesPrepVessel() && !state.mixed;
 }
 
+/** True when the counter already has the vessels this method needs — no remount. */
+function stationReadyForMethod(methodId) {
+  if (!$("#glass-mount svg.glass-svg")) return false;
+  if (usesPrepVessel(methodId)) {
+    const prepMount = $("#prep-mount");
+    if (!prepMount || prepMount.hidden) return false;
+    if (!prepMount.querySelector("svg.glass-svg")) return false;
+  }
+  return true;
+}
+
+/** Method chrome only — keeps the poured glass SVG intact. */
+function syncStationMethodChrome(methodId) {
+  const station = $(".station");
+  if (!station || !methodId) return;
+  station.setAttribute("data-method", methodId);
+  station.classList.toggle("has-build", methodId === "build");
+  station.classList.toggle("has-muddle", methodId === "muddle");
+  station.classList.toggle("has-prep", usesPrepVessel(methodId));
+}
+
 function ensureVesselShadow(el) {
   if (!el) return;
   let sh = el.querySelector(":scope > .vessel-shadow");
@@ -1766,7 +1597,7 @@ function renderStation() {
   if (prepMount) prepMount.classList.add("is-on-counter");
 
   updateLiquid(false);
-  if (state.steps.includes("garnish") || state.mixed) applyGarnishVisual();
+  if (state.build.garnish || state.steps.includes("garnish") || state.mixed) applyGarnishVisual();
   refreshStationStatus();
 }
 
@@ -1944,10 +1775,20 @@ async function animateStrainTransfer(methodId) {
 
 async function runMethod(methodId) {
   const station = $(".station");
+  if (!station) return;
   state.mixed = false;
   if (state.build.method !== methodId) state.build.method = methodId;
-  renderStation();
-  updateLiquid(false);
+
+  // Remount only when vessels are missing. Always rebuilding the glass SVG
+  // flashes a redraw on Serve for build drinks (e.g. Paloma) that already sit
+  // in the serving glass.
+  const remounted = !stationReadyForMethod(methodId);
+  if (remounted) {
+    renderStation();
+    updateLiquid(false);
+  } else {
+    syncStationMethodChrome(methodId);
+  }
 
   const labels = {
     shake: "Shaking…",
@@ -1967,8 +1808,9 @@ async function runMethod(methodId) {
 
   if (["shake", "stir", "blend"].includes(methodId)) {
     await animateStrainTransfer(methodId);
-  } else {
-    updateLiquid(true);
+  } else if (remounted) {
+    // Build/muddle: only repaint if we just created a fresh empty glass.
+    updateLiquid(false);
   }
 
   station.classList.remove("is-working");
@@ -1982,7 +1824,12 @@ async function runMethod(methodId) {
 // ============================ Step tracker ============================
 function renderTracker() {
   const el = $("#step-tracker");
+  if (!el) return;
+  // Short flows (ingredients → serve) don't need a tracker — frees chrome.
+  const show = (state.steps || []).length > 2;
+  el.hidden = !show;
   el.innerHTML = "";
+  if (!show) return;
   const nodes = [...state.steps, "serve"];
   nodes.forEach((step, i) => {
     if (i > 0) {
@@ -2009,9 +1856,11 @@ function renderStepPanel() {
   const panel = $("#step-panel");
   const meta = STEP_META[step];
   let sub = meta.sub;
-  if (step === "ingredients" && state.complexity && state.complexity.portions === false) {
-    sub = "Tap the ingredients you think belong in this drink — no measuring yet.";
+  const guessCompact = step === "ingredients" && isGuessMode();
+  if (guessCompact) {
+    sub = "Tap the ingredients you think belong in this drink — no measuring.";
   }
+  panel.classList.toggle("is-guess-compact", guessCompact);
   panel.innerHTML = `
     <h3 class="step-panel-title">${meta.title}</h3>
     <p class="step-panel-sub">${sub}</p>
@@ -2101,6 +1950,17 @@ function renderGarnishPanel(body) {
 
 // ---- Ingredients panel ----
 function renderIngredientsPanel(body) {
+  // Guess mode: catalog only — selection highlights + pours into the glass (toggleable).
+  // Measure mode (Mixologist): keep a pour list for −/+ amounts.
+  if (isGuessMode()) {
+    body.innerHTML = `
+      <div class="ingredient-layout is-catalog-only">
+        <div class="ingredient-catalog" id="ingredient-catalog"></div>
+      </div>
+    `;
+    fillCatalog();
+    return;
+  }
   body.innerHTML = `
     <div class="ingredient-layout">
       <div class="ingredient-catalog" id="ingredient-catalog"></div>
@@ -2114,6 +1974,38 @@ function renderIngredientsPanel(body) {
   fillBuildList();
 }
 
+function ingredientCatOrder() {
+  return [...new Set(INGREDIENTS.map((i) => i.cat))];
+}
+
+function appendCatalogGroups(el, list, added) {
+  const order = ingredientCatOrder();
+  const cats = order.filter((cat) => list.some((i) => i.cat === cat));
+  const guess = isGuessMode();
+  cats.forEach((cat) => {
+    const group = document.createElement("div");
+    group.className = "cat-group";
+    group.innerHTML = `<p class="cat-group-title">${cat}</p>`;
+    const items = document.createElement("div");
+    items.className = "cat-items";
+    list.filter((i) => i.cat === cat).forEach((ing) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      const on = added.has(ing.id);
+      btn.className = "cat-item" + (on ? " is-selected" : "");
+      btn.setAttribute("aria-pressed", on ? "true" : "false");
+      btn.textContent = ing.name;
+      btn.addEventListener("click", () => {
+        if (guess) toggleIngredient(ing.id);
+        else addIngredient(ing.id);
+      });
+      items.appendChild(btn);
+    });
+    group.appendChild(items);
+    el.appendChild(group);
+  });
+}
+
 function fillCatalog() {
   const el = $("#ingredient-catalog");
   if (!el) return;
@@ -2122,40 +2014,15 @@ function fillCatalog() {
   // Underage players never see anything alcoholic.
   const pantry = isUnderage() ? INGREDIENTS.filter((i) => (i.mx?.abv || 0) === 0) : INGREDIENTS;
 
-  // Early stages use a short, curated menu — a flat shuffled grid of options.
+  // Early stages use a short curated menu — still grouped by type.
   if (state.menuIds) {
-    const items = document.createElement("div");
-    items.className = "cat-items";
-    [...state.menuIds].forEach((id) => {
-      const ing = INGREDIENT_BY_ID[id];
-      if (!ing) return;
-      const btn = document.createElement("button");
-      btn.className = "cat-item" + (added.has(ing.id) ? " is-added" : "");
-      btn.textContent = ing.name;
-      btn.addEventListener("click", () => addIngredient(ing.id));
-      items.appendChild(btn);
-    });
-    el.appendChild(items);
+    const list = [...state.menuIds].map((id) => INGREDIENT_BY_ID[id]).filter(Boolean);
+    appendCatalogGroups(el, list, added);
     applyTrainingHints();
     return;
   }
 
-  const cats = [...new Set(pantry.map((i) => i.cat))];
-  cats.forEach((cat) => {
-    const group = document.createElement("div");
-    group.innerHTML = `<p class="cat-group-title">${cat}</p>`;
-    const items = document.createElement("div");
-    items.className = "cat-items";
-    pantry.filter((i) => i.cat === cat).forEach((ing) => {
-      const btn = document.createElement("button");
-      btn.className = "cat-item" + (added.has(ing.id) ? " is-added" : "");
-      btn.textContent = ing.name;
-      btn.addEventListener("click", () => addIngredient(ing.id));
-      items.appendChild(btn);
-    });
-    group.appendChild(items);
-    el.appendChild(group);
-  });
+  appendCatalogGroups(el, pantry, added);
   applyTrainingHints();
 }
 
@@ -2167,7 +2034,7 @@ function fillBuildList() {
     el.innerHTML = `<p class="build-empty">No ingredients yet. Tap one to add it.</p>`;
     return;
   }
-  const guessMode = state.complexity && state.complexity.portions === false;
+  const guessMode = isGuessMode();
   state.build.ingredients.forEach((entry) => {
     const ing = INGREDIENT_BY_ID[entry.id];
     const meta = unitMeta(ing.unit);
@@ -2212,7 +2079,7 @@ function addIngredient(id) {
   let amount = unitMeta(INGREDIENT_BY_ID[id].unit).def;
   // In guess mode the player doesn't set volumes — pour the *correct* recipe
   // portion for ingredients that belong to the drink so it looks realistic.
-  if (state.complexity && state.complexity.portions === false) {
+  if (isGuessMode()) {
     const recipe = currentRecipe();
     const target = recipe && recipe.ingredients.find((i) => i.id === id);
     if (target) amount = target.amount;
@@ -2224,8 +2091,20 @@ function addIngredient(id) {
   updateNav();
 }
 
+/** Guess-mode tap: add to glass + highlight, or remove if already picked. */
+function toggleIngredient(id) {
+  if (state.build.ingredients.some((i) => i.id === id)) {
+    Sound.click();
+    removeIngredient(id);
+    return;
+  }
+  Sound.select();
+  addIngredient(id);
+}
+
 function removeIngredient(id) {
   state.build.ingredients = state.build.ingredients.filter((i) => i.id !== id);
+  state.mixed = false;
   fillCatalog();
   fillBuildList();
   updateLiquid();
@@ -2244,9 +2123,14 @@ function changeAmount(id, value, pour) {
 
 // ============================ Step navigation ============================
 function getSteps(difficulty) {
-  return difficulty === "basic"
+  let steps = difficulty === "basic"
     ? ["method", "ingredients", "garnish"]
     : ["glass", "method", "ingredients", "garnish"];
+  // Mixologist keeps the full flow; campaign/training honor hold flags.
+  if (state.mode === "mixologist") return steps;
+  if (!TOOLS_ENABLED) steps = steps.filter((s) => s !== "method");
+  if (!GARNISH_ENABLED) steps = steps.filter((s) => s !== "garnish");
+  return steps;
 }
 
 function stepSatisfied(step) {
@@ -2261,7 +2145,8 @@ function stepSatisfied(step) {
 
 function setNavDisabled(disabled) {
   $("#btn-next").disabled = disabled;
-  $("#btn-back").disabled = disabled || state.stepIndex === 0;
+  // Back stays available — at step 0 it leaves the pour (map / menu).
+  $("#btn-back").disabled = !!disabled;
 }
 
 function updateNav() {
@@ -2269,7 +2154,7 @@ function updateNav() {
   const isLast = state.stepIndex === state.steps.length - 1;
   $("#btn-next").textContent = isLast ? "Serve Drink" : "Next →";
   $("#btn-next").disabled = !stepSatisfied(step);
-  $("#btn-back").disabled = state.stepIndex === 0;
+  $("#btn-back").disabled = false;
 }
 
 function enterStep() {
@@ -2287,20 +2172,34 @@ function enterStep() {
   updateProgress();
 }
 
+/** Shake / stir / muddle / blend once before advancing or scoring. */
+async function prepareDrinkIfNeeded() {
+  const methodId = state.build.method || activeMethod();
+  if (!methodId || state.mixed) return false;
+  state.build.method = methodId;
+  const panel = $("#step-panel");
+  const name = METHOD_BY_ID[methodId]?.name || "method";
+  if (panel) {
+    panel.innerHTML = `<div class="auto-note">Working the drink — <strong>${name}</strong>…</div>`;
+  }
+  await runMethod(methodId);
+  return true;
+}
+
 async function goNext() {
   const cur = state.steps[state.stepIndex];
-  // After pouring, run the method animation (shake / stir / muddle / …)
-  // whether the player chose tools earlier or the recipe auto-set them.
-  if (cur === "ingredients" && state.build.method && !state.mixed) {
-    const panel = $("#step-panel");
-    const name = METHOD_BY_ID[state.build.method]?.name || "method";
-    panel.innerHTML = `<div class="auto-note">Working the drink — <strong>${name}</strong>…</div>`;
-    await runMethod(state.build.method);
+  const isLast = state.stepIndex >= state.steps.length - 1;
+  // After pouring, and again on Serve if somehow still unmixed (e.g. last
+  // step is garnish), run the method whether the player chose tools or the
+  // recipe auto-set them.
+  if ((cur === "ingredients" || isLast) && !state.mixed) {
+    await prepareDrinkIfNeeded();
   }
-  if (state.stepIndex < state.steps.length - 1) {
+  if (!isLast) {
     state.stepIndex++;
     enterStep();
   } else {
+    if (!state.mixed) await prepareDrinkIfNeeded();
     serve();
   }
 }
@@ -2309,10 +2208,115 @@ function goBack() {
   if (state.stepIndex > 0) {
     state.stepIndex--;
     enterStep();
+    return;
+  }
+  // First step: leave the station (same destinations as Quit).
+  Sound.click();
+  if (state.mode === "campaign") {
+    renderMap();
+    showScreen("screen-map");
+  } else {
+    renderStartBest();
+    showScreen("screen-start");
   }
 }
 
 // ============================ Stage loading ============================
+function setGameVenue(label) {
+  const el = $("#game-venue");
+  if (!el) return;
+  el.textContent = label || "";
+  el.hidden = !label;
+}
+
+const DEFAULT_BAR_BG = "assets/station/bar-stage.png";
+
+/** Swap the station (and result card) backdrop to the venue's interior art. */
+function applyVenueChrome(venue) {
+  const url = (venue && (venue.interior || venue.bg)) || DEFAULT_BAR_BG;
+  const cssUrl = `url("${url}")`;
+  const bar = $(".bar-bg");
+  if (bar) bar.style.setProperty("--venue-bar-bg", cssUrl);
+
+  const card = $("#screen-result .result-card");
+  if (card) {
+    if (venue && (venue.interior || venue.bg)) {
+      card.style.setProperty("--venue-bar-bg", cssUrl);
+      card.classList.add("has-venue-bg");
+    } else {
+      card.style.removeProperty("--venue-bar-bg");
+      card.classList.remove("has-venue-bg");
+    }
+  }
+}
+
+/** Mixologist / free pour has no recipe face — block flip and hide hints. */
+function setTicketFlippable(on) {
+  const ticket = $("#order-ticket");
+  if (!ticket) return;
+  const flippable = !!on;
+  ticket.classList.toggle("is-no-flip", !flippable);
+  if (!flippable) {
+    setTicketFlipped(false);
+    ticket.removeAttribute("tabindex");
+    ticket.setAttribute("role", "group");
+    ticket.removeAttribute("aria-pressed");
+    ticket.setAttribute("aria-label", "Order ticket");
+  } else {
+    ticket.setAttribute("tabindex", "0");
+    ticket.setAttribute("role", "button");
+    ticket.setAttribute("aria-pressed", ticket.classList.contains("is-flipped") ? "true" : "false");
+    ticket.setAttribute("aria-label", "Order ticket — tap to flip for recipe");
+  }
+}
+
+function setTicketFlipped(on) {
+  const ticket = $("#order-ticket");
+  if (!ticket) return;
+  if (ticket.classList.contains("is-no-flip")) on = false;
+  ticket.classList.toggle("is-flipped", !!on);
+  if (!ticket.classList.contains("is-no-flip")) {
+    ticket.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  const back = ticket.querySelector(".ticket-face--back");
+  const front = ticket.querySelector(".ticket-face--front");
+  if (back) back.setAttribute("aria-hidden", on ? "false" : "true");
+  if (front) front.setAttribute("aria-hidden", on ? "true" : "false");
+}
+
+function renderTicketRecipe(recipe) {
+  const list = $("#ticket-recipe");
+  if (!list) return;
+  if (!recipe || !Array.isArray(recipe.ingredients)) {
+    list.innerHTML = `<li class="ticket-recipe-empty">Free pour — invent the recipe yourself.</li>`;
+    return;
+  }
+  const glass = GLASS_BY_ID[recipe.glass]?.name || recipe.glass || "—";
+  const method = METHOD_BY_ID[recipe.method]?.name || recipe.method || "—";
+  const garnishId = Array.isArray(recipe.garnish)
+    ? recipe.garnish.find((g) => g && g !== "none")
+    : (recipe.garnish && recipe.garnish !== "none" ? recipe.garnish : null);
+  const garnish = garnishId ? (GARNISH_BY_ID[garnishId]?.name || garnishId) : null;
+  const rows = [
+    `<li><span class="tr-k">Glass</span><span class="tr-v">${glass}</span></li>`,
+    `<li><span class="tr-k">Method</span><span class="tr-v">${method}</span></li>`,
+  ];
+  recipe.ingredients.forEach((line) => {
+    const ing = INGREDIENT_BY_ID[line.id];
+    if (!ing) return;
+    let amount = "";
+    try {
+      const disp = dispAmount(ing.unit, line.amount);
+      amount = `${disp.val} ${disp.label}`;
+    } catch (e) {
+      amount = `${line.amount} ${ing.unit || ""}`.trim();
+    }
+    rows.push(`<li><span class="tr-k">${ing.name}</span><span class="tr-v">${amount}</span></li>`);
+  });
+  if (garnish) rows.push(`<li><span class="tr-k">Garnish</span><span class="tr-v">${garnish}</span></li>`);
+  list.innerHTML = rows.join("");
+}
+
 function setTicketOrigin(recipe) {
   const el = $("#ticket-origin");
   if (!el) return;
@@ -2346,9 +2350,10 @@ function loadStage(index) {
   applyComplexity(complexityForStage(index + 1), recipe);
 
   const stop = venueForStage(index);
-  $("#ticket-label").textContent = stop.venue
+  setGameVenue(stop.venue
     ? `${stop.venue.flag || ""} ${stop.venue.name}`.trim()
-    : "Customer Order";
+    : "");
+  applyVenueChrome(stop.venue);
   $("#stage-pill").textContent = `Stop ${index + 1} / ${pool.length}`;
   $("#diff-pill").textContent = state.complexity.label;
   pickCustomer();
@@ -2356,6 +2361,9 @@ function loadStage(index) {
   $("#order-name").textContent = recipe.name;
   $("#order-desc").textContent = recipe.order;
   setTicketOrigin(recipe);
+  renderTicketRecipe(recipe);
+  setTicketFlippable(true);
+  setTicketFlipped(false);
   animatePoints(state.totalScore);
   updateProgress();
 
@@ -2400,7 +2408,8 @@ function loadEndless(next = false) {
   $("#endless-hud").style.display = "";
   renderEndlessHud();
 
-  $("#ticket-label").textContent = "Now serving";
+  setGameVenue("Now serving");
+  applyVenueChrome(venueOf(recipe) || venueForStage(getMap().cleared || 0)?.venue);
   $("#stage-pill").textContent = `Endless · 🍸 ${state.served}`;
   $("#diff-pill").textContent = state.complexity.label;
   pickCustomer();
@@ -2408,6 +2417,9 @@ function loadEndless(next = false) {
   $("#order-name").textContent = recipe.name;
   $("#order-desc").textContent = recipe.order;
   setTicketOrigin(recipe);
+  renderTicketRecipe(recipe);
+  setTicketFlippable(true);
+  setTicketFlipped(false);
   animatePoints(state.totalScore);
 
   renderStation();
@@ -2514,18 +2526,8 @@ function pickCustomer() {
   return c;
 }
 
-function renderCustomer(drinkName) {
-  const el = $("#ticket-customer");
-  if (!el) return;
-  const c = state.customer;
-  if (!c) { el.innerHTML = ""; el.style.display = "none"; return; }
-  el.style.display = "";
-  const line = c.lines[Math.floor(Math.random() * c.lines.length)].replace("{drink}", drinkName);
-  const sub = [c.breed, c.vibe].filter(Boolean).join(" · ");
-  const img = c.portrait
-    ? `<img class="cust-avatar-img" src="${c.portrait}" alt="${c.name}" width="48" height="48" />`
-    : "";
-  el.innerHTML = `<span class="cust-avatar">${img}</span><span class="cust-meta"><span class="cust-name">${c.name}</span><span class="cust-sub">${sub}</span><span class="cust-line">"${line}"</span></span>`;
+function renderCustomer(_drinkName) {
+  // Guest lives on the bar only — ticket shows the order text, not a second chip.
   renderBarGuest();
 }
 
@@ -2553,8 +2555,6 @@ function renderBarGuest(opts = {}) {
 
 function clearCustomer() {
   state.customer = null;
-  const el = $("#ticket-customer");
-  if (el) { el.innerHTML = ""; el.style.display = "none"; }
   renderBarGuest();
 }
 
@@ -2585,6 +2585,8 @@ function loadTraining() {
   state.mixed = false;
   state.complexity = null;
   state.menuIds = null;
+  if (!TOOLS_ENABLED) state.build.method = state.trainingRecipe.method;
+  if (!GARNISH_ENABLED) state.build.garnish = state.trainingRecipe.garnish[0];
   state.steps = getSteps("advanced");
   state.stepIndex = 0;
   state.totalScore = 0;
@@ -2596,12 +2598,16 @@ function loadTraining() {
   clearCustomer();
 
   const r = state.trainingRecipe;
-  $("#ticket-label").textContent = "Training drink";
+  setGameVenue("Training drink");
+  applyVenueChrome(venueOf(r));
   $("#stage-pill").textContent = "📚 Training";
   $("#diff-pill").textContent = "Tutorial";
   $("#order-name").textContent = r.name;
   $("#order-desc").textContent = r.order;
   setTicketOrigin(r);
+  renderTicketRecipe(r);
+  setTicketFlippable(true);
+  setTicketFlipped(false);
 
   renderStation();
   enterStep();
@@ -2632,12 +2638,15 @@ function coachHTML() {
     title = "🧰 Set up your tools";
     body = `Before pouring, pick how you'll prepare. A ${r.name} is <strong>${mname.toLowerCase()}ed</strong> — tap glowing <strong>${mname}</strong> so the tools land on the counter, then hit <strong>Next →</strong>.`;
   } else if (step === "ingredients") {
+    const names = r.ingredients.map((i) => `<strong>${INGREDIENT_BY_ID[i.id].name}</strong>`).join(", ");
     const list = r.ingredients
       .map((i) => `<strong>${i.amount} ${INGREDIENT_BY_ID[i.id].unit} ${INGREDIENT_BY_ID[i.id].name}</strong>`)
       .join(", ");
     const into = ["shake", "stir", "blend"].includes(r.method) ? "into the prep tool" : "into the glass";
     title = "🫗 Now build the drink";
-    body = `Pour ${into}. Tap each glowing ingredient, then use <strong>− / +</strong> to set amounts: ${list}. When you hit Next, we'll ${METHOD_BY_ID[r.method].name.toLowerCase()} it.`;
+    body = isGuessMode()
+      ? `Tap each glowing ingredient that belongs in a ${r.name}: ${names}. No measuring — just pick the right ones. When you hit Next, we'll ${METHOD_BY_ID[r.method].name.toLowerCase()} it.`
+      : `Pour ${into}. Tap each glowing ingredient, then use <strong>− / +</strong> to set amounts: ${list}. When you hit Next, we'll ${METHOD_BY_ID[r.method].name.toLowerCase()} it.`;
   } else if (step === "garnish") {
     const gid = r.garnish[0];
     const gname = GARNISH_BY_ID[gid].name;
@@ -2697,8 +2706,9 @@ function scoreBuild() {
   // manual, e.g. training/challenge/full-bar tier).
   const cx = state.complexity;
   const glassChosen = !cx || cx.chooseGlass;
-  const methodChosen = !cx || cx.chooseMethod;
-  const garnishChosen = !cx || cx.chooseGarnish;
+  // Held-off steps are auto-set — don't grade choices the player never made.
+  const methodChosen = TOOLS_ENABLED && (!cx || cx.chooseMethod);
+  const garnishChosen = GARNISH_ENABLED && (!cx || cx.chooseGarnish);
 
   // Glass
   if (glassChosen) {
@@ -2711,7 +2721,7 @@ function scoreBuild() {
       feedback.push(fb("bad", "Glass", `You used ${chosen}; should be ${GLASS_BY_ID[recipe.glass].name}.`));
     }
   } else {
-    feedback.push(fb("auto", "Glass", `${GLASS_BY_ID[recipe.glass].name} — set for you at this stage.`));
+    feedback.push(fb("auto", "Glass", GLASS_BY_ID[recipe.glass].name));
   }
 
   // Method
@@ -2725,14 +2735,14 @@ function scoreBuild() {
       feedback.push(fb("bad", "Method", `You chose ${chosen}; should be ${METHOD_BY_ID[recipe.method].name}.`));
     }
   } else {
-    feedback.push(fb("auto", "Method", `${METHOD_BY_ID[recipe.method].name} — set for you at this stage.`));
+    feedback.push(fb("auto", "Method", METHOD_BY_ID[recipe.method].name));
   }
 
   // Ingredients
   const builtMap = new Map(state.build.ingredients.map((i) => [i.id, i.amount]));
   const targetIds = new Set(recipe.ingredients.map((i) => i.id));
 
-  const guessMode = state.complexity && state.complexity.portions === false;
+  const guessMode = isGuessMode();
 
   recipe.ingredients.forEach((target) => {
     const ing = INGREDIENT_BY_ID[target.id];
@@ -2790,7 +2800,7 @@ function scoreBuild() {
   } else {
     const gid = recipe.garnish[0];
     const gname = gid === "none" ? "None" : GARNISH_BY_ID[gid].name;
-    feedback.push(fb("auto", "Garnish", `${gname} — added automatically at this stage.`));
+    feedback.push(fb("auto", "Garnish", gname));
   }
 
   points = Math.max(0, points);
@@ -2810,7 +2820,7 @@ function scoreBuild() {
     const panel = scoreWithJudges(evalResult, pickJudges(3));
     result.judgePanel = panel;
     result.judgeEval = evalResult;
-    const blendable = !state.complexity || state.complexity.portions !== false;
+    const blendable = !isGuessMode();
     if (blendable) {
       const blended = Math.round(pct * 0.75 + panel.total * 0.25);
       result.blended = blended;
@@ -2889,11 +2899,16 @@ function startMixologist() {
   state.stepIndex = 0;
   $(".progress-wrap").style.display = "none";
   clearCustomer();
+  setGameVenue("Mixologist");
+  applyVenueChrome(null);
   $("#stage-pill").textContent = "Mixologist";
   $("#diff-pill").textContent = "Sandbox";
   $("#order-name").textContent = "Invent a Cocktail";
   $("#order-desc").textContent = "Free pour — choose a glass, add anything you like, pick a method & garnish, then Serve to get it judged.";
   setTicketOrigin(null);
+  renderTicketRecipe(null);
+  setTicketFlippable(false);
+  setTicketFlipped(false);
   renderStation();
   enterStep();
   showScreen("screen-game");
@@ -3141,15 +3156,22 @@ function loadChallenge(recipe) {
   state.mixed = false;
   state.complexity = null;
   state.menuIds = null;
+  if (!TOOLS_ENABLED) state.build.method = recipe.method;
+  if (!GARNISH_ENABLED) state.build.garnish = Array.isArray(recipe.garnish) ? recipe.garnish[0] : recipe.garnish;
   state.steps = getSteps("advanced");
   state.stepIndex = 0;
   $(".progress-wrap").style.display = "none";
   clearCustomer();
+  setGameVenue("Challenge");
+  applyVenueChrome(null);
   $("#stage-pill").textContent = "Challenge";
   $("#diff-pill").textContent = "Recreate";
   $("#order-name").textContent = recipe.name;
-  $("#order-desc").textContent = "Recreate this invention from memory — match the glass, pour, method & garnish.";
+  $("#order-desc").textContent = "Recreate this invention from memory — match the glass & ingredients.";
   setTicketOrigin(null);
+  renderTicketRecipe(recipe);
+  setTicketFlippable(true);
+  setTicketFlipped(false);
   renderStation();
   enterStep();
   showScreen("screen-game");
@@ -3251,17 +3273,30 @@ function revealResultVerdict(result, recipe) {
     }
   }
 
-  // Customer reaction (campaign & endless only)
+  // Guest portrait as score backdrop; quote sits in the foreground
+  const guestBg = $("#result-guest-bg");
+  const guestImg = $("#result-guest-img");
   const custEl = $("#result-customer");
   if (state.customer && state.mode !== "challenge") {
     const c = state.customer;
+    if (guestBg && guestImg && c.portrait) {
+      guestImg.src = c.portrait;
+      guestBg.hidden = false;
+      guestBg.setAttribute("aria-hidden", "false");
+    } else if (guestBg) {
+      guestBg.hidden = true;
+      guestBg.setAttribute("aria-hidden", "true");
+      if (guestImg) guestImg.removeAttribute("src");
+    }
     const tip = result.tip ? ` <span class="result-tip">💵 +${result.tip} tip</span>` : "";
-    const img = c.portrait
-      ? `<img class="result-cust-img" src="${c.portrait}" alt="" width="40" height="40" />`
-      : "";
-    custEl.innerHTML = `${img}<span class="result-cust-text"><strong>${c.name}</strong>: "${reactionFor(result.stars, recipe.name)}"${tip}</span>`;
+    custEl.innerHTML = `<span class="result-cust-text"><strong>${c.name}</strong>: "${reactionFor(result.stars, recipe.name)}"${tip}</span>`;
     custEl.style.display = "";
   } else {
+    if (guestBg) {
+      guestBg.hidden = true;
+      guestBg.setAttribute("aria-hidden", "true");
+    }
+    if (guestImg) guestImg.removeAttribute("src");
     custEl.style.display = "none";
   }
 
@@ -3351,44 +3386,77 @@ function showFinish() {
 }
 
 // ============================ Event wiring ============================
-function setCtaMenuOpen(open) {
-  const menu = $("#cta-menu");
-  const caret = $("#btn-cta-caret");
-  if (!menu || !caret) return;
-  menu.hidden = !open;
-  menu.classList.toggle("is-open", !!open);
-  caret.setAttribute("aria-expanded", open ? "true" : "false");
-  caret.textContent = open ? "▲" : "▼";
-}
-
-$("#btn-cta-caret")?.addEventListener("click", (e) => {
-  e.stopPropagation();
+function hubPlayJourney() {
   Sound.init();
   Sound.click();
-  const menu = $("#cta-menu");
-  setCtaMenuOpen(!!(menu && menu.hidden));
-});
-document.addEventListener("click", (e) => {
-  const wrap = $("#cta-wrap");
-  if (wrap && !wrap.contains(e.target)) setCtaMenuOpen(false);
-});
-document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") setCtaMenuOpen(false);
-});
-
-// Play the journey → open the stage map.
-$("#btn-start").addEventListener("click", () => {
-  Sound.init();
-  Sound.click();
-  setCtaMenuOpen(false);
-  // Ensure the story plays before the very first level (covers players who
-  // registered before the intro existed).
   maybePlayIntro(() => {
     recordPlayDay();
     renderMap();
     showScreen("screen-map");
   });
-});
+}
+
+function hubOpenMixologist() {
+  Sound.init();
+  if (!mapUnlocked()) { Sound.fail(); showToast(`🔒 Clear ${STAGES_TO_UNLOCK} stages to unlock Mixologist`); return; }
+  Sound.coin();
+  track("mixologist_started");
+  startMixologist();
+}
+
+function hubOpenEndless() {
+  Sound.init();
+  if (!mapUnlocked()) { Sound.fail(); showToast(`🔒 Clear ${STAGES_TO_UNLOCK} stages to unlock Endless Shift`); return; }
+  Sound.coin();
+  track("endless_started");
+  recordPlayDay();
+  state.totalScore = 0;
+  state.starsEarned = 0;
+  state.lives = 3;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.served = 0;
+  state.lastEndlessIdx = -1;
+  displayedScore = 0;
+  loadEndless();
+}
+
+function hubOpenTraining() {
+  Sound.init();
+  Sound.click();
+  track("training_started");
+  loadTraining();
+}
+
+function hubOpenCotd() {
+  Sound.init();
+  Sound.coin();
+  loadCotd();
+}
+
+function hubOpenBadges() {
+  Sound.init();
+  Sound.click();
+  renderBadges();
+  showScreen("screen-badges");
+}
+
+function registerHubActions() {
+  window.DagTailsHub?.setActions({
+    playJourney: hubPlayJourney,
+    openEndless: hubOpenEndless,
+    openMixologist: hubOpenMixologist,
+    openCotd: hubOpenCotd,
+    openTraining: hubOpenTraining,
+    openHelp: () => $("#modal-how").classList.add("is-open"),
+    openBadges: hubOpenBadges,
+    openSettings: () => { Sound.init(); Sound.click(); openSettings(); },
+    editProfile: () => { Sound.click(); openProfileForm(); },
+  });
+  refreshHub();
+}
+
+registerHubActions();
 
 $("#btn-map-back").addEventListener("click", () => {
   Sound.click();
@@ -3423,33 +3491,6 @@ $("#btn-result-shop").addEventListener("click", () => {
   if (recipe) openShop(recipe);
 });
 $("#btn-rankup-ok").addEventListener("click", () => { Sound.click(); $("#rankup").classList.remove("is-open"); });
-
-$("#btn-mixologist").addEventListener("click", () => {
-  Sound.init();
-  setCtaMenuOpen(false);
-  if (!mapUnlocked()) { Sound.fail(); showToast(`🔒 Clear ${STAGES_TO_UNLOCK} stages to unlock Mixologist`); return; }
-  Sound.coin();
-  track("mixologist_started");
-  startMixologist();
-});
-
-$("#btn-endless").addEventListener("click", () => {
-  Sound.init();
-  setCtaMenuOpen(false);
-  if (!mapUnlocked()) { Sound.fail(); showToast(`🔒 Clear ${STAGES_TO_UNLOCK} stages to unlock Endless Shift`); return; }
-  Sound.coin();
-  track("endless_started");
-  recordPlayDay();
-  state.totalScore = 0;
-  state.starsEarned = 0;
-  state.lives = 3;
-  state.streak = 0;
-  state.bestStreak = 0;
-  state.served = 0;
-  state.lastEndlessIdx = -1;
-  displayedScore = 0;
-  loadEndless();
-});
 
 $("#btn-sound").addEventListener("click", () => {
   Sound.init();
@@ -3562,28 +3603,8 @@ $("#btn-mix-save").addEventListener("click", () => {
   setTimeout(() => $("#invent-name").focus(), 50);
 });
 
-// Training
-$("#btn-training").addEventListener("click", () => {
-  Sound.init();
-  Sound.click();
-  track("training_started");
-  loadTraining();
-});
+// Training / COTD / Badges — wired through DagTailsHub (React hub).
 
-// Cocktail of the Day
-$("#btn-cotd").addEventListener("click", () => {
-  Sound.init();
-  Sound.coin();
-  loadCotd();
-});
-
-// Badges
-$("#btn-badges").addEventListener("click", () => {
-  Sound.init();
-  Sound.click();
-  renderBadges();
-  showScreen("screen-badges");
-});
 $("#btn-badges-back").addEventListener("click", () => showScreen("screen-start"));
 
 // My Bar
@@ -3618,6 +3639,20 @@ $("#btn-replay").addEventListener("click", () => {
   Sound.click();
   renderMap();
   showScreen("screen-map");
+});
+
+$("#order-ticket")?.addEventListener("click", () => {
+  const ticket = $("#order-ticket");
+  if (!ticket || ticket.classList.contains("is-no-flip")) return;
+  Sound.click();
+  setTicketFlipped(!ticket.classList.contains("is-flipped"));
+});
+$("#order-ticket")?.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const ticket = $("#order-ticket");
+  if (!ticket || ticket.classList.contains("is-no-flip")) return;
+  e.preventDefault();
+  ticket.click();
 });
 
 $("#btn-quit").addEventListener("click", () => {
@@ -3927,10 +3962,7 @@ $("#modal-profile").addEventListener("click", (e) => {
   if (e.target.id === "modal-profile") closeProfileModal();
 });
 
-$("#btn-edit-profile").addEventListener("click", () => {
-  Sound.click();
-  openProfileForm();
-});
+// Edit profile — wired through DagTailsHub (React hub).
 
 // ============================ Intro comic reel ============================
 // A short cinematic where Old Tom, a veteran duck bartender, takes a young
@@ -4055,7 +4087,6 @@ function logoutToGate() {
   openProfileForm(true);
 }
 
-$("#btn-settings").addEventListener("click", () => { Sound.init(); Sound.click(); openSettings(); });
 $("#btn-settings-back").addEventListener("click", () => { Sound.click(); onShowStart(); showScreen("screen-start"); });
 
 wireSeg("set-units", (units) => {
@@ -4195,7 +4226,12 @@ $("#btn-diag-clear").addEventListener("click", () => {
   }
 });
 
-$("#screen-splash").addEventListener("click", () => { Sound.init(); Sound.click(); dismissSplash(); });
+// Splash stays until the player taps Enter — no auto-advance / tap-anywhere.
+$("#btn-splash-continue")?.addEventListener("click", () => {
+  Sound.init();
+  Sound.click();
+  dismissSplash();
+});
 
 // Boot: everyone sees the brand splash first. New players then get the
 // credentials modal; returning players continue to the hub.
@@ -4209,8 +4245,6 @@ syncSoundButtons();
 checkBadges();
 renderSplash();
 showScreen("screen-splash");
-splashShownAt = Date.now();
-splashTimer = setTimeout(() => dismissSplash(true), SPLASH_MIN_MS);
 track("app_open", { returning: !!getProfile() });
 
 // Debug-only deep link to preview the intro reel directly (localhost or ?debug).
@@ -4277,7 +4311,6 @@ $("#btn-mix-share").addEventListener("click", () => {
   }, $("#btn-mix-share"));
 });
 
-$("#btn-how").addEventListener("click", () => $("#modal-how").classList.add("is-open"));
 $("#btn-close-how").addEventListener("click", () => $("#modal-how").classList.remove("is-open"));
 $("#modal-how").addEventListener("click", (e) => {
   if (e.target.id === "modal-how") $("#modal-how").classList.remove("is-open");

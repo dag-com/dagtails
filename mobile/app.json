@@ -1,0 +1,44 @@
+{
+  "expo": {
+    "name": "DAG Tails",
+    "slug": "dag-tails",
+    "version": "1.0.0",
+    "orientation": "landscape",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "dagtails",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0c0814"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.dagcom.dagtails.expo",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": true,
+          "NSAllowsLocalNetworking": true
+        }
+      }
+    },
+    "android": {
+      "package": "com.dagcom.dagtails.expo",
+      "adaptiveIcon": {
+        "backgroundColor": "#0c0814",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "permissions": [],
+      "usesCleartextTraffic": true
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "gameUrl": "https://dag-com.github.io/last-call-bartending-game/"
+    }
+  }
+}
