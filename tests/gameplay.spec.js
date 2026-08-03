@@ -57,4 +57,48 @@ test.describe("gameplay smoke", () => {
     expect(gap).toBeGreaterThan(-80);
     expect(gap).toBeLessThan(90);
   });
+
+  test("venue interior loads on bar-bg (not a black void)", async ({ page }) => {
+    // Mimosa is stop 17 at Aperitivo Piazza (cleared 16).
+    await seedPlayer(page, { cleared: 16 });
+    await gotoHub(page);
+    await openMap(page);
+    await page.locator("#btn-map-play").click({ force: true });
+    await page.locator("#screen-game.is-active").waitFor({ state: "visible", timeout: 15_000 });
+    await expect(page.locator("#game-venue")).toContainText(/Aperitivo/i);
+
+    const info = await page.evaluate(async () => {
+      const bar = document.querySelector(".bar-bg");
+      if (!bar) return { error: "missing .bar-bg" };
+      const raw = getComputedStyle(bar).getPropertyValue("--venue-bar-bg").trim()
+        || bar.style.getPropertyValue("--venue-bar-bg").trim();
+      const match = raw.match(/url\(\s*["']?([^"')]+)["']?\s*\)/i);
+      const url = match ? match[1] : "";
+      let status = 0;
+      let contentType = "";
+      if (url) {
+        const res = await fetch(url);
+        status = res.status;
+        contentType = res.headers.get("content-type") || "";
+      }
+      const bg = getComputedStyle(bar).backgroundImage || "";
+      return {
+        raw,
+        url,
+        status,
+        contentType,
+        bg,
+        isAbsolute: /^https?:\/\//i.test(url),
+        mentionsInterior: /venues\/interiors\//i.test(url) || /venues\/interiors\//i.test(bg),
+      };
+    });
+
+    expect(info.error).toBeUndefined();
+    expect(info.url, `css var was: ${info.raw}`).toBeTruthy();
+    expect(info.isAbsolute).toBe(true);
+    expect(info.mentionsInterior).toBe(true);
+    expect(info.status).toBe(200);
+    expect(info.contentType).toMatch(/image\//i);
+    expect(info.bg).toMatch(/url\(/i);
+  });
 });

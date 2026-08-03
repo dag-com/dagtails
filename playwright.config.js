@@ -10,13 +10,13 @@ module.exports = defineConfig({
   reporter: [["list"]],
   timeout: 60_000,
   use: {
-    baseURL: "http://127.0.0.1:4173",
+    baseURL: `http://127.0.0.1:${process.env.PW_PORT || 4173}`,
     trace: "on-first-retry",
   },
   webServer: {
-    command: "npm run build && npx --yes serve -l 4173 www",
-    url: "http://127.0.0.1:4173",
-    reuseExistingServer: false,
+    command: `npm run build && npx --yes serve -l ${process.env.PW_PORT || 4173} www`,
+    url: `http://127.0.0.1:${process.env.PW_PORT || 4173}`,
+    reuseExistingServer: !process.env.CI,
     timeout: 180_000,
   },
   projects: [

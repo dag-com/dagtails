@@ -2235,10 +2235,23 @@ function setGameVenue(label) {
 
 const DEFAULT_BAR_BG = "assets/station/bar-stage.png";
 
+/** Resolve game asset paths against the page (not the hashed CSS bundle). */
+function resolveAssetUrl(path) {
+  if (!path) return "";
+  if (/^(?:https?:|data:|blob:)/i.test(path)) return path;
+  try {
+    return new URL(path.replace(/^\.\//, ""), document.baseURI).href;
+  } catch (e) {
+    return path;
+  }
+}
+
 /** Swap the station (and result card) backdrop to the venue's interior art. */
 function applyVenueChrome(venue) {
-  const url = (venue && (venue.interior || venue.bg)) || DEFAULT_BAR_BG;
-  const cssUrl = `url("${url}")`;
+  const path = (venue && (venue.interior || venue.bg)) || DEFAULT_BAR_BG;
+  // Absolute URLs: relative url() inside --venue-bar-bg was resolving against
+  // www/assets/index-*.css and 404ing (black bar void on Pages / production).
+  const cssUrl = `url("${resolveAssetUrl(path)}")`;
   const bar = $(".bar-bg");
   if (bar) bar.style.setProperty("--venue-bar-bg", cssUrl);
 
