@@ -6,7 +6,8 @@ module.exports = defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // Allow android+ios (and more) to run in parallel. Override with PW_WORKERS=1 for serial.
+  workers: process.env.PW_WORKERS ? Number(process.env.PW_WORKERS) : undefined,
   reporter: [["list"]],
   timeout: 60_000,
   use: {

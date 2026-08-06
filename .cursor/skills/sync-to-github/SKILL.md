@@ -41,7 +41,10 @@ Publish the current branch to `origin`. Prefer committing unfinished work first 
 
 - Default deploy branch: **`master`** (not `main`)
 - Remote: `https://github.com/dag-com/last-call-bartending-game.git`
-- `www/` is gitignored — no need to build before push for Pages (Pages serves repo root)
+- `www/` is gitignored — GitHub Actions builds and deploys `www/` via `.github/workflows/deploy-pages.yml`
+- After a successful `master` push (or workflow dispatch), live site:
+  https://dag-com.github.io/last-call-bartending-game/
+- For a full ship gate (healthcheck + watch deploy), prefer the **ship-pages** skill / **pages-shipper** agent
 - Leave `experiment/*` branches unmerged unless the user asks
 
 ## Do not
