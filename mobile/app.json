@@ -38,7 +38,9 @@
       "favicon": "./assets/favicon.png"
     },
     "extra": {
-      "gameUrl": "https://dag-com.github.io/last-call-bartending-game/"
+      "gameUrl": "https://dag-com.github.io/last-call-bartending-game/",
+      "alwaysOn": true,
+      "note": "Remote play = open gameUrl in any browser. Expo Go is optional landscape chrome only."
     }
   }
 }

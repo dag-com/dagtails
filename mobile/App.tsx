@@ -2,6 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import { useCallback, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Linking,
   Platform,
   Pressable,
   SafeAreaView,
@@ -12,22 +13,53 @@ import {
 import { WebView } from "react-native-webview";
 import type { WebViewNavigation } from "react-native-webview";
 
-/** Live GitHub Pages build — works from any network. */
+/** Live GitHub Pages build — always on, works from any network (no laptop). */
 export const PAGES_URL =
   "https://dag-com.github.io/last-call-bartending-game/";
 
 /**
  * Override at runtime with EXPO_PUBLIC_GAME_URL
- * (e.g. a Cloudflare Tunnel / ngrok URL pointing at local `npx serve -l 4173`).
+ * (e.g. a Cloudflare Tunnel pointing at local `npm run serve:www`).
+ * Remote testers should use Pages — not a local tunnel.
  */
 function resolveGameUrl(): string {
   const fromEnv = (process.env.EXPO_PUBLIC_GAME_URL || "").trim();
   return fromEnv || PAGES_URL;
 }
 
+/** Bust WebView HTTP cache so phones pick up the latest Pages deploy. */
+function withCacheBust(url: string): string {
+  try {
+    const u = new URL(url);
+    u.searchParams.set("v", String(Date.now()));
+    return u.href;
+  } catch {
+    const sep = url.includes("?") ? "&" : "?";
+    return `${url}${sep}v=${Date.now()}`;
+  }
+}
+
+function friendlyLoadError(raw: string, statusCode?: number): string {
+  if (statusCode && statusCode >= 500) {
+    return `GitHub Pages returned HTTP ${statusCode}. The always-on host may be redeploying — retry in a minute.`;
+  }
+  if (statusCode && statusCode >= 400) {
+    return `GitHub Pages returned HTTP ${statusCode}. Try Reload, or open the Pages link in your phone browser.`;
+  }
+  const s = (raw || "").toLowerCase();
+  if (
+    /net::|network|offline|internet|timed?\s*out|could not connect|dns|unreachable|failed to connect/.test(
+      s
+    )
+  ) {
+    return "Network error — check your connection. The game is always on at GitHub Pages (no Expo tunnel required).";
+  }
+  return raw || "Could not load the game from GitHub Pages.";
+}
+
 export default function App() {
   const webRef = useRef<WebView>(null);
-  const [uri, setUri] = useState(resolveGameUrl);
+  const [uri, setUri] = useState(() => withCacheBust(resolveGameUrl()));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [navTitle, setNavTitle] = useState("DAG Tails");
@@ -41,13 +73,28 @@ export default function App() {
   const reload = useCallback(() => {
     setError(null);
     setLoading(true);
-    webRef.current?.reload();
+    // Prefer a fresh URI over WebView.reload() so cache-bust applies.
+    setUri((prev) => {
+      try {
+        const base = new URL(prev);
+        base.searchParams.delete("v");
+        return withCacheBust(base.href);
+      } catch {
+        return withCacheBust(resolveGameUrl());
+      }
+    });
   }, []);
 
   const usePages = useCallback(() => {
     setError(null);
     setLoading(true);
-    setUri(PAGES_URL);
+    setUri(withCacheBust(PAGES_URL));
+  }, []);
+
+  const openPagesInBrowser = useCallback(() => {
+    Linking.openURL(PAGES_URL).catch(() => {
+      setError("Could not open the system browser. Copy the Pages URL from mobile/README.md.");
+    });
   }, []);
 
   return (
@@ -79,12 +126,21 @@ export default function App() {
           <View style={styles.errorBox}>
             <Text style={styles.errorTitle}>Could not load the game</Text>
             <Text style={styles.errorBody}>{error}</Text>
-            <Text style={styles.errorHint}>URI: {uri}</Text>
+            <Text style={styles.errorHint}>
+              Always-on URL:{"\n"}
+              {PAGES_URL}
+            </Text>
+            <Text style={styles.errorHintMuted} numberOfLines={2}>
+              Last tried: {uri}
+            </Text>
             <Pressable onPress={reload} style={styles.primaryBtn}>
               <Text style={styles.primaryBtnText}>Retry</Text>
             </Pressable>
             <Pressable onPress={usePages} style={styles.secondaryBtn}>
-              <Text style={styles.secondaryBtnText}>Open GitHub Pages</Text>
+              <Text style={styles.secondaryBtnText}>Load GitHub Pages</Text>
+            </Pressable>
+            <Pressable onPress={openPagesInBrowser} style={styles.secondaryBtn}>
+              <Text style={styles.secondaryBtnText}>Open in phone browser</Text>
             </Pressable>
           </View>
         ) : (
@@ -100,12 +156,19 @@ export default function App() {
             onNavigationStateChange={onNav}
             onError={(e) => {
               setLoading(false);
-              setError(e.nativeEvent.description || "WebView error");
+              setError(
+                friendlyLoadError(e.nativeEvent.description || "WebView error")
+              );
             }}
             onHttpError={(e) => {
               if (e.nativeEvent.statusCode >= 400) {
                 setLoading(false);
-                setError(`HTTP ${e.nativeEvent.statusCode}`);
+                setError(
+                  friendlyLoadError(
+                    `HTTP ${e.nativeEvent.statusCode}`,
+                    e.nativeEvent.statusCode
+                  )
+                );
               }
             }}
             allowsInlineMediaPlayback
@@ -114,10 +177,10 @@ export default function App() {
             setSupportMultipleWindows={false}
             javaScriptEnabled
             domStorageEnabled
-            // LAN http:// during local tunnel/dev
+            cacheEnabled={false}
+            // LAN http:// during local shell-dev only
             originWhitelist={["*"]}
             mixedContentMode="always"
-            // iOS: allow http for local tunnels
             {...(Platform.OS === "ios"
               ? { allowsBackForwardNavigationGestures: true }
               : {})}
@@ -204,8 +267,14 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   errorHint: {
-    color: "#b3a4cf",
+    color: "#e9b949",
     fontSize: 12,
+    textAlign: "center",
+    fontWeight: "600",
+  },
+  errorHintMuted: {
+    color: "#b3a4cf",
+    fontSize: 11,
     textAlign: "center",
   },
   primaryBtn: {

@@ -1,64 +1,73 @@
-# DAG Tails — Expo Path A (remote preview shell)
+# DAG Tails — Expo Path A (landscape WebView shell)
 
-Thin **Expo Go** wrapper: a full-screen `WebView` that loads the existing vanilla web game. Capacitor remains the path for store-native builds; this shell is for **phone testing off your LAN**.
+Thin **Expo Go** wrapper around the **always-on** web game on GitHub Pages.
+Capacitor remains the path for store-native builds.
 
-## Quick start (any network)
+## Always-on / remote play (no laptop)
+
+Anyone, anywhere:
+
+**https://dag-com.github.io/last-call-bartending-game/**
+
+Open that URL in mobile Safari/Chrome (or Add to Home Screen). You do **not** need Expo Go, Metro, or a tunnel. Pages is redeployed on every `master` push.
+
+From the repo root:
+
+```bash
+npm run play:url
+```
+
+## Expo Go (optional landscape chrome)
+
+The shell only wraps Pages in a landscape WebView. It does **not** host the game.
+
+1. Install **Expo Go** (SDK **54**).
+2. Same Wi‑Fi as your PC:
+   ```bash
+   cd mobile
+   npm start
+   # or from repo root: npm run expo:start
+   ```
+3. Scan the QR code. The WebView loads Pages by default.
+
+In-app **Pages** / **Reload** force a cache-busted load of the live site.
+
+## Dev-only: tunnel the *shell* (not the game)
+
+`expo start --tunnel` only publishes Metro (the React Native chrome). Ngrok tunnels are flaky — do **not** rely on them for remote testers.
 
 ```bash
 cd mobile
-npm start
-# or from repo root:
-npm run expo:tunnel
+npm run tunnel
+# or: npm run expo:tunnel
 ```
 
-1. Install **Expo Go** on your phone (App Store / Play Store — currently **SDK 54**).
-   This shell targets SDK 54 on purpose: store Expo Go has not shipped 55+ yet.
-2. Run with tunnel so the Metro URL is public:
-   ```bash
-   npx expo start --tunnel
-   ```
-3. Scan the QR code in Expo Go.
-4. The WebView opens the **GitHub Pages** build by default:
-   https://dag-com.github.io/last-call-bartending-game/
+Use this only when you must iterate on the Expo chrome itself off-LAN. Remote players should use the Pages URL above.
 
-Landscape is locked in `app.json` to match the game.
+## Preview uncommitted game changes on a phone
 
-## Preview local game changes on a remote phone
+Expo tunnel does **not** serve your local game files. To preview a local build:
 
-Expo tunnel only publishes the **shell**. To also serve **uncommitted** game files off-LAN:
-
-1. In the repo root, serve the game:
-   ```bash
-   npx --yes serve -l 4173 .
-   ```
-2. Expose it with a public tunnel (pick one):
-   ```bash
-   # Cloudflare (example)
-   cloudflared tunnel --url http://127.0.0.1:4173
-   # or ngrok
-   ngrok http 4173
-   ```
-3. Start Expo with that URL:
-   ```bash
-   # Windows PowerShell
+1. `npm run serve:www` (or `npx serve -l 4173 www` after `npm run build`)
+2. Expose with Cloudflare/ngrok
+3. Point the shell at it:
+   ```powershell
    $env:EXPO_PUBLIC_GAME_URL="https://YOUR-TUNNEL-HOST"
-   npx expo start --tunnel
+   npx expo start
    ```
-
-In-app **Pages** chip resets the WebView to the live GitHub Pages URL.
 
 ## Scripts
 
 | Command | What it does |
 |---|---|
-| `npm start` | Expo dev server (LAN) |
-| `npm run tunnel` | Expo dev server with `--tunnel` |
+| `npm start` | Expo Metro (LAN) — shell only |
+| `npm run tunnel` | Expo Metro via ngrok — shell-dev only |
 | `npm run android` / `ios` | Open on emulator / simulator |
-
-Root package.json also has `expo:start` and `expo:tunnel`.
+| Root `npm run play:url` | Print the always-on Pages URL |
+| Root `npm run healthcheck` | Probe Pages + Supabase |
 
 ## Notes
 
-- Same web game as Capacitor/`www` — no React rewrite of gameplay.
-- Cleartext HTTP is allowed so LAN/`http://` tunnels work during development.
-- If the bar looks outdated, hard-reload in the chrome bar or confirm Pages has deployed your branch/commit.
+- Same web game as Capacitor / Pages — no React rewrite of gameplay.
+- Cleartext HTTP is allowed only so optional LAN game tunnels work during development.
+- If the bar looks outdated: tap **Reload** or **Pages**, or confirm the latest Pages deploy finished on GitHub Actions.

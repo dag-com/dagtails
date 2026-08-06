@@ -14,9 +14,13 @@
     "ios:open": "npm run cap:sync && npx cap open ios",
     "expo:start": "npm --prefix mobile start",
     "expo:tunnel": "npm --prefix mobile run tunnel",
+    "play:url": "node -e \"console.log('https://dag-com.github.io/last-call-bartending-game/')\"",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
-    "test:perf": "playwright test tests/performance.spec.js"
+    "test:perf": "playwright test tests/performance.spec.js",
+    "test:health": "playwright test tests/health.spec.js tests/backend.spec.js --project=pc",
+    "healthcheck": "node scripts/healthcheck.js",
+    "healthcheck:json": "node scripts/healthcheck.js --json"
   },
   "repository": {
     "type": "git",
@@ -35,6 +39,7 @@
     "@capacitor/cli": "^8.4.1",
     "@capacitor/core": "^8.4.1",
     "@capacitor/ios": "^8.4.1",
+    "@supabase/supabase-js": "^2.112.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },

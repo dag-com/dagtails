@@ -4175,7 +4175,20 @@ function renderDiagnostics() {
     status.innerHTML = [
       `<span class="diag-chip">Session ${escapeHtml(SESSION_ID.slice(0, 10))}</span>`,
       `<span class="diag-chip ${p ? "is-on" : "is-off"}">${p ? "Profile set" : "No profile"}</span>`,
-      `<span class="diag-chip ${Backend.isConfigured() ? "is-on" : "is-off"}">Backend ${Backend.isConfigured() ? (Backend.isReady() ? "connected" : "configured") : "offline"}</span>`,
+      (() => {
+        const h = Backend.getLastHealth();
+        if (!Backend.isConfigured()) {
+          return `<span class="diag-chip is-off">Backend offline</span>`;
+        }
+        if (!h) {
+          return `<span class="diag-chip">Backend checking…</span>`;
+        }
+        if (h.ok) {
+          const label = Backend.isReady() ? "connected" : "up";
+          return `<span class="diag-chip is-on">Backend ${label} (${h.latencyMs}ms)</span>`;
+        }
+        return `<span class="diag-chip is-off">Backend down (${escapeHtml(h.error || "error")})</span>`;
+      })(),
       `<span class="diag-chip">${log.length} event${log.length === 1 ? "" : "s"} logged</span>`,
     ].join("");
   }
@@ -4273,10 +4286,32 @@ if (debugEnabled() && location.hash.includes("introtest")) {
   if (m) { comicIndex = Math.min(parseInt(m[1], 10), INTRO_COMIC.length - 1); renderComicPanel(comicIndex); }
 }
 
-// Connect to the backend in the background (no-op if not configured yet).
-if (getProfile()) {
-  Backend.initBackend(getProfile()).then((ok) => { if (ok) syncBackendStats(); });
-}
+// Validate Supabase on every boot, then connect (when a profile exists).
+// Exposes window.__dagtailsHealth for Playwright / remote diagnostics.
+(async function bootBackend() {
+  const health = await Backend.checkHealth();
+  try { window.__dagtailsHealth = health; } catch (e) { /* ignore */ }
+  try {
+    const log = getAnalyticsLog();
+    log.push({ name: "backend_health", props: { ...health }, t: Date.now() });
+    localStorage.setItem(ANALYTICS_KEY, JSON.stringify(log.slice(-ANALYTICS_MAX)));
+  } catch (e) { /* ignore */ }
+  if (!health.ok) {
+    console.warn("[backend] health check failed:", health.error || health);
+  }
+  if (getProfile()) {
+    const ok = await Backend.initBackend(getProfile());
+    if (ok) syncBackendStats();
+    // Refresh health.ready after auth so diagnostics stay accurate.
+    try {
+      const again = Backend.getLastHealth();
+      if (again) {
+        again.ready = Backend.isReady();
+        window.__dagtailsHealth = { ...again };
+      }
+    } catch (e) { /* ignore */ }
+  }
+})();
 
 // Community
 $("#btn-community").addEventListener("click", () => {

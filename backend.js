@@ -5,8 +5,9 @@
 //
 // Everything here degrades gracefully: if config.js still has the placeholder
 // values, isConfigured() returns false and the rest of the game keeps working
-// offline. The Supabase library is only fetched (from a CDN) once configured.
+// offline. The SDK is bundled via Vite (no CDN fetch at runtime).
 // ============================================================================
+import { createClient } from "@supabase/supabase-js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 
 let sb = null; // Supabase client
@@ -27,16 +28,101 @@ export function isConfigured() {
 export function isReady() { return ready; }
 export function currentUserId() { return myId; }
 
+/** @type {{ ok: boolean, configured: boolean, ready: boolean, latencyMs: number, error: string | null } | null} */
+let lastHealth = null;
+
+/** Last result from checkHealth() (null until the first probe finishes). */
+export function getLastHealth() { return lastHealth; }
+
+function restHeaders(extra = {}) {
+  return {
+    apikey: SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    "Content-Type": "application/json",
+    ...extra,
+  };
+}
+
 // Lazily create (or reuse) the Supabase client without requiring a signed-in
 // session — used by logEvent() so basic usage stats still flow in even
 // before a player has set up a profile.
-async function getClient() {
+function getClient() {
   if (!isConfigured()) return null;
-  if (!sb) {
-    const mod = await import("https://esm.sh/@supabase/supabase-js@2");
-    sb = mod.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  }
+  if (!sb) sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   return sb;
+}
+
+/**
+ * Probe that Supabase is reachable and the analytics write path works.
+ * Uses PostgREST directly (browser CORS-safe). Never throws.
+ */
+export async function checkHealth() {
+  const started = Date.now();
+  if (!isConfigured()) {
+    lastHealth = { ok: false, configured: false, ready, latencyMs: 0, error: "not_configured" };
+    return lastHealth;
+  }
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 10_000);
+    let readRes;
+    try {
+      readRes = await fetch(`${SUPABASE_URL}/rest/v1/players?select=id&limit=1`, {
+        headers: restHeaders({ Prefer: "count=exact" }),
+        signal: controller.signal,
+      });
+    } finally {
+      clearTimeout(timer);
+    }
+    if (!readRes.ok) {
+      lastHealth = {
+        ok: false,
+        configured: true,
+        ready,
+        latencyMs: Date.now() - started,
+        error: `rest_read_${readRes.status}`,
+      };
+      return lastHealth;
+    }
+
+    const latencyMs = Date.now() - started;
+    const writeRes = await fetch(`${SUPABASE_URL}/rest/v1/events`, {
+      method: "POST",
+      headers: restHeaders({ Prefer: "return=minimal" }),
+      body: JSON.stringify({
+        player_id: myId || null,
+        name: "backend_health",
+        props: { probe: true, latencyMs, ready },
+      }),
+    });
+    if (!writeRes.ok) {
+      const detail = await writeRes.text().catch(() => "");
+      lastHealth = {
+        ok: false,
+        configured: true,
+        ready,
+        latencyMs,
+        error: `events_write_${writeRes.status}${detail ? `:${detail.slice(0, 120)}` : ""}`,
+      };
+      return lastHealth;
+    }
+
+    lastHealth = { ok: true, configured: true, ready, latencyMs, error: null };
+    return lastHealth;
+  } catch (e) {
+    const cause = e && e.cause;
+    const detail = cause && (cause.code || cause.message)
+      ? ` (${cause.code || cause.message})`
+      : "";
+    lastHealth = {
+      ok: false,
+      configured: true,
+      ready,
+      latencyMs: Date.now() - started,
+      error: ((e && e.message) ? e.message : String(e)) + detail,
+    };
+    return lastHealth;
+  }
 }
 
 // Sign in anonymously (or reuse the existing session) and make sure this
@@ -44,10 +130,7 @@ async function getClient() {
 export async function initBackend(profile) {
   if (!isConfigured()) return false;
   try {
-    if (!sb) {
-      const mod = await import("https://esm.sh/@supabase/supabase-js@2");
-      sb = mod.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    }
+    if (!sb) sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let { data: { session } } = await sb.auth.getSession();
     if (!session) {
       const { data, error } = await sb.auth.signInAnonymously();
@@ -149,7 +232,7 @@ export async function leaderboardStreak() {
 // if the backend isn't configured (or the insert fails), this is a silent no-op.
 export async function logEvent(name, props = {}) {
   try {
-    const client = await getClient();
+    const client = getClient();
     if (!client) return;
     await client.from("events").insert({
       player_id: myId || null,

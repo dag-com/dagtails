@@ -29,6 +29,10 @@ Thumbs.db
 # npm logs
 npm-debug.log*
 
+# Local Supabase secrets (never commit)
+.supabase-db-password
+supabase/.temp/
+
 # Playwright
 /test-results/
 /playwright-report/
