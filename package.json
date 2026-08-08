@@ -19,7 +19,9 @@
     "test:ui": "playwright test --ui",
     "test:perf": "playwright test tests/performance.spec.js",
     "test:health": "playwright test tests/health.spec.js tests/backend.spec.js --project=pc",
-    "test:qa": "playwright test tests/health.spec.js tests/backend.spec.js tests/gameplay.spec.js --project=android --project=ios",
+    "test:qa": "node scripts/run-qa.js",
+    "test:qa:quick": "playwright test tests/health.spec.js tests/backend.spec.js tests/gameplay.spec.js tests/play-journey.spec.js tests/layout-integrity.spec.js tests/text-readability.spec.js --project=android --project=ios",
+    "test:qa:devices": "node scripts/run-qa.js",
     "healthcheck": "node scripts/healthcheck.js",
     "healthcheck:json": "node scripts/healthcheck.js --json"
   },

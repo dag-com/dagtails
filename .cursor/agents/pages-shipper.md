@@ -19,6 +19,7 @@ https://dag-com.github.io/last-call-bartending-game/
    - `git status -sb` and `git log -3 --oneline`
    - Confirm branch is `master` (or user explicitly wants another branch — warn that Pages only deploys from `master`)
    - Run `npm run healthcheck` (or `node scripts/healthcheck.js`)
+   - Run `npm run test:qa` (full handheld matrix + play journey + layout + text + portrait rotate-lock). If the user asked for a fast ship and matrix was green earlier in the session, `npm run test:qa:quick` is acceptable — note that in the report.
    - If required checks fail, fix or stop and report — do not push a broken backend/Pages
 
 2. **Commit** (only when there are meaningful changes and shipping implies publishing them)

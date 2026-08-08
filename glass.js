@@ -509,7 +509,19 @@ export function setLiquid(svg, bands, fillFrac, animate = true, opts = {}) {
   };
 
   const from = s._fill || 0;
-  const dur = animate ? 650 : 0;
+  // Pace large fill jumps (guess-mode mixers) so the glass doesn't flash-fill.
+  let dur = 0;
+  if (animate) {
+    if (typeof opts.duration === "number") {
+      dur = Math.max(0, opts.duration);
+    } else {
+      const delta = Math.abs(fillPx - from) / h;
+      if (delta < 0.12) dur = 480;
+      else if (delta < 0.28) dur = 650;
+      else if (delta < 0.45) dur = 900;
+      else dur = 1100;
+    }
+  }
   const start = performance.now();
   cancelAnimationFrame(s._raf);
   if (!dur) {

@@ -1443,13 +1443,13 @@ body {
   100% { opacity: 0; transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) scale(0.35); }
 }
 
-/* ---- Pour stream ---- */
+/* ---- Pour stream (top/height set in JS to meet the vessel rim) ---- */
 .pour-stream {
   position: absolute;
   top: 24px;
   left: 50%;
-  width: 7px;
-  height: 160px;
+  width: 6px;
+  height: 100px;
   transform: translateX(-50%) scaleY(0);
   transform-origin: top center;
   border-radius: 4px;
@@ -1459,9 +1459,14 @@ body {
   opacity: 0;
   z-index: 6;
   pointer-events: none;
+  will-change: transform, opacity;
 }
 .pour-stream.is-pouring {
   animation: pour 0.7s ease;
+}
+.pour-stream.is-pouring-out {
+  transform-origin: bottom center;
+  animation: pour-out 0.45s ease;
 }
 @keyframes pour {
   0% {
@@ -1479,6 +1484,24 @@ body {
   100% {
     opacity: 0;
     transform: translateX(-50%) scaleY(1);
+  }
+}
+@keyframes pour-out {
+  0% {
+    opacity: 0.85;
+    transform: translateX(-50%) scaleY(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) scaleY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pour-stream.is-pouring,
+  .pour-stream.is-pouring-out,
+  .droplet {
+    animation: none !important;
+    opacity: 0 !important;
   }
 }
 
@@ -4936,8 +4959,13 @@ body {
     max-width: none;
   }
   .glass-mount .glass-svg,
-  .prep-mount .prep-svg {
-    max-height: min(38dvh, 170px);
+  .prep-mount .prep-svg,
+  /* Beat later .game-stage .game-bar .glass-mount .glass-svg { min(72%, 240px) } */
+  .game-stage .glass-mount .glass-svg,
+  .game-stage .prep-mount .prep-svg,
+  .game-stage .game-bar .glass-mount .glass-svg,
+  .game-stage .game-bar .prep-mount .prep-svg {
+    max-height: min(40dvh, 150px);
   }
   .station-status {
     font-size: 11px;
@@ -4948,11 +4976,66 @@ body {
     overflow: hidden;
     min-height: 0;
   }
+  .game-stage #screen-game.is-active .game-side .step-panel {
+    padding: 6px 8px;
+  }
+  .game-stage #screen-game.is-active .game-side .step-nav #btn-next {
+    min-height: 40px;
+  }
+  .step-panel.is-guess-compact {
+    padding-top: 6px;
+  }
+  /* Keep ingredient chips in a scrollport players can actually reach */
+  .game-stage #panel-body {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .game-stage .ingredient-layout.is-catalog-only {
+    min-height: 0;
+    height: 100%;
+  }
+  .game-stage .ingredient-layout.is-catalog-only .ingredient-catalog {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+  }
+  .cat-group-title {
+    margin: 0 0 4px;
+    font-size: 10px;
+  }
+  .cat-items {
+    gap: 6px;
+  }
+  .cat-item {
+    padding: 6px 10px;
+    font-size: 12px;
+  }
   .topbar-right .btn-sm,
   .topbar-left .stage-pill,
   .topbar-left .diff-pill {
     padding-top: 5px;
     padding-bottom: 5px;
+  }
+}
+
+/* Ultra-short landscape (Flip cover / SE / Air / Mini / Fold cover) */
+@media (orientation: landscape) and (max-height: 400px) {
+  .game-stage .glass-mount .glass-svg,
+  .game-stage .prep-mount .prep-svg,
+  .game-stage .game-bar .glass-mount .glass-svg,
+  .game-stage .game-bar .prep-mount .prep-svg {
+    max-height: min(34dvh, 118px);
+  }
+  .game-stage #screen-game.is-active .game-side .step-nav #btn-next {
+    min-height: 36px;
+  }
+  .order-ticket-compact .ticket-desc {
+    -webkit-line-clamp: 2;
+  }
+  .game-bar .counter-stage {
+    padding-bottom: 28px;
   }
 }
 
@@ -6509,4 +6592,25 @@ body.has-game-stage .app {
 /* Toast lives outside the stage ? keep it readable on the shell */
 body.has-game-stage .toast {
   z-index: 10001;
+}
+
+/*
+ * Short-landscape glass caps MUST come after .game-stage .game-bar glass rules
+ * above ? same specificity, later source order wins.
+ */
+@media (orientation: landscape) and (max-height: 560px) {
+  .game-stage .glass-mount .glass-svg,
+  .game-stage .prep-mount .prep-svg,
+  .game-stage .game-bar .glass-mount .glass-svg,
+  .game-stage .game-bar .prep-mount .prep-svg {
+    max-height: min(40dvh, 150px);
+  }
+}
+@media (orientation: landscape) and (max-height: 400px) {
+  .game-stage .glass-mount .glass-svg,
+  .game-stage .prep-mount .prep-svg,
+  .game-stage .game-bar .glass-mount .glass-svg,
+  .game-stage .game-bar .prep-mount .prep-svg {
+    max-height: min(34dvh, 118px);
+  }
 }

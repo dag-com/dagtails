@@ -1656,56 +1656,110 @@ function computeLiquid(g) {
   return { bands, fillFrac };
 }
 
-function updateLiquid(animate = true) {
+function prefersReducedMotion() {
+  try {
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  } catch (e) {
+    return false;
+  }
+}
+
+/** Duration for liquid tween from previous → next fill fraction. */
+function pourFillDuration(fromFrac, toFrac) {
+  if (prefersReducedMotion()) return 0;
+  const d = Math.abs((toFrac || 0) - (fromFrac || 0));
+  if (d < 0.12) return 480;
+  if (d < 0.28) return 650;
+  if (d < 0.45) return 900;
+  return 1100;
+}
+
+function updateLiquid(animate = true, opts = {}) {
   const glassSvg = $("#glass-mount svg.glass-svg");
   const prepSvg = $("#prep-mount svg.glass-svg");
   const g = currentGlass();
   if (!g) return;
   const { bands, fillFrac } = computeLiquid(g);
   const foam = state.mixed && activeMethod() === "shake";
+  const motion = animate && !prefersReducedMotion();
+  const liquidOpts = { foam, duration: opts.duration };
 
   if (liquidInPrep() && prepSvg) {
-    Glass.setLiquid(prepSvg, bands, Math.min(0.9, fillFrac * 1.05), animate);
+    Glass.setLiquid(prepSvg, bands, Math.min(0.9, fillFrac * 1.05), motion, liquidOpts);
     if (glassSvg) Glass.setLiquid(glassSvg, [], 0, false);
   } else {
-    if (prepSvg) Glass.setLiquid(prepSvg, [], 0, animate);
-    if (glassSvg) Glass.setLiquid(glassSvg, bands, fillFrac, animate, { foam });
+    if (prepSvg) Glass.setLiquid(prepSvg, [], 0, motion, liquidOpts);
+    if (glassSvg) Glass.setLiquid(glassSvg, bands, fillFrac, motion, liquidOpts);
   }
 }
 
-function animatePour(id) {
+/**
+ * Position #pour-stream so it ends at the vessel rim (top = start, bottom = mouth).
+ * Coordinates are relative to the stream's offset parent (.counter-stage).
+ */
+function aimPourStream(target, { reverse = false } = {}) {
   const stream = $("#pour-stream");
+  if (!stream || !target) return stream;
+  const parent = stream.offsetParent || stream.parentElement;
+  if (!parent) return stream;
+  const pRect = parent.getBoundingClientRect();
+  const tRect = target.getBoundingClientRect();
+  const cx = tRect.left + tRect.width * 0.5 - pRect.left;
+  // Mouth sits near the top of the mount; stream length scales with vessel size.
+  const rimY = tRect.top - pRect.top + Math.max(8, tRect.height * 0.14);
+  const streamH = Math.max(44, Math.min(128, tRect.height * 0.52 + 20));
+  const top = Math.max(2, rimY - streamH);
+  stream.style.left = `${cx}px`;
+  stream.style.top = `${top}px`;
+  stream.style.height = `${streamH}px`;
+  stream.style.transformOrigin = reverse ? "bottom center" : "top center";
+  stream.style.transform = "translateX(-50%) scaleY(0)";
+  return stream;
+}
+
+/**
+ * @param {string} id ingredient id
+ * @param {{ reverse?: boolean, duration?: number }} [opts]
+ */
+function animatePour(id, opts = {}) {
+  const reverse = !!opts.reverse;
+  const ing = INGREDIENT_BY_ID[id];
+  const color = (ing && ing.color) || "#cde";
   const target = liquidInPrep() ? $("#prep-mount") : $("#glass-mount");
-  stream.style.color = INGREDIENT_BY_ID[id].color;
-  // Aim the stream at the active vessel
-  if (target && stream.parentElement) {
-    const station = $(".station");
-    const sRect = station.getBoundingClientRect();
-    const tRect = target.getBoundingClientRect();
-    const cx = tRect.left + tRect.width / 2 - sRect.left;
-    stream.style.left = cx + "px";
-    stream.style.transform = "translateX(-50%) scaleY(0)";
-  } else {
-    stream.style.left = "50%";
+  const stream = $("#pour-stream");
+  const reduced = prefersReducedMotion();
+
+  if (stream) {
+    stream.style.color = color;
+    stream.classList.remove("is-pouring", "is-pouring-out");
+    if (!reduced && target) {
+      aimPourStream(target, { reverse });
+      void stream.offsetWidth;
+      stream.classList.add(reverse ? "is-pouring-out" : "is-pouring");
+      const ms = reverse ? 480 : 720;
+      setTimeout(() => stream.classList.remove("is-pouring", "is-pouring-out"), ms);
+    }
   }
-  stream.classList.remove("is-pouring");
-  void stream.offsetWidth;
-  stream.classList.add("is-pouring");
-  setTimeout(() => stream.classList.remove("is-pouring"), 720);
-  spawnSplash(INGREDIENT_BY_ID[id].color, target);
-  Sound.pour();
-  updateLiquid(true);
+
+  if (!reduced && !reverse) spawnSplash(color, target);
+  if (!reduced) {
+    if (reverse) Sound.click();
+    else Sound.pour();
+  }
+
+  updateLiquid(true, { duration: opts.duration });
   refreshStationStatus();
 }
 
 function spawnSplash(color, mouthEl) {
+  if (prefersReducedMotion()) return;
   const station = $(".station");
   const mouth = mouthEl || $("#glass-mount");
   if (!station || !mouth) return;
   const sRect = station.getBoundingClientRect();
   const mRect = mouth.getBoundingClientRect();
   const cxPct = ((mRect.left + mRect.width / 2 - sRect.left) / sRect.width) * 100;
-  const topPx = mRect.top - sRect.top + Math.max(10, mRect.height * 0.18);
+  const topPx = mRect.top - sRect.top + Math.max(10, mRect.height * 0.14);
   for (let i = 0; i < 7; i++) {
     const d = document.createElement("span");
     d.className = "droplet";
@@ -1748,31 +1802,37 @@ async function animateStrainTransfer(methodId) {
   station.classList.add("anim-strain");
 
   const color = mixColor(state.build.ingredients);
-  stream.style.color = color;
-  if (glassMount) {
-    const sRect = station.getBoundingClientRect();
-    const tRect = glassMount.getBoundingClientRect();
-    stream.style.left = (tRect.left + tRect.width / 2 - sRect.left) + "px";
+  const reduced = prefersReducedMotion();
+  if (stream) {
+    stream.style.color = color;
+    stream.classList.remove("is-pouring", "is-pouring-out");
+    if (!reduced && glassMount) {
+      aimPourStream(glassMount);
+      void stream.offsetWidth;
+      stream.classList.add("is-pouring");
+    }
   }
-  stream.classList.remove("is-pouring");
-  void stream.offsetWidth;
-  stream.classList.add("is-pouring");
-  Sound.pour();
-  spawnSplash(color, glassMount);
+  if (!reduced) {
+    Sound.pour();
+    spawnSplash(color, glassMount);
+  }
 
   // Empty prep while filling glass
   const prepSvg = prepMount.querySelector("svg.glass-svg");
   const glassSvg = glassMount.querySelector("svg.glass-svg");
   const g = currentGlass();
   const { fillFrac } = computeLiquid(g);
-  if (prepSvg) Glass.setLiquid(prepSvg, [], 0, true);
+  if (prepSvg) Glass.setLiquid(prepSvg, [], 0, !reduced);
   state.mixed = true;
   if (glassSvg && g) {
-    Glass.setLiquid(glassSvg, [{ color, frac: 1 }], fillFrac, true, { foam: methodId === "shake" });
+    Glass.setLiquid(glassSvg, [{ color, frac: 1 }], fillFrac, !reduced, {
+      foam: methodId === "shake",
+      duration: reduced ? 0 : 780,
+    });
   }
 
-  await wait(780);
-  stream.classList.remove("is-pouring");
+  await wait(reduced ? 120 : 780);
+  if (stream) stream.classList.remove("is-pouring", "is-pouring-out");
   station.classList.remove("anim-strain");
 }
 
@@ -2079,6 +2139,8 @@ function fillBuildList() {
 function addIngredient(id) {
   if (state.build.ingredients.some((i) => i.id === id)) return;
   state.mixed = false; // adding changes the build; un-blend
+  const g = currentGlass();
+  const beforeFrac = g ? computeLiquid(g).fillFrac : 0;
   let amount = unitMeta(INGREDIENT_BY_ID[id].unit).def;
   // In guess mode the player doesn't set volumes — pour the *correct* recipe
   // portion for ingredients that belong to the drink so it looks realistic.
@@ -2090,14 +2152,14 @@ function addIngredient(id) {
   state.build.ingredients.push({ id, amount });
   fillCatalog();
   fillBuildList();
-  animatePour(id);
+  const afterFrac = g ? computeLiquid(g).fillFrac : beforeFrac;
+  animatePour(id, { duration: pourFillDuration(beforeFrac, afterFrac) });
   updateNav();
 }
 
 /** Guess-mode tap: add to glass + highlight, or remove if already picked. */
 function toggleIngredient(id) {
   if (state.build.ingredients.some((i) => i.id === id)) {
-    Sound.click();
     removeIngredient(id);
     return;
   }
@@ -2106,11 +2168,17 @@ function toggleIngredient(id) {
 }
 
 function removeIngredient(id) {
+  const g = currentGlass();
+  const beforeFrac = g ? computeLiquid(g).fillFrac : 0;
   state.build.ingredients = state.build.ingredients.filter((i) => i.id !== id);
   state.mixed = false;
   fillCatalog();
   fillBuildList();
-  updateLiquid();
+  const afterFrac = g ? computeLiquid(g).fillFrac : 0;
+  animatePour(id, {
+    reverse: true,
+    duration: pourFillDuration(beforeFrac, afterFrac),
+  });
   updateNav();
 }
 

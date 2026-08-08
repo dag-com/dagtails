@@ -21,7 +21,9 @@ Gate remote play on live Pages + Supabase, then optionally confirm in-game boot.
 
 2. **In-game boot** (when user wants full gate, or backend/Pages just changed):
    - Quick desktop: `npm run test:health` (`pc` only)
-   - **Default phone gate** (android + ios in parallel): `npm run test:qa`
+   - **Default phone/tablet/fold gate** (full matrix, landscape, parallel): `npm run test:qa`
+   - Quick 2-phone smoke: `npm run test:qa:quick`
+   - Device-matrix specialist: **device-qa** agent (`/device-qa`)
    - If port 4173 is busy on Windows:
      ```powershell
      $env:PW_PORT='4183'; $env:CI='1'; npm run test:qa
@@ -36,4 +38,4 @@ Gate remote play on live Pages + Supabase, then optionally confirm in-game boot.
 
 - Prefer this skill before invoking **pages-shipper**
 - For deeper Supabase repair, delegate to **supabase-ops**
-- For gameplay regressions, delegate to **gameplay-qa** (defaults to android+ios parallel via `npm run test:qa`)
+- For gameplay regressions, delegate to **gameplay-qa** (defaults to full handheld matrix via `npm run test:qa`)

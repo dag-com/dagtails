@@ -145,7 +145,8 @@ export const Sound = {
     lfo.stop(t + 1.25);
   },
   build() {
-    this.pour();
+    // Soft settle on Serve — per-ingredient pours already played Sound.pour().
+    this._tone(520, 0.09, { type: "triangle", gain: 0.1, slideTo: 360 });
   },
 
   garnish() {
