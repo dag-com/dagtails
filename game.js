@@ -4340,7 +4340,6 @@ function renderComicPanel(i) {
 
   const last = i === INTRO_COMIC.length - 1;
   $("#comic-next").textContent = last ? "Start my shift \u2192" : "Next \u2192";
-  $("#comic-tap-hint").style.display = last ? "none" : "";
 }
 
 function playIntro(onDone) {

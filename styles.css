@@ -2692,8 +2692,13 @@ body {
   position: relative;
 }
 .profile-modal-box {
-  max-height: calc(100dvh - 40px);
-  overflow-y: auto;
+  max-height: calc(100dvh - 24px);
+  overflow: hidden;
+  scrollbar-width: none;
+}
+.profile-modal-box::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 .profile-form .name-input {
   margin: 4px 0 0;
@@ -4499,27 +4504,6 @@ body {
   min-height: calc(100dvh - 88px);
   justify-content: center;
 }
-.comic-skip {
-  position: absolute;
-  top: 0;
-  right: 0;
-  z-index: 5;
-  font-family: inherit;
-  font-weight: 600;
-  font-size: 13px;
-  color: var(--muted);
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 7px 14px;
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition: color 0.15s ease, border-color 0.15s ease;
-}
-.comic-skip:hover {
-  color: var(--text);
-  border-color: var(--gold);
-}
 .comic-stage {
   position: relative;
 }
@@ -4584,21 +4568,6 @@ body {
   color: var(--amber);
   margin-bottom: 3px;
 }
-.comic-tap-hint {
-  position: absolute;
-  right: 14px;
-  bottom: 12px;
-  z-index: 3;
-  font-size: 11px;
-  letter-spacing: 0.5px;
-  color: rgba(244, 238, 251, 0.55);
-  pointer-events: none;
-  animation: comicHintPulse 1.8s ease-in-out infinite;
-}
-@keyframes comicHintPulse {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.85; }
-}
 .comic-anim {
   animation: comicIn 0.5s cubic-bezier(0.2, 0.7, 0.25, 1);
 }
@@ -4614,10 +4583,16 @@ body {
   to { opacity: 1; }
 }
 .comic-foot {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+}
+.comic-foot #comic-skip {
+  justify-self: start;
+}
+.comic-foot #comic-next {
+  justify-self: end;
 }
 .comic-dots {
   display: flex;
@@ -4833,9 +4808,10 @@ body {
   .comic-foot {
     flex: 0 0 auto;
   }
-  .comic-foot .btn-lg {
+  .comic-foot .btn {
     min-height: 40px;
     padding: 8px 16px;
+    font-size: 14px;
   }
   #screen-start.is-active {
     padding-top: 0;
@@ -4850,6 +4826,58 @@ body {
   .recipes-card,
   .shop-card {
     padding: 18px;
+  }
+  .modal {
+    padding: 6px 10px;
+  }
+  .profile-modal-box.profile-card {
+    padding: 10px 14px 12px;
+    gap: 6px;
+    max-height: 100%;
+    overflow: hidden;
+  }
+  .profile-card .eyebrow {
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+  .profile-card .subtitle {
+    font-size: 12px;
+    line-height: 1.3;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .profile-form {
+    gap: 6px 12px;
+    margin-top: 2px;
+  }
+  .profile-form .name-input,
+  .name-input {
+    margin: 0;
+    padding: 7px 10px;
+    font-size: 14px;
+  }
+  .pf-label {
+    font-size: 10px;
+  }
+  .pf-field {
+    gap: 3px;
+  }
+  .pf-error {
+    min-height: 0;
+    font-size: 12px;
+  }
+  .profile-form .name-hint {
+    display: none;
+  }
+  .profile-form .btn-primary {
+    margin-top: 2px;
+    min-height: 40px;
+    padding: 8px 18px;
+    justify-self: stretch;
+    width: 100%;
   }
   .result-card {
     padding: 12px 16px;
@@ -6365,6 +6393,14 @@ body.has-game-stage .app {
 }
 .game-stage .modal {
   position: absolute;
+  padding: 8px 12px;
+  align-items: center;
+  justify-content: center;
+}
+.game-stage .profile-modal-box {
+  max-height: 100%;
+  width: min(960px, 100%);
+  overflow: hidden;
 }
 .game-stage .rankup,
 .game-stage .map-sheet {
