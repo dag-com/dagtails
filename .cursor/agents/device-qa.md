@@ -45,7 +45,12 @@ Portrait is covered only by `phone-portrait` → `tests/rotate-lock.spec.js` (as
    - Short flip/cover viewports (height ~308–422) often break vertical chrome — treat as real bugs
    - Fold unfolded (~1040×932) behaves closer to a tablet
    - Fix smallest shared CSS/JS; re-run full `npm run test:qa`
-   - Glass @ 800px is **pc-only** — expect SKIP on all matrix projects
+   - Glass **placement** @ 800px is **pc-only** (vessel-lift SKIP on matrix). Glass **visibility** is **not** skip-only — iPhone / Expo Go WKWebView must still draw `#glass-mount .glass-svg`
+
+5. **Hunt this class (blocker)**
+   - **Dead-end screens:** primary exit CTAs clipped, off-viewport, or covered by `overflow:hidden` / oversized brand (finish Menu + Play again, result Next, endless, mix-result, map CTA, intro Next). If a 10-year-old cannot leave the screen, fail the project
+   - **Intro comic:** `#comic-caption` text must be on-screen in short landscape (Expo chrome eats height). Off-panel / below-fold copy is a fail
+   - **Glass not drawn:** empty counter on ios/android — SVG 0×0, 3D+overflow clip, or `%` max-height collapse. Do not close as “pc-only skip”
 
 5. **Report**
    - Pass / skip / fail counts

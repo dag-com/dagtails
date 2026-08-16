@@ -128,7 +128,7 @@ test.describe("layout integrity", () => {
     const report = await page.evaluate(() => window.measureLayout([
       ["#btn-map-play", "cta"],
       ["#map-hint", "hint"],
-      [".map-venue.is-current", "current"],
+      ["#map-hero-title", "current"],
       ["#btn-map-back", "back"],
     ], { pairs: [["cta", "back"]], maxOverlapRatio: 0.25 }));
 
@@ -138,6 +138,7 @@ test.describe("layout integrity", () => {
   });
 
   test("station chrome: glass proportion, serve in-bounds, catalog reachable", async ({ page }) => {
+    // Handhelds included — glass SVG must paint (iOS/Expo 0×0 is a blocker).
     await seedPlayer(page, { cleared: 0 });
     await gotoHub(page);
     await enterStation(page);
@@ -234,5 +235,79 @@ test.describe("layout integrity", () => {
     expect(report.missing, JSON.stringify(report)).toEqual([]);
     expect(report.outOfBounds, JSON.stringify(report)).toEqual([]);
     expect(report.overlaps, JSON.stringify(report)).toEqual([]);
+  });
+
+  test("finish screen keeps Menu and Play again in viewport", async ({ page }) => {
+    await seedPlayer(page, { cleared: 0 });
+    await gotoHub(page);
+    await page.evaluate(() => {
+      document.querySelectorAll(".screen").forEach((s) => s.classList.remove("is-active"));
+      const fin = document.getElementById("screen-finish");
+      fin.classList.add("is-active");
+      document.getElementById("finish-score").textContent = "229";
+      document.getElementById("finish-rank").textContent = "Still in training · 5/36 stars";
+      document.getElementById("finish-best").textContent = "Best score: 229 pts";
+    });
+
+    const report = await page.evaluate(() => window.measureLayout([
+      ["#btn-replay", "replay"],
+      ["#btn-finish-menu", "menu"],
+      ["#finish-rank", "rank"],
+    ], {
+      pairs: [["replay", "menu"]],
+      allowAdjacent: true,
+    }));
+
+    expect(report.missing, JSON.stringify(report)).toEqual([]);
+    expect(report.outOfBounds, JSON.stringify(report)).toEqual([]);
+  });
+
+  test("intro comic caption and Next stay in the viewport", async ({ page }) => {
+    await seedPlayer(page, { cleared: 0, introSeen: false });
+    await gotoHub(page);
+    await page.locator("#btn-start").click({ force: true });
+    await page.locator("#screen-intro.is-active").waitFor({ state: "visible", timeout: 15_000 });
+    await page.waitForFunction(() => {
+      const cap = document.querySelector("#comic-caption");
+      const next = document.querySelector("#comic-next");
+      if (!cap || !next) return false;
+      const text = (cap.textContent || "").trim();
+      if (text.length < 8) return false;
+      const r = cap.getBoundingClientRect();
+      const n = next.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      const visibleH = Math.min(r.bottom, vh) - Math.max(r.top, 0);
+      return (
+        r.height > 12 &&
+        visibleH >= r.height * 0.9 &&
+        r.left >= -8 &&
+        r.right <= vw + 8 &&
+        n.top >= -2 &&
+        n.bottom <= vh + 2
+      );
+    }, null, { timeout: 10_000 });
+
+    const report = await page.evaluate(() => {
+      const cap = document.querySelector("#comic-caption");
+      const next = document.querySelector("#comic-next");
+      const cr = cap.getBoundingClientRect();
+      const nr = next.getBoundingClientRect();
+      return {
+        text: (cap.textContent || "").trim(),
+        captionH: cr.height,
+        captionTop: cr.top,
+        captionBottom: cr.bottom,
+        nextBottom: nr.bottom,
+        vw: window.innerWidth,
+        vh: window.innerHeight,
+      };
+    });
+
+    expect(report.text.length, JSON.stringify(report)).toBeGreaterThan(8);
+    expect(report.captionH, JSON.stringify(report)).toBeGreaterThan(12);
+    expect(report.captionTop, JSON.stringify(report)).toBeGreaterThanOrEqual(-8);
+    expect(report.captionBottom, JSON.stringify(report)).toBeLessThanOrEqual(report.vh + 8);
+    expect(report.nextBottom, JSON.stringify(report)).toBeLessThanOrEqual(report.vh + 2);
   });
 });

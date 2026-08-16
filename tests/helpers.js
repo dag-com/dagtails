@@ -14,16 +14,18 @@ const PROFILE = {
 
 /**
  * @param {import('@playwright/test').Page} page
- * @param {{ cleared?: number, seenTiers?: Record<string, number> }} [opts]
+ * @param {{ cleared?: number, seenTiers?: Record<string, number>, introSeen?: boolean }} [opts]
  */
 async function seedPlayer(page, opts = {}) {
   const cleared = opts.cleared ?? 0;
   // Default: mark Guess tier seen so the rules announce does not block pours.
   const seenTiers = opts.seenTiers ?? { Guess: 1 };
+  const introSeen = opts.introSeen !== false;
   await page.addInitScript(
-    ({ profile, cleared: c, seenTiers: tiers }) => {
+    ({ profile, cleared: c, seenTiers: tiers, introSeen: seen }) => {
       localStorage.setItem("dagtails_migrated", "1");
-      localStorage.setItem("dagtails_intro_seen", "1");
+      if (seen) localStorage.setItem("dagtails_intro_seen", "1");
+      else localStorage.removeItem("dagtails_intro_seen");
       localStorage.setItem("dagtails_profile", JSON.stringify(profile));
       localStorage.setItem(
         "dagtails_map",
@@ -36,7 +38,7 @@ async function seedPlayer(page, opts = {}) {
       );
       localStorage.setItem("dagtails_settings", JSON.stringify({ sound: false }));
     },
-    { profile: PROFILE, cleared, seenTiers }
+    { profile: PROFILE, cleared, seenTiers, introSeen }
   );
 }
 
@@ -74,7 +76,7 @@ async function clearRotateLock(page) {
 async function openMap(page) {
   await page.locator("#btn-start").click({ force: true });
   await page.locator("#screen-map.is-active").waitFor({ state: "visible", timeout: 15_000 });
-  await page.locator("#map-hubs .map-venue").first().waitFor({ state: "attached" });
+  await page.locator("#map-hero-title").waitFor({ state: "visible", timeout: 10_000 });
 }
 
 /** Dismiss tier / rankup announce if it is open. */
@@ -92,7 +94,10 @@ async function dismissAnnounce(page) {
  */
 async function enterStation(page) {
   await openMap(page);
-  await page.locator("#btn-map-play").click({ force: true });
+  const cta = page.locator("#btn-map-play");
+  await cta.click({ force: true });
+  await page.locator("#map-path:not([hidden])").waitFor({ state: "visible", timeout: 10_000 });
+  await cta.click({ force: true });
   await page.locator("#screen-game.is-active").waitFor({ state: "visible", timeout: 15_000 });
   await dismissAnnounce(page);
   await page.locator("#ingredient-catalog .cat-item").first().waitFor({

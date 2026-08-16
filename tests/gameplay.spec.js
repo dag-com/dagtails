@@ -1,22 +1,31 @@
 const { test, expect } = require("@playwright/test");
-const { seedPlayer, gotoHub, openMap } = require("./helpers");
+const { seedPlayer, gotoHub, openMap, enterStation } = require("./helpers");
 
 test.describe("gameplay smoke", () => {
-  test("map shows CTA, hint, and current hub", async ({ page }) => {
+  test("map shows venue hero, CTA, and current bar", async ({ page }) => {
     await seedPlayer(page, { cleared: 0 });
     await gotoHub(page);
     await openMap(page);
 
     await expect(page.locator("#map-hint")).toBeVisible();
     await expect(page.locator("#btn-map-play")).toBeVisible();
-    await expect(page.locator("#btn-map-play")).toContainText(/Pour at|Enter|Snug/i);
+    await expect(page.locator("#btn-map-play")).toContainText(/Enter bar/i);
+    await expect(page.locator("#map-hero-title")).toContainText(/SNUG|The Snug/i);
+    await expect(page.locator("#map-hero-duck")).toBeVisible();
+    await expect(page.locator("#map-dots .map-dot.is-current")).toHaveCount(1);
+  });
 
-    const current = page.locator(".map-venue.is-current");
-    await expect(current).toHaveCount(1);
-    await expect(current).toContainText(/Snug/i);
-
-    // Venue list shows stages for the current bar
-    await expect(current.locator(".map-stage-btn").first()).toBeVisible();
+  test("Enter bar opens candy path; Pour starts the station", async ({ page }) => {
+    await seedPlayer(page, { cleared: 0 });
+    await gotoHub(page);
+    await openMap(page);
+    await page.locator("#btn-map-play").click({ force: true });
+    await expect(page.locator("#map-path:not([hidden])")).toBeVisible();
+    await expect(page.locator("#screen-game.is-active")).toHaveCount(0);
+    await expect(page.locator(".map-node").first()).toBeVisible();
+    await expect(page.locator("#btn-map-play")).toContainText(/Pour/i);
+    await page.locator("#btn-map-play").click({ force: true });
+    await expect(page.locator("#screen-game.is-active")).toBeVisible({ timeout: 15_000 });
   });
 
   test("map has no background plate image", async ({ page }) => {
@@ -24,7 +33,7 @@ test.describe("gameplay smoke", () => {
     await gotoHub(page);
     await openMap(page);
     await expect(page.locator("#map-plate")).toHaveCount(0);
-    expect(await page.locator("#map-hubs .map-venue").count()).toBeGreaterThan(0);
+    expect(await page.locator("#map-dots .map-dot").count()).toBeGreaterThan(0);
   });
 
   test("glass mount sits near bar-top at 800px width", async ({ page }, testInfo) => {
@@ -33,9 +42,7 @@ test.describe("gameplay smoke", () => {
     await page.setViewportSize({ width: 800, height: 900 });
     await seedPlayer(page, { cleared: 0 });
     await gotoHub(page);
-    await openMap(page);
-    await page.locator("#btn-map-play").click({ force: true });
-    await page.locator("#screen-game.is-active").waitFor({ state: "visible", timeout: 15_000 });
+    await enterStation(page);
 
     // Wait for a vessel to mount on the counter
     await page.waitForFunction(() => {
@@ -62,9 +69,7 @@ test.describe("gameplay smoke", () => {
     // Mimosa is stop 17 at Aperitivo Piazza (cleared 16).
     await seedPlayer(page, { cleared: 16 });
     await gotoHub(page);
-    await openMap(page);
-    await page.locator("#btn-map-play").click({ force: true });
-    await page.locator("#screen-game.is-active").waitFor({ state: "visible", timeout: 15_000 });
+    await enterStation(page);
     await expect(page.locator("#game-venue")).toContainText(/Aperitivo/i);
 
     const info = await page.evaluate(async () => {

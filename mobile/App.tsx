@@ -1,5 +1,6 @@
 import { StatusBar } from "expo-status-bar";
-import { useCallback, useMemo, useRef, useState } from "react";
+import * as ScreenOrientation from "expo-screen-orientation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Linking,
@@ -39,6 +40,21 @@ function withCacheBust(url: string): string {
   }
 }
 
+/** Android WebView can report HTTP errors for redirects/assets; only fail the game document. */
+function isMainDocumentHttpError(failedUrl: string | undefined, documentUri: string): boolean {
+  if (!failedUrl) return true;
+  try {
+    const failed = new URL(failedUrl);
+    const doc = new URL(documentUri);
+    if (failed.origin !== doc.origin) return false;
+    const norm = (p: string) =>
+      p.replace(/\/index\.html$/i, "").replace(/\/+$/, "") || "/";
+    return norm(failed.pathname) === norm(doc.pathname);
+  } catch {
+    return false;
+  }
+}
+
 function friendlyLoadError(raw: string, statusCode?: number): string {
   if (statusCode && statusCode >= 500) {
     return `GitHub Pages returned HTTP ${statusCode}. The always-on host may be redeploying — retry in a minute.`;
@@ -56,6 +72,15 @@ function friendlyLoadError(raw: string, statusCode?: number): string {
   }
   return raw || "Could not load the game from GitHub Pages.";
 }
+
+/** Expo shell is already landscape-locked; don't let the web rotate-gate block play. */
+const EXPO_SHELL_BOOT_JS = `(function(){
+  document.documentElement.setAttribute('data-expo-shell','1');
+  var s=document.createElement('style');
+  s.textContent='html[data-expo-shell] #rotate-lock{display:none!important}html[data-expo-shell] .app{filter:none!important;pointer-events:auto!important;user-select:auto!important}';
+  (document.head||document.documentElement).appendChild(s);
+})();
+true;`;
 
 export default function App() {
   const webRef = useRef<WebView>(null);
@@ -95,6 +120,12 @@ export default function App() {
     Linking.openURL(PAGES_URL).catch(() => {
       setError("Could not open the system browser. Copy the Pages URL from mobile/README.md.");
     });
+  }, []);
+
+  useEffect(() => {
+    ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE).catch(
+      () => {}
+    );
   }, []);
 
   return (
@@ -143,49 +174,49 @@ export default function App() {
               <Text style={styles.secondaryBtnText}>Open in phone browser</Text>
             </Pressable>
           </View>
-        ) : (
-          <WebView
-            ref={webRef}
-            source={source}
-            style={styles.web}
-            onLoadStart={() => {
-              setLoading(true);
-              setError(null);
-            }}
-            onLoadEnd={() => setLoading(false)}
-            onNavigationStateChange={onNav}
-            onError={(e) => {
-              setLoading(false);
-              setError(
-                friendlyLoadError(e.nativeEvent.description || "WebView error")
-              );
-            }}
-            onHttpError={(e) => {
-              if (e.nativeEvent.statusCode >= 400) {
-                setLoading(false);
-                setError(
-                  friendlyLoadError(
-                    `HTTP ${e.nativeEvent.statusCode}`,
-                    e.nativeEvent.statusCode
-                  )
-                );
-              }
-            }}
-            allowsInlineMediaPlayback
-            mediaPlaybackRequiresUserAction={false}
-            allowsFullscreenVideo
-            setSupportMultipleWindows={false}
-            javaScriptEnabled
-            domStorageEnabled
-            cacheEnabled={false}
-            // LAN http:// during local shell-dev only
-            originWhitelist={["*"]}
-            mixedContentMode="always"
-            {...(Platform.OS === "ios"
-              ? { allowsBackForwardNavigationGestures: true }
-              : {})}
-          />
-        )}
+        ) : null}
+
+        <WebView
+          ref={webRef}
+          source={source}
+          style={error ? styles.webHidden : styles.web}
+          onLoadStart={() => {
+            setLoading(true);
+            setError(null);
+          }}
+          onLoadEnd={() => setLoading(false)}
+          onNavigationStateChange={onNav}
+          onError={(e) => {
+            const { description, url } = e.nativeEvent;
+            if (url && !isMainDocumentHttpError(url, uri)) return;
+            setLoading(false);
+            setError(friendlyLoadError(description || "WebView error"));
+          }}
+          onHttpError={(e) => {
+            const { statusCode, url } = e.nativeEvent;
+            if (statusCode < 400) return;
+            if (!isMainDocumentHttpError(url, uri)) return;
+            setLoading(false);
+            setError(friendlyLoadError(`HTTP ${statusCode}`, statusCode));
+          }}
+          allowsInlineMediaPlayback
+          mediaPlaybackRequiresUserAction={false}
+          allowsFullscreenVideo
+          setSupportMultipleWindows={false}
+          javaScriptEnabled
+          domStorageEnabled
+          cacheEnabled={false}
+          thirdPartyCookiesEnabled
+          sharedCookiesEnabled
+          // LAN http:// during local shell-dev only
+          originWhitelist={["*"]}
+          mixedContentMode="always"
+          injectedJavaScriptBeforeContentLoaded={EXPO_SHELL_BOOT_JS}
+          injectedJavaScript={EXPO_SHELL_BOOT_JS}
+          {...(Platform.OS === "ios"
+            ? { allowsBackForwardNavigationGestures: true }
+            : {})}
+        />
       </View>
     </SafeAreaView>
   );
@@ -238,6 +269,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#0c0814",
   },
+  webHidden: {
+    height: 0,
+    flexGrow: 0,
+    flexShrink: 0,
+    opacity: 0,
+  },
   overlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 2,
@@ -251,11 +288,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   errorBox: {
-    flex: 1,
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 3,
     alignItems: "center",
     justifyContent: "center",
     padding: 24,
     gap: 10,
+    backgroundColor: "#0c0814",
   },
   errorTitle: {
     color: "#fff7e6",

@@ -8,6 +8,26 @@ const NS = "http://www.w3.org/2000/svg";
 const geom = new WeakMap();
 let _uid = 0;
 
+/** Parse SVG markup into a real SVG element (WKWebView innerHTML often yields 0×0). */
+function svgFromMarkup(markup) {
+  const raw = String(markup || "").trim();
+  try {
+    const parsed = new DOMParser().parseFromString(raw, "image/svg+xml");
+    const root = parsed.documentElement;
+    if (
+      root &&
+      root.namespaceURI === NS &&
+      root.localName === "svg" &&
+      !parsed.querySelector("parsererror")
+    ) {
+      return document.importNode(root, true);
+    }
+  } catch (e) { /* fall through */ }
+  const tmp = document.createElement("div");
+  tmp.innerHTML = raw;
+  return tmp.firstElementChild;
+}
+
 function hexAlpha(color, a) {
   if (!color) return `rgba(255,255,255,${a})`;
   if (color.startsWith("rgba") || color.startsWith("rgb")) return color;
@@ -274,7 +294,7 @@ function buildGlassSvg(glass, opts = {}) {
            fill="none" stroke="rgba(220,190,140,0.35)" stroke-width="1.3"/>`;
 
   const svg =
-`<svg class="glass-svg${liquidOnly ? " glass-liquid-layer" : ""}" viewBox="0 0 ${p.vbW} ${p.vbH}" xmlns="${NS}" preserveAspectRatio="xMidYMax meet">
+`<svg class="glass-svg${liquidOnly ? " glass-liquid-layer" : ""}" viewBox="0 0 ${p.vbW} ${p.vbH}" width="${p.vbW}" height="${p.vbH}" xmlns="${NS}" preserveAspectRatio="xMidYMax meet">
   <defs>
     <linearGradient id="${glassGrad}" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="rgba(255,230,190,0.48)"/>
@@ -312,9 +332,7 @@ function buildGlassSvg(glass, opts = {}) {
   <g class="garnish-group"></g>
 </svg>`;
 
-  const tmp = document.createElement("div");
-  tmp.innerHTML = svg.trim();
-  const el = tmp.firstElementChild;
+  const el = svgFromMarkup(svg);
   geom.set(el, { ...p, clipId, _fill: 0, _raf: 0, _bands: [], _foam: false });
   return el;
 }
@@ -385,7 +403,7 @@ function assemblePrepSvg(p) {
   const glassBody = `${p.outer} ${p.inner}`;
 
   const svg =
-`<svg class="glass-svg prep-svg" viewBox="0 0 ${p.vbW} ${p.vbH}" xmlns="${NS}" preserveAspectRatio="xMidYMax meet">
+`<svg class="glass-svg prep-svg" viewBox="0 0 ${p.vbW} ${p.vbH}" width="${p.vbW}" height="${p.vbH}" xmlns="${NS}" preserveAspectRatio="xMidYMax meet">
   <defs>
     <linearGradient id="${ggId}" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="rgba(255,236,200,0.38)"/>
@@ -414,9 +432,7 @@ function assemblePrepSvg(p) {
   <g class="garnish-group"></g>
 </svg>`;
 
-  const tmp = document.createElement("div");
-  tmp.innerHTML = svg.trim();
-  const el = tmp.firstElementChild;
+  const el = svgFromMarkup(svg);
   geom.set(el, { ...p, clipId, _fill: 0, _raf: 0 });
   return el;
 }

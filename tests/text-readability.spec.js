@@ -66,7 +66,7 @@ test.describe("text readability", () => {
     const report = await page.evaluate((mins) => window.readText([
       { sel: "#btn-map-play", key: "cta", min: mins.body },
       { sel: "#map-hint", key: "hint", min: mins.tertiary },
-      { sel: ".map-venue.is-current .map-venue-titles", key: "venue", min: mins.tertiary },
+      { sel: "#map-hero-title", key: "venue", min: mins.body },
     ]), { body: MIN_BODY_PX, tertiary: MIN_TERTIARY_PX });
 
     expect(report.failures, JSON.stringify(report)).toEqual([]);

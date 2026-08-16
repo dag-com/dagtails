@@ -4,6 +4,7 @@
   "main": "index.ts",
   "dependencies": {
     "expo": "~54.0.33",
+    "expo-screen-orientation": "~9.0.9",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
     "react-native": "0.81.5",
@@ -15,10 +16,10 @@
     "typescript": "~5.9.2"
   },
   "scripts": {
-    "start": "expo start",
-    "tunnel": "expo start --tunnel",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "start": "expo start --go",
+    "tunnel": "expo start --tunnel --go",
+    "android": "expo start --android --go",
+    "ios": "expo start --ios --go",
     "web": "expo start --web"
   },
   "private": true

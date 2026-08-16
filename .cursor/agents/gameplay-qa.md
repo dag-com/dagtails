@@ -41,8 +41,14 @@ For **device-matrix-focused** asks (`/device-qa`, foldables, “test all phones�
 ## Domain checks
 
 - Hub, map, venue interior, `__dagtailsHealth`
-- Landscape only; glass mount is pc-only (SKIP on handhelds)
-- Flip cover / short heights are valid stress cases
+- Landscape only. Flip cover / short heights are valid stress cases
+- **Dead-end / clipped-CTA class (blocker):** on every primary screen, the way out must stay tappable in the short-landscape viewport — not clipped by `overflow:hidden`, a tall logo, or a 3:2 panel. Hunt finish (Menu + Play again), result (Retry + Next), endless, mix-result, map dock CTA, hop overlay, intro Next. A screen the player cannot leave is a ship-stopper (kids hit finish first)
+- **Intro comic:** `#comic-caption` copy and `#comic-next` must stay inside the viewport on short landscape (Expo chrome included). Text sitting below the fold counts as a fail
+- **Glass on handhelds:** `#glass-mount .glass-svg` must paint with a real box (height ≳ 36px) on ios/android/fold — including iPhone WKWebView / Expo Go. Do **not** treat handheld glass as skip-only. The 800px `pc` test is a separate vessel-lift regression only
+
+## Hunt on every run (layout)
+
+Primary exit controls that are off-viewport, 0-height, or covered are the same class of bug as the shift-complete screen with no buttons. Prefer `layout-integrity` + a screenshot of the failing project over “works on pc”.
 
 ## Do not
 
