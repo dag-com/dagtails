@@ -4339,7 +4339,8 @@ function renderComicPanel(i) {
   });
 
   const last = i === INTRO_COMIC.length - 1;
-  $("#comic-next").textContent = last ? "Start my shift \u2192" : "Next \u2192";
+  const next = $("#comic-next");
+  next.setAttribute("aria-label", last ? "Start my shift" : "Next");
 }
 
 function playIntro(onDone) {
@@ -4371,9 +4372,12 @@ function finishIntro() {
   else { onShowStart(); showScreen("screen-start"); }
 }
 
-$("#comic-next").addEventListener("click", comicNext);
-$("#comic-panel").addEventListener("click", comicNext);
-$("#comic-skip").addEventListener("click", () => { Sound.click(); finishIntro(); });
+$("#comic-next").addEventListener("click", (e) => { e.stopPropagation(); comicNext(); });
+$("#comic-panel").addEventListener("click", (e) => {
+  if (e.target.closest("button")) return;
+  comicNext();
+});
+$("#comic-skip").addEventListener("click", (e) => { e.stopPropagation(); Sound.click(); finishIntro(); });
 
 // ============================ Settings ============================
 function syncSoundButtons() {

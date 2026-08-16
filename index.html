@@ -20,7 +20,7 @@
         <div class="modal-box profile-card profile-modal-box">
           <button id="btn-profile-close" class="modal-x" type="button" aria-label="Close" style="display:none">✕</button>
           <p class="eyebrow">Welcome to the bar</p>
-          <p class="subtitle">Set up your bartender profile to begin. We use your age to decide whether you get the full cocktail bar or the alcohol-free mocktail menu.</p>
+          <p class="subtitle">Age picks the cocktail bar or the alcohol-free mocktail menu.</p>
 
           <form id="profile-form" class="profile-form" novalidate>
             <label class="pf-field">
@@ -48,7 +48,7 @@
             </div>
             <p class="pf-error" id="pf-error"></p>
             <p class="name-hint">Stored only on this device for now. Under 18 means a mocktail-only (no alcohol) experience.</p>
-            <button type="submit" id="btn-profile-save" class="btn btn-primary btn-lg">Enter the bar →</button>
+            <button type="submit" id="btn-profile-save" class="btn btn-primary">Enter the bar →</button>
           </form>
         </div>
       </div>
@@ -86,17 +86,24 @@
       <!-- ============================== INTRO COMIC REEL ============================== -->
       <section id="screen-intro" class="screen">
         <div class="comic">
-          <div class="comic-stage">
-            <div class="comic-panel" id="comic-panel">
-              <img class="comic-img" id="comic-img" alt="" draggable="false" />
-              <div class="comic-shade" aria-hidden="true"></div>
-              <div class="comic-caption" id="comic-caption"></div>
+          <div class="comic-panel" id="comic-panel">
+            <img class="comic-img" id="comic-img" alt="" draggable="false" />
+            <div class="comic-shade" aria-hidden="true"></div>
+            <div class="comic-chrome">
+              <button id="comic-skip" class="comic-skip" type="button" aria-label="Skip intro">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path fill="currentColor" d="M2.4 4.1 11.2 12 2.4 19.9z"/>
+                  <path fill="currentColor" d="M12.2 4.1 21 12 12.2 19.9z"/>
+                </svg>
+              </button>
+              <div class="comic-dots" id="comic-dots"></div>
+              <button id="comic-next" class="comic-next" type="button" aria-label="Next">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path fill="currentColor" d="M7 3.2 20.2 12 7 20.8z"/>
+                </svg>
+              </button>
             </div>
-          </div>
-          <div class="comic-foot">
-            <button id="comic-skip" class="btn btn-ghost" type="button">Skip intro</button>
-            <div class="comic-dots" id="comic-dots"></div>
-            <button id="comic-next" class="btn btn-primary" type="button">Next →</button>
+            <div class="comic-caption" id="comic-caption"></div>
           </div>
         </div>
       </section>

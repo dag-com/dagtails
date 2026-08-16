@@ -270,11 +270,13 @@ test.describe("layout integrity", () => {
     await page.waitForFunction(() => {
       const cap = document.querySelector("#comic-caption");
       const next = document.querySelector("#comic-next");
-      if (!cap || !next) return false;
+      const skip = document.querySelector("#comic-skip");
+      if (!cap || !next || !skip) return false;
       const text = (cap.textContent || "").trim();
       if (text.length < 8) return false;
       const r = cap.getBoundingClientRect();
       const n = next.getBoundingClientRect();
+      const s = skip.getBoundingClientRect();
       const vh = window.innerHeight;
       const vw = window.innerWidth;
       const visibleH = Math.min(r.bottom, vh) - Math.max(r.top, 0);
@@ -283,22 +285,34 @@ test.describe("layout integrity", () => {
         visibleH >= r.height * 0.9 &&
         r.left >= -8 &&
         r.right <= vw + 8 &&
+        n.width >= 36 &&
         n.top >= -2 &&
-        n.bottom <= vh + 2
+        n.right <= vw + 2 &&
+        s.left >= -2 &&
+        s.top >= -2 &&
+        (skip.getAttribute("aria-label") || "").toLowerCase().includes("skip")
       );
     }, null, { timeout: 10_000 });
 
     const report = await page.evaluate(() => {
       const cap = document.querySelector("#comic-caption");
       const next = document.querySelector("#comic-next");
+      const skip = document.querySelector("#comic-skip");
       const cr = cap.getBoundingClientRect();
       const nr = next.getBoundingClientRect();
+      const sr = skip.getBoundingClientRect();
       return {
         text: (cap.textContent || "").trim(),
+        skipLabel: (skip.getAttribute("aria-label") || "").trim(),
+        skipIsCircle: Math.abs(sr.width - sr.height) < 8,
         captionH: cr.height,
         captionTop: cr.top,
         captionBottom: cr.bottom,
-        nextBottom: nr.bottom,
+        nextTop: nr.top,
+        nextRight: nr.right,
+        skipLeft: sr.left,
+        skipTop: sr.top,
+        nextIsCircle: Math.abs(nr.width - nr.height) < 8,
         vw: window.innerWidth,
         vh: window.innerHeight,
       };
@@ -308,6 +322,11 @@ test.describe("layout integrity", () => {
     expect(report.captionH, JSON.stringify(report)).toBeGreaterThan(12);
     expect(report.captionTop, JSON.stringify(report)).toBeGreaterThanOrEqual(-8);
     expect(report.captionBottom, JSON.stringify(report)).toBeLessThanOrEqual(report.vh + 8);
-    expect(report.nextBottom, JSON.stringify(report)).toBeLessThanOrEqual(report.vh + 2);
+    expect(report.skipLabel, JSON.stringify(report)).toMatch(/skip/i);
+    expect(report.skipIsCircle, JSON.stringify(report)).toBe(true);
+    expect(report.skipLeft, JSON.stringify(report)).toBeGreaterThanOrEqual(-2);
+    expect(report.nextRight, JSON.stringify(report)).toBeLessThanOrEqual(report.vw + 2);
+    expect(report.nextIsCircle, JSON.stringify(report)).toBe(true);
+    expect(report.nextTop, JSON.stringify(report)).toBeLessThan(report.vh * 0.35);
   });
 });
