@@ -21,6 +21,10 @@ export type HubSnapshot = {
   badgesLabel: string;
   bestLine: string;
   footerHtml: string;
+  currentVenueBg: string;
+  mascotFloor: string;
+  hubBgSize: string;
+  hubBgPos: string;
 };
 
 export type HubActions = {

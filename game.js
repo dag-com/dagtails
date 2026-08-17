@@ -214,6 +214,33 @@ function playMetaCopy() {
     : `Stop ${Math.min(cleared + 1, pool.length)} of ${pool.length} · ${v.flag} ${v.name} — tap to open the map`;
 }
 
+/** Frontier venue for the hub backdrop (Snug at start; last bar if the crawl is done). */
+function currentHubVenue() {
+  const venues = venueList();
+  const pool = drinkPool();
+  if (!venues.length) return null;
+  if (!pool.length) return venues[0];
+  const cleared = getMap().cleared || 0;
+  const idx = Math.min(Math.max(0, cleared), pool.length - 1);
+  return venueForStage(idx).venue;
+}
+
+function currentHubVenueBg() {
+  const venue = currentHubVenue();
+  const path = venue && (venue.interior || venue.bg);
+  return path ? resolveAssetUrl(path) : "";
+}
+
+function currentHubVenueChrome() {
+  const venue = currentHubVenue();
+  return {
+    currentVenueBg: currentHubVenueBg(),
+    mascotFloor: venue?.mascotFloor || "8%",
+    hubBgSize: venue?.hubBgSize || "175%",
+    hubBgPos: venue?.hubBgPos || "20% 72%",
+  };
+}
+
 function bestScoreCopy() {
   const best = getHighScore();
   const eb = getEndlessBest();
@@ -270,6 +297,7 @@ function buildHubSnapshot() {
     badgesLabel: `🏅 Badges (${getEarned().length}/${BADGES.length})`,
     bestLine: bestScoreCopy(),
     footerHtml: `🍸 ${drinkPool().length} ${noun} &nbsp;•&nbsp; ${MEASURE_ENABLED ? "precision pours" : "spot the ingredients"} &nbsp;•&nbsp; earn your stars`,
+    ...currentHubVenueChrome(),
   };
 }
 
@@ -2566,7 +2594,7 @@ function setTicketFlippable(on) {
     ticket.setAttribute("tabindex", "0");
     ticket.setAttribute("role", "button");
     ticket.setAttribute("aria-pressed", ticket.classList.contains("is-flipped") ? "true" : "false");
-    ticket.setAttribute("aria-label", "Order ticket — tap to flip for recipe");
+    ticket.setAttribute("aria-label", "Order ticket — flip for recipe");
   }
 }
 

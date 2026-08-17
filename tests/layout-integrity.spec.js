@@ -290,7 +290,7 @@ test.describe("layout integrity", () => {
         n.right <= vw + 2 &&
         s.left >= -2 &&
         s.top >= -2 &&
-        (skip.getAttribute("aria-label") || "").toLowerCase().includes("skip")
+        /skip intro/i.test((skip.textContent || "").trim())
       );
     }, null, { timeout: 10_000 });
 
@@ -303,8 +303,7 @@ test.describe("layout integrity", () => {
       const sr = skip.getBoundingClientRect();
       return {
         text: (cap.textContent || "").trim(),
-        skipLabel: (skip.getAttribute("aria-label") || "").trim(),
-        skipIsCircle: Math.abs(sr.width - sr.height) < 8,
+        skipLabel: (skip.textContent || "").trim(),
         captionH: cr.height,
         captionTop: cr.top,
         captionBottom: cr.bottom,
@@ -322,8 +321,7 @@ test.describe("layout integrity", () => {
     expect(report.captionH, JSON.stringify(report)).toBeGreaterThan(12);
     expect(report.captionTop, JSON.stringify(report)).toBeGreaterThanOrEqual(-8);
     expect(report.captionBottom, JSON.stringify(report)).toBeLessThanOrEqual(report.vh + 8);
-    expect(report.skipLabel, JSON.stringify(report)).toMatch(/skip/i);
-    expect(report.skipIsCircle, JSON.stringify(report)).toBe(true);
+    expect(report.skipLabel, JSON.stringify(report)).toMatch(/skip intro/i);
     expect(report.skipLeft, JSON.stringify(report)).toBeGreaterThanOrEqual(-2);
     expect(report.nextRight, JSON.stringify(report)).toBeLessThanOrEqual(report.vw + 2);
     expect(report.nextIsCircle, JSON.stringify(report)).toBe(true);

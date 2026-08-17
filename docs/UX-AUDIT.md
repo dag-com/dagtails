@@ -469,3 +469,39 @@ Impact order, not “tokens first.” The old visual-unification list led with r
 | Resolved | None of F01–F22 from 2026-08-09. Station landscape split, compact judges, hub side-by-side, and mocktail venue set remain the working mobile foundations. |
 | Remaining | F01–F22 plus new lane findings **F23** (Speakeasy length), **F24** (orphaned lounge IA), **F25** (unlocks/complexity vs venue walls). |
 | Re-audit trigger | After Phase 1 map (hero + candy path + duck) lands; re-run this skill before merge. |
+
+---
+
+## 9. Hub mock whitespace — 2026-08-16 (evening)
+
+**Surface:** Landscape-phone hub mock `mocks/hub-layout-venue-stage-mobile.png` (852×393 @2x).  
+**Live code:** `#screen-start` / `.hub-shell` / `#hub-duck` in `src/hub/HubScreen.tsx`, `styles.css`.  
+**Maturity of this mock:** prototype. One gold CTA is right; the composition is still a left sticker + right HUD over empty steel.
+
+### Summary
+
+The “white space” is not missing widgets. It is a **gap in the composition**. The duck hugs the left of the bar; Continue + CotD hug the right; Zavod’s photo leaves a dark lounge and a blank counter in the middle. Removing the venue lockup and drink path (correct for a quieter hub) took away the only objects occupying that middle — so the page now fails **hierarchy in one glance** and **duck as guide**. North-star fill for that hole is the **per-venue candy path**, but that belongs on the map, not as a second hub dashboard. On the hub, fill the hole by **clustering duck + Continue** on the busy part of the interior, not by adding more chrome.
+
+### Findings
+
+| ID | Severity | Screen | Problem | Evidence | Suggested fix | Visual-system? |
+|----|----------|--------|---------|----------|---------------|----------------|
+| H1 | Major | Hub mock | Empty bar between mascot and CTA — two foci, no stage | Duck ~left 8%; Continue ~right 61%; `hub-layout-venue-stage-mobile.png` | Treat duck + Continue as **one unit**: duck center-left on the counter, gold pill 24–40px to his right at chest height. Crop/position interior so bottles sit behind that unit (`hubBgPos` toward the backbar, not the lounge void). | Y |
+| H2 | Major | Hub mock | CotD is a second wide bar under Continue, stretching a HUD column | `#cotd-card` grammar in mock; live `.hub-quest` | Keep CotD **demoted** (F08): one line under Continue, same width as the pill, not a rival slab. | Y |
+| H3 | Minor | Hub mock | Utility chips (Badges / Learn / Help) float in leftover counter | Bottom row in mock; live `.hub-nav` / `.hub-modes` | Pin them to the **bottom-right of the CTA cluster** (or a single ⋯), not a third island in the middle of the bar. | N |
+| H4 | Polish | Hub mock | Profile + level still occupy opposite corners, forcing eye travel | Top-left / top-right chips | Keep, but smaller; they are status, not layout. Do not use them to “fill” the void. | N |
+
+### Top fixes (for the next mock / live hub)
+
+1. **Cluster, don’t spread** — duck presents Continue. Gap between sneaker and pill ≈ one duck-width, not half the screen.
+2. **Aim the photo at the backbar** — `background-size` ~140–160%, `background-position` on the bottle wall, so the lounge hole is cropped out. Venue hero stays one bar; we just pick the busy half.
+3. **Do not refill with a 6-drink path on the hub** — that path is the **map** (`map-v3-candy-drinks`). Hub job is: you’re at this bar, tap Continue.
+4. **One gold pill**, CotD as caption, utilities as chips attached to that stack.
+5. Live selectors to change after the mock is approved: `#hub-duck` `left`/`bottom`, `.hub-cta` / `.cta-main` max-width, `.hub-quest` width, `--hub-bg-pos` / `--hub-bg-size` on `.hub-shell.has-venue-bg`.
+
+### Out of scope (this pass)
+
+- Reintroducing ZAVOD wordmark or six named drinks on the hub
+- City crawl / multi-bar plate
+- Implementing live CSS until a clustered mock is chosen
+

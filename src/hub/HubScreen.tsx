@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import type { HubSnapshot } from "./types";
 
 const EMPTY: HubSnapshot = {
@@ -24,6 +24,10 @@ const EMPTY: HubSnapshot = {
   badgesLabel: "🏅 Badges",
   bestLine: "",
   footerHtml: "🍸 cocktails &nbsp;•&nbsp; precision pours &nbsp;•&nbsp; earn your stars",
+  currentVenueBg: "",
+  mascotFloor: "8%",
+  hubBgSize: "175%",
+  hubBgPos: "20% 72%",
 };
 
 function run(action:
@@ -67,11 +71,34 @@ export function HubScreen() {
     };
   }, [menuOpen]);
 
+  useEffect(() => {
+    const screen = document.getElementById("screen-start");
+    if (!screen) return;
+    screen.classList.toggle("has-venue-bg", !!snap.currentVenueBg);
+    return () => screen.classList.remove("has-venue-bg");
+  }, [snap.currentVenueBg]);
+
   const duckClass = ["hub-duck", "mascot-duck", snap.mascotTier].filter(Boolean).join(" ");
+  const venueBg = snap.currentVenueBg;
+  const zoom = snap.hubBgSize || "175%";
+  const pos = snap.hubBgPos || "20% 72%";
+  const heroBgStyle = venueBg
+    ? {
+        backgroundImage: `radial-gradient(ellipse 72% 62% at 50% 46%, transparent 36%, rgba(6, 4, 2, 0.45) 100%), url("${venueBg}")`,
+        backgroundSize: `${zoom}, ${zoom}`,
+        backgroundPosition: `${pos}, ${pos}`,
+        backgroundRepeat: "no-repeat",
+      }
+    : undefined;
+  const shellStyle = venueBg
+    ? ({
+        ["--hub-mascot-floor"]: snap.mascotFloor || "8%",
+      } as CSSProperties)
+    : undefined;
 
   return (
-    <div className="hub-shell">
-      <div className="hero-bg" aria-hidden="true" />
+    <div className={`hub-shell${venueBg ? " has-venue-bg" : ""}`} style={shellStyle}>
+      <div className="hero-bg" style={heroBgStyle} aria-hidden="true" />
       <div className="start-hub">
         <div className="hub-topbar">
           <div

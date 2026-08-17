@@ -1421,11 +1421,22 @@ body {
   0% { opacity: 0; transform: translateY(28px) scale(0.82); }
   100% { opacity: 1; transform: translateY(0) scale(1); }
 }
+.glass-svg .garnish-group {
+  overflow: visible;
+}
+.glass-svg .garnish-art,
 .glass-svg .garnish-emoji {
-  animation: garnishDrop 0.6s cubic-bezier(0.2, 1.2, 0.4, 1);
+  animation: garnishDrop 0.55s cubic-bezier(0.2, 1.2, 0.4, 1);
+  transform-box: fill-box;
+  transform-origin: 50% 85%;
+  filter: drop-shadow(0 1px 1.2px rgba(0, 0, 0, 0.32));
+}
+.glass-svg .garnish-art--static {
+  animation: none;
+  filter: none;
 }
 @keyframes garnishDrop {
-  0% { transform: translateY(-30px) rotate(-22deg); opacity: 0; }
+  0% { transform: translateY(-18px) rotate(-14deg); opacity: 0; }
   100% { transform: translateY(0) rotate(0); opacity: 1; }
 }
 
@@ -4575,11 +4586,14 @@ body {
 }
 .comic-skip {
   justify-self: start;
-  width: 40px;
-  padding: 0;
-  border-radius: 50%;
-  display: grid;
-  place-items: center;
+  width: auto;
+  padding: 0 16px;
+  border-radius: 999px;
+  font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
 }
 .comic-next {
   justify-self: end;
@@ -4589,17 +4603,11 @@ body {
   display: grid;
   place-items: center;
 }
-.comic-skip svg,
 .comic-next svg {
   width: 22px;
   height: 22px;
   display: block;
-}
-.comic-next svg {
   margin-left: 2px;
-}
-.comic-skip svg {
-  margin-left: 1px;
 }
 .comic-dots {
   display: flex;
@@ -4862,12 +4870,15 @@ body {
   .comic-chrome {
     padding: 8px 10px;
   }
-  .comic-skip,
+  .comic-skip {
+    padding: 0 14px;
+    font-size: 13px;
+    width: auto;
+  }
   .comic-next {
     width: 40px;
     height: 40px;
   }
-  .comic-skip svg,
   .comic-next svg {
     width: 22px;
     height: 22px;
@@ -5298,8 +5309,9 @@ body.is-phone-play .judges-title {
   font-size: 11px;
   margin: 0 0 4px;
 }
-body.is-phone-play #result-judges,
-body.is-phone-play .judges-panel {
+/* Campaign result only — mixologist `#judges-panel` is one of many
+   siblings in a flex card, so height:100% + min-height:0 collapses it. */
+body.is-phone-play #result-judges {
   height: 100%;
   min-height: 0;
 }
@@ -5541,6 +5553,58 @@ body.is-phone-play .chip {
     radial-gradient(900px 360px at 80% 14%, rgba(130, 70, 255, 0.16), transparent 52%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.45)),
     linear-gradient(180deg, #120b1f 0%, #140d22 44%, #0c0814 100%);
+}
+
+/* Hub uses the current venue interior as a full-bleed backdrop.
+   #screen-start .hero-bg is an ID rule — these selectors must beat that for the overlay. */
+#screen-start.has-venue-bg .hero-bg,
+#screen-start .hub-shell.has-venue-bg .hero-bg {
+  overflow: hidden;
+  background-color: #0c0806;
+}
+
+/* Plant the mascot on the bar top (per-venue --hub-mascot-floor). */
+.hub-shell.has-venue-bg .hub-stage {
+  background: none;
+  flex: 0 0 32%;
+  min-width: 160px;
+}
+.hub-shell.has-venue-bg .hub-duck {
+  position: absolute;
+  left: 3%;
+  bottom: var(--hub-mascot-floor, 8%);
+  z-index: 2;
+  flex: none;
+  width: auto;
+  height: min(62vh, 420px);
+  max-height: none;
+  max-width: min(38vw, 340px);
+  margin: 0;
+  pointer-events: none;
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
+}
+.hub-shell.has-venue-bg .hub-duck::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  width: 54%;
+  bottom: 1%;
+  height: 7%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.5) 0%, transparent 70%);
+  pointer-events: none;
+}
+#screen-start.has-venue-bg .start-hub,
+#screen-start .hub-shell.has-venue-bg .start-hub {
+  background: linear-gradient(180deg, rgba(10, 7, 5, 0.18), rgba(8, 5, 4, 0.42));
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+#screen-start.has-venue-bg .start-hub::after,
+#screen-start .hub-shell.has-venue-bg .start-hub::after {
+  opacity: 0.4;
+  background:
+    radial-gradient(420px 200px at 50% 100%, rgba(233, 185, 73, 0.12), transparent 70%),
+    linear-gradient(180deg, transparent 0%, rgba(10, 7, 4, 0.35) 82%);
 }
 
 .start-hub {
@@ -6178,6 +6242,12 @@ body.is-phone-play .chip {
     aspect-ratio: 0.65;
     margin-bottom: 0;
   }
+  .hub-shell.has-venue-bg .hub-duck {
+    height: min(70vh, 320px);
+    max-height: none;
+    max-width: min(36vw, 280px);
+    margin-bottom: 0;
+  }
   .hub-status {
     display: none;
   }
@@ -6344,6 +6414,107 @@ body.has-game-stage .app {
   overflow: hidden;
   min-height: 0;
 }
+/* Mixologist verdict: keep the 3-judge strip visible and scroll the
+   card if the rest of the sheet still won't fit the short stage. */
+body.is-phone-play .mix-card,
+.game-stage .mix-card {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 16px 14px;
+  gap: 6px;
+}
+.mix-card .eyebrow,
+.mix-card .result-name,
+.mix-card .mix-score-row,
+.mix-card .judges-title,
+.mix-card .judges-panel,
+.mix-card .mix-classic,
+.mix-card .mix-note,
+.mix-card .mix-meta,
+.mix-card .flavor-bars,
+.mix-card .mix-tips-wrap,
+.mix-card .mix-actions,
+.mix-card .mix-lounge,
+.mix-card .mix-quit {
+  flex-shrink: 0;
+}
+.mix-card .judges-panel,
+body.is-phone-play .mix-card .judges-panel,
+.game-stage .mix-card .judges-panel {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+  width: 100%;
+}
+.mix-card .judge-scene,
+body.is-phone-play .mix-card .judge-scene,
+.game-stage .mix-card .judge-scene {
+  height: auto;
+  width: 100%;
+  min-width: 0;
+  overflow: visible;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 2px 0 0;
+  align-items: stretch;
+}
+.mix-card .judge-table {
+  display: none;
+}
+.mix-card .judge-seat {
+  min-width: 0;
+  gap: 0;
+  padding-bottom: 0;
+}
+.mix-card .judge-avatar-wrap {
+  display: none;
+}
+.mix-card .judge-bubble {
+  min-height: 0;
+  padding: 8px 10px;
+}
+.mix-card .judge-bubble::after {
+  display: none;
+}
+.mix-card .judge-bubble-quote,
+.mix-card .judge-bubble-reason,
+.mix-card .judge-bubble-tip,
+.mix-card .judge-bubble-prefs {
+  display: none;
+}
+.mix-card .judge-bubble-top {
+  margin-bottom: 0;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+.mix-card .judge-bubble-name {
+  min-width: 0;
+  overflow: visible;
+  white-space: normal;
+  font-size: 12px;
+  line-height: 1.2;
+}
+.mix-card .judge-score {
+  font-size: 13px;
+}
+.mix-card .mix-bigscore {
+  font-size: 42px;
+}
+.mix-card .mix-score-row {
+  margin: 2px 0;
+}
+.mix-card .flavor-bars {
+  margin: 2px 0 8px;
+  gap: 5px;
+}
+.mix-card .mix-tips-wrap {
+  margin-bottom: 8px;
+}
+.mix-card .mix-quit {
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
 .game-stage .result-card.has-venue-bg {
   background:
     linear-gradient(180deg, rgba(14, 10, 22, 0.9) 0%, rgba(10, 6, 18, 0.94) 100%),
@@ -6504,15 +6675,19 @@ body.has-game-stage .app {
     radial-gradient(ellipse 70% 28% at 50% 92%, rgba(233, 185, 73, 0.18), transparent 70%),
     radial-gradient(ellipse 80% 40% at 50% 100%, rgba(0, 0, 0, 0.35), transparent 72%);
 }
-.game-stage .hub-duck {
-  flex: none;
-  width: auto;
-  height: min(100%, 300px);
+.game-stage .hub-shell.has-venue-bg .hub-stage {
+  background: none;
+  justify-content: flex-end;
+}
+.game-stage .hub-shell.has-venue-bg .hub-duck {
+  position: absolute;
+  left: 3%;
+  bottom: var(--hub-mascot-floor, 8%);
+  height: min(68%, 380px);
   max-height: none;
-  max-width: 92%;
-  aspect-ratio: 0.65;
+  max-width: min(34vw, 300px);
   margin-bottom: 0;
-  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.45));
+  filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.4));
 }
 .game-stage .hub-status {
   display: none;
@@ -6598,6 +6773,9 @@ body.has-game-stage .app {
   }
   .game-stage .hub-duck {
     height: min(100%, 220px);
+  }
+  .game-stage .hub-shell.has-venue-bg .hub-duck {
+    height: min(68%, 240px);
   }
   .game-stage .cta-main,
   .game-stage .cta-caret {
@@ -6739,7 +6917,8 @@ body.has-game-stage .app {
   overflow: visible !important;
 }
 .game-bar .order-ticket .ticket-face {
-  padding: 8px 12px 8px;
+  /* ~10% taller card: extra block padding, no type stretch / 3D flatten */
+  padding: 16px 12px 16px;
   overflow: visible !important;
 }
 .game-bar .order-ticket .ticket-face--back {

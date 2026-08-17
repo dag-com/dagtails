@@ -556,34 +556,225 @@ export function setLiquid(svg, bands, fillFrac, animate = true, opts = {}) {
   s._raf = requestAnimationFrame(frame);
 }
 
+function gN(n) {
+  return Math.round(n * 10) / 10;
+}
+
+function clampG(n, a, b) {
+  return Math.max(a, Math.min(b, n));
+}
+
+/** Front rim of the ellipse (t=0 right, t=0.5 near-center, t=1 left). */
+function rimFront(s, t) {
+  const a = t * Math.PI;
+  return { x: s.cx + s.oTop * Math.cos(a), y: s.rimY + s.rimRy * Math.sin(a) };
+}
+
+function wrapGarnish(inner, extraClass = "") {
+  return `<g class="garnish-art${extraClass ? " " + extraClass : ""}">${inner}</g>`;
+}
+
+function citrusWheelMarkup(s, rind, pith, flesh) {
+  const r = clampG(s.oTop * 0.58, 15, 24);
+  const ry = r * 0.8;
+  const thick = Math.max(2.4, r * 0.18);
+  const p = rimFront(s, 0.15);
+  let cuts = "";
+  for (let i = 0; i < 10; i++) {
+    const a = (i * Math.PI * 2) / 10 + 0.12;
+    cuts += `<line x1="0" y1="0" x2="${gN(Math.cos(a) * r * 0.68)}" y2="${gN(Math.sin(a) * ry * 0.68)}" stroke="${pith}" stroke-width="${gN(Math.max(0.5, r * 0.032))}" opacity="0.78"/>`;
+  }
+  return wrapGarnish(`<g transform="translate(${gN(p.x)},${gN(p.y)}) rotate(-36)">
+    <ellipse cx="0" cy="${gN(ry * 0.2 + thick)}" rx="${gN(r * 0.72)}" ry="${gN(ry * 0.18)}" fill="rgba(0,0,0,0.25)"/>
+    <ellipse cx="0" cy="${gN(thick * 0.6)}" rx="${gN(r)}" ry="${gN(ry)}" fill="${rind}"/>
+    <ellipse cx="0" cy="0" rx="${gN(r)}" ry="${gN(ry)}" fill="${rind}" stroke="#3a6410" stroke-width="0.75"/>
+    <ellipse cx="0" cy="0" rx="${gN(r * 0.84)}" ry="${gN(ry * 0.84)}" fill="${pith}"/>
+    <ellipse cx="0" cy="0" rx="${gN(r * 0.75)}" ry="${gN(ry * 0.75)}" fill="${flesh}"/>
+    ${cuts}
+    <ellipse cx="0" cy="0" rx="${gN(r * 0.13)}" ry="${gN(ry * 0.13)}" fill="${pith}"/>
+    <ellipse cx="${gN(-r * 0.22)}" cy="${gN(-ry * 0.28)}" rx="${gN(r * 0.26)}" ry="${gN(ry * 0.14)}" fill="rgba(255,255,255,0.28)"/>
+  </g>`);
+}
+
+function peelTwistMarkup(s, rind, pith, thick = 1) {
+  const u = clampG(s.oTop * 0.58, 14, 24);
+  const p = rimFront(s, 0.16);
+  const w = Math.max(1.7, u * 0.15 * thick);
+  return wrapGarnish(`<g transform="translate(${gN(p.x)},${gN(p.y)}) rotate(16)">
+    <path d="M ${gN(u * 0.08)} ${gN(u * 0.12)}
+             C ${gN(u * 0.9)} ${gN(-u * 0.58)}, ${gN(u * 1.18)} ${gN(u * 0.12)}, ${gN(u * 0.52)} ${gN(u * 0.88)}
+             S ${gN(-u * 0.12)} ${gN(u * 0.92)}, ${gN(u * 0.18)} ${gN(u * 0.42)}"
+          fill="none" stroke="${rind}" stroke-width="${gN(w)}" stroke-linecap="round"/>
+    <path d="M ${gN(u * 0.1)} ${gN(u * 0.12)}
+             C ${gN(u * 0.86)} ${gN(-u * 0.5)}, ${gN(u * 1.08)} ${gN(u * 0.1)}, ${gN(u * 0.52)} ${gN(u * 0.78)}"
+          fill="none" stroke="${pith}" stroke-width="${gN(w * 0.38)}" stroke-linecap="round" opacity="0.9"/>
+  </g>`);
+}
+
+function orangePeelMarkup(s) {
+  const u = clampG(s.oTop * 0.62, 16, 26);
+  const p = rimFront(s, 0.14);
+  return wrapGarnish(`<g transform="translate(${gN(p.x)},${gN(p.y)}) rotate(10)">
+    <path d="M ${gN(-u * 0.12)} ${gN(u * 0.06)}
+             C ${gN(u * 0.12)} ${gN(-u * 0.82)}, ${gN(u * 1.08)} ${gN(-u * 0.5)}, ${gN(u * 0.92)} ${gN(u * 0.38)}
+             C ${gN(u * 0.84)} ${gN(u * 0.68)}, ${gN(u * 0.42)} ${gN(u * 0.5)}, ${gN(u * 0.32)} ${gN(u * 0.12)}
+             C ${gN(u * 0.55)} ${gN(-u * 0.42)}, ${gN(u * 0.08)} ${gN(-u * 0.55)}, ${gN(-u * 0.12)} ${gN(u * 0.06)} Z"
+          fill="#e8891a" stroke="#c56a0c" stroke-width="0.55"/>
+    <path d="M ${gN(-u * 0.02)} ${gN(u * 0.02)}
+             C ${gN(u * 0.18)} ${gN(-u * 0.62)}, ${gN(u * 0.88)} ${gN(-u * 0.38)}, ${gN(u * 0.78)} ${gN(u * 0.18)}"
+          fill="none" stroke="#f6d089" stroke-width="${gN(Math.max(1, u * 0.07))}" stroke-linecap="round" opacity="0.75"/>
+  </g>`);
+}
+
+function mintSprigMarkup(s) {
+  const u = clampG(s.oTop * 0.62, 14, 24);
+  const x = s.cx + s.iTop * 0.22;
+  const y = s.rimY + 1;
+  const leaf = (tx, ty, rot, len, fill) =>
+    `<g transform="translate(${gN(tx)},${gN(ty)}) rotate(${rot})">
+      <path d="M 0 0 C ${gN(-len * 0.3)} ${gN(-len * 0.32)}, ${gN(-len * 0.1)} ${gN(-len * 0.82)}, 0 ${gN(-len)}
+               C ${gN(len * 0.1)} ${gN(-len * 0.82)}, ${gN(len * 0.3)} ${gN(-len * 0.32)}, 0 0 Z" fill="${fill}"/>
+      <path d="M 0 0 L 0 ${gN(-len * 0.86)}" stroke="#245c32" stroke-width="0.65" opacity="0.5"/>
+    </g>`;
+  return wrapGarnish(`<g transform="translate(${gN(x)},${gN(y)})">
+    ${leaf(0, 0, -26, u * 0.92, "#3b8a48")}
+    ${leaf(1.2, 1.5, 6, u * 1.08, "#4eaa58")}
+    ${leaf(2.2, 1, 34, u * 0.84, "#2f7540")}
+    ${leaf(-3.5, 3.5, -46, u * 0.58, "#5cb866")}
+  </g>`);
+}
+
+function oliveMarkup(s) {
+  const u = clampG(s.oTop * 0.2, 7.5, 12);
+  const y = s.rimY + Math.max(12, Math.min(s.oTop * 0.32, (s.botY - s.rimY) * 0.28));
+  const pick = s.iTop * 0.82;
+  return wrapGarnish(`
+    <line x1="${gN(s.cx - pick)}" y1="${gN(s.rimY + 2)}" x2="${gN(s.cx + pick * 0.08)}" y2="${gN(y + u * 0.15)}"
+          stroke="#d9c9a4" stroke-width="${gN(Math.max(1.05, u * 0.13))}" stroke-linecap="round"/>
+    <ellipse cx="${gN(s.cx)}" cy="${gN(y)}" rx="${gN(u * 1.12)}" ry="${gN(u * 0.74)}" fill="#6a8c30" stroke="#4c661c" stroke-width="0.6"/>
+    <ellipse cx="${gN(s.cx + u * 0.18)}" cy="${gN(y - u * 0.06)}" rx="${gN(u * 0.3)}" ry="${gN(u * 0.24)}" fill="#c4452d"/>
+    <ellipse cx="${gN(s.cx - u * 0.38)}" cy="${gN(y - u * 0.26)}" rx="${gN(u * 0.32)}" ry="${gN(u * 0.16)}" fill="rgba(255,255,255,0.28)"/>
+  `);
+}
+
+function cherryMarkup(s) {
+  const u = clampG(s.oTop * 0.22, 8, 13);
+  const p = rimFront(s, 0.17);
+  return wrapGarnish(`<g transform="translate(${gN(p.x)},${gN(p.y)})">
+    <path d="M 0 ${gN(-u * 0.15)} C ${gN(u * 0.12)} ${gN(-u * 1.25)}, ${gN(u * 0.72)} ${gN(-u * 1.55)}, ${gN(u * 0.58)} ${gN(-u * 1.95)}"
+          fill="none" stroke="#2f7a38" stroke-width="${gN(Math.max(0.9, u * 0.11))}" stroke-linecap="round"/>
+    <ellipse cx="0" cy="${gN(u * 0.2)}" rx="${gN(u)}" ry="${gN(u * 0.9)}" fill="#8e1024"/>
+    <ellipse cx="0" cy="${gN(u * 0.18)}" rx="${gN(u * 0.9)}" ry="${gN(u * 0.8)}" fill="#c41832"/>
+    <ellipse cx="${gN(-u * 0.3)}" cy="${gN(-u * 0.08)}" rx="${gN(u * 0.28)}" ry="${gN(u * 0.18)}" fill="rgba(255,255,255,0.32)"/>
+  </g>`);
+}
+
+function coffeeBeansMarkup(s) {
+  const u = clampG(s.oTop * 0.11, 3.8, 6.5);
+  const fill = s._fill || 0;
+  const cy = fill > 6
+    ? s.botY - s.thick * 0.35 - fill - 1.5
+    : s.rimY + s.rimRy * 0.45;
+  const bean = (dx, dy, rot) =>
+    `<g transform="translate(${gN(s.cx + dx)},${gN(cy + dy)}) rotate(${rot})">
+      <ellipse cx="0" cy="0" rx="${gN(u)}" ry="${gN(u * 0.52)}" fill="#3a2214" stroke="#24150c" stroke-width="0.35"/>
+      <path d="M 0 ${gN(-u * 0.38)} C ${gN(u * 0.14)} 0, ${gN(-u * 0.14)} 0, 0 ${gN(u * 0.38)}" fill="none" stroke="#c4a07a" stroke-width="0.65"/>
+    </g>`;
+  return wrapGarnish(`${bean(-u * 1.35, 0.4, -26)}${bean(u * 0.25, -u * 0.45, 16)}${bean(u * 1.45, u * 0.35, 48)}`);
+}
+
+function pineappleWedgeMarkup(s) {
+  const u = clampG(s.oTop * 0.62, 16, 26);
+  const p = rimFront(s, 0.17);
+  return wrapGarnish(`<g transform="translate(${gN(p.x)},${gN(p.y)}) rotate(-26)">
+    <ellipse cx="${gN(u * 0.45)}" cy="${gN(u * 0.08)}" rx="${gN(u * 0.5)}" ry="${gN(u * 0.14)}" fill="rgba(0,0,0,0.16)"/>
+    <path d="M 0 0 L ${gN(u * 0.92)} ${gN(-u * 1.12)} L ${gN(u * 1.32)} ${gN(-u * 0.18)} Z" fill="#efc43c" stroke="#d4a016" stroke-width="0.55"/>
+    <path d="M ${gN(u * 0.92)} ${gN(-u * 1.12)} L ${gN(u * 1.2)} ${gN(-u * 1.28)} L ${gN(u * 1.32)} ${gN(-u * 0.18)}" fill="#c9a024"/>
+    <path d="M ${gN(u * 0.92)} ${gN(-u * 1.12)} L ${gN(u * 0.78)} ${gN(-u * 1.5)} L ${gN(u * 1.05)} ${gN(-u * 1.32)} Z" fill="#3d8f3a"/>
+    <path d="M ${gN(u * 0.92)} ${gN(-u * 1.12)} L ${gN(u * 1.1)} ${gN(-u * 1.58)} L ${gN(u * 1.16)} ${gN(-u * 1.22)} Z" fill="#2f7540"/>
+    <path d="M ${gN(u * 0.22)} ${gN(-u * 0.12)} L ${gN(u * 0.82)} ${gN(-u * 0.82)}" stroke="#ffe9a0" stroke-width="0.55" opacity="0.8"/>
+    <path d="M ${gN(u * 0.38)} ${gN(-u * 0.04)} L ${gN(u * 1.02)} ${gN(-u * 0.5)}" stroke="#ffe9a0" stroke-width="0.45" opacity="0.7"/>
+  </g>`);
+}
+
+function rimCrustMarkup(s, sugar) {
+  const n = Math.round(clampG(s.oTop * 0.58, 20, 38));
+  const fill = sugar ? "rgba(255,248,228,0.96)" : "rgba(255,255,255,0.96)";
+  const stroke = sugar ? "rgba(236,208,148,0.65)" : "rgba(210,222,232,0.5)";
+  const sw = Math.max(1.8, s.oTop * 0.038);
+  let dots = `<ellipse cx="${gN(s.cx)}" cy="${gN(s.rimY)}" rx="${gN(s.oTop)}" ry="${gN(s.rimRy)}" fill="none" stroke="${fill}" stroke-width="${gN(sw)}" opacity="0.5"/>`;
+  for (let i = 0; i <= n; i++) {
+    const a = (Math.PI * i) / n;
+    const j = ((i * 17) % 7 - 3) * 0.32;
+    const px = s.cx + (s.oTop + j * 0.12) * Math.cos(a);
+    const py = s.rimY + s.rimRy * Math.sin(a) + j * 0.18;
+    dots += `<circle cx="${gN(px)}" cy="${gN(py)}" r="${gN(1.05 + (i % 3) * 0.5)}" fill="${fill}" stroke="${stroke}" stroke-width="0.2"/>`;
+  }
+  return wrapGarnish(dots, "garnish-art--static");
+}
+
+function garnishMarkup(s, gid) {
+  switch (gid) {
+    case "lime_wheel":
+      return citrusWheelMarkup(s, "#4e7a1c", "#e4eeb4", "#b8cc44");
+    case "lemon_twist":
+      return peelTwistMarkup(s, "#f0c62e", "#fff4b0", 0.92);
+    case "orange_peel":
+      return orangePeelMarkup(s);
+    case "mint_sprig":
+      return mintSprigMarkup(s);
+    case "olive":
+      return oliveMarkup(s);
+    case "cherry":
+      return cherryMarkup(s);
+    case "coffee_beans":
+      return coffeeBeansMarkup(s);
+    case "pineapple_wedge":
+      return pineappleWedgeMarkup(s);
+    case "salt_rim":
+      return rimCrustMarkup(s, false);
+    case "sugar_rim":
+      return rimCrustMarkup(s, true);
+    default:
+      return "";
+  }
+}
+
 export function setGarnish(svg, gid, emoji) {
   const s = geom.get(svg);
   const g = svg.querySelector(".garnish-group");
   if (!s || !g) return;
-  g.innerHTML = "";
+  while (g.firstChild) g.removeChild(g.firstChild);
   if (!gid || gid === "none") return;
 
-  if (gid === "salt_rim" || gid === "sugar_rim") {
-    const n = 20;
-    let dots = "";
-    const fill = gid === "sugar_rim" ? "rgba(255,245,220,0.95)" : "rgba(255,255,255,0.95)";
-    for (let i = 0; i <= n; i++) {
-      const a = Math.PI + (Math.PI * i) / n;
-      const px = s.cx + s.oTop * Math.cos(a);
-      const py = s.rimY + s.rimRy * Math.sin(a);
-      dots += `<circle cx="${px}" cy="${py}" r="2.3" fill="${fill}"/>`;
-    }
-    g.innerHTML = dots;
+  const art = garnishMarkup(s, gid);
+  if (art) {
+    try {
+      const parsed = new DOMParser().parseFromString(
+        `<svg xmlns="${NS}">${art}</svg>`,
+        "image/svg+xml"
+      );
+      const root = parsed.documentElement;
+      if (root && !parsed.querySelector("parsererror")) {
+        [...root.childNodes].forEach((node) => {
+          g.appendChild(document.importNode(node, true));
+        });
+        return;
+      }
+    } catch (e) { /* fall through */ }
+    g.innerHTML = art;
     return;
   }
 
+  const size = clampG(s.oTop * 0.38, 11, 16);
+  const p = rimFront(s, 0.2);
   const text = document.createElementNS(NS, "text");
-  text.setAttribute("x", String(s.cx + s.oTop * 0.55));
-  text.setAttribute("y", String(s.rimY + 4));
-  text.setAttribute("font-size", "30");
+  text.setAttribute("x", String(gN(p.x)));
+  text.setAttribute("y", String(gN(p.y + 2)));
+  text.setAttribute("font-size", String(gN(size)));
   text.setAttribute("text-anchor", "middle");
   text.setAttribute("class", "garnish-emoji");
-  text.textContent = emoji;
+  text.textContent = emoji || "";
   g.appendChild(text);
 }
 

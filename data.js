@@ -1558,6 +1558,7 @@ export const VENUES = [
     kind: "Gin pub", accent: "#7ec8e3", sign: "THE SNUG",
     bg: "assets/venues/snug.png",
     interior: "assets/venues/interiors/snug.png",
+    hubBgSize: "175%", hubBgPos: "18% 70%", mascotFloor: "10%",
     blurb: "Oak booths, tonic bottles, and a proper London gin rail.",
     mapPin: { x: 12, y: 16 },
     master: {
@@ -1571,6 +1572,7 @@ export const VENUES = [
     kind: "Vodka bar", accent: "#9bb8ff", sign: "ЗАВОД",
     bg: "assets/venues/zavod.png",
     interior: "assets/venues/interiors/zavod.png",
+    hubBgSize: "195%", hubBgPos: "16% 72%", mascotFloor: "8%",
     blurb: "Ice-cold vodka, copper mules, and neon snow light.",
     mapPin: { x: 30, y: 18 },
     master: {
@@ -1584,6 +1586,7 @@ export const VENUES = [
     kind: "Cantina", accent: "#f0a35e", sign: "LA CANTINA",
     bg: "assets/venues/cantina.png",
     interior: "assets/venues/interiors/cantina.png",
+    hubBgSize: "170%", hubBgPos: "22% 70%", mascotFloor: "11%",
     blurb: "Agave bottles, salt rims, and a sunset grapefruit glow.",
     mapPin: { x: 52, y: 16 },
     master: {
@@ -1597,6 +1600,7 @@ export const VENUES = [
     kind: "Aperitivo bar", accent: "#ff8a3d", sign: "APERITIVO",
     bg: "assets/venues/aperitivo.png",
     interior: "assets/venues/interiors/aperitivo.png",
+    hubBgSize: "170%", hubBgPos: "20% 68%", mascotFloor: "10%",
     blurb: "Campari-red hour on a Milanese square.",
     mapPin: { x: 78, y: 20 },
     master: {
@@ -1610,6 +1614,7 @@ export const VENUES = [
     kind: "Rum bar", accent: "#e8c547", sign: "EL FLORIDITA",
     bg: "assets/venues/floridita.png",
     interior: "assets/venues/interiors/floridita.png",
+    hubBgSize: "170%", hubBgPos: "20% 70%", mascotFloor: "10%",
     blurb: "Hemingway's rum cathedral — mint, lime, and white rum.",
     mapPin: { x: 16, y: 48 },
     master: {
@@ -1623,6 +1628,7 @@ export const VENUES = [
     kind: "Speakeasy", accent: "#d4a017", sign: "SPEAKEASY",
     bg: "assets/venues/speakeasy.png",
     interior: "assets/venues/interiors/speakeasy.png",
+    hubBgSize: "175%", hubBgPos: "18% 66%", mascotFloor: "11%",
     blurb: "Jazz, rye, and passwords behind a unmarked door.",
     mapPin: { x: 42, y: 50 },
     master: {
@@ -1636,6 +1642,7 @@ export const VENUES = [
     kind: "Champagne salon", accent: "#e8b4d4", sign: "LE BOUDOIR",
     bg: "assets/venues/boudoir.png",
     interior: "assets/venues/interiors/boudoir.png",
+    hubBgSize: "170%", hubBgPos: "20% 68%", mascotFloor: "10%",
     blurb: "Velvet booths, coupe glasses, and late-night Champagne.",
     mapPin: { x: 70, y: 48 },
     master: {
@@ -1649,6 +1656,7 @@ export const VENUES = [
     kind: "Whisky bar", accent: "#c98a3a", sign: "THE STILL",
     bg: "assets/venues/still.png",
     interior: "assets/venues/interiors/still.png",
+    hubBgSize: "170%", hubBgPos: "20% 70%", mascotFloor: "10%",
     blurb: "Peat smoke, heather honey, and a Highland pour.",
     mapPin: { x: 48, y: 72 },
     master: {
@@ -1662,6 +1670,7 @@ export const VENUES = [
     kind: "Tiki bar", accent: "#ff6b4a", sign: "SUNSET TIKI",
     bg: "assets/venues/sunset_tiki.png",
     interior: "assets/venues/interiors/sunset_tiki.png",
+    hubBgSize: "165%", hubBgPos: "22% 72%", mascotFloor: "12%",
     blurb: "Torchlight, carved mugs, and rum from every island.",
     mapPin: { x: 82, y: 80 },
     master: {
@@ -1678,6 +1687,7 @@ export const VENUES_UNDER = [
     kind: "Soda shop", accent: "#ff6b8a", sign: "SODA FOUNTAIN",
     bg: "assets/venues/soda_fountain.png",
     interior: "assets/venues/interiors/soda_fountain.png",
+    hubBgSize: "165%", hubBgPos: "20% 70%", mascotFloor: "11%",
     blurb: "Chrome stools, cherry syrup, and zero proof.",
     mapPin: { x: 18, y: 48 },
     master: {
@@ -1691,6 +1701,7 @@ export const VENUES_UNDER = [
     kind: "Juice bar", accent: "#7dce82", sign: "JUICE BAR",
     bg: "assets/venues/juice_bar.png",
     interior: "assets/venues/interiors/juice_bar.png",
+    hubBgSize: "165%", hubBgPos: "20% 68%", mascotFloor: "11%",
     blurb: "Fresh citrus, ginger fizz, and green counters.",
     mapPin: { x: 48, y: 36 },
     master: {
@@ -1704,6 +1715,7 @@ export const VENUES_UNDER = [
     kind: "Beach shack", accent: "#45c4e6", sign: "BEACH SHACK",
     bg: "assets/venues/beach_shack.png",
     interior: "assets/venues/interiors/beach_shack.png",
+    hubBgSize: "160%", hubBgPos: "22% 62%", mascotFloor: "14%",
     blurb: "Sand underfoot and virgin tropicals on ice.",
     mapPin: { x: 78, y: 70 },
     master: {
