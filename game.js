@@ -1044,6 +1044,15 @@ function drinkGlassSrc(recipe) {
   return resolveAssetUrl(path);
 }
 
+const MAP_STAR_PATH = "M12 2.1l2.85 6.05 6.65.72-5 4.55 1.4 6.48L12 16.62 6.1 19.9l1.4-6.48-5-4.55 6.65-.72z";
+
+function mapStarMarkup(on) {
+  return `<svg class="map-node-star${on ? " is-on" : ""}" viewBox="0 0 24 24" aria-hidden="true">`
+    + `<path class="star-shadow" d="${MAP_STAR_PATH}"></path>`
+    + `<path class="star-face" d="${MAP_STAR_PATH}"></path>`
+    + `</svg>`;
+}
+
 const PATH_LAYOUTS = {
   1: [{ x: 50, y: 58 }],
   2: [{ x: 28, y: 60 }, { x: 70, y: 40 }],
@@ -1262,13 +1271,17 @@ function renderPath(venue, map, cleared) {
     btn.style.left = pos.x + "%";
     btn.style.top = pos.y + "%";
     btn.dataset.stage = String(d.index);
-    btn.setAttribute("aria-label", locked ? `${d.recipe.name} (locked)` : d.recipe.name);
-    const stars = [0, 1, 2].map((s) => `<span class="${s < best.stars ? "on" : ""}">★</span>`).join("");
+    btn.setAttribute(
+      "aria-label",
+      locked
+        ? `${d.recipe.name} (locked)`
+        : `${d.recipe.name}, ${best.stars} of 3 stars`
+    );
+    const stars = [0, 1, 2].map((s) => mapStarMarkup(!locked && s < best.stars)).join("");
     btn.innerHTML =
-      `<span class="map-node-glass"><img alt="" draggable="false" src="${drinkGlassSrc(d.recipe)}" /></span>` +
+      `<span class="map-node-stars">${stars}</span>` +
       `<span class="map-node-num">${locked ? "🔒" : d.localIdx + 1}</span>` +
-      `<span class="map-node-name">${d.recipe.name}</span>` +
-      `<span class="map-node-stars">${stars}</span>`;
+      `<span class="map-node-name">${d.recipe.name}</span>`;
     btn.addEventListener("click", () => onPathNodeTap(venue, d));
     nodesEl.appendChild(btn);
     mapDrinkEls[d.index] = btn;
@@ -1365,22 +1378,7 @@ function openVenueSheet() { /* sheet removed */ }
 
 function placeDuckOnMap() {
   const duck = $("#map-path-duck");
-  if (!duck || mapStep !== "path") return;
-  const venue = focusedVenue();
-  const cleared = getMap().cleared || 0;
-  applyMascotTier(duck, rankForCleared(cleared));
-  const idx = selectedStageIndex ?? defaultStageForVenue(venue);
-  const node = mapDrinkEls[idx];
-  if (!node) {
-    duck.hidden = true;
-    return;
-  }
-  duck.hidden = false;
-  duck.style.left = node.style.left;
-  duck.style.top = `calc(${node.style.top} - 38px)`;
-  duck.classList.remove("is-settle");
-  void duck.offsetWidth;
-  duck.classList.add("is-settle");
+  if (duck) duck.hidden = true;
 }
 
 function centerOnVenue(venueId) {

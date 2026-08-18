@@ -162,9 +162,18 @@
             <div class="map-path-bg" id="map-path-bg" aria-hidden="true"></div>
             <p class="map-path-kicker" id="map-path-kicker"></p>
             <div class="map-path-board" id="map-path-board">
+              <svg class="map-star-defs" aria-hidden="true" focusable="false">
+                <defs>
+                  <linearGradient id="map-star-fill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="#fff6c4"/>
+                    <stop offset="42%" stop-color="#e9b949"/>
+                    <stop offset="100%" stop-color="#9a6410"/>
+                  </linearGradient>
+                </defs>
+              </svg>
               <svg class="map-path-ribbon" id="map-path-ribbon" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
               <div class="map-path-nodes" id="map-path-nodes"></div>
-              <div class="map-path-duck mascot-duck" id="map-path-duck" aria-hidden="true"></div>
+              <div class="map-path-duck mascot-duck" id="map-path-duck" hidden aria-hidden="true"></div>
             </div>
             <div class="map-path-pages" id="map-path-pages" hidden></div>
           </div>

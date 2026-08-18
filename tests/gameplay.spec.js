@@ -23,6 +23,10 @@ test.describe("gameplay smoke", () => {
     await expect(page.locator("#map-path:not([hidden])")).toBeVisible();
     await expect(page.locator("#screen-game.is-active")).toHaveCount(0);
     await expect(page.locator(".map-node").first()).toBeVisible();
+    await expect(page.locator(".map-node-glass")).toHaveCount(0);
+    await expect(page.locator(".map-node-star")).toHaveCount(9);
+    await expect(page.locator("#map-path-duck")).toBeHidden();
+    await expect(page.locator(".map-node.is-current .map-node-star.is-on")).toHaveCount(0);
     await expect(page.locator("#btn-map-play")).toContainText(/Pour/i);
     await page.locator("#btn-map-play").click({ force: true });
     await expect(page.locator("#screen-game.is-active")).toBeVisible({ timeout: 15_000 });
