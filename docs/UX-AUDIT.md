@@ -505,3 +505,328 @@ The “white space” is not missing widgets. It is a **gap in the composition**
 - City crawl / multi-bar plate
 - Implementing live CSS until a clustered mock is chosen
 
+---
+
+## 10. Map path glass tiles — 2026-08-18
+
+**Surface:** Candy drink path (`.map-node` / `.map-node-glass img` on `#map-path`).  
+**Evidence:** Player screenshot of Zavod node 1 (Screwdriver); `assets/glasses/*.png` are **RGB, no alpha** (corner ~253,253,254).  
+**Maturity:** beta path chrome with a **catalog-photo** glyph — not candy, not station glass.
+
+### Summary
+
+The gold bezel and dark node are the right candy grammar (`map-v3-candy-drinks`). What sits inside is wrong: `drinkGlassSrc()` feeds shop-style product shots (`GLASS_PHOTO` in `glass.js`) into a 34×32px well. Those PNGs have no transparency, so each node punches a **white rectangle** through the gold night. That is a visual-system break (Major): the path looks like a merch grid, not a drink trail. The station already has the correct vessel language — `Glass.buildGlass()` SVG with liquid — and the v3 mock shows **filled, colored cocktails** in the disc, never empty glassware on a white plate.
+
+**Call:** do not keep the PNG on the path. Either a filled SVG glass (same as the station) or a number-only gold candy. Do not “crop the white” in CSS as the long-term look.
+
+### Findings
+
+| ID | Severity | Screen | Problem | Evidence | Suggested fix | Visual-system? |
+|----|----------|--------|---------|----------|---------------|----------------|
+| P1 | Major | Map path | Opaque white glass photo in the candy node | `.map-node-glass img`; `assets/glasses/highball.png` mode RGB; `game.js` `drinkGlassSrc()` | Stop using `GLASS_PHOTO` on `.map-node`. Put a **drink token** in the disc (see Top fixes). | Y |
+| P2 | Minor | Map path | Empty grayscale glass does not encode the cocktail | Screwdriver node shows a blank highball | Token should read as the *drink* (liquid color / SVG fill), not the SKU of the glass. Name already sits under the node. | Y |
+| P3 | Polish | Map path | 32px product shot is unreadable on landscape phone | `max-width/height: 32px` on `.map-node-glass img` | If keeping a vessel, use the station SVG at ~28px, not a 1024×1536 JPEG-style PNG. | N |
+
+### Recommended visual (pick one)
+
+**1. Preferred — station SVG in the candy disc (no new art)**  
+Inner HTML of `.map-node-glass` becomes a scaled `Glass.buildGlass(recipe.glass)` (or a tiny “icon” profile: rim + liquid band only). Fill liquid from the recipe’s typical color (Screwdriver = orange, Mule = copper, etc.) or a single gold-amber fill. Clip to the circle. Same glass language as the pour, zero white plate.
+
+**2. Strong candy alternative — number is the glyph**  
+Drop the photo. Current node = gold disc + big **1**; locked = dim disc + lock; done = gold disc + check. Name stays under the node. Matches classic candy paths and the north-star “one job: pick the drink.” Use this if SVG-at-32px still feels busy next to the duck.
+
+**3. Reject as the target look**  
+- `mix-blend-mode: multiply` to knock out white (works on the dark node, eats glass highlights, still an empty catalog glass).  
+- Re-export PNGs with alpha only (fixes the rectangle, keeps the empty highball — still not candy).  
+- White circle mask around the PNG (makes a white *disc* instead of a white *rect* — same bug, rounder).
+
+### Top fixes
+
+1. **P1** — Remove `GLASS_PHOTO` from path nodes.
+2. **Preferred token** — SVG glass + liquid, clipped in `.map-node`.
+3. **Fallback token** — number-only gold candy if the SVG is muddy at 32px.
+4. Leave `GLASS_PHOTO` on the station / shop if those surfaces need the catalog shot — path is not shop.
+
+### Out of scope
+
+- New illustrated cocktail stickers (v3 mock art) until we have a set for every recipe
+- Changing path layout, ribbon, or duck settle
+- Implementing this pass (recommendation only)
+
+### Resolved / remaining (this slice)
+
+| | |
+|---|---|
+| Resolved | P1–P3 live: glass photos removed; stars in the disc, filled only when earned; path duck hidden. |
+| Remaining | Hub H1–H4 unchanged. Current-stop pop is §11. |
+
+---
+
+## 11. Candy path — current stop does not pop — 2026-08-18
+
+**Surface:** `#map-path` `.map-node.is-current` (frontier drink). Player asked to drop the path duck and still **see which stop they are on**.  
+**Evidence:** Live `.map-node.is-current` was only +8px and a soft gold `box-shadow`; locked/done nodes share the same gold ribbon and dark discs, so the current stop did not read at a glance on landscape. v3 mock (`mocks/map-ideas/map-v3-candy-drinks.jpg`) uses a thicker halo, sparkles, and a marker on the active node.  
+**Maturity:** beta candy path; orientation is the remaining path job.
+
+### Summary
+
+Stars-in-disc + earned-only fill is the right glyph. After removing the duck, **orientation collapsed**: current, selected, and done all looked like gold-ringed candy. North-star still wants a guide on the path, but the player rule for this screen is **no duck**. Emphasize with candy grammar instead: bigger disc, hard gold halo, pulse, and a **NOW** chip. Do not restore the mascot on `#map-path-duck`. Do not grow every node — contrast is the pop.
+
+**Maturity: beta** — playable; current stop must be readable before polish-ready.
+
+### Findings
+
+| ID | Severity | Screen | Problem | Evidence | Suggested fix | Visual-system? |
+|----|----------|--------|---------|----------|---------------|----------------|
+| C1 | Major | Map path | Current stop does not pop vs other gold discs | `.map-node.is-current` size 64px vs 56px; same gold family as ribbon | Scale + hard double ring + pulse + NOW chip on `.is-current` only | Y |
+| C2 | Minor | Map path | `.is-selected` used the same glow as current | `.map-node.is-current, .map-node.is-selected` shared rule | Quiet ring for selected-not-current; full pop only for frontier | Y |
+| C3 | Polish | Map path | Drink name under current is the same white 10px as locked | `.map-node-name` | Gold, slightly larger name on current | N |
+
+### Top fixes (this slice)
+
+1. **C1** — Current node: larger disc, dark+gold double halo, breathing `box-shadow` pulse, dashed orbit, **NOW** pill above the disc.
+2. **C2** — Do not give `.is-selected` the same treatment.
+3. **C3** — Current drink name in gold.
+4. Respect `prefers-reduced-motion` (static halo, no pulse/orbit).
+
+### Out of scope
+
+- Putting the duck back on the candy path
+- City crawl / multi-bar map
+- New cocktail illustration stickers
+- Hub clustered CTA layout (still mock-only)
+
+### Resolved / remaining (path highlight)
+
+| | |
+|---|---|
+| Resolved | C1–C3 implemented in `styles.css` / `game.js` (NOW chip). |
+| Remaining | Hub H1–H4. Duck stays on venue hero only. |
+
+---
+
+## 12. Mixologist verdict — functionality & gameplay — 2026-08-18
+
+**Surface:** `#screen-mix-result` vs mock `mocks/mix-verdict-landscape.png` (852×393 @2x, `mocks/_compose_mix_verdict.py`).  
+**Live:** `index.html` mix card, `game.js` `serveMix` / `showMixResult` / mix action listeners, `styles.css` `.mix-card` (avatars and quotes hidden; `overflow-y: auto` + all children `flex-shrink: 0`).  
+**Mode job:** Invent → diagnose → persist / share / shop the kit → iterate. Unlocks after `STAGES_TO_UNLOCK` (5) campaign clears (`mapUnlocked()`). This is **not** campaign `#screen-result`.  
+**Maturity:** live Mixologist loop is **beta** (scoring and verbs exist; landscape **clips the teaching and the exits**). The mock is the right functional target if tap targets are grown. Not polish-ready until live matches the mock without scroll.
+
+This slice **supersedes F22** (“strip to verdict + Make another”). That diet belongs on campaign result (F11). Applying it here would delete Mixologist’s persist and meta loops.
+
+### Mixologist loop (what the player is doing)
+
+```mermaid
+flowchart LR
+  Hub["Hub Mixologist"] --> Station["Sandbox station<br/>ticket not flippable"]
+  Station -->|Serve| Verdict["#screen-mix-result"]
+  Verdict -->|Tweak it| Pour["Ingredients step<br/>same build"]
+  Pour --> Station
+  Verdict -->|Make another| Fresh["startMixologist<br/>empty build"]
+  Fresh --> Station
+  Verdict -->|Save to My Bar| Name["Name modal"] --> MyBar["#screen-mybar<br/>Recreate later"]
+  Verdict -->|Shop gear| ShopScoped["openShop glass+method"]
+  Verdict -->|Lounge Shop| ShopAll["openShop null"]
+  Verdict -->|Share| Community
+  Verdict -->|Quit| Hub
+```
+
+Campaign result answers “did I match the ticket?” Mix result answers “what did **this random panel** think of **my** drink, and what do I do with it?” Judges are the mechanic (`scoreWithJudges` in `judges.js`: three scores → average → stars/verdict). Flavor bars and bartender tips are the **coaching** that makes Tweak worth tapping.
+
+### Function map — keep all of these in play
+
+| Control | Live selector | Gameplay job | Cut it? |
+|---|---|---|---|
+| Score / stars / verdict | `#mix-score` `#mix-stars` `#mix-verdict` | Outcome of the serve | No — primary readout |
+| Three judge portraits + scores | `#judges-panel` / `.judge-avatar-wrap` | **Who** judged you; Mixologist identity vs campaign pills | No — live currently hides faces (`.mix-card .judge-avatar-wrap { display: none }`) |
+| Tap a judge for quote | `.judge-bubble-quote` (+ reason/tip) | Panel disagreement (Freya 57 vs Otto/Tommy 67) | No — live hides quote/reason/tip on `.mix-card` |
+| Original / classic + note | `#mix-classic` `#mix-note` | Named the invention vs “you made a Negroni” | No — identity of the pour |
+| ABV / vol / family | `#mix-meta` | What you actually mixed | No — diagnosis |
+| Five flavor bars | `#flavor-bars` | Why the panel split (Sweet maxed → Freya) | No — coaching; live clips these on short landscape |
+| Bartender's notes | `#mix-tips` | Actionable Tweak hint | No — user-critical; live list can be 2–3 lines |
+| Tweak it | `#btn-mix-tweak` | Same drink, jump to pour (`state.stepIndex` = ingredients) | No — craft loop |
+| Make another | `#btn-mix-another` | New invention (`startMixologist` clears build) | No — primary iterate CTA |
+| Save to My Bar | `#btn-mix-save` | Persist `lastMix` → Recreate in My Bar | **No** — without this, Mix has no collection |
+| Shop the gear | `#btn-mix-shop` | Scoped demo shop from glass+method | Keep, but it is demo (F11 cousin) |
+| Share | `#btn-mix-share` | Community beat; needs backend | Keep; fail already toasts |
+| Lounge row | `#mix-lounge` | **Only hub door** for Shop / Recipes / My Bar / Community / Ranks (F24) | **Keep on this screen until F24 ships a hub door** |
+| Quit | `#btn-mix-quit` | Exit to hub | No — dead-end if missing |
+
+Duck is **N/A** here. Orientation on Mix is the three judges, not the mascot. Do not add a path duck to this screen.
+
+### Live vs mock (gameplay, not paint)
+
+Live landscape **fails the loop**: `.mix-card` scrolls because every block is `flex-shrink: 0`, and phone CSS historically hid overflow. Testers lose flavor bars and Make another — that is a **dead-end / unreadable coaching** failure (checklist: primary exit in short landscape; errors recoverable only if Tweak is visible). Compact `renderJudgesInteractive` also drops reason, tip, likes/dislikes; mix CSS then drops the quote. The player sees three **name+score pills**. Mixologist without faces is a campaign result with extra buttons.
+
+The mock restores the loop on one 393px-tall stage: portraits + one open quote, flavor strip on the right, notes, lounge, Tweak/Save/Shop/Share, gold Make another, Quit. That is the correct **functional** density. Cognitive load is high (one screen, many jobs) but those jobs are the mode. Hierarchy is right: verdict + faces first, iterate CTA last, persist/meta as ghosts.
+
+### Findings
+
+| ID | Severity | Screen | Problem | Evidence | Suggested fix | Visual-system? |
+|----|----------|--------|---------|----------|---------------|----------------|
+| M1 | **Blocker** | Mix result live | Flavor bars and/or Make another leave the short-landscape viewport; player cannot finish the craft loop without scroll | `.mix-card` `overflow-y: auto`; children `flex-shrink: 0`; `#flavor-bars` after judges; no layout test injects `#screen-mix-result` | Ship the mock’s two-column landscape: faces left, meta+bars right, actions docked; assert last `.fbar-row` + `#btn-mix-another` in viewport | N |
+| M2 | **Major** | Mix result live | Judges are the mode; avatars and quotes are CSS-hidden | `.mix-card .judge-avatar-wrap { display: none }`; `.mix-card .judge-bubble-quote` (and reason/tip) `display: none` | Circular portraits + score coins as in mock; tap seat for that judge’s comment (default: faces only, notes always visible) | Y |
+| M3 | **Major** | Mix result | Coaching payload is richer than the mock shows, but live throws it away | `renderJudgesInteractive` writes `comment`, `reason`, `tip`, likes/dislikes; compact + mix CSS hide all but name/score; `#mix-tips` is the only remaining teacher | Keep `#mix-tips` always on. On tap, show **comment + one tip** (not the full desktop essay). Do not require tap to learn “ease off sugar” | N |
+| M4 | **Major** | Mix result mock + live | Two Shop doors, two scopes | `#btn-mix-shop` → `openShop({ glass, method })`; `#btn-shop` in `.mix-lounge` → `openShop(null)` | One Shop control on this screen (scoped “Shop gear”). Lounge Shop can wait for F24 hub door | N |
+| M5 | **Major** | Mix result | Save is easy to skip; Make another leaves the verdict and Save is not on the station | `#btn-mix-another` → `startMixologist()`; Save only on `#screen-mix-result`; `lastMix` is not offered again until the next serve | Keep Save on the verdict (mock is right). Do not hide it in a “diet.” Optional: disable Make another until Saved or “Skip save,” or toast “Unsaved invention” | N |
+| M6 | **Minor** | Mix result mock | Lounge chips and ghost actions undershoot 44px thumbs | Mock lounge ~22px tall; action pills ~32px; Expo landscape | 36–44px hit height; fewer, larger ghosts if they collide | N |
+| M7 | **Minor** | Mix result mock | Abbreviated bars weaken the Freya lesson | Mock `Str/Swt/Sour/Bit/Fizz` vs live `Strong/Sweet/...` | Keep live full labels (or two-letter with `aria-label`); Sweet must read as Sweet when it is the miss | N |
+| M8 | **Polish** | Mix result mock | Stars read as zero for a 64 / “Solid pour” | Mock compositor `★★★☆☆` rendered as empty outlines; `starsFor(64)` is **3** (`judges.js`) | Fill three stars so the mock matches live scoring | N |
+
+### Top 10 (this slice — Mixologist only)
+
+1. **M1** — Two-column no-scroll landscape so bars + Make another stay on stage.  
+2. **M2** — Show judge portraits; pills-only kills the tasting fantasy.  
+3. **M3** — Always-on bartender notes; tap for that judge’s line, not a wall of prefs.  
+4. **Do not revive F22 diet** — Save, Share, Tweak, notes, and lounge (until F24) stay in the mode.  
+5. **M5** — Save remains visible; iterate CTAs must not maroon an unsaved invention with no way back.  
+6. **M4** — One Shop on this screen (scoped).  
+7. **F24** — Hub door for Book / Shop / Ranks so lounge can eventually leave the verdict. Until then, keep the row.  
+8. **M6** — Thumb-sized lounge + ghosts.  
+9. **M7** — Readable flavor names (Sweet, not only Swt).  
+10. Layout-integrity test: inject mix-result, assert last flavor row + `#btn-mix-another` in viewport (gameplay QA missed this because hunts never open Mix).
+
+### Out of scope
+
+- Changing `scoreWithJudges` / recipe math  
+- Real shop checkout  
+- Community backend  
+- Animated judge reveal (campaign `opts.animated`; Mix is instant today)  
+- Duck on mix-result  
+- Implementing live CSS/JS until this mock is signed off  
+
+### Resolved / remaining (this slice)
+
+| | |
+|---|---|
+| Resolved (design) | Mock keeps the full Mixologist verb set; two-column answers the clip. F22 “strip the lounge” is **withdrawn** for this screen. |
+| Remaining (live) | Hub H1–H4 unchanged. Mix UX layout is live; stacked card is `?mixLegacy=1` / debug **Mix result: Legacy**. |
+
+---
+
+## 13. Mixologist verdict — recommended visual — 2026-08-18
+
+**Surface:** Proposed landscape composition `mocks/mix-verdict-ux.png` (852×393 @2x, `mocks/_compose_mix_verdict_ux.py`).  
+**Supersedes as target look:** `mocks/mix-verdict-landscape.png` (v1 packed both lounge and actions on the bottom; dual Shop; abbreviated bars; empty stars).  
+**Live:** unchanged. Do not implement until this mock is signed off.  
+**North-star:** gold cocktail night; one gold-lip primary CTA; Mixologist faces are the “guide” (no duck).  
+**Maturity of this mock:** prototype of the **correct jobs**, not polish-ready type/motion.
+
+### Summary
+
+Mix result is a **tasting room**, not a campaign score sheet and not a lounge dashboard. The v2 visual keeps every gameplay verb from §12, then **ranks them in space**: judges are the hero; flavor + identity sit in a right strip so coaching never scrolls away; bartender notes stay on stage without a tap; one 40px dock holds Tweak / Save / Shop / Share / **Make another**; lounge moves to the **header** and **drops Shop** (M4). Purple panel chrome is replaced with warm brown/gold. Three filled stars match `starsFor(64)`.
+
+**Call:** treat `mix-verdict-ux.png` as the ship target for `#screen-mix-result`. Reject going back to pills-only judges or a campaign-style “diet” that hides Save.
+
+### Composition (one 393px stage, no page scroll)
+
+```
+Header   THE JUDGES' VERDICT     [Recipes][My Bar][Community][Ranks]  Quit
+Score    YOUR CREATION   64/100  ★★★☆☆  Solid pour
+         Panel 3 of 20 · avg 64
+
+Left     Otto 67   Freya 57   Tommy 67     Right   Original
+         (gold-ring portraits + coins)            sipper line
+         Freya quote (tap-to-read, one line)      ABV · vol · family  (one row)
+         BARTENDER'S NOTES (always on)            Strong / Sweet / Sour / Bitter / Fizz
+
+Dock     [Tweak it] [Save to My Bar] [Shop gear · demo] [Share]     [Make another →]
+```
+
+### Findings (visual vs v1 / live)
+
+| ID | Severity | Screen | Problem | Evidence | Suggested fix | Visual-system? |
+|----|----------|--------|---------|----------|---------------|----------------|
+| V1 | **Blocker** | Mix result live | Still pills + scroll | `.mix-card` hide avatars; overflow | Implement this two-column + dock | Y |
+| V2 | Major | Mix result v1 mock | Two bottom rows steal the CTA and duplicate Shop | `mix-verdict-landscape.png` lounge + actions; `#btn-shop` + `#btn-mix-shop` | Header lounge, no Shop chip; one scoped **Shop gear · demo** in the dock | N |
+| V3 | Minor | Mix result v2 mock | Header lounge chips ~26px (below 44px) | `_compose_mix_verdict_ux.py` header pills | Accept as secondary until F24 hub door; dock stays ≥40px | N |
+| V4 | Polish | Mix result v2 mock | Instant report, no tasting beat | Live Mix skips `opts.animated` | Optional later: scores pop on the coins; quote stays tap | N |
+
+### Why this, not the alternatives
+
+- **Not campaign result diet** (verdict + Make another only) — deletes Save / notes / judges, which *are* Mixologist.  
+- **Not v1 stacked chrome** — lounge + ghosts on the bottom is two competing docks; Shop twice.  
+- **Not a wall of judge prefs** — one quote line + always-on notes. Tip/reason wait behind tap (M3).  
+- **Not a duck on this screen** — three portraits are the orientation.  
+- **Shop labeled demo** — checklist honesty; still one control (M4).
+
+### Top fixes after sign-off (live)
+
+1. Two-column `#screen-mix-result`: `#judges-panel` portraits left; `#mix-classic` / `#mix-meta` / `#flavor-bars` right.  
+2. Un-hide `.mix-card .judge-avatar-wrap`; hide quote until seat tap; keep `#mix-tips` visible.  
+3. Dock `.mix-actions` at the bottom of the stage (`flex-shrink: 0`); `#btn-mix-another` gold-lip.  
+4. Move `#mix-lounge` to the header; remove lounge Shop.  
+5. Full flavor labels; filled stars from `panel.stars`.  
+6. Layout test: last `.fbar-row` + `#btn-mix-another` in the 393px viewport.
+
+### Out of scope
+
+- Live CSS/JS until sign-off  
+- F24 hub Bar-book door (this mock is the stopgap)  
+- Judge scoring rules  
+- Shop payments / share backend  
+
+### Resolved / remaining (visual)
+
+| | |
+|---|---|
+| Resolved (design) | M4 dual Shop, M7 labels, M8 stars, one primary CTA, gold-night panels, notes always on. |
+| Remaining | Live still v0. Header chips short (V3). F24 still needed to retire header lounge. |
+
+---
+
+## 14. Mixologist judges undersized on large phones — 2026-08-18
+
+**Surface:** `#screen-mix-result` UX card (not legacy). Player screenshot: iPhone-class landscape (~Pro Max); three gold-ring portraits sit in a wide well with empty purple between them.  
+**Live:** `.judge-portrait { width/height: clamp(68px, 16vh, 96px) }` in `styles.css`; `.judge-scene.is-mix-ux` is `grid-template-columns: repeat(3, minmax(0, 1fr))`.  
+**Closest matrix device:** `phone-iphone-15-pro-max` (Playwright has no iPhone 16 preset; 15 Pro Max landscape is the stand-in).  
+**North-star:** Mixologist faces **are** the guide on this screen (no duck). If they read as chips, the tasting room fails hierarchy.  
+**Maturity:** beta layout; large-phone scale is not polish-ready.
+
+### Summary
+
+Yes — on a Pro Max the panel is the hero job and the art is still **SE-sized**. `16vh` on ~430px-tall landscape is ~69px, then the **96px cap** freezes every tall phone at the same disc as iPhone SE. The three seats are `1fr` columns, so extra width becomes **gap**, not face. Bartender notes and the flavor strip grow; Otto/Freya/Tommy do not. That is a Major visual-system miss (guide too small), not a new screen.
+
+Do not grow them on Flip cover / SE (68px floor is correct there). Scale the **trio as a cluster** in the judges column, capped so notes and the dock never clip.
+
+### Findings
+
+| ID | Severity | Screen | Problem | Evidence | Suggested fix | Visual-system? |
+|----|----------|--------|---------|----------|---------------|----------------|
+| J1 | **Major** | Mix result UX | Portraits capped at 96px on every landscape taller than SE | `.mix-card .judge-portrait` `clamp(68px, 16vh, 96px)`; 16vh≈69px on Pro Max | Size from the **judges column**, not a 96px ceiling: e.g. `clamp(68px, min(28vh, 22cqw), 168px)` on a container query on `#judges-panel` | Y |
+| J2 | **Major** | Mix result UX | Trio spreads into three islands; empty bar between faces | `.judge-scene` `repeat(3, minmax(0, 1fr))` inherited from campaign | `grid-template-columns: repeat(3, max-content); justify-content: center; gap: clamp(12px, 2vw, 28px)` so width buys **bigger discs**, not bigger gutters | Y |
+| J3 | Minor | Mix result UX | Score coins / names stay 11–12px while faces should grow | `.judge-score-coin` top uses the same 96px clamp; `.judge-avatar-name` 12px | Coin and name scale with portrait (`em` or matching clamp). Keep ≥44px seat hit area | N |
+| J4 | Polish | Mix result | Notes list looks like a third column under tiny faces | `#mix-tips` under a sparse trio | Once J1–J2 land, notes sit **under** a filled stage; do not enlarge notes to fill the hole | N |
+
+### Recommended visual (large landscape)
+
+Keep the two-column tasting room. On ≥390px-tall / ≥800px-wide landscape (15/16 Pro Max class):
+
+- Disc **~140–168px** (about 1.5–1.75× today’s 96px), gold ring + coin on the chin  
+- Three faces **grouped center-left** of the judges well, not stretched to the spec strip  
+- Names under coins; tap still opens one quote  
+- SE / Flip cover **unchanged** (68–88px, icon lounge, compact dock)
+
+Reject: a fourth judge, a duck on this screen, or stretching portraits into ovals.
+
+### Top fixes
+
+1. **J1** — Raise the clamp max; prefer `cqw`/`cqh` on `#judges-panel` (`container-type: size`).  
+2. **J2** — `max-content` columns + centered cluster.  
+3. **J3** — Coin position tracks portrait size (today `top: clamp(68px, 16vh, 96px)` will miss a 168px face).  
+4. Assert on `phone-iphone-15-pro-max` that portrait width ≥ 130px and the three seats do not span the full judges column with >40px gutters.
+
+### Out of scope
+
+- iPhone 16 Playwright preset (use 15 Pro Max)  
+- Legacy stacked mix card  
+- Hub / map duck  
+- Implementing until this scale is signed off  
+
+### Resolved / remaining (this slice)
+
+| | |
+|---|---|
+| Resolved | SE/Flip dock overlap. **J1–J3** Pro Max cluster + 132–168px discs. |
+| Remaining | F24 hub lounge door. |
+

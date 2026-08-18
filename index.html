@@ -352,10 +352,12 @@
           </div>
           <p class="judges-title" id="mix-judges-title">⚖️ Tonight's panel</p>
           <div class="judges-panel" id="judges-panel"></div>
-          <p class="mix-classic" id="mix-classic"></p>
-          <p class="mix-note" id="mix-note"></p>
-          <div class="mix-meta" id="mix-meta"></div>
-          <div class="flavor-bars" id="flavor-bars"></div>
+          <div class="mix-spec-col" id="mix-spec-col">
+            <p class="mix-classic" id="mix-classic"></p>
+            <p class="mix-note" id="mix-note"></p>
+            <div class="mix-meta" id="mix-meta"></div>
+            <div class="flavor-bars" id="flavor-bars"></div>
+          </div>
           <div class="mix-tips-wrap">
             <p class="mix-tips-title">Bartender's notes</p>
             <ul class="mix-tips" id="mix-tips"></ul>
@@ -367,14 +369,16 @@
             <button id="btn-mix-share" class="btn btn-ghost">🌐 Share</button>
             <button id="btn-mix-another" class="btn btn-primary">Make another →</button>
           </div>
-          <nav class="mix-lounge" id="mix-lounge" aria-label="Mixologist lounge">
-            <button id="btn-shop" class="mix-lounge-btn" type="button"><span class="ico">🛍</span>Shop</button>
-            <button id="btn-recipes" class="mix-lounge-btn" type="button"><span class="ico">📖</span>Recipes</button>
-            <button id="btn-mybar" class="mix-lounge-btn" type="button"><span class="ico">🍹</span>My Bar</button>
-            <button id="btn-community" class="mix-lounge-btn" type="button"><span class="ico">🌐</span>Community</button>
-            <button id="btn-leaderboard" class="mix-lounge-btn" type="button"><span class="ico">🏆</span>Ranks</button>
-          </nav>
-          <button id="btn-mix-quit" class="btn btn-ghost btn-sm mix-quit">Quit to menu</button>
+          <div class="mix-top-tools">
+            <nav class="mix-lounge" id="mix-lounge" aria-label="Mixologist lounge">
+              <button id="btn-shop" class="mix-lounge-btn mix-lounge-shop" type="button" aria-label="Shop" title="Shop"><span class="ico">🛍</span><span class="mix-lounge-txt">Shop</span></button>
+              <button id="btn-recipes" class="mix-lounge-btn" type="button" aria-label="Recipes" title="Recipes"><span class="ico">📖</span><span class="mix-lounge-txt">Recipes</span></button>
+              <button id="btn-mybar" class="mix-lounge-btn" type="button" aria-label="My Bar" title="My Bar"><span class="ico">🍹</span><span class="mix-lounge-txt">My Bar</span></button>
+              <button id="btn-community" class="mix-lounge-btn" type="button" aria-label="Community" title="Community"><span class="ico">🌐</span><span class="mix-lounge-txt">Community</span></button>
+              <button id="btn-leaderboard" class="mix-lounge-btn" type="button" aria-label="Ranks" title="Ranks"><span class="ico">🏆</span><span class="mix-lounge-txt">Ranks</span></button>
+            </nav>
+            <button id="btn-mix-quit" class="btn btn-ghost btn-sm mix-quit">Quit to menu</button>
+          </div>
         </div>
       </section>
 
@@ -569,6 +573,7 @@
       <div class="dbg-tools" id="dbg-tools">
         <span class="dbg-label">DEBUG</span>
         <button id="dbg-diagnostics" class="dbg-btn" title="View local usage diagnostics">📊 Diagnostics</button>
+        <button id="dbg-mix-layout" class="dbg-btn" title="Toggle Mixologist verdict layout (UX vs previous stacked card)">Mix result: UX</button>
         <button id="dbg-reset" class="dbg-btn dbg-danger" title="Wipe identity & progress, restart fresh">Reset everything</button>
       </div>
     </div>

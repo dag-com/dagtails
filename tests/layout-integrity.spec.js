@@ -327,4 +327,79 @@ test.describe("layout integrity", () => {
     expect(report.nextIsCircle, JSON.stringify(report)).toBe(true);
     expect(report.nextTop, JSON.stringify(report)).toBeLessThan(report.vh * 0.35);
   });
+
+  test("mix result keeps last flavor bar and Make another in viewport", async ({ page }) => {
+    await seedPlayer(page, { cleared: 5 });
+    await gotoHub(page);
+    await page.evaluate(() => {
+      document.body.classList.add("is-phone-play");
+      document.body.classList.remove("mix-result-legacy");
+      const dbg = document.getElementById("debug-toolbar");
+      if (dbg) dbg.style.display = "none";
+      document.querySelectorAll(".screen").forEach((s) => s.classList.remove("is-active"));
+      const mix = document.getElementById("screen-mix-result");
+      mix.classList.add("is-active");
+      document.getElementById("flavor-bars").innerHTML = ["Strong", "Sweet", "Sour", "Bitter", "Fizz"]
+        .map((l) => `<div class="fbar-row"><span class="fbar-label">${l}</span><div class="fbar-track"><div class="fbar-fill" style="width:40%"></div></div></div>`)
+        .join("");
+      document.getElementById("judges-panel").innerHTML = `<div class="judge-scene is-mix-ux">${
+        ["Otto", "Freya", "Tommy"].map((n) =>
+          `<article class="judge-seat is-in"><div class="judge-avatar-wrap"><div class="judge-portrait"></div><span class="judge-avatar-name">${n}</span></div></article>`
+        ).join("")
+      }</div>`;
+    });
+
+    const report = await page.evaluate(() => window.measureLayout([
+      [".fbar-row:last-child", "fizz"],
+      ["#btn-mix-another", "another"],
+      ["#judges-panel .judge-portrait", "portrait"],
+      ["#btn-mix-tweak", "tweak"],
+      ["#btn-mix-save", "save"],
+      ["#btn-mix-shop", "shop"],
+      ["#btn-mix-share", "share"],
+      ["#btn-recipes", "recipes"],
+      ["#btn-mybar", "mybar"],
+      ["#mix-name", "title"],
+      ["#mix-lounge", "lounge"],
+    ], {
+      pairs: [
+        ["another", "save"],
+        ["tweak", "save"],
+        ["save", "shop"],
+        ["shop", "share"],
+        ["share", "another"],
+        ["recipes", "mybar"],
+        ["title", "lounge"],
+      ],
+      allowAdjacent: true,
+    }));
+
+    expect(report.missing, JSON.stringify(report)).toEqual([]);
+    expect(report.outOfBounds, JSON.stringify(report)).toEqual([]);
+
+    const scale = await page.evaluate(() => {
+      const ports = [...document.querySelectorAll("#judges-panel .judge-portrait")];
+      const seats = [...document.querySelectorAll("#judges-panel .judge-seat")];
+      const w = ports[0] ? ports[0].getBoundingClientRect().width : 0;
+      const gaps = [];
+      for (let i = 0; i < seats.length - 1; i++) {
+        const a = seats[i].getBoundingClientRect();
+        const b = seats[i + 1].getBoundingClientRect();
+        gaps.push(b.left - a.right);
+      }
+      return {
+        w,
+        maxGap: gaps.length ? Math.max(...gaps) : 0,
+        vw: window.innerWidth,
+        vh: window.innerHeight,
+      };
+    });
+    if (scale.vw >= 860 && scale.vh >= 410) {
+      expect(scale.w, JSON.stringify(scale)).toBeGreaterThanOrEqual(130);
+      expect(scale.maxGap, JSON.stringify(scale)).toBeLessThanOrEqual(40);
+    } else {
+      expect(scale.w, JSON.stringify(scale)).toBeGreaterThanOrEqual(60);
+      expect(scale.w, JSON.stringify(scale)).toBeLessThanOrEqual(96);
+    }
+  });
 });

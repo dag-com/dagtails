@@ -7201,3 +7201,343 @@ html[data-expo-shell] .game-stage .prep-mount {
   filter: none;
   min-height: min(32dvh, 120px);
 }
+
+/* ============================== Mixologist verdict UX (default) ==============================
+   Two-column tasting room. body.mix-result-legacy restores the previous stacked card
+   (wrappers use display:contents so the old mix-card rules still apply). */
+body.mix-result-legacy .mix-spec-col,
+body.mix-result-legacy .mix-top-tools {
+  display: contents;
+}
+
+body:not(.mix-result-legacy) #screen-mix-result.is-active,
+body:not(.mix-result-legacy).is-phone-play #screen-mix-result.is-active,
+body:not(.mix-result-legacy) .game-stage #screen-mix-result.is-active {
+  overflow: hidden !important;
+}
+
+body:not(.mix-result-legacy) .mix-card,
+body:not(.mix-result-legacy).is-phone-play .mix-card,
+body:not(.mix-result-legacy) .game-stage .mix-card {
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(200px, 28%);
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto auto;
+  grid-template-areas:
+    "tools  tools"
+    "title  score"
+    "kicker spec"
+    "judges spec"
+    "tips   spec"
+    "dock   dock";
+  gap: 4px 14px;
+  align-content: stretch;
+  min-height: 0;
+  height: 100%;
+  padding: 10px 14px 10px;
+}
+
+body:not(.mix-result-legacy) .mix-card > .eyebrow { display: none; }
+body:not(.mix-result-legacy) .mix-card > .result-name {
+  grid-area: title;
+  margin: 0;
+  font-size: clamp(22px, 4.2vw, 32px);
+  line-height: 1;
+  text-align: left;
+}
+body:not(.mix-result-legacy) .mix-card > .mix-score-row {
+  grid-area: score;
+  justify-content: flex-end;
+  margin: 0;
+  gap: 10px;
+}
+body:not(.mix-result-legacy) .mix-card .mix-bigscore { font-size: clamp(28px, 5vw, 42px); }
+body:not(.mix-result-legacy) .mix-card > .judges-title {
+  grid-area: kicker;
+  margin: 0;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+body:not(.mix-result-legacy) .mix-card > .judges-panel {
+  grid-area: judges;
+  min-height: 0;
+  overflow: visible;
+  container-type: inline-size;
+  container-name: mix-judges;
+}
+body:not(.mix-result-legacy) .mix-card .judge-scene.is-mix-ux {
+  --mix-judge-size: clamp(68px, 16vh, 88px);
+}
+@media (min-width: 860px) and (min-height: 410px) {
+  body:not(.mix-result-legacy) .mix-card .judge-scene.is-mix-ux {
+    --mix-judge-size: clamp(132px, 34vh, 168px);
+  }
+  @supports (width: 1cqw) {
+    body:not(.mix-result-legacy) .mix-card .judge-scene.is-mix-ux {
+      --mix-judge-size: clamp(132px, min(34vh, 26cqw), 168px);
+    }
+  }
+}
+body:not(.mix-result-legacy) .mix-card > .mix-spec-col {
+  grid-area: spec;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  text-align: left;
+}
+body:not(.mix-result-legacy) .mix-card > .mix-tips-wrap {
+  grid-area: tips;
+  margin: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+body:not(.mix-result-legacy) .mix-card > .mix-actions {
+  grid-area: dock;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 8px;
+  margin: 0;
+  padding-top: 4px;
+}
+body:not(.mix-result-legacy) .mix-card > .mix-top-tools {
+  grid-area: tools;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  min-width: 0;
+  overflow: hidden;
+}
+body:not(.mix-result-legacy) .mix-lounge {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  min-width: 0;
+  overflow: hidden;
+}
+body:not(.mix-result-legacy) .mix-lounge-shop { display: none; }
+body:not(.mix-result-legacy) .mix-lounge-btn {
+  padding: 8px 10px;
+  min-height: 36px;
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(28, 18, 12, 0.55);
+}
+body:not(.mix-result-legacy) .mix-quit {
+  margin: 0;
+  min-height: 36px;
+}
+body:not(.mix-result-legacy) .mix-card .mix-actions .btn {
+  min-height: 40px;
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: nowrap;
+}
+body:not(.mix-result-legacy) .mix-card .mix-actions #btn-mix-another,
+body:not(.mix-result-legacy) .game-stage .mix-card .mix-actions .btn-primary {
+  margin-left: auto;
+  flex: 1.15 1 0;
+  min-width: 0;
+}
+body:not(.mix-result-legacy) #btn-mix-share:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+body:not(.mix-result-legacy) .mix-card .mix-classic {
+  margin: 0;
+  font-size: 13px;
+}
+body:not(.mix-result-legacy) .mix-card .mix-note {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+}
+body:not(.mix-result-legacy) .mix-card .mix-meta {
+  margin: 0;
+  justify-content: flex-start;
+}
+body:not(.mix-result-legacy) .mix-card .flavor-bars {
+  margin: 4px 0 0;
+  gap: 6px;
+  flex: 1 1 auto;
+}
+body:not(.mix-result-legacy) .mix-card .fbar-label { width: 52px; }
+
+/* UX judges: portraits + score coins; quote/tip on tap */
+body:not(.mix-result-legacy) .mix-card .judge-avatar-wrap {
+  display: flex;
+  position: relative;
+  max-width: none;
+  gap: 2px;
+}
+body:not(.mix-result-legacy) .mix-card .judge-table,
+body:not(.mix-result-legacy) .mix-card .judge-avatar-title,
+body:not(.mix-result-legacy) .mix-card .judge-avatar-breed,
+body:not(.mix-result-legacy) .mix-card .judge-avatar-character,
+body:not(.mix-result-legacy) .mix-card .judge-bubble-reason,
+body:not(.mix-result-legacy) .mix-card .judge-bubble-prefs,
+body:not(.mix-result-legacy) .mix-card .judge-bubble::after {
+  display: none;
+}
+body:not(.mix-result-legacy) .mix-card .judge-scene.is-mix-ux,
+body:not(.mix-result-legacy).is-phone-play .mix-card .judge-scene.is-mix-ux,
+body:not(.mix-result-legacy) .game-stage .mix-card .judge-scene.is-mix-ux {
+  overflow: visible;
+  height: auto;
+  min-height: 0;
+  padding: 0;
+  align-items: start;
+  justify-content: center;
+  justify-items: center;
+  grid-template-columns: repeat(3, max-content) !important;
+  gap: clamp(12px, 2vw, 28px);
+}
+body:not(.mix-result-legacy) .mix-card .judge-seat {
+  gap: 4px;
+  padding-bottom: 0;
+  cursor: pointer;
+  width: var(--mix-judge-size);
+}
+body:not(.mix-result-legacy) .mix-card .judge-portrait {
+  width: var(--mix-judge-size);
+  height: var(--mix-judge-size);
+  overflow: hidden;
+}
+body:not(.mix-result-legacy) .mix-card .judge-seat.is-open .judge-portrait {
+  box-shadow: 0 0 0 2px var(--gold-soft);
+}
+body:not(.mix-result-legacy) .mix-card .judge-score-coin {
+  position: absolute;
+  left: 50%;
+  top: var(--mix-judge-size);
+  transform: translate(-50%, -40%);
+  min-width: max(28px, calc(var(--mix-judge-size) * 0.28));
+  height: max(22px, calc(var(--mix-judge-size) * 0.22));
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--gold);
+  color: #1c1208;
+  font-size: max(11px, calc(var(--mix-judge-size) * 0.12));
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+}
+body:not(.mix-result-legacy) .mix-card .judge-avatar-name {
+  font-size: max(12px, calc(var(--mix-judge-size) * 0.12));
+  margin-top: max(12px, calc(var(--mix-judge-size) * 0.1));
+}
+body:not(.mix-result-legacy) .mix-card .judge-bubble {
+  display: none;
+  position: absolute;
+  left: 50%;
+  top: calc(100% + 2px);
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: min(240px, 42vw);
+  min-height: 0;
+  padding: 8px 10px;
+  z-index: 3;
+  background: #2a1c10;
+  border: 1px solid var(--gold);
+  border-radius: 10px;
+}
+body:not(.mix-result-legacy) .mix-card .judge-seat.is-open .judge-bubble {
+  display: block;
+}
+body:not(.mix-result-legacy) .mix-card .judge-bubble-quote,
+body:not(.mix-result-legacy) .mix-card .judge-seat.is-open .judge-bubble-quote,
+body:not(.mix-result-legacy) .mix-card .judge-seat.is-open .judge-bubble-tip {
+  display: block;
+  margin: 0;
+  font-size: 11px;
+}
+body:not(.mix-result-legacy) .mix-card .judge-bubble-top { display: none; }
+body:not(.mix-result-legacy) .mix-card .judge-bubble-tip { margin-top: 4px; }
+body:not(.mix-result-legacy) .mix-card .mix-tips-title { margin-bottom: 4px; }
+body:not(.mix-result-legacy) .mix-card .mix-tips li {
+  font-size: 12px;
+  color: var(--text);
+}
+
+.mybar-share-lock {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gold-soft);
+  align-self: center;
+}
+
+@media (max-height: 420px) {
+  body:not(.mix-result-legacy) .mix-card .mix-tips li:nth-child(n + 2) { display: none; }
+}
+
+/* Debug bug sits bottom-left; keep it off the dock on localhost. */
+body:has(#debug-toolbar:not([style*="display: none"])) .mix-card > .mix-actions {
+  padding-left: 44px;
+}
+
+/* iPhone SE / short landscape (~667×375): icon lounge + compact dock. */
+@media (max-width: 740px) {
+  body:not(.mix-result-legacy) .mix-card,
+  body:not(.mix-result-legacy).is-phone-play .mix-card,
+  body:not(.mix-result-legacy) .game-stage .mix-card {
+    padding: 8px 10px;
+    gap: 4px 10px;
+  }
+  body:not(.mix-result-legacy) .mix-lounge-btn {
+    font-size: 0;
+    gap: 0;
+    padding: 6px 8px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+  body:not(.mix-result-legacy) .mix-lounge-btn .ico {
+    font-size: 15px;
+    line-height: 1;
+  }
+  body:not(.mix-result-legacy) .mix-lounge-txt { display: none; }
+  body:not(.mix-result-legacy) .mix-card > .mix-actions {
+    gap: 5px;
+    min-width: 0;
+  }
+  body:not(.mix-result-legacy) .mix-card .mix-actions .btn,
+  body:not(.mix-result-legacy) .game-stage .mix-card .mix-actions .btn-primary {
+    min-height: 36px;
+    padding: 6px 8px;
+    font-size: 12px;
+    min-width: 0;
+    flex: 1 1 0;
+  }
+  body:not(.mix-result-legacy) .mix-card .mix-actions #btn-mix-another {
+    margin-left: 0;
+    flex: 1.15 1 0;
+  }
+}
+
+/* Flip cover / extra-narrow: even tighter dock. */
+@media (max-width: 560px) {
+  body:not(.mix-result-legacy) .mix-card,
+  body:not(.mix-result-legacy).is-phone-play .mix-card,
+  body:not(.mix-result-legacy) .game-stage .mix-card {
+    padding: 8px;
+    gap: 4px 8px;
+  }
+  body:not(.mix-result-legacy) .mix-card > .mix-actions {
+    gap: 4px;
+  }
+  body:not(.mix-result-legacy) .mix-card .mix-actions .btn,
+  body:not(.mix-result-legacy) .game-stage .mix-card .mix-actions .btn-primary {
+    padding: 6px 6px;
+    font-size: 11px;
+  }
+}

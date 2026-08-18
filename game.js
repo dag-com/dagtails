@@ -20,7 +20,7 @@
 } from "./data.js";
 import { Sound } from "./sound.js";
 import * as Glass from "./glass.js";
-import { evaluate } from "./mixology.js";
+import { evaluate, detectClassic, classicBlocksCommunityShare } from "./mixology.js";
 import { scoreWithJudges, pickJudges } from "./judges.js";
 import * as Backend from "./backend.js";
 
@@ -117,6 +117,66 @@ function getSettings() {
   catch (e) { return { sound: true }; }
 }
 function setSettings(s) { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* ignore */ } }
+
+// Mixologist verdict layout. Default is the two-column UX card. Set
+// localStorage dagtails_mix_result_layout=legacy, or open with ?mixLegacy=1,
+// to restore the previous stacked card.
+const MIX_LAYOUT_KEY = "dagtails_mix_result_layout";
+function mixResultLegacyPreferred() {
+  try {
+    const q = new URLSearchParams(location.search);
+    if (q.get("mixLegacy") === "1" || q.get("mix-result") === "legacy") return true;
+    if (q.get("mix-result") === "ux" || q.get("mixLegacy") === "0") return false;
+    return localStorage.getItem(MIX_LAYOUT_KEY) === "legacy";
+  } catch (e) {
+    return false;
+  }
+}
+function mixChromeCompact() {
+  try {
+    return !mixResultLegacyPreferred() && window.matchMedia("(max-width: 740px)").matches;
+  } catch (e) {
+    return false;
+  }
+}
+function applyMixResultLayout() {
+  const legacy = mixResultLegacyPreferred();
+  document.body.classList.toggle("mix-result-legacy", legacy);
+  const compact = mixChromeCompact();
+  const quit = $("#btn-mix-quit");
+  if (quit) quit.textContent = legacy ? "Quit to menu" : "Quit";
+  const shop = $("#btn-mix-shop");
+  if (shop && !shop.disabled) {
+    shop.textContent = legacy ? "🛍 Shop the gear" : compact ? "Shop" : "Shop gear · demo";
+  }
+  const save = $("#btn-mix-save");
+  if (save && !save.disabled) save.textContent = compact ? "Save" : "Save to My Bar";
+  const tweak = $("#btn-mix-tweak");
+  if (tweak) tweak.textContent = compact ? "Tweak" : "Tweak it";
+  const another = $("#btn-mix-another");
+  if (another) another.textContent = compact ? "Another →" : "Make another →";
+  const dbg = $("#dbg-mix-layout");
+  if (dbg) dbg.textContent = legacy ? "Mix result: Legacy" : "Mix result: UX";
+  try {
+    if (lastMix) applyMixShareLock(lastMix.result && lastMix.result.classic);
+  } catch (e) { /* lastMix not initialized yet */ }
+}
+
+function applyMixShareLock(classic) {
+  const shareBtn = $("#btn-mix-share");
+  if (!shareBtn) return;
+  const blocked = classicBlocksCommunityShare(classic);
+  const legacy = mixResultLegacyPreferred();
+  shareBtn.disabled = blocked;
+  shareBtn.setAttribute("aria-disabled", blocked ? "true" : "false");
+  if (blocked) {
+    shareBtn.textContent = "Can't share";
+    shareBtn.title = classicShareBlockMessage(classic);
+  } else {
+    shareBtn.textContent = legacy ? "🌐 Share" : "Share";
+    shareBtn.removeAttribute("title");
+  }
+}
 
 // ============================ Diagnostics / analytics ============================
 // Lightweight, privacy-friendly product analytics: every event is kept in a
@@ -894,7 +954,25 @@ async function renderLeaderboard() {
 }
 function rankMedal(i) { return i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "#" + (i + 1); }
 
+function classicShareBlockMessage(classic) {
+  if (!classic || !classic.name) return "";
+  return classic.exact
+    ? `That's a ${classic.name} — Community is for originals.`
+    : `Too close to a ${classic.name} — Community is for originals.`;
+}
+
+function classicFromSharePayload(payload) {
+  if (payload && classicBlocksCommunityShare(payload.classic)) return payload.classic;
+  if (payload && payload.recipe) return detectClassic(payload.recipe);
+  return null;
+}
+
 async function shareCreationToCommunity(payload, btn) {
+  const classic = classicFromSharePayload(payload);
+  if (classicBlocksCommunityShare(classic)) {
+    showToast(classicShareBlockMessage(classic));
+    return;
+  }
   if (!Backend.isConfigured()) { showToast("Online sharing isn't connected yet."); return; }
   const original = btn ? btn.textContent : "";
   if (btn) { btn.disabled = true; btn.textContent = "Sharing…"; }
@@ -1605,6 +1683,7 @@ function showScreen(id) {
   if (id === "screen-start") onShowStart();
   if (id === "screen-map") ensureMapAssets();
   if (id === "screen-mix-result") {
+    applyMixResultLayout();
     const commBtn = $("#btn-community");
     if (commBtn) commBtn.style.display = isUnderage() ? "none" : "";
   }
@@ -3331,11 +3410,12 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
   const el = $(panelSel);
   if (!el) return;
   const animated = !!opts.animated;
-  const compact = opts.compact != null ? !!opts.compact : isPhonePlay();
-  const note = compact ? "" : judgeSceneNote(opts.scoring);
+  const mixUx = panelSel === "#judges-panel" && !mixResultLegacyPreferred();
+  const compact = mixUx ? false : (opts.compact != null ? !!opts.compact : isPhonePlay());
+  const note = mixUx || compact ? "" : judgeSceneNote(opts.scoring);
   el.innerHTML = `
     ${note ? `<div class="judge-scene-note">${escapeHtml(note)}</div>` : ""}
-    <div class="judge-scene${compact ? " is-compact" : ""}">
+    <div class="judge-scene${compact ? " is-compact" : ""}${mixUx ? " is-mix-ux" : ""}">
       <div class="judge-table" aria-hidden="true"></div>
       ${judges.map((j) => `
       <article class="judge-seat judge-seat-${escapeHtml(j.id)}${animated ? "" : " is-in"}" data-judge-id="${escapeHtml(j.id)}">
@@ -3345,22 +3425,49 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
             <span class="judge-score"><span class="judge-score-num">${animated ? "···" : j.score100}</span><small>/100</small></span>
           </div>
           <div class="judge-bubble-quote">“${escapeHtml(j.comment)}”</div>
-          ${compact ? "" : `<div class="judge-bubble-reason">${escapeHtml(j.reason)}</div>`}
-          ${compact ? "" : `<div class="judge-bubble-tip"><strong>Tip:</strong> ${escapeHtml(j.tip)}</div>`}
-          ${!compact && j.likes ? `<div class="judge-bubble-prefs"><span class="pref-like">Loves:</span> ${escapeHtml(j.likes)}</div>` : ""}
-          ${!compact && j.dislikes ? `<div class="judge-bubble-prefs pref-avoid"><span class="pref-hate">Avoids:</span> ${escapeHtml(j.dislikes)}</div>` : ""}
+          ${mixUx || compact ? "" : `<div class="judge-bubble-reason">${escapeHtml(j.reason)}</div>`}
+          ${compact && !mixUx ? "" : `<div class="judge-bubble-tip"><strong>Tip:</strong> ${escapeHtml(j.tip)}</div>`}
+          ${!mixUx && !compact && j.likes ? `<div class="judge-bubble-prefs"><span class="pref-like">Loves:</span> ${escapeHtml(j.likes)}</div>` : ""}
+          ${!mixUx && !compact && j.dislikes ? `<div class="judge-bubble-prefs pref-avoid"><span class="pref-hate">Avoids:</span> ${escapeHtml(j.dislikes)}</div>` : ""}
         </div>
         <div class="judge-avatar-wrap">
           <div class="judge-portrait">
             <img src="${resolveAssetUrl(`assets/judges/${j.id}.png`)}" alt="${escapeHtml(j.name)}" loading="lazy">
           </div>
-          ${compact ? "" : `<span class="judge-avatar-name">${escapeHtml(j.name)}</span>`}
-          ${compact ? "" : `<span class="judge-avatar-title">${escapeHtml(j.title || j.blurb)}</span>`}
-          ${!compact && j.breed ? `<span class="judge-avatar-breed">${escapeHtml(j.breed)}</span>` : ""}
-          ${!compact && j.character ? `<span class="judge-avatar-character">${escapeHtml(j.character)}</span>` : ""}
+          ${mixUx ? `<span class="judge-score-coin">${animated ? "···" : j.score100}</span>` : ""}
+          <span class="judge-avatar-name">${escapeHtml(j.name)}</span>
+          ${compact || mixUx ? "" : `<span class="judge-avatar-title">${escapeHtml(j.title || j.blurb)}</span>`}
+          ${!compact && !mixUx && j.breed ? `<span class="judge-avatar-breed">${escapeHtml(j.breed)}</span>` : ""}
+          ${!compact && !mixUx && j.character ? `<span class="judge-avatar-character">${escapeHtml(j.character)}</span>` : ""}
         </div>
       </article>`).join("")}
     </div>`;
+
+  if (mixUx) {
+    el.querySelectorAll(".judge-seat").forEach((seat) => {
+      seat.tabIndex = 0;
+      seat.setAttribute("role", "button");
+      seat.setAttribute("aria-expanded", "false");
+      const toggle = () => {
+        const open = seat.classList.contains("is-open");
+        el.querySelectorAll(".judge-seat").forEach((s) => {
+          s.classList.remove("is-open");
+          s.setAttribute("aria-expanded", "false");
+        });
+        if (!open) {
+          seat.classList.add("is-open");
+          seat.setAttribute("aria-expanded", "true");
+        }
+      };
+      seat.addEventListener("click", toggle);
+      seat.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") {
+          ev.preventDefault();
+          toggle();
+        }
+      });
+    });
+  }
 
   if (!animated) return;
 
@@ -3411,7 +3518,10 @@ function showMixResult(result) {
   $("#mix-score").textContent = panel.total;
   $("#mix-verdict").textContent = panel.verdict;
   $("#mix-stars").innerHTML = [0, 1, 2, 3, 4].map((i) => `<span class="${i < panel.stars ? "on" : ""}">★</span>`).join("");
-  $("#mix-judges-title").textContent = `⚖️ Tonight's panel: ${panel.verdict} (3 of ${JUDGES.length} judges, avg ${panel.total})`;
+  const legacy = mixResultLegacyPreferred();
+  $("#mix-judges-title").textContent = legacy
+    ? `⚖️ Tonight's panel: ${panel.verdict} (3 of ${JUDGES.length} judges, avg ${panel.total})`
+    : `Panel  3 of ${JUDGES.length}  ·  avg ${panel.total}`;
   renderJudgesInteractive(panel.judges, "#judges-panel", {
     scoring: { mode: "mixologist", judges: panel.total, final: panel.total },
   });
@@ -3419,10 +3529,10 @@ function showMixResult(result) {
   const cl = $("#mix-classic");
   if (result.classic) {
     cl.textContent = result.classic.exact
-      ? `🎯 Spot on — you made a ${result.classic.name}!`
-      : `≈ This is basically a ${result.classic.name}.`;
+      ? `Spot on — you made a ${result.classic.name}. Too close to share to Community.`
+      : `Close to a ${result.classic.name}. Community is for originals — sharing is locked.`;
   } else {
-    cl.textContent = "🍸 An original creation.";
+    cl.textContent = "An original creation.";
   }
 
   $("#mix-note").textContent = result.note;
@@ -3440,8 +3550,7 @@ function showMixResult(result) {
 
   $("#btn-mix-save").textContent = "Save to My Bar";
   $("#btn-mix-save").disabled = false;
-  const shareBtn = $("#btn-mix-share");
-  if (shareBtn) { shareBtn.textContent = "🌐 Share"; shareBtn.disabled = false; }
+  applyMixShareLock(result.classic);
   showScreen("screen-mix-result");
 }
 
@@ -3464,6 +3573,7 @@ function saveInvention(name) {
     score,
     verdict,
     family: lastMix.result.family,
+    classic: lastMix.result.classic || null,
     ts: Date.now(),
   });
   setMyBar(list);
@@ -3487,6 +3597,8 @@ function renderMyBar() {
     const ings = inv.build.ingredients.map((i) => INGREDIENT_BY_ID[i.id]?.name).filter(Boolean).join(", ");
     const card = document.createElement("div");
     card.className = "mybar-item";
+    const classic = inv.classic || detectClassic(inv.build);
+    const shareBlocked = classicBlocksCommunityShare(classic);
     card.innerHTML = `
       <div class="mybar-item-main">
         <div class="mybar-item-top"><span class="mybar-name">${escapeHtml(inv.name)}</span><span class="mybar-badge">${inv.score}/100</span></div>
@@ -3495,7 +3607,8 @@ function renderMyBar() {
       </div>
       <div class="mybar-item-actions">
         <button class="btn btn-primary btn-sm" data-act="play">Recreate</button>
-        ${Backend.isConfigured() ? '<button class="btn btn-ghost btn-sm" data-act="share">🌐 Share</button>' : ""}
+        ${Backend.isConfigured() && !shareBlocked ? '<button class="btn btn-ghost btn-sm" data-act="share">🌐 Share</button>' : ""}
+        ${shareBlocked ? `<span class="mybar-share-lock" title="${escapeHtml(classicShareBlockMessage(classic))}">Too close to share</span>` : ""}
         <button class="btn btn-ghost btn-sm" data-act="del">Delete</button>
       </div>`;
     card.querySelector('[data-act="play"]').addEventListener("click", () => playInvention(inv));
@@ -3507,6 +3620,7 @@ function renderMyBar() {
         score: inv.score,
         verdict: inv.verdict,
         family: inv.family,
+        classic,
       }, shareEl);
     });
     card.querySelector('[data-act="del"]').addEventListener("click", () => {
@@ -4594,10 +4708,23 @@ function renderDiagnostics() {
   const toggle = $("#dbg-toggle");
   const reset = $("#dbg-reset");
   const diagBtn = $("#dbg-diagnostics");
+  const mixLayoutBtn = $("#dbg-mix-layout");
   if (!bar || !toggle || !reset) return;
   if (!debugEnabled()) { bar.remove(); return; }
   bar.style.display = "";
+  applyMixResultLayout();
   toggle.addEventListener("click", () => bar.classList.toggle("is-open"));
+  if (mixLayoutBtn) {
+    mixLayoutBtn.addEventListener("click", () => {
+      const next = mixResultLegacyPreferred() ? "ux" : "legacy";
+      try { localStorage.setItem(MIX_LAYOUT_KEY, next); } catch (e) { /* ignore */ }
+      applyMixResultLayout();
+      if ($("#screen-mix-result")?.classList.contains("is-active") && lastMix) {
+        showMixResult(lastMix.result);
+      }
+      showToast(next === "legacy" ? "Mix result: previous stacked card" : "Mix result: two-column UX");
+    });
+  }
   reset.addEventListener("click", () => {
     const ok = window.confirm(
       "Reset everything?\n\nThis wipes your profile/identity and all progress (map, stars, streaks, badges, My Bar, high scores) and restarts the game fresh."
@@ -4611,6 +4738,11 @@ function renderDiagnostics() {
     });
   }
 })();
+applyMixResultLayout();
+window.addEventListener("resize", () => applyMixResultLayout());
+if (debugEnabled()) {
+  window.__dagtailsMixology = { detectClassic, classicBlocksCommunityShare, evaluate };
+}
 
 $("#btn-diag-close").addEventListener("click", () => $("#modal-diagnostics").classList.remove("is-open"));
 $("#modal-diagnostics").addEventListener("click", (e) => {
@@ -4739,6 +4871,7 @@ $("#btn-mix-share").addEventListener("click", () => {
     score: lastMix.panel ? lastMix.panel.total : lastMix.result.score,
     verdict: lastMix.panel ? lastMix.panel.verdict : lastMix.result.verdict,
     family: lastMix.result.family,
+    classic: lastMix.result.classic || null,
   }, $("#btn-mix-share"));
 });
 

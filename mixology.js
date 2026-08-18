@@ -231,6 +231,11 @@ export function evaluate(build, opts = {}) {
   };
 }
 
+/** True when Community must not accept this pour (exact classic or close copy). */
+export function classicBlocksCommunityShare(classic) {
+  return !!(classic && classic.name);
+}
+
 function tastingNote(family, f) {
   const bits = [];
   if (f.abv >= 30) bits.push("spirit-forward and strong");
@@ -246,32 +251,54 @@ function tastingNote(family, f) {
   return `${lead} — ${bits.length ? bits.join(", ") : "simple and straightforward"}.`;
 }
 
-// Compare the build to known classics by ingredient-set + rough proportions.
+// Compare the build to known classics by ingredient overlap + rough proportions.
+// Same set → always a hit (exact if ratios + method are close). One extra or
+// missing ingredient with similar ratios → "close". Distinct cousins (Negroni
+// vs Boulevardier) stay unmatched so Community can still take originals.
 export function detectClassic(build) {
-  const ids = (build.ingredients || []).filter((i) => i.amount > 0).map((i) => i.id);
+  const items = (build.ingredients || []).filter((i) => i.amount > 0);
+  const ids = items.map((i) => i.id);
   if (ids.length < 2) return null;
   const set = new Set(ids);
+
+  const share = (list) => {
+    const tot = list.reduce((s, i) => s + i.amount, 0) || 1;
+    return Object.fromEntries(list.map((i) => [i.id, i.amount / tot]));
+  };
 
   let best = null;
   for (const c of CLASSICS) {
     const cset = new Set(c.ingredients.map((i) => i.id));
-    if (cset.size !== set.size) continue;
-    let same = true;
-    for (const id of set) if (!cset.has(id)) { same = false; break; }
-    if (!same) continue;
+    let inter = 0;
+    for (const id of set) if (cset.has(id)) inter++;
+    const extra = set.size - inter;
+    const missing = cset.size - inter;
+    const union = set.size + cset.size - inter;
+    const jaccard = union ? inter / union : 0;
 
-    // proportions: compare each ingredient's share of total volume
-    const share = (list) => {
-      const tot = list.reduce((s, i) => s + i.amount, 0) || 1;
-      return Object.fromEntries(list.map((i) => [i.id, i.amount / tot]));
-    };
-    const a = share(build.ingredients.filter((i) => i.amount > 0));
+    const a = share(items);
     const b = share(c.ingredients);
     let diff = 0;
-    for (const id of set) diff += Math.abs((a[id] || 0) - (b[id] || 0));
-    const exact = diff < 0.28 && build.method === c.method;
-    const score = 1 - diff;
-    if (!best || score > best.score) best = { name: c.name, exact, score };
+    for (const id of set) {
+      if (!cset.has(id)) continue;
+      diff += Math.abs((a[id] || 0) - (b[id] || 0));
+    }
+
+    const sameSet = extra === 0 && missing === 0;
+    const nearSet = extra + missing === 1 && inter >= 2;
+    const closeProportions = diff < 0.45;
+    const exact = sameSet && diff < 0.28 && (!c.method || build.method === c.method);
+
+    let kind = null;
+    if (sameSet) kind = exact ? "exact" : "close";
+    else if (nearSet && closeProportions && jaccard >= 0.6) kind = "close";
+    else if (jaccard >= 0.8 && inter >= 3 && closeProportions) kind = "close";
+    if (!kind) continue;
+
+    const score = jaccard * 0.55 + (1 - Math.min(1, diff)) * 0.45 + (exact ? 0.1 : 0);
+    if (!best || score > best.score) {
+      best = { name: c.name, exact: kind === "exact", score };
+    }
   }
-  return best ? { name: best.name, exact: best.exact } : null;
+  return best ? { name: best.name, exact: best.exact, close: !best.exact } : null;
 }
