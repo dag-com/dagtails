@@ -214,15 +214,27 @@ function playMetaCopy() {
     : `Stop ${Math.min(cleared + 1, pool.length)} of ${pool.length} · ${v.flag} ${v.name} — tap to open the map`;
 }
 
-/** Frontier venue for the hub backdrop (Snug at start; last bar if the crawl is done). */
+function rememberHubVenue(venue) {
+  if (!venue?.id) return;
+  selectedVenueId = venue.id;
+  const m = getMap();
+  if (m.hubVenueId !== venue.id) {
+    m.hubVenueId = venue.id;
+    setMap(m);
+  }
+}
+
+/** Bar the hub should show: last unlocked stop you stood in, else the crawl frontier. */
 function currentHubVenue() {
   const venues = venueList();
-  const pool = drinkPool();
   if (!venues.length) return null;
-  if (!pool.length) return venues[0];
   const cleared = getMap().cleared || 0;
-  const idx = Math.min(Math.max(0, cleared), pool.length - 1);
-  return venueForStage(idx).venue;
+  const remembered = selectedVenueId || getMap().hubVenueId;
+  const fromMemory = remembered && venues.find((v) => v.id === remembered);
+  if (fromMemory && !venueStatus(fromMemory, cleared).locked) return fromMemory;
+  const pool = drinkPool();
+  if (!pool.length) return venues[0];
+  return venueForStage(frontierStageIndex()).venue;
 }
 
 function currentHubVenueBg() {
@@ -1005,7 +1017,8 @@ function frontierStageIndex() {
 
 function focusedVenue() {
   const venues = venueList();
-  return venues.find((v) => v.id === selectedVenueId) || venueForStage(getMap().cleared || 0).venue;
+  const remembered = selectedVenueId || getMap().hubVenueId;
+  return venues.find((v) => v.id === remembered) || venueForStage(frontierStageIndex()).venue;
 }
 
 function venueDrinks(venue) {
@@ -2546,16 +2559,45 @@ function setGameVenue(label) {
 
 const DEFAULT_BAR_BG = "assets/station/bar-stage.png";
 
+function assetBaseHref() {
+  const declared = document.querySelector("base")?.href;
+  if (declared) return declared;
+  try {
+    const u = new URL(document.baseURI || document.URL);
+    const last = (u.pathname.split("/").pop() || "");
+    const looksLikeFile = /\.[a-z0-9]+$/i.test(last);
+    if (!looksLikeFile && !u.pathname.endsWith("/")) u.pathname += "/";
+    u.search = "";
+    u.hash = "";
+    return u.href;
+  } catch (e) {
+    return document.baseURI || "./";
+  }
+}
+
 /** Resolve game asset paths against the page (not the hashed CSS bundle). */
 function resolveAssetUrl(path) {
   if (!path) return "";
   if (/^(?:https?:|data:|blob:)/i.test(path)) return path;
   try {
-    return new URL(path.replace(/^\.\//, ""), document.baseURI).href;
+    return new URL(path.replace(/^\.\//, ""), assetBaseHref()).href;
   } catch (e) {
     return path;
   }
 }
+
+/** HTML `<img src="assets/…">` is resolved at parse time — rewrite after JS loads. */
+function rewriteRelativeAssetImgs() {
+  document.querySelectorAll("img[src]").forEach((img) => {
+    const raw = img.getAttribute("src");
+    if (!raw || /^(?:https?:|data:|blob:|\/\/)/i.test(raw)) return;
+    img.src = resolveAssetUrl(raw);
+  });
+}
+rewriteRelativeAssetImgs();
+try {
+  window.__dagtailsResolveAssetUrl = resolveAssetUrl;
+} catch (e) { /* ignore */ }
 
 /** Swap the station (and result card) backdrop to the venue's interior art. */
 function applyVenueChrome(venue) {
@@ -2678,9 +2720,12 @@ function loadStage(index) {
   applyComplexity(complexityForStage(index + 1), recipe);
 
   const stop = venueForStage(index);
-  setGameVenue(stop.venue
-    ? `${stop.venue.flag || ""} ${stop.venue.name}`.trim()
-    : "");
+  rememberHubVenue(stop.venue);
+  setGameVenue(
+    stop.venue
+      ? `${stop.venue.flag || ""} ${stop.venue.name}`.trim()
+      : ""
+  );
   applyVenueChrome(stop.venue);
   $("#stage-pill").textContent = `Stop ${index + 1} / ${pool.length}`;
   $("#diff-pill").textContent = state.complexity.label;
@@ -2871,7 +2916,7 @@ function renderBarGuest(opts = {}) {
     img.alt = "";
     return;
   }
-  img.src = c.portrait;
+  img.src = resolveAssetUrl(c.portrait);
   img.alt = c.name || "";
   el.hidden = false;
   if (opts.entering) {
@@ -3309,7 +3354,7 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
         </div>
         <div class="judge-avatar-wrap">
           <div class="judge-portrait">
-            <img src="assets/judges/${escapeHtml(j.id)}.png" alt="${escapeHtml(j.name)}" loading="lazy">
+            <img src="${resolveAssetUrl(`assets/judges/${j.id}.png`)}" alt="${escapeHtml(j.name)}" loading="lazy">
           </div>
           ${compact ? "" : `<span class="judge-avatar-name">${escapeHtml(j.name)}</span>`}
           ${compact ? "" : `<span class="judge-avatar-title">${escapeHtml(j.title || j.blurb)}</span>`}
@@ -3610,7 +3655,7 @@ function revealResultVerdict(result, recipe) {
   if (state.customer && state.mode !== "challenge") {
     const c = state.customer;
     if (guestBg && guestImg && c.portrait) {
-      guestImg.src = c.portrait;
+      guestImg.src = resolveAssetUrl(c.portrait);
       guestBg.hidden = false;
       guestBg.setAttribute("aria-hidden", "false");
     } else if (guestBg) {
@@ -4103,7 +4148,7 @@ function shopCardHtml(item) {
   const key = shopKey(item);
   const inCart = !!shopCart[key];
   const icon = item.icon
-    ? `<img class="shop-item-icon-img" src="${item.icon}" alt="" draggable="false">`
+    ? `<img class="shop-item-icon-img" src="${resolveAssetUrl(item.icon)}" alt="" draggable="false">`
     : `<div class="shop-item-icon">${item.emoji}</div>`;
   return `
     <div class="shop-item">
@@ -4331,7 +4376,7 @@ const comicWarmed = new Set();
 function preloadComicAround(i) {
   const idxs = [i, i + 1].filter((n) => n >= 0 && n < INTRO_COMIC.length);
   idxs.forEach((n) => {
-    const src = INTRO_COMIC[n].img;
+    const src = resolveAssetUrl(INTRO_COMIC[n].img);
     if (comicWarmed.has(src)) return;
     comicWarmed.add(src);
     const im = new Image();
@@ -4345,7 +4390,7 @@ function renderComicPanel(i) {
   preloadComicAround(i);
   const img = $("#comic-img");
   const cap = $("#comic-caption");
-  img.src = p.img;
+  img.src = resolveAssetUrl(p.img);
   img.alt = p.kind === "say" ? `${p.who}: ${p.text}` : p.text;
   cap.innerHTML = p.kind === "say"
     ? `<p class="comic-say"><span class="comic-who">${p.who}</span>\u201c${p.text}\u201d</p>`

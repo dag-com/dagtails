@@ -32,6 +32,9 @@ function resolveGameUrl(): string {
 function withCacheBust(url: string): string {
   try {
     const u = new URL(url);
+    // Treat the Pages project as a directory so `assets/foo.png` does not
+    // resolve to github.io/assets/... when the trailing slash is dropped.
+    if (!u.pathname.endsWith("/")) u.pathname += "/";
     u.searchParams.set("v", String(Date.now()));
     return u.href;
   } catch {

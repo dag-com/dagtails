@@ -82,23 +82,18 @@ export function HubScreen() {
   const venueBg = snap.currentVenueBg;
   const zoom = snap.hubBgSize || "175%";
   const pos = snap.hubBgPos || "20% 72%";
-  const heroBgStyle = venueBg
-    ? {
-        backgroundImage: `radial-gradient(ellipse 72% 62% at 50% 46%, transparent 36%, rgba(6, 4, 2, 0.45) 100%), url("${venueBg}")`,
-        backgroundSize: `${zoom}, ${zoom}`,
-        backgroundPosition: `${pos}, ${pos}`,
-        backgroundRepeat: "no-repeat",
-      }
-    : undefined;
   const shellStyle = venueBg
     ? ({
         ["--hub-mascot-floor"]: snap.mascotFloor || "8%",
+        ["--hub-venue-image"]: `radial-gradient(ellipse 72% 62% at 50% 46%, transparent 36%, rgba(6, 4, 2, 0.45) 100%), url("${venueBg}")`,
+        ["--hub-bg-size"]: `${zoom}, ${zoom}`,
+        ["--hub-bg-pos"]: `${pos}, ${pos}`,
       } as CSSProperties)
     : undefined;
 
   return (
     <div className={`hub-shell${venueBg ? " has-venue-bg" : ""}`} style={shellStyle}>
-      <div className="hero-bg" style={heroBgStyle} aria-hidden="true" />
+      <div className="hero-bg" aria-hidden="true" />
       <div className="start-hub">
         <div className="hub-topbar">
           <div

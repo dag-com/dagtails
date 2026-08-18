@@ -14,6 +14,7 @@ const SPECS = [
   "tests/gameplay.spec.js",
   "tests/play-journey.spec.js",
   "tests/layout-integrity.spec.js",
+  "tests/assets-integrity.spec.js",
   "tests/text-readability.spec.js",
   "tests/rotate-lock.spec.js",
 ];

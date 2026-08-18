@@ -5561,6 +5561,10 @@ body.is-phone-play .chip {
 #screen-start .hub-shell.has-venue-bg .hero-bg {
   overflow: hidden;
   background-color: #0c0806;
+  background-image: var(--hub-venue-image);
+  background-size: var(--hub-bg-size, 175%);
+  background-position: var(--hub-bg-pos, 20% 72%);
+  background-repeat: no-repeat;
 }
 
 /* Plant the mascot on the bar top (per-venue --hub-mascot-floor). */

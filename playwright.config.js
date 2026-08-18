@@ -9,10 +9,14 @@ module.exports = defineConfig({
   retries: process.env.CI ? 1 : 0,
   // Allow phone/tablet matrix to run in parallel. Override with PW_WORKERS=1 for serial.
   workers: process.env.PW_WORKERS ? Number(process.env.PW_WORKERS) : undefined,
-  reporter: [["list"]],
+  reporter: [
+    ["list"],
+    ["html", { open: "never", outputFolder: "playwright-report" }],
+  ],
   timeout: 60_000,
   use: {
     baseURL: `http://127.0.0.1:${process.env.PW_PORT || 4173}`,
+    screenshot: "only-on-failure",
     trace: "on-first-retry",
   },
   webServer: {
