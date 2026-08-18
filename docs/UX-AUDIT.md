@@ -830,3 +830,82 @@ Reject: a fourth judge, a duck on this screen, or stretching portraits into oval
 | Resolved | SE/Flip dock overlap. **J1–J3** Pro Max cluster + 132–168px discs. |
 | Remaining | F24 hub lounge door. |
 
+---
+
+## 15. Pour chips expand to measure — 2026-08-19
+
+**Surface:** Station right sheet, ingredients step (`#ingredient-catalog` `.cat-item`; measure path in `renderIngredientsPanel` / `fillBuildList`).  
+**Live today:** Campaign is **guess-only** (`MEASURE_ENABLED = false` in `game.js`) — tap toggles a gold chip. Mixologist is **not** guess mode: catalog plus a second **Your Pour** column with `.stepper` (− / input / +).  
+**Mocks:** sheet context `mocks/pour-chip-expand.png`; states `mocks/pour-chip-idle.png`, `mocks/pour-chip-in-glass.png`, `mocks/pour-chip-editing.png`; strip `mocks/pour-chip-states.png` (`mocks/_compose_pour_chip.py`).  
+**Player idea:** highlight the selected ingredient and **expand that chip** with the amount selector.  
+**Maturity of the idea:** right for Mixologist + a future Pour tier; do not use it in Guess. Prototype until one-open-at-a-time + 44px −/+ are proven on SE landscape.
+
+### Summary
+
+The idea is **correct**. Measuring is one job: pick a bottle, set how much, see it hit the glass. Live Mixologist splits that into catalog + “Your Pour” (`ingredient-layout` two columns), which landscape phones cannot hold next to the bar. Expanding the chip **is** the pour list — same grammar as candy nodes (the thing you tap *is* the control). It also gives a selected state that is not color-only (checklist: locked/done/current without color alone).
+
+Keep Guess as a simple toggle. Do not expand chips and keep the Your Pour column — that duplicates the same amounts. One chip open at a time; collapsed-in-glass chips show a gold **amount badge** so the pour stays readable when you move to the next bottle.
+
+**Call:** treat `pour-chip-expand.png` as the Mixologist / Pour-tier chip. Reject a floating stepper overlay that covers the catalog, and reject expanding in Guess mode.
+
+### Comment on the idea
+
+**Why it works**
+- Matches station hierarchy: ticket + glass left, **one** sheet job right.
+- Mixologist already needs amounts (`isGuessMode()` is false). This is the landscape fix for `fillBuildList`, not a new mechanic.
+- Expanding is stronger feedback than `.cat-item.is-selected` gold fill alone.
+- Recoverable: − / + and × (remove) live on the same chip; Serve stays `#btn-next`.
+
+**Risks if done naively**
+- Wrap reflow: a 220px expanded pill in `.cat-items` will shove neighbors and jump the finger (Major on SE).
+- −/+ today are **28×30px** (`.stepper button`) — below 44px thumbs.
+- Two “selected” meanings: in the glass vs currently dialing. Gold border on both would collide.
+- Full Mixologist pantry + one fat chip can clip `#btn-next` if the catalog cannot scroll under the expanded row.
+
+**Rules for the mock (and later live)**
+1. **Guess:** no expand. Toggle in/out as now.  
+2. **Measure (Mixologist / Pour tier):** tap idle → add + expand; tap another → collapse previous, expand that one; tap expanded name (not −/+) does not toggle off. Remove is a small × on the editing chip only.  
+3. **Three chip states:** idle / in-glass (amount badge, collapsed) / editing (expanded stepper).  
+4. **Replace** `#build-list`, do not show it beside the catalog.  
+5. −/+ hit ≥36px (44px if the sheet allows); amount is gold type, unit muted.  
+6. Pour animation on the glass still fires on add and on amount change (`changeAmount` / `animatePour`).
+
+### Findings
+
+| ID | Severity | Screen | Problem | Evidence | Suggested fix | Visual-system? |
+|----|----------|--------|---------|----------|---------------|----------------|
+| Q1 | **Major** | Mixologist pour | Amounts live in a second column the phone sheet cannot spare | `.ingredient-layout` 1.1fr/1fr; `.game-side` ~32% | In-chip expand; catalog-only layout (`is-catalog-only`) | N |
+| Q2 | Major | Measure chips | `.is-selected` = “in the glass”, not “I’m dialing this” | `.cat-item.is-selected` in `fillCatalog`; Mixologist `addIngredient` does not focus a row | `is-in-glass` vs `is-editing`; only one `is-editing` | Y |
+| Q3 | Minor | Stepper | −/+ too small for thumbs | `.stepper button` 28×30 | 36–44px round gold ghosts inside the expanded pill | N |
+| Q4 | Polish | Guess vs Pour | Expanding in Guess would fight “spot the ingredients” | `MEASURE_ENABLED`; `TIER_INTRO.Guess` | Keep Guess as tap-toggle; Pour intro copy: “tap again to dial” | N |
+
+### Recommended chip (from the mock)
+
+Idle: dark pill, name only.  
+In glass: gold lip, name + **25** (unit optional at 12px).  
+Editing: double gold ring, `Gin  −  50 ml  +`, + is the gold-lip control, − is ghost. Height **44px**. Only one of these on screen.
+
+Do not: a dropdown under the chip (covers Serve), a modal jigger, or a duck holding a measuring cup.
+
+### Top fixes (when implementing)
+
+1. Mixologist sheet = catalog only; stepper **inside** `.cat-item.is-editing`.  
+2. Amount badge on collapsed in-glass chips so the pour is still scannable.  
+3. One open chip; expanding does not cover `#btn-next`.  
+4. 36px+ −/+ ; `aria` on the chip (`aria-expanded`, amount live region).  
+5. Leave Guess unchanged. Flip `MEASURE_ENABLED` only after this chip exists.
+
+### Out of scope
+
+- Turning `MEASURE_ENABLED` on for campaign  
+- Jigger physics / live ml animation beyond current `animatePour`  
+- Live CSS/JS until this chip mock is signed off  
+- Campaign Pour (`MEASURE_ENABLED`) until Guess→Pour intro is retuned  
+
+### Resolved / remaining (this slice)
+
+| | |
+|---|---|
+| Resolved | Design call: expand-in-chip is the measure UX. Live Mixologist catalog-only + idle / in-glass / editing chips. Guess stays toggle. |
+| Remaining | Campaign Pour tier still off (`MEASURE_ENABLED = false`). |
+

@@ -34,6 +34,8 @@ test.describe("play journey", () => {
 
     await pickIngredients(page, ["Gin", "Tonic Water"]);
     await expect(page.locator("#ingredient-catalog .cat-item.is-selected")).toHaveCount(2);
+    await expect(page.locator("#ingredient-catalog .cat-item-step")).toHaveCount(0);
+    await expect(page.locator("#build-list")).toHaveCount(0);
     await expect(page.locator("#btn-next")).toBeEnabled();
     await expect(page.locator("#btn-next")).toContainText(/Serve Drink/i);
 

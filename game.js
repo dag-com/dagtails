@@ -50,6 +50,7 @@ const state = {
   mixJudges: null, // judging panel result for the current invention
   complexity: null, // active complexity profile (portions/glass/method/menu)
   menuIds: null, // curated ingredient menu (Set of ids) or null for full pantry
+  editingIngredientId: null, // Mixologist/Pour: one catalog chip expanded at a time
 };
 
 const STRICTNESS = "balanced";
@@ -2255,9 +2256,14 @@ function renderStepPanel() {
   if (guessCompact) {
     sub = "Tap the ingredients you think belong in this drink — no measuring.";
   }
+  let title = meta.title;
+  if (step === "ingredients" && !isGuessMode()) {
+    title = "Pour your ingredients";
+    sub = "Tap to add. Tap again to dial the amount. One chip open at a time.";
+  }
   panel.classList.toggle("is-guess-compact", guessCompact);
   panel.innerHTML = `
-    <h3 class="step-panel-title">${meta.title}</h3>
+    <h3 class="step-panel-title">${title}</h3>
     <p class="step-panel-sub">${sub}</p>
     <div id="panel-body"></div>
   `;
@@ -2345,38 +2351,134 @@ function renderGarnishPanel(body) {
 
 // ---- Ingredients panel ----
 function renderIngredientsPanel(body) {
-  // Guess mode: catalog only — selection highlights + pours into the glass (toggleable).
-  // Measure mode (Mixologist): keep a pour list for −/+ amounts.
-  if (isGuessMode()) {
-    body.innerHTML = `
-      <div class="ingredient-layout is-catalog-only">
-        <div class="ingredient-catalog" id="ingredient-catalog"></div>
-      </div>
-    `;
-    fillCatalog();
-    return;
-  }
+  // Catalog only. Guess: tap-toggle. Mixologist / Pour: expand the chip to dial.
   body.innerHTML = `
-    <div class="ingredient-layout">
+    <div class="ingredient-layout is-catalog-only">
       <div class="ingredient-catalog" id="ingredient-catalog"></div>
-      <div class="ingredient-build">
-        <h4 class="build-title">Your Pour</h4>
-        <div class="build-list" id="build-list"></div>
-      </div>
     </div>
   `;
   fillCatalog();
-  fillBuildList();
 }
 
 function ingredientCatOrder() {
   return [...new Set(INGREDIENTS.map((i) => i.cat))];
 }
 
+function makeCatalogChip(ing, added) {
+  const guess = isGuessMode();
+  const inGlass = added.has(ing.id);
+  const editing = !guess && inGlass && state.editingIngredientId === ing.id;
+  const node = document.createElement(editing ? "div" : "button");
+  if (!editing) node.type = "button";
+  node.className = "cat-item";
+  node.dataset.ingId = ing.id;
+  node.dataset.ingName = ing.name;
+
+  if (guess) {
+    if (inGlass) node.classList.add("is-selected");
+    node.setAttribute("aria-pressed", inGlass ? "true" : "false");
+    node.textContent = ing.name;
+    node.addEventListener("click", () => toggleIngredient(ing.id));
+    return node;
+  }
+
+  if (editing) {
+    const entry = state.build.ingredients.find((i) => i.id === ing.id);
+    const disp = dispAmount(ing.unit, entry.amount);
+    node.classList.add("is-in-glass", "is-editing");
+    node.setAttribute("role", "group");
+    node.setAttribute("aria-label", `${ing.name} amount`);
+    node.setAttribute("aria-expanded", "true");
+
+    const name = document.createElement("span");
+    name.className = "cat-item-name";
+    name.textContent = ing.name;
+
+    const stepper = document.createElement("div");
+    stepper.className = "cat-item-stepper";
+
+    const dec = document.createElement("button");
+    dec.type = "button";
+    dec.className = "cat-item-step";
+    dec.setAttribute("aria-label", `Less ${ing.name}`);
+    dec.textContent = "−";
+    dec.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const cur = state.build.ingredients.find((i) => i.id === ing.id);
+      if (!cur) return;
+      const shown = dispAmount(ing.unit, cur.amount);
+      changeAmount(ing.id, toMl(ing.unit, shown.val - dispStep(ing.unit)), false);
+    });
+
+    const amt = document.createElement("span");
+    amt.className = "cat-item-amt";
+    amt.textContent = String(disp.val);
+    amt.setAttribute("aria-live", "polite");
+
+    const unit = document.createElement("span");
+    unit.className = "cat-item-unit";
+    unit.textContent = disp.label;
+
+    const inc = document.createElement("button");
+    inc.type = "button";
+    inc.className = "cat-item-step is-plus";
+    inc.setAttribute("aria-label", `More ${ing.name}`);
+    inc.textContent = "+";
+    inc.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const cur = state.build.ingredients.find((i) => i.id === ing.id);
+      if (!cur) return;
+      const shown = dispAmount(ing.unit, cur.amount);
+      changeAmount(ing.id, toMl(ing.unit, shown.val + dispStep(ing.unit)), true);
+    });
+
+    const rm = document.createElement("button");
+    rm.type = "button";
+    rm.className = "cat-item-remove";
+    rm.setAttribute("aria-label", `Remove ${ing.name}`);
+    rm.textContent = "×";
+    rm.addEventListener("click", (e) => {
+      e.stopPropagation();
+      removeIngredient(ing.id);
+    });
+
+    stepper.append(dec, amt, unit, inc);
+    node.append(name, stepper, rm);
+    return node;
+  }
+
+  if (inGlass) {
+    const entry = state.build.ingredients.find((i) => i.id === ing.id);
+    const disp = dispAmount(ing.unit, entry.amount);
+    node.classList.add("is-in-glass");
+    node.setAttribute("aria-pressed", "true");
+    node.setAttribute("aria-expanded", "false");
+    const name = document.createElement("span");
+    name.className = "cat-item-name";
+    name.textContent = ing.name;
+    const badge = document.createElement("span");
+    badge.className = "cat-item-badge";
+    badge.textContent = String(disp.val);
+    node.append(name, badge);
+    node.addEventListener("click", () => {
+      Sound.select();
+      selectIngredientForEdit(ing.id);
+    });
+    return node;
+  }
+
+  node.setAttribute("aria-pressed", "false");
+  node.textContent = ing.name;
+  node.addEventListener("click", () => {
+    Sound.select();
+    addIngredient(ing.id);
+  });
+  return node;
+}
+
 function appendCatalogGroups(el, list, added) {
   const order = ingredientCatOrder();
   const cats = order.filter((cat) => list.some((i) => i.cat === cat));
-  const guess = isGuessMode();
   cats.forEach((cat) => {
     const group = document.createElement("div");
     group.className = "cat-group";
@@ -2384,17 +2486,7 @@ function appendCatalogGroups(el, list, added) {
     const items = document.createElement("div");
     items.className = "cat-items";
     list.filter((i) => i.cat === cat).forEach((ing) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      const on = added.has(ing.id);
-      btn.className = "cat-item" + (on ? " is-selected" : "");
-      btn.setAttribute("aria-pressed", on ? "true" : "false");
-      btn.textContent = ing.name;
-      btn.addEventListener("click", () => {
-        if (guess) toggleIngredient(ing.id);
-        else addIngredient(ing.id);
-      });
-      items.appendChild(btn);
+      items.appendChild(makeCatalogChip(ing, added));
     });
     group.appendChild(items);
     el.appendChild(group);
@@ -2413,12 +2505,14 @@ function fillCatalog() {
   if (state.menuIds) {
     const list = [...state.menuIds].map((id) => INGREDIENT_BY_ID[id]).filter(Boolean);
     appendCatalogGroups(el, list, added);
-    applyTrainingHints();
-    return;
+  } else {
+    appendCatalogGroups(el, pantry, added);
   }
-
-  appendCatalogGroups(el, pantry, added);
   applyTrainingHints();
+  const open = el.querySelector(".cat-item.is-editing");
+  if (open) {
+    requestAnimationFrame(() => open.scrollIntoView({ block: "nearest", inline: "nearest" }));
+  }
 }
 
 function fillBuildList() {
@@ -2469,7 +2563,10 @@ function fillBuildList() {
 }
 
 function addIngredient(id) {
-  if (state.build.ingredients.some((i) => i.id === id)) return;
+  if (state.build.ingredients.some((i) => i.id === id)) {
+    if (!isGuessMode()) selectIngredientForEdit(id);
+    return;
+  }
   state.mixed = false; // adding changes the build; un-blend
   const g = currentGlass();
   const beforeFrac = g ? computeLiquid(g).fillFrac : 0;
@@ -2482,6 +2579,7 @@ function addIngredient(id) {
     if (target) amount = target.amount;
   }
   state.build.ingredients.push({ id, amount });
+  if (!isGuessMode()) state.editingIngredientId = id;
   fillCatalog();
   fillBuildList();
   const afterFrac = g ? computeLiquid(g).fillFrac : beforeFrac;
@@ -2499,10 +2597,18 @@ function toggleIngredient(id) {
   addIngredient(id);
 }
 
+function selectIngredientForEdit(id) {
+  if (isGuessMode()) return;
+  if (!state.build.ingredients.some((i) => i.id === id)) return;
+  state.editingIngredientId = id;
+  fillCatalog();
+}
+
 function removeIngredient(id) {
   const g = currentGlass();
   const beforeFrac = g ? computeLiquid(g).fillFrac : 0;
   state.build.ingredients = state.build.ingredients.filter((i) => i.id !== id);
+  if (state.editingIngredientId === id) state.editingIngredientId = null;
   state.mixed = false;
   fillCatalog();
   fillBuildList();
@@ -2514,11 +2620,29 @@ function removeIngredient(id) {
   updateNav();
 }
 
+function syncChipAmount(id) {
+  const chip = document.querySelector(`.cat-item[data-ing-id="${id}"]`);
+  if (!chip) return;
+  const entry = state.build.ingredients.find((i) => i.id === id);
+  if (!entry) return;
+  const ing = INGREDIENT_BY_ID[id];
+  const disp = dispAmount(ing.unit, entry.amount);
+  const amt = chip.querySelector(".cat-item-amt");
+  const badge = chip.querySelector(".cat-item-badge");
+  if (amt) amt.textContent = String(disp.val);
+  if (badge) badge.textContent = String(disp.val);
+}
+
 function changeAmount(id, value, pour) {
   const ing = state.build.ingredients.find((i) => i.id === id);
   if (!ing) return;
   const meta = unitMeta(INGREDIENT_BY_ID[id].unit);
+  if (value <= 0 || value < meta.min) {
+    removeIngredient(id);
+    return;
+  }
   ing.amount = Math.max(meta.min, value);
+  syncChipAmount(id);
   fillBuildList();
   if (pour) animatePour(id);
   else updateLiquid();
@@ -2567,7 +2691,8 @@ function enterStep() {
     state.mixed = false;
     updateLiquid();
   }
-  setStatus(STEP_META[step].status);
+  if (step === "ingredients" && !isGuessMode()) setStatus("Pour your ingredients");
+  else setStatus(STEP_META[step].status);
   renderTracker();
   renderStepPanel();
   renderCoach();
@@ -3124,7 +3249,9 @@ function applyTrainingHints() {
   else if (step === "ingredients") {
     const need = new Set(r.ingredients.map((i) => INGREDIENT_BY_ID[i.id].name));
     document.querySelectorAll("#ingredient-catalog .cat-item").forEach((b) => {
-      b.classList.toggle("train-hint", need.has(b.textContent) && !b.classList.contains("is-added"));
+      const name = b.dataset.ingName || "";
+      const used = b.classList.contains("is-selected") || b.classList.contains("is-in-glass");
+      b.classList.toggle("train-hint", need.has(name) && !used);
     });
   }
 }
@@ -3348,6 +3475,7 @@ function startMixologist() {
   state.menuIds = null;
   state.steps = getSteps("mixologist");
   state.stepIndex = 0;
+  state.editingIngredientId = null;
   $(".progress-wrap").style.display = "none";
   clearCustomer();
   setGameVenue("Mixologist");

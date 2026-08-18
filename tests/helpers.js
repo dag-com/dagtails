@@ -148,13 +148,49 @@ async function serveDrink(page) {
     const el = document.querySelector("#btn-next");
     return el && !el.disabled;
   }, null, { timeout: 10_000 });
-  await next.click({ force: true });
-  await page.locator("#screen-result.is-active").waitFor({ state: "visible", timeout: 30_000 });
-  // Verdict reveal is deferred ~120ms on campaign (no judge panel).
-  await page.locator("#result-actions:not(.is-pending)").waitFor({
+    await next.click({ force: true });
+    await page.locator("#screen-result.is-active").waitFor({ state: "visible", timeout: 30_000 });
+    // Verdict reveal is deferred ~120ms on campaign (no judge panel).
+    await page.locator("#result-actions:not(.is-pending)").waitFor({
+      state: "visible",
+      timeout: 15_000,
+    });
+}
+
+/**
+ * Hub caret → Mixologist → skip glass + tools → pour catalog.
+ * @param {import('@playwright/test').Page} page
+ */
+async function openMixologistPour(page) {
+  const started = await page.evaluate(() => {
+    const fn = window.DagTailsHub?.getActions()?.openMixologist;
+    if (typeof fn !== "function") return false;
+    fn();
+    return true;
+  });
+  if (!started) throw new Error("DagTailsHub.openMixologist is not registered");
+  await page.locator("#screen-game.is-active").waitFor({ state: "visible", timeout: 15_000 });
+  await dismissAnnounce(page);
+  await page.locator("#panel-body .chip").first().waitFor({ state: "visible", timeout: 10_000 });
+  await page.locator("#panel-body .chip").first().click({ force: true });
+  await page.locator("#btn-next").click({ force: true });
+  await page.locator(".step-panel-title").waitFor({ state: "visible", timeout: 10_000 });
+  await page.locator("#panel-body .chip").first().waitFor({ state: "visible", timeout: 10_000 });
+  await page.locator("#panel-body .chip").first().click({ force: true });
+  await page.locator("#btn-next").click({ force: true });
+  await page.locator("#ingredient-catalog .cat-item").first().waitFor({
     state: "visible",
     timeout: 15_000,
   });
+}
+
+/**
+ * Mixologist catalog chip by ingredient display name.
+ * @param {import('@playwright/test').Page} page
+ * @param {string} name
+ */
+function mixChip(page, name) {
+  return page.locator(`#ingredient-catalog .cat-item[data-ing-name="${name}"]`);
 }
 
 /**
@@ -181,6 +217,8 @@ module.exports = {
   enterStation,
   pickIngredients,
   serveDrink,
+  openMixologistPour,
+  mixChip,
   isPortraitProject,
   skipIfPortrait,
   PROFILE,

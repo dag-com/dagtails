@@ -505,15 +505,98 @@ body {
   transform: translateY(-1px);
 }
 .cat-item.is-added,
-.cat-item.is-selected {
+.cat-item.is-selected,
+.cat-item.is-in-glass {
   border-color: rgba(233, 185, 73, 0.75);
   background: rgba(233, 185, 73, 0.18);
   color: #fff8e6;
   box-shadow: inset 0 0 0 1px rgba(233, 185, 73, 0.25);
 }
-.cat-item.is-selected:hover {
+.cat-item.is-selected:hover,
+.cat-item.is-in-glass:hover {
   border-color: var(--gold);
   transform: none;
+}
+.cat-item.is-in-glass {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.cat-item-badge {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gold);
+}
+.cat-item.is-editing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+  width: max-content;
+  max-width: 100%;
+  cursor: default;
+  transform: none;
+}
+.cat-item.is-editing:hover {
+  transform: none;
+}
+.cat-item-name {
+  white-space: nowrap;
+}
+.cat-item-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.cat-item-step {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35em;
+  height: 1.35em;
+  padding: 0;
+  border-radius: 6px;
+  border: 1px solid var(--gold);
+  background: rgba(28, 18, 12, 0.9);
+  color: var(--gold);
+  font-size: inherit;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+.cat-item-step.is-plus {
+  background: var(--gold);
+  color: #1c1208;
+  border-color: var(--gold);
+}
+.cat-item-amt {
+  min-width: 1.4em;
+  text-align: center;
+  font-size: inherit;
+  font-weight: 700;
+  color: #f2cf7e;
+}
+.cat-item-unit {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.cat-item-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35em;
+  height: 1.35em;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+.cat-item-remove:hover {
+  color: var(--red);
 }
 .ingredient-layout.is-catalog-only {
   grid-template-columns: 1fr;
