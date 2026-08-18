@@ -19,7 +19,8 @@ For **device-matrix-focused** asks (`/device-qa`, foldables, “test all phones�
 - Folds: Galaxy Z Flip 7 / Cover, Galaxy Z Fold 7 / Cover, iPhone Air (no Apple flip preset in Playwright)
 - Aliases: `android` → Pixel 8 landscape, `ios` → iPhone 15 landscape, `pc` → desktop
 - Port: `PW_PORT`; `CI=1` forces fresh webServer
-- Specs: `tests/health.spec.js`, `backend.spec.js`, `gameplay.spec.js`, `play-journey.spec.js`, `layout-integrity.spec.js`, `text-readability.spec.js`, `rotate-lock.spec.js`
+- Specs: `tests/health.spec.js`, `backend.spec.js`, `gameplay.spec.js`, `play-journey.spec.js`, `layout-integrity.spec.js`, `hub-layout.spec.js`, `mixology.spec.js`, `player-fixes.spec.js`, `assets-integrity.spec.js`, `text-readability.spec.js`, `rotate-lock.spec.js`
+- Player-fix map: `docs/TEST-PLAN.md` (P1–P20)
 - Helpers clear rotate-lock for automated landscape play (portrait smoke does not)
 
 ## Workflow
@@ -44,7 +45,11 @@ For **device-matrix-focused** asks (`/device-qa`, foldables, “test all phones�
 - Landscape only. Flip cover / short heights are valid stress cases
 - **Dead-end / clipped-CTA class (blocker):** on every primary screen, the way out must stay tappable in the short-landscape viewport — not clipped by `overflow:hidden`, a tall logo, or a 3:2 panel. Hunt finish (Menu + Play again), result (Retry + Next), endless, mix-result, map dock CTA, hop overlay, intro Next. A screen the player cannot leave is a ship-stopper (kids hit finish first)
 - **Intro comic:** `#comic-caption` copy and `#comic-next` must stay inside the viewport on short landscape (Expo chrome included). Text sitting below the fold counts as a fail
-- **Glass on handhelds:** `#glass-mount .glass-svg` must paint with a real box (height ≳ 36px) on ios/android/fold — including iPhone WKWebView / Expo Go. Do **not** treat handheld glass as skip-only. The 800px `pc` test is a separate vessel-lift regression only
+- **Mix result:** no document scroll; judges panel visible; SE dock must not overlap; large phones scale portraits
+- **Hub:** venue photo is the current stop (not always Snug); Learn/Help/Badges stay at the bottom; no page scroll
+- **Map:** candy discs show stars, not white glasses; current stop pulses
+- **Mixologist pour:** amounts live on the chip; editing chip grows sideways only
+- **Assets:** Pages/Expo image URLs must be absolute and load
 
 ## Hunt on every run (layout)
 

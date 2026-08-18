@@ -8,6 +8,10 @@ const NS = "http://www.w3.org/2000/svg";
 const geom = new WeakMap();
 let _uid = 0;
 
+export function readGeom(svg) {
+  return svg ? geom.get(svg) || null : null;
+}
+
 /** Parse SVG markup into a real SVG element (WKWebView innerHTML often yields 0×0). */
 function svgFromMarkup(markup) {
   const raw = String(markup || "").trim();

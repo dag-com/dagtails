@@ -1721,6 +1721,7 @@ function fitGameStage() {
   document.documentElement.style.setProperty("--stage-scale", String(Math.max(0.2, scale)));
   document.documentElement.style.setProperty("--stage-w", `${vw}px`);
   document.documentElement.style.setProperty("--stage-h", `${vh}px`);
+  if (document.querySelector(".station.has-muddle")) placeMuddler();
 }
 
 function isPhonePlay() {
@@ -1935,6 +1936,36 @@ function renderStation() {
   updateLiquid(false);
   if (state.build.garnish || state.steps.includes("garnish") || state.mixed) applyGarnishVisual();
   refreshStationStatus();
+  requestAnimationFrame(placeMuddler);
+}
+
+/** Seat the muddler in the bowl (not through the stem) and size it to the cavity. */
+function placeMuddler() {
+  const muddler = $("#tool-muddler");
+  const mount = $("#glass-mount");
+  const svg = mount && mount.querySelector("svg.glass-svg");
+  if (!muddler || !mount || !svg) return;
+  if (!document.querySelector(".station.has-muddle")) return;
+  const g = Glass.readGeom(svg);
+  if (!g || !g.vbH) return;
+  const svgR = svg.getBoundingClientRect();
+  const mountR = mount.getBoundingClientRect();
+  if (svgR.height < 8 || mountR.height < 8) return;
+  const sy = svgR.height / g.vbH;
+  const sx = svgR.width / g.vbW;
+  const svgTop = svgR.top - mountR.top;
+  const bowlBot = svgTop + g.botY * sy;
+  const bowlH = Math.max(16, (g.botY - g.rimY) * sy);
+  const stemmed = (g.stemH || 0) > 20;
+  const mudH = stemmed
+    ? Math.min(Math.max(bowlH * 2.05, 58), mountR.height * 0.58)
+    : Math.min(Math.max(bowlH * 1.12, 68), mountR.height * 0.76);
+  const bottomPx = Math.max(2, mountR.height - bowlBot);
+  const shift = Math.max(8, Math.min(26, (g.iTop || g.oTop || 40) * sx * 0.26));
+  muddler.style.setProperty("--muddle-bottom", `${bottomPx}px`);
+  muddler.style.setProperty("--muddle-height", `${mudH}px`);
+  muddler.style.setProperty("--muddle-shift", `${shift}px`);
+  muddler.style.setProperty("--muddle-width", stemmed ? "20px" : "24px");
 }
 
 function refreshStationStatus() {

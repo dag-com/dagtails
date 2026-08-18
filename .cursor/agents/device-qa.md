@@ -31,7 +31,7 @@ Portrait is covered only by `phone-portrait` → `tests/rotate-lock.spec.js` (as
    ```bash
    npm run test:qa
    ```
-   (= `node scripts/run-qa.js` → health + backend + gameplay + play-journey + layout + text + rotate-lock on all `QA_PROJECT_NAMES` + `phone-portrait`)
+   (= `node scripts/run-qa.js` → health + backend + gameplay + play-journey + layout + hub-layout + mixology + player-fixes + assets + text + rotate-lock on all `QA_PROJECT_NAMES` + `phone-portrait`)
 
 2. **Busy port (PowerShell)**
    ```powershell
@@ -47,10 +47,15 @@ Portrait is covered only by `phone-portrait` → `tests/rotate-lock.spec.js` (as
    - Fix smallest shared CSS/JS; re-run full `npm run test:qa`
    - Glass **placement** @ 800px is **pc-only** (vessel-lift SKIP on matrix). Glass **visibility** is **not** skip-only — iPhone / Expo Go WKWebView must still draw `#glass-mount .glass-svg`
 
-5. **Hunt this class (blocker)**
+5. **Hunt this class (blocker)** — full map: `docs/TEST-PLAN.md`
    - **Dead-end screens:** primary exit CTAs clipped, off-viewport, or covered by `overflow:hidden` / oversized brand (finish Menu + Play again, result Next, endless, mix-result, map CTA, intro Next). If a 10-year-old cannot leave the screen, fail the project
-   - **Intro comic:** `#comic-caption` text must be on-screen in short landscape (Expo chrome eats height). Off-panel / below-fold copy is a fail
+   - **Intro comic:** `#comic-caption` text must be on-screen in short landscape (Expo chrome eats height). Off-panel / below-fold copy is a fail. Skip intro + circular Next, same height, no “tap to continue”
    - **Glass not drawn:** empty counter on ios/android — SVG 0×0, 3D+overflow clip, or `%` max-height collapse. Do not close as “pc-only skip”
+   - **Profile modal:** Welcome-to-the-bar must fit the viewport (no page scroller)
+   - **Mix result:** judges visible, no document scroll, SE dock no overlap, large-phone portraits scale
+   - **Hub / Expo assets:** venue photo is the current stop; `url(...)` must be absolute and load
+   - **Map:** stars in discs, current pulse, no white glass tokens
+   - **Pour chips:** Mixologist measures on the chip; editing grows width only
 
 5. **Report**
    - Pass / skip / fail counts

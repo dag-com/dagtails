@@ -13,6 +13,10 @@ Use during audits. Mark Pass / Fail / N/A. Do not paste this whole list into the
 - [ ] Intro comic caption + Next readable on-screen (including Expo chrome)
 - [ ] Station glass SVG paints on handhelds (iPhone / Expo Go), not only desktop
 - [ ] Locked / done / current states distinct without relying on color alone
+- [ ] Mixologist pour: selected chip expands sideways for − / amount / + / × (same height)
+- [ ] Mix result: judges + Make another on-screen; no page scroll
+- [ ] Hub venue photo is the current stop; Learn / Help / Badges stay at the bottom
+- [ ] Map candy discs show earned stars; current stop pulses
 
 ## Splash / hub / profile
 - [ ] Brand readable as hero
