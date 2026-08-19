@@ -76,6 +76,8 @@ Never log or display player names, ages, or emails. `underage` boolean only.
 - Pad known catalogs with zeros (judge verdicts, play modes, venues, hub
   buttons, star buckets, pour steps, teaching levels, drink families).
   Unused options stay visible.
+- The hook / price block is **analytics only**. Do not change gameplay,
+  unlocks, or shop from this skill.
 - Omit a section only if the whole family has no tracking in the schema yet
   *and* showing zeros would imply “nobody did it” when we simply were not
   recording it (intro skip / menu return before Phase 1).
@@ -85,4 +87,5 @@ Never log or display player names, ages, or emails. `underage` boolean only.
 - Query `events` with the anon key (RLS is write-only).
 - Print JWT / database passwords.
 - Add new tracking events from this skill (instrumentation lives in `game.js`).
+- Change gameplay, unlocks, or shop from hook / price findings.
 - Ship Pages or change the game unless the user asked.

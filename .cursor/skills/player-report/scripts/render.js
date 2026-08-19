@@ -219,25 +219,25 @@ function hookAndPremium(report) {
   return {
     hook: mixIsHook ? "Mixologist" : "the first bar-hop drink",
     hookLine: mixIsHook
-      ? `The strongest hook is Mixologist: ${people ? fmt(people) : "a handful of"} people started ${fmt(started)} inventions and finished ${fmt(served)} (${rate}%). That is the only mode that looks like “make another,” not a lesson.`
-      : "The log does not yet show a mode people return to on purpose. Until Mixologist (or another sandbox) is used, do not sell a subscription.",
-    keepFree: "Keep the bar-hop journey free. That is how people learn, and almost all recorded pours are still the first Guess drink — charging for it would sell the tutorial.",
+      ? `The strongest hook in this log is Mixologist: ${people ? fmt(people) : "a handful of"} people started ${fmt(started)} inventions and finished ${fmt(served)} (${rate}%). That is the only mode that looks like “make another,” not a lesson.`
+      : "The log does not yet show a mode people return to on purpose. Until Mixologist (or another sandbox) is used, there is no subscription signal.",
+    keepFree: "The bar-hop journey reads as the lesson, not the product to sell: almost all recorded pours are still the first Guess drink.",
     sell: mixIsHook
-      ? "Charge for a Mixologist Pass: invent without clearing five stages, extra bottles, save inventions, and make another round. Do not charge for Endless, Cocktail of the Day, or My Bar until people actually start them."
-      : "Do not put a paywall on unused modes. Wait until a sandbox mode is finished more than once.",
+      ? "Analytics only — do not change the game from this. If a pass were priced later, Mixologist is the only mode this log would support (invent, extra bottles, save, another round). Endless, Cocktail of the Day, and My Bar have no start signal yet."
+      : "Analytics only — do not change the game from this. Unused modes are not a paywall signal.",
     skipCharge: unused.length
       ? unused.length === 1
-        ? `Do not sell: ${unused[0]} — nobody started it.`
-        : `Do not sell: ${unused.join(", ")} — nobody started those.`
+        ? `No demand signal for: ${unused[0]} — nobody started it.`
+        : `No demand signal for: ${unused.join(", ")} — nobody started those.`
       : null,
     priceMonth: "$4.99",
     priceYear: "$29.99",
     priceLine: mixIsHook
-      ? "Suggested price: $4.99 a month, or $29.99 a year (about $2.50 a month). That is a hobby-game pass, not a hardcore MMO. The shop is still a demo (3 opens) — do not make merch the subscription."
-      : "No price until a real hook shows up in the log.",
+      ? `For the record only (not a ship item): a hobby-game pass in this range would be $4.99 a month, or $29.99 a year. Shop opens in this snapshot: ${fmt(report.side_modes?.shop_open || 0)} — merch is not the subscription signal.`
+      : "No price to record until a real hook shows up in the log.",
     caveat: qaHeavy
-      ? "This is a first read from a log that is mostly automated tests. Revisit the price after real testers play and we can see who comes back tomorrow."
-      : "Revisit the price once we can see who comes back the next day.",
+      ? "This is a first analytics read from a log that is mostly automated tests. It is not a product change. Revisit after real testers play and we can see who comes back tomorrow."
+      : "This is an analytics read, not a product change. Revisit once we can see who comes back the next day.",
   };
 }
 
@@ -593,7 +593,9 @@ function renderDay(report) {
   lines.push("");
 
   const reco = hookAndPremium(report);
-  lines.push("## What hooked them, and what to charge");
+  lines.push("## What hooked them (analytics only)");
+  lines.push("");
+  lines.push("This section is a read of the log. It is not a change to ship.");
   lines.push("");
   lines.push(reco.hookLine);
   lines.push("");
@@ -1005,12 +1007,13 @@ function renderDayHtml(report, history, day) {
   }
   parts.push("</ul>");
   const reco = hookAndPremium(report);
-  parts.push("<h2>What hooked them, and what to charge</h2>");
+  parts.push("<h2>What hooked them (analytics only)</h2>");
+  parts.push("<p>This section is a read of the log. It is not a change to ship.</p>");
   parts.push(`<p>${escapeHtml(reco.hookLine)}</p>`);
   parts.push(`<p>${escapeHtml(reco.keepFree)}</p>`);
   parts.push(`<p>${escapeHtml(reco.sell)}</p>`);
   if (reco.skipCharge) parts.push(`<p>${escapeHtml(reco.skipCharge)}</p>`);
-  parts.push(`<aside><strong>Suggested price:</strong> ${escapeHtml(reco.priceMonth)} / month or ${escapeHtml(reco.priceYear)} / year. ${escapeHtml(reco.caveat)}</aside>`);
+  parts.push(`<aside><strong>Recorded range only (not a ship item):</strong> ${escapeHtml(reco.priceMonth)} / month or ${escapeHtml(reco.priceYear)} / year. ${escapeHtml(reco.caveat)}</aside>`);
   if (history.length) {
     parts.push("<h2>History</h2>");
     parts.push(

@@ -197,18 +197,20 @@ Drink families they invented:
 - When someone reaches Mixologist, they usually finish the drink. That is the strongest “they wanted another round” signal here.
 - After the live site has the new tracking, this report will show who came back the next day and where people quit.
 
-## What hooked them, and what to charge
+## What hooked them (analytics only)
 
-The strongest hook is Mixologist: 19 people started 37 inventions and finished 27 (73%). That is the only mode that looks like “make another,” not a lesson.
+This section is a read of the log. It is not a change to ship.
 
-Keep the bar-hop journey free. That is how people learn, and almost all recorded pours are still the first Guess drink — charging for it would sell the tutorial.
+The strongest hook in this log is Mixologist: 19 people started 37 inventions and finished 27 (73%). That is the only mode that looks like “make another,” not a lesson.
 
-Charge for a Mixologist Pass: invent without clearing five stages, extra bottles, save inventions, and make another round. Do not charge for Endless, Cocktail of the Day, or My Bar until people actually start them.
+The bar-hop journey reads as the lesson, not the product to sell: almost all recorded pours are still the first Guess drink.
 
-Do not sell: My Bar challenge — nobody started it.
+Analytics only — do not change the game from this. If a pass were priced later, Mixologist is the only mode this log would support (invent, extra bottles, save, another round). Endless, Cocktail of the Day, and My Bar have no start signal yet.
 
-Suggested price: $4.99 a month, or $29.99 a year (about $2.50 a month). That is a hobby-game pass, not a hardcore MMO. The shop is still a demo (3 opens) — do not make merch the subscription.
+No demand signal for: My Bar challenge — nobody started it.
 
-This is a first read from a log that is mostly automated tests. Revisit the price after real testers play and we can see who comes back tomorrow.
+For the record only (not a ship item): a hobby-game pass in this range would be $4.99 a month, or $29.99 a year. Shop opens in this snapshot: 3 — merch is not the subscription signal.
+
+This is a first analytics read from a log that is mostly automated tests. It is not a product change. Revisit after real testers play and we can see who comes back tomorrow.
 
 See the [full history](./README.md).
