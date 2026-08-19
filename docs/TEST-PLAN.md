@@ -44,6 +44,7 @@ Quick two-phone smoke: `npm run test:qa:quick`
 | P18 | Hub Learn / Help / Badges stay at the bottom | Hub | `hub-layout` | Learn/Help sit above `#btn-badges`; no critical overlap |
 | P19 | Hub CTA gold split-button; caret must not cover badges | Hub | `hub-layout` | `#btn-start` gold; `#cta-menu` does not swallow badges |
 | P21 | Muddler graphic sits through coupe/stem | Station (muddle) | visual / `placeMuddler` | Pestle sits in the bowl; handle tilts out of the rim; not a full-mount brown bar |
+| P22 | Tool must sit IN the glass, in proportion | Station | `station-fit` all glass × method | Pestle in bowl with handle at/above rim; not a toothpick; spoon clears mixing-glass rim; prep hidden for muddle/build |
 
 ## Out of scope for this gate
 
@@ -54,7 +55,7 @@ Quick two-phone smoke: `npm run test:qa:quick`
 
 ## Hunt list (QA agents)
 
-Keep hunting these classes on every `device-qa` / `gameplay-qa` run — they are the same bugs as P1–P20, not new product ideas:
+Keep hunting these classes on every `device-qa` / `gameplay-qa` run — they are the same bugs as P1–P22, not new product ideas:
 
 - Dead-end screens (clipped Menu / Play again / Serve / Make another / intro Next)
 - Intro copy below the fold (Expo chrome)
@@ -63,3 +64,4 @@ Keep hunting these classes on every `device-qa` / `gameplay-qa` run — they are
 - Hub always-Snug or broken `url(...)` on Pages/Expo
 - Map white-glass discs or missing star fills
 - Mixologist pour still showing `#build-list` or a full-row tall editing chip
+- Muddler / spoon sitting through the stem or outside the bowl on any glass

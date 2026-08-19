@@ -1721,7 +1721,7 @@ function fitGameStage() {
   document.documentElement.style.setProperty("--stage-scale", String(Math.max(0.2, scale)));
   document.documentElement.style.setProperty("--stage-w", `${vw}px`);
   document.documentElement.style.setProperty("--stage-h", `${vh}px`);
-  if (document.querySelector(".station.has-muddle")) placeMuddler();
+  if (document.querySelector(".station.has-muddle, .station.has-prep")) placeStationTools();
 }
 
 function isPhonePlay() {
@@ -1896,6 +1896,8 @@ function renderStation() {
 
   ensureVesselShadow(mount);
   ensureVesselShadow(prepMount);
+  if (muddler) muddler.classList.remove("is-placed");
+  if (spoon) spoon.classList.remove("is-placed");
   if (muddler && muddler.parentElement !== mount) mount.appendChild(muddler);
   if (spoon && prepMount && spoon.parentElement !== prepMount) prepMount.appendChild(spoon);
 
@@ -1936,37 +1938,269 @@ function renderStation() {
   updateLiquid(false);
   if (state.build.garnish || state.steps.includes("garnish") || state.mixed) applyGarnishVisual();
   refreshStationStatus();
-  requestAnimationFrame(placeMuddler);
+  requestAnimationFrame(() => placeStationTools());
+  const svg = mount.querySelector("svg.glass-svg");
+  if (svg) {
+    svg.addEventListener("animationend", () => placeStationTools(), { once: true });
+  }
 }
 
-/** Seat the muddler in the bowl (not through the stem) and size it to the cavity. */
-function placeMuddler() {
+/** Map a viewBox point into CSS px inside the mount (immune to rotateX on the bench). */
+function svgMeetScale(svg, g) {
+  const w = svg.clientWidth;
+  const h = svg.clientHeight;
+  if (!g || !g.vbW || !g.vbH || w < 8 || h < 8) return null;
+  return Math.min(w / g.vbW, h / g.vbH);
+}
+
+function cssBottomForVb(svg, mount, vbY) {
+  const g = Glass.readGeom(svg);
+  const scale = svgMeetScale(svg, g);
+  if (!scale) return null;
+  // Mounts are flex-end; glass SVGs use xMidYMax — viewBox bottom = SVG bottom.
+  // CSS `bottom` is the padding edge, so add padding-bottom (not screen Y).
+  const padB = parseFloat(getComputedStyle(mount).paddingBottom) || 0;
+  return padB + (g.vbH - vbY) * scale;
+}
+
+function svgToScreen(svg, x, y) {
+  const g = Glass.readGeom(svg);
+  if (!svg || !g) return null;
+  const r = svg.getBoundingClientRect();
+  if (r.width < 8 || r.height < 8) return null;
+  const scale = Math.min(r.width / g.vbW, r.height / g.vbH);
+  const contentW = g.vbW * scale;
+  const contentH = g.vbH * scale;
+  // Same as preserveAspectRatio="xMidYMax meet"
+  const x0 = r.left + (r.width - contentW) / 2;
+  const y0 = r.bottom - contentH;
+  return { x: x0 + x * scale, y: y0 + y * scale };
+}
+
+function cavityGeom(svg) {
+  const g = Glass.readGeom(svg);
+  if (!g) return null;
+  const cav = g.cavBox || { x: g.cx - (g.iTop || 24), y: g.rimY, w: (g.iTop || 24) * 2, h: g.botY - g.rimY };
+  return {
+    g,
+    rimY: cav.y,
+    botY: cav.y + cav.h,
+    cx: g.cx,
+    rxTop: Math.max(6, cav.w / 2),
+    rxBot: Math.max(3, g.iBot || 4),
+    stemH: g.stemH || 0,
+  };
+}
+
+function bowlBox(svg) {
+  const cav = cavityGeom(svg);
+  if (!cav) return null;
+  const rim = svgToScreen(svg, cav.cx, cav.rimY);
+  const bot = svgToScreen(svg, cav.cx, cav.botY);
+  const left = svgToScreen(svg, cav.cx - cav.rxTop, cav.rimY);
+  const right = svgToScreen(svg, cav.cx + cav.rxTop, cav.rimY);
+  if (!rim || !bot || bot.y - rim.y < 8) return null;
+  return {
+    top: rim.y,
+    bottom: bot.y,
+    cx: rim.x,
+    rxTop: left && right ? Math.abs(right.x - left.x) / 2 : cav.rxTop,
+    height: bot.y - rim.y,
+  };
+}
+
+/** Seat muddler / spoon from the live vessel cavity so tools sit IN the glass. */
+function placeStationTools(tries = 0) {
+  placeMuddler(tries);
+  placeSpoon(tries);
+}
+
+function placeMuddler(tries = 0) {
   const muddler = $("#tool-muddler");
   const mount = $("#glass-mount");
   const svg = mount && mount.querySelector("svg.glass-svg");
-  if (!muddler || !mount || !svg) return;
-  if (!document.querySelector(".station.has-muddle")) return;
-  const g = Glass.readGeom(svg);
-  if (!g || !g.vbH) return;
-  const svgR = svg.getBoundingClientRect();
-  const mountR = mount.getBoundingClientRect();
-  if (svgR.height < 8 || mountR.height < 8) return;
-  const sy = svgR.height / g.vbH;
-  const sx = svgR.width / g.vbW;
-  const svgTop = svgR.top - mountR.top;
-  const bowlBot = svgTop + g.botY * sy;
-  const bowlH = Math.max(16, (g.botY - g.rimY) * sy);
-  const stemmed = (g.stemH || 0) > 20;
-  const mudH = stemmed
-    ? Math.min(Math.max(bowlH * 2.05, 58), mountR.height * 0.58)
-    : Math.min(Math.max(bowlH * 1.12, 68), mountR.height * 0.76);
-  const bottomPx = Math.max(2, mountR.height - bowlBot);
-  const shift = Math.max(8, Math.min(26, (g.iTop || g.oTop || 40) * sx * 0.26));
-  muddler.style.setProperty("--muddle-bottom", `${bottomPx}px`);
+  if (!muddler || !mount) return;
+  if (!document.querySelector(".station.has-muddle")) {
+    muddler.classList.remove("is-placed");
+    return;
+  }
+  const cav = cavityGeom(svg);
+  const scale = svg && cav ? svgMeetScale(svg, cav.g) : null;
+  const floorBottom = svg && scale ? cssBottomForVb(svg, mount, cav.botY) : null;
+  if (!cav || !scale || floorBottom == null) {
+    if (tries < 12) requestAnimationFrame(() => placeMuddler(tries + 1));
+    return;
+  }
+  const bowlH = Math.max(12, (cav.botY - cav.rimY) * scale);
+  const stemmed = cav.stemH > 20;
+  const shallow = stemmed && bowlH < 80;
+  const cone = (cav.g.iBot || 0) < 8 && stemmed;
+  const rxPx = cav.rxTop * scale;
+  const inset = Math.min(shallow ? 4 : 8, bowlH * 0.08);
+  // Pestle on the floor; handle must clear the rim or the tool reads as a toothpick.
+  const overRim = shallow || cone
+    ? Math.max(bowlH * 0.52, 28)
+    : Math.max(bowlH * 0.18, 20);
+  const mudH = Math.min(
+    Math.max(bowlH - inset + overRim, 56),
+    Math.max(72, mount.clientHeight * 0.9)
+  );
+  const rimW = rxPx * 2;
+  const width = cone
+    ? Math.max(20, Math.min(26, rimW * 0.3))
+    : shallow
+      ? Math.max(26, Math.min(36, rimW * 0.2))
+      : Math.max(24, Math.min(34, rimW * 0.28));
+  const tilt = cone ? 5 : shallow ? 7 : stemmed ? 8 : 11;
+  const shift = cone ? Math.min(6, rxPx * 0.08) : Math.min(rxPx * 0.12, 12);
+  muddler.style.setProperty("--muddle-bottom", `${Math.max(2, floorBottom + inset)}px`);
   muddler.style.setProperty("--muddle-height", `${mudH}px`);
   muddler.style.setProperty("--muddle-shift", `${shift}px`);
-  muddler.style.setProperty("--muddle-width", stemmed ? "20px" : "24px");
+  muddler.style.setProperty("--muddle-width", `${width}px`);
+  muddler.style.setProperty("--muddle-tilt", `${tilt}deg`);
+  muddler.classList.add("is-placed");
 }
+
+function placeSpoon(tries = 0) {
+  const spoon = $("#tool-spoon");
+  const prepMount = $("#prep-mount");
+  const station = $(".station");
+  if (!spoon || !prepMount) return;
+  if (station?.getAttribute("data-method") !== "stir" || prepMount.hidden) {
+    spoon.classList.remove("is-placed");
+    return;
+  }
+  const svg = prepMount.querySelector("svg.glass-svg, svg.prep-svg");
+  const cav = cavityGeom(svg);
+  const scale = svg && cav ? svgMeetScale(svg, cav.g) : null;
+  const floorBottom = svg && scale ? cssBottomForVb(svg, prepMount, cav.botY) : null;
+  if (!cav || !scale || floorBottom == null) {
+    if (tries < 12) requestAnimationFrame(() => placeSpoon(tries + 1));
+    return;
+  }
+  const bowlH = Math.max(12, (cav.botY - cav.rimY) * scale);
+  const spoonH = Math.min(Math.max(bowlH * 1.32, 72), prepMount.clientHeight * 0.92);
+  const inset = Math.min(6, bowlH * 0.06);
+  const spoonW = Math.max(8, Math.min(11, cav.rxTop * scale * 0.14));
+  spoon.style.setProperty("--spoon-bottom", `${Math.max(2, floorBottom + inset)}px`);
+  spoon.style.setProperty("--spoon-height", `${spoonH}px`);
+  spoon.style.setProperty("--spoon-width", `${spoonW}px`);
+  spoon.style.setProperty("--spoon-shift", `${Math.min(10, cav.rxTop * scale * 0.14)}px`);
+  spoon.classList.add("is-placed");
+}
+
+function measureStationFit() {
+  const station = $(".station");
+  const method = station?.getAttribute("data-method") || state.build.method || "";
+  const glassId = state.build.glass || "";
+  const glassSvg = $("#glass-mount svg.glass-svg");
+  const prepMount = $("#prep-mount");
+  const prepSvg = prepMount && !prepMount.hidden
+    ? prepMount.querySelector("svg.glass-svg, svg.prep-svg")
+    : null;
+  const muddler = $("#tool-muddler");
+  const spoon = $("#tool-spoon");
+  const bowl = bowlBox(glassSvg);
+  const prepBowl = bowlBox(prepSvg);
+  const mudVisible = !!(muddler && muddler.classList.contains("is-placed") && getComputedStyle(muddler).opacity !== "0");
+  const spoonVisible = !!(spoon && spoon.classList.contains("is-placed") && getComputedStyle(spoon).opacity !== "0");
+  const mudR = mudVisible ? muddler.getBoundingClientRect() : null;
+  const spoonR = spoonVisible ? spoon.getBoundingClientRect() : null;
+  const issues = [];
+  const prepOn = !!(prepMount && !prepMount.hidden && prepSvg && prepSvg.clientHeight >= 24);
+  if (method === "muddle") {
+    if (!mudR || mudR.height < 8) issues.push("muddler-missing");
+    else if (bowl) {
+      const pestleTop = mudR.top + mudR.height * 0.7;
+      if (mudR.bottom > bowl.bottom + 14) issues.push("muddler-below-bowl");
+      if (pestleTop > bowl.bottom - 2) issues.push("muddler-in-stem");
+      if (mudR.bottom < bowl.top - 2) issues.push("muddler-above-rim");
+      if (mudR.top > bowl.top + 10) issues.push("muddler-too-short");
+      if (mudR.height < bowl.height * 0.9) issues.push("muddler-too-short");
+      if (mudR.width < 18) issues.push("muddler-too-thin");
+      const pestleX = (mudR.left + mudR.right) / 2;
+      if (pestleX < bowl.cx - bowl.rxTop - 12 || pestleX > bowl.cx + bowl.rxTop + 12) {
+        issues.push("muddler-outside-bowl-x");
+      }
+    } else {
+      issues.push("serving-bowl-unreadable");
+    }
+    if (prepOn) issues.push("prep-should-be-hidden");
+  } else if (mudVisible) {
+    issues.push("muddler-should-be-hidden");
+  }
+  if (method === "stir") {
+    if (!prepOn) issues.push("mixing-glass-missing");
+    if (!spoonR || spoonR.height < 8) issues.push("spoon-missing");
+    else if (prepBowl) {
+      if (spoonR.bottom > prepBowl.bottom + 16) issues.push("spoon-below-mixing-glass");
+      if (spoonR.top > prepBowl.top + 12) issues.push("spoon-too-short");
+      if (spoonR.height < prepBowl.height * 0.95) issues.push("spoon-too-short");
+      const sx = (spoonR.left + spoonR.right) / 2;
+      if (sx < prepBowl.cx - prepBowl.rxTop - 14 || sx > prepBowl.cx + prepBowl.rxTop + 14) {
+        issues.push("spoon-outside-mixing-glass");
+      }
+    } else {
+      issues.push("mixing-bowl-unreadable");
+    }
+  }
+  if (method === "shake" || method === "blend") {
+    if (!prepOn) issues.push("prep-vessel-missing");
+    if (spoonVisible) issues.push("spoon-should-be-hidden");
+    const lid = prepSvg && prepSvg.querySelector(".prep-lid");
+    const lidR = lid ? lid.getBoundingClientRect() : null;
+    if (!lidR || lidR.width < 28) issues.push("prep-lid-missing");
+    else if (prepBowl && lidR.width < prepBowl.rxTop * 1.15) issues.push("prep-lid-too-small");
+  }
+  if (method === "build" && prepOn) issues.push("prep-should-be-hidden");
+  if (!glassSvg || glassSvg.clientHeight < 24) issues.push("serving-glass-missing");
+  return {
+    glass: glassId,
+    method,
+    issues,
+    bowl,
+    muddler: mudR ? { top: mudR.top, bottom: mudR.bottom, left: mudR.left, right: mudR.right, height: mudR.height, width: mudR.width } : null,
+    spoon: spoonR ? { top: spoonR.top, bottom: spoonR.bottom, height: spoonR.height } : null,
+    prepOn,
+  };
+}
+
+function previewStationCombo(glassId, methodId) {
+  if (state.mode !== "mixologist") startMixologist();
+  state.build.glass = glassId;
+  state.build.method = methodId;
+  state.mixed = false;
+  const pour = state.steps.indexOf("ingredients");
+  state.stepIndex = pour >= 0 ? pour : state.stepIndex;
+  renderStation();
+  renderTracker();
+  updateNav();
+  refreshStationStatus();
+  return new Promise((resolve) => {
+    document.querySelectorAll("#glass-mount .glass-svg, #prep-mount .glass-svg, #prep-mount .prep-svg").forEach((el) => {
+      el.style.animation = "none";
+    });
+    let n = 0;
+    const tick = () => {
+      placeStationTools();
+      const method = $(".station")?.getAttribute("data-method");
+      const mudOk = method !== "muddle" || $("#tool-muddler")?.classList.contains("is-placed");
+      const spoonOk = method !== "stir" || $("#tool-spoon")?.classList.contains("is-placed");
+      if ((mudOk && spoonOk) || n++ > 16) resolve(measureStationFit());
+      else requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+try {
+  window.__dagtailsStation = {
+    preview: previewStationCombo,
+    measure: measureStationFit,
+    glasses: () => GLASSES.map((g) => g.id),
+    methods: () => METHODS.map((m) => m.id),
+  };
+} catch (e) { /* ignore */ }
 
 function refreshStationStatus() {
   const step = state.steps[state.stepIndex];

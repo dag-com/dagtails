@@ -346,9 +346,8 @@ export function buildGlass(glass) {
   return buildGlassSvg(glass);
 }
 
-// ---- Prep vessels (simpler metal/glass tools; share setLiquid) ----
+// ---- Prep vessels (mixing glass, cobbler shaker, blender) ----
 function prepGeometry(kind, pad) {
-  const cx = pad + 55;
   if (kind === "mixing") {
     const W = 100, H = 130;
     const glass = { tpl: "tumbler", w: W, h: H };
@@ -356,45 +355,78 @@ function prepGeometry(kind, pad) {
     return { ...p, kind: "mixing", metal: false, stemH: 0 };
   }
   if (kind === "blender") {
-    const W = 108, H = 140;
-    const x0 = pad, y0 = pad + 18, x1 = pad + W, y1 = pad + H, t = 7;
-    const lid = `<rect class="prep-lid" x="${x0 + 8}" y="${pad}" width="${W - 16}" height="20" rx="6" fill="#c5ccd4" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>`;
-    const oTop = W / 2 - 6, oBot = W / 2 - 14;
+    const W = 118, H = 132, t = 7, baseH = 32, lidH = 26;
     const cxb = pad + W / 2;
-    const rimY = y0 + 6, botY = y1;
-    const outer = silhouettePath({ cx: cxb, rimY, botY, rimRy: 7, botRy: 8 }, oTop, oBot);
-    const inner = silhouettePath({ cx: cxb, rimY: rimY + 2, botY: botY - t, rimRy: 6, botRy: 6 }, oTop - t, oBot - t);
+    const rimY = pad + lidH + 10;
+    const botY = rimY + H;
+    const oTop = W / 2 - 10;
+    const oBot = W / 2 - 18;
+    const outer = silhouettePath({ cx: cxb, rimY, botY, rimRy: 8, botRy: 9 }, oTop, oBot);
+    const inner = silhouettePath({ cx: cxb, rimY: rimY + 3, botY: botY - t, rimRy: 6, botRy: 7 }, oTop - t, oBot - t);
+    const capRx = oTop + 4;
+    const lidY = rimY - 6;
+    const lid = `
+      <g class="prep-lid">
+        <ellipse cx="${cxb}" cy="${lidY + 8}" rx="${capRx}" ry="8" fill="#2a3038"/>
+        <rect x="${cxb - capRx}" y="${pad + 4}" width="${capRx * 2}" height="${lidH}" rx="8" fill="#3a424c" stroke="rgba(255,255,255,0.28)" stroke-width="1.2"/>
+        <rect x="${cxb - capRx + 5}" y="${pad + 7}" width="${capRx * 2 - 10}" height="5" rx="2" fill="rgba(255,255,255,0.18)"/>
+        <circle cx="${cxb}" cy="${pad + 8}" r="7" fill="#c5ccd4" stroke="rgba(255,255,255,0.45)" stroke-width="1"/>
+        <circle cx="${cxb}" cy="${pad + 7}" r="2.4" fill="rgba(255,255,255,0.55)"/>
+      </g>`;
+    const extra = `
+      <g class="prep-base">
+        <rect x="${cxb - oBot - 10}" y="${botY - 4}" width="${(oBot + 10) * 2}" height="${baseH}" rx="8" fill="#1a1e24" stroke="rgba(255,255,255,0.2)" stroke-width="1.1"/>
+        <rect x="${cxb - oBot - 4}" y="${botY + 6}" width="${(oBot + 4) * 2}" height="8" rx="3" fill="#2c333c"/>
+        <circle cx="${cxb + oBot - 2}" cy="${botY + 14}" r="3.2" fill="#c9a227"/>
+      </g>`;
     return {
-      perspective: true, cx: cxb, rimY, botY, rimRy: 7, botRy: 8,
+      perspective: true, cx: cxb, rimY, botY, rimRy: 8, botRy: 9,
       oTop, oBot, iTop: oTop - t, iBot: oBot - t, thick: t, wall: "straight", bulge: 0,
-      outer, inner, stemH: 0, footW: 0, footH: 0, lid,
-      vbW: W + 2 * pad, vbH: H + 2 * pad + 8, ice: [],
+      outer, inner, stemH: 0, footW: 0, footH: 0, lid, extra,
+      vbW: W + 2 * pad, vbH: botY + baseH + pad,
+      ice: [],
       rimCx: cxb, rimCy: rimY, rimRx: oTop,
       cavBox: { x: cxb - (oTop - t), y: rimY, w: (oTop - t) * 2, h: botY - rimY },
-      kind: "blender", metal: false,
+      kind: "blender", metal: false, hideGlassRim: true,
     };
   }
-  // shaker
-  const W = 92, H = 150;
-  const x0 = pad, y0 = pad + 16;
+  // Cobbler shaker: metal tin + cap seated on the mouth (not a floating pill).
+  const W = 112, tinH = 148, t = 6, capH = 44, knob = 12;
   const cxb = pad + W / 2;
-  const rimY = y0 + 4, botY = pad + H;
-  const oTop = W / 2 - 2, oBot = W / 2 - 10, t = 5;
-  const lid = `<rect class="prep-lid" x="${x0 + 10}" y="${pad}" width="${W - 20}" height="18" rx="5" fill="#c5ccd4" stroke="rgba(255,255,255,0.4)" stroke-width="1"/>`;
-  const outer = silhouettePath({ cx: cxb, rimY, botY, rimRy: 6, botRy: 10 }, oTop, oBot);
-  const inner = silhouettePath({ cx: cxb, rimY: rimY + 2, botY: botY - t, rimRy: 5, botRy: 8 }, oTop - t, oBot - t);
+  const rimY = pad + knob + capH - 8;
+  const botY = rimY + tinH;
+  const oTop = W / 2 - 6;
+  const oBot = W / 2 - 16;
+  const outer = silhouettePath({ cx: cxb, rimY, botY, rimRy: 7, botRy: 10 }, oTop, oBot);
+  const inner = silhouettePath({ cx: cxb, rimY: rimY + 4, botY: botY - t, rimRy: 5, botRy: 8 }, oTop - t, oBot - t);
+  const capRx = oTop + 5;
+  const capTop = pad + knob;
+  const capJoin = rimY + 10;
+  const lid = `
+    <g class="prep-lid">
+      <path d="M ${cxb - capRx} ${capJoin}
+               Q ${cxb - capRx} ${capTop + 8} ${cxb - capRx * 0.55} ${capTop + 4}
+               Q ${cxb} ${capTop - 2} ${cxb + capRx * 0.55} ${capTop + 4}
+               Q ${cxb + capRx} ${capTop + 8} ${cxb + capRx} ${capJoin}
+               Z"
+            fill="#b8c0c8" stroke="rgba(255,255,255,0.4)" stroke-width="1.3"/>
+      <ellipse cx="${cxb}" cy="${capJoin}" rx="${capRx}" ry="8" fill="#8e98a3"/>
+      <ellipse cx="${cxb}" cy="${capTop + 5}" rx="${capRx * 0.62}" ry="6" fill="#d5dbe1"/>
+      <rect x="${cxb - 5}" y="${pad}" width="10" height="${knob + 4}" rx="3" fill="#c5ccd4" stroke="rgba(255,255,255,0.35)" stroke-width="1"/>
+      <circle cx="${cxb}" cy="${pad + 3}" r="6.5" fill="#e8ecf0" stroke="rgba(255,255,255,0.5)" stroke-width="1"/>
+    </g>`;
   return {
-    perspective: true, cx: cxb, rimY, botY, rimRy: 6, botRy: 10,
+    perspective: true, cx: cxb, rimY, botY, rimRy: 7, botRy: 10,
     oTop, oBot, iTop: oTop - t, iBot: oBot - t, thick: t, wall: "straight", bulge: 0,
-    outer, inner, stemH: 0, footW: 0, footH: 0, lid, metal: true,
-    vbW: W + 2 * pad, vbH: H + 2 * pad + 8,
+    outer, inner, stemH: 0, footW: 0, footH: 0, lid, extra: "",
+    vbW: W + 2 * pad, vbH: botY + pad + 6,
     ice: [
       { x: cxb - 18, y: rimY + 50, s: 18, rot: 8 },
       { x: cxb + 2, y: rimY + 70, s: 14, rot: -10 },
     ],
     rimCx: cxb, rimCy: rimY, rimRx: oTop,
     cavBox: { x: cxb - (oTop - t), y: rimY, w: (oTop - t) * 2, h: botY - rimY },
-    kind: "shaker",
+    kind: "shaker", metal: true, hideGlassRim: true,
   };
 }
 
@@ -405,9 +437,12 @@ function assemblePrepSvg(p) {
   const metalId = uid + "metal";
   const bodyFill = p.metal ? `url(#${metalId})` : `url(#${ggId})`;
   const glassBody = `${p.outer} ${p.inner}`;
+  const rim = p.hideGlassRim
+    ? ""
+    : `<ellipse class="rim" cx="${p.cx}" cy="${p.rimY}" rx="${p.oTop}" ry="${p.rimRy}" fill="rgba(255,240,210,0.05)" stroke="rgba(255,236,210,0.65)" stroke-width="2"/>`;
 
   const svg =
-`<svg class="glass-svg prep-svg" viewBox="0 0 ${p.vbW} ${p.vbH}" width="${p.vbW}" height="${p.vbH}" xmlns="${NS}" preserveAspectRatio="xMidYMax meet">
+`<svg class="glass-svg prep-svg prep-${p.kind || "vessel"}" viewBox="0 0 ${p.vbW} ${p.vbH}" width="${p.vbW}" height="${p.vbH}" xmlns="${NS}" preserveAspectRatio="xMidYMax meet">
   <defs>
     <linearGradient id="${ggId}" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="rgba(255,236,200,0.38)"/>
@@ -416,14 +451,15 @@ function assemblePrepSvg(p) {
     </linearGradient>
     <linearGradient id="${metalId}" x1="0" y1="0" x2="1" y2="0">
       <stop offset="0" stop-color="#f4f6f8"/>
-      <stop offset="0.35" stop-color="#9aa3ae"/>
-      <stop offset="0.55" stop-color="#d5dae0"/>
-      <stop offset="1" stop-color="#7f8894"/>
+      <stop offset="0.28" stop-color="#9aa3ae"/>
+      <stop offset="0.52" stop-color="#d8dee4"/>
+      <stop offset="1" stop-color="#6f7884"/>
     </linearGradient>
     <clipPath id="${clipId}"><path d="${p.inner}"/></clipPath>
   </defs>
-  <path d="${glassBody}" fill-rule="evenodd" fill="${bodyFill}" stroke="rgba(255,236,210,0.5)" stroke-width="1.7" stroke-linejoin="round"/>
-  <path d="${p.inner}" fill="rgba(180,150,100,0.05)"/>
+  ${p.extra || ""}
+  <path d="${glassBody}" fill-rule="evenodd" fill="${bodyFill}" stroke="${p.metal ? "rgba(255,255,255,0.42)" : "rgba(255,236,210,0.5)"}" stroke-width="1.7" stroke-linejoin="round"/>
+  <path d="${p.inner}" fill="${p.metal ? "rgba(30,36,44,0.35)" : "rgba(180,150,100,0.05)"}"/>
   <g clip-path="url(#${clipId})">
     <g class="bands"></g>
     <ellipse class="foam" cx="${p.cx}" cy="${p.botY}" rx="${p.iTop * 0.9}" ry="6" fill="rgba(255,250,240,0.55)" opacity="0"/>
@@ -431,8 +467,8 @@ function assemblePrepSvg(p) {
   </g>
   <ellipse class="surface" cx="${p.cx}" cy="${p.botY}" rx="${p.iTop}" ry="6" fill="rgba(255,255,255,0.4)" opacity="0"/>
   <ellipse class="surface-shine" cx="${p.cx}" cy="${p.botY}" rx="${p.iTop * 0.4}" ry="3" fill="rgba(255,255,255,0.35)" opacity="0"/>
+  ${rim}
   ${p.lid || ""}
-  <ellipse class="rim" cx="${p.cx}" cy="${p.rimY}" rx="${p.oTop}" ry="${p.rimRy}" fill="rgba(255,240,210,0.05)" stroke="rgba(255,236,210,0.65)" stroke-width="2"/>
   <g class="garnish-group"></g>
 </svg>`;
 

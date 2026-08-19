@@ -19,7 +19,7 @@ export const GLASSES = [
 ];
 
 export const METHODS = [
-  { id: "shake", name: "Shake", emoji: "🤝", hint: "Chill & combine with ice in a shaker." },
+  { id: "shake", name: "Shake", emoji: "🍸", hint: "Chill & combine with ice in a shaker." },
   { id: "stir", name: "Stir", emoji: "🥄", hint: "Gently stir with ice to chill & dilute." },
   { id: "build", name: "Build", emoji: "🧱", hint: "Build directly in the serving glass." },
   { id: "muddle", name: "Muddle", emoji: "🪵", hint: "Crush ingredients to release flavour." },

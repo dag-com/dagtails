@@ -17,6 +17,7 @@ const SPECS = [
   "tests/hub-layout.spec.js",
   "tests/mixology.spec.js",
   "tests/player-fixes.spec.js",
+  "tests/station-fit.spec.js",
   "tests/assets-integrity.spec.js",
   "tests/text-readability.spec.js",
   "tests/rotate-lock.spec.js",

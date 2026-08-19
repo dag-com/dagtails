@@ -19,8 +19,8 @@ For **device-matrix-focused** asks (`/device-qa`, foldables, “test all phones�
 - Folds: Galaxy Z Flip 7 / Cover, Galaxy Z Fold 7 / Cover, iPhone Air (no Apple flip preset in Playwright)
 - Aliases: `android` → Pixel 8 landscape, `ios` → iPhone 15 landscape, `pc` → desktop
 - Port: `PW_PORT`; `CI=1` forces fresh webServer
-- Specs: `tests/health.spec.js`, `backend.spec.js`, `gameplay.spec.js`, `play-journey.spec.js`, `layout-integrity.spec.js`, `hub-layout.spec.js`, `mixology.spec.js`, `player-fixes.spec.js`, `assets-integrity.spec.js`, `text-readability.spec.js`, `rotate-lock.spec.js`
-- Player-fix map: `docs/TEST-PLAN.md` (P1–P20)
+- Specs: `tests/health.spec.js`, `backend.spec.js`, `gameplay.spec.js`, `play-journey.spec.js`, `layout-integrity.spec.js`, `hub-layout.spec.js`, `mixology.spec.js`, `player-fixes.spec.js`, `station-fit.spec.js`, `assets-integrity.spec.js`, `text-readability.spec.js`, `rotate-lock.spec.js`
+- Player-fix map: `docs/TEST-PLAN.md` (P1–P22)
 - Helpers clear rotate-lock for automated landscape play (portrait smoke does not)
 
 ## Workflow
@@ -48,7 +48,7 @@ For **device-matrix-focused** asks (`/device-qa`, foldables, “test all phones�
 - **Mix result:** no document scroll; judges panel visible; SE dock must not overlap; large phones scale portraits
 - **Hub:** venue photo is the current stop (not always Snug); Learn/Help/Badges stay at the bottom; no page scroll
 - **Map:** candy discs show stars, not white glasses; current stop pulses
-- **Mixologist pour:** amounts live on the chip; editing chip grows sideways only
+- **Station tools:** every glass × method — muddler in the serving bowl at usable scale (handle at/above rim), spoon in the mixing glass, prep vessel only for shake/stir/blend (`tests/station-fit.spec.js`)
 - **Assets:** Pages/Expo image URLs must be absolute and load
 
 ## Hunt on every run (layout)
