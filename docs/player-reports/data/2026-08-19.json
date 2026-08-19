@@ -1,0 +1,307 @@
+{
+  "abandon_steps": [],
+  "daily": [
+    {
+      "abandoned": 0,
+      "day": "2026-08-04",
+      "likely_qa": false,
+      "mix_start": 0,
+      "opens": 3,
+      "served": 0,
+      "sessions": 0,
+      "started": 0
+    },
+    {
+      "abandoned": 0,
+      "day": "2026-08-07",
+      "likely_qa": false,
+      "mix_start": 0,
+      "opens": 1,
+      "served": 6,
+      "sessions": 0,
+      "started": 6
+    },
+    {
+      "abandoned": 0,
+      "day": "2026-08-08",
+      "likely_qa": true,
+      "mix_start": 0,
+      "opens": 758,
+      "served": 216,
+      "sessions": 0,
+      "started": 446
+    },
+    {
+      "abandoned": 0,
+      "day": "2026-08-09",
+      "likely_qa": false,
+      "mix_start": 1,
+      "opens": 2,
+      "served": 1,
+      "sessions": 0,
+      "started": 2
+    },
+    {
+      "abandoned": 0,
+      "day": "2026-08-14",
+      "likely_qa": false,
+      "mix_start": 1,
+      "opens": 1,
+      "served": 3,
+      "sessions": 0,
+      "started": 3
+    },
+    {
+      "abandoned": 0,
+      "day": "2026-08-16",
+      "likely_qa": true,
+      "mix_start": 10,
+      "opens": 459,
+      "served": 119,
+      "sessions": 0,
+      "started": 236
+    },
+    {
+      "abandoned": 0,
+      "day": "2026-08-17",
+      "likely_qa": false,
+      "mix_start": 1,
+      "opens": 3,
+      "served": 5,
+      "sessions": 0,
+      "started": 7
+    },
+    {
+      "abandoned": 0,
+      "day": "2026-08-18",
+      "likely_qa": true,
+      "mix_start": 19,
+      "opens": 1097,
+      "served": 186,
+      "sessions": 0,
+      "started": 446
+    },
+    {
+      "abandoned": 0,
+      "day": "2026-08-19",
+      "likely_qa": false,
+      "mix_start": 5,
+      "opens": 25,
+      "served": 0,
+      "sessions": 0,
+      "started": 0
+    }
+  ],
+  "funnel": [
+    {
+      "events": 2349,
+      "people": 2298,
+      "step": "app_open"
+    },
+    {
+      "events": 1146,
+      "people": 987,
+      "step": "stage_started"
+    },
+    {
+      "events": 536,
+      "people": 489,
+      "step": "stage_result"
+    },
+    {
+      "events": 18,
+      "people": 18,
+      "step": "profile_created"
+    }
+  ],
+  "hub_cta": [],
+  "mixologist": {
+    "finished": 27,
+    "started": 37,
+    "verdicts": [
+      {
+        "avg_score": 65.1,
+        "n": 14,
+        "verdict": "Solid pour"
+      },
+      {
+        "avg_score": 76.8,
+        "n": 13,
+        "verdict": "Crowd-pleaser"
+      }
+    ]
+  },
+  "modes": [
+    {
+      "mode": "campaign",
+      "served": 533
+    },
+    {
+      "mode": "cotd",
+      "served": 1
+    },
+    {
+      "mode": "training",
+      "served": 1
+    },
+    {
+      "mode": "endless",
+      "served": 1
+    }
+  ],
+  "phase1_live": false,
+  "platforms": [
+    {
+      "opens": 2349,
+      "platform": "unknown"
+    }
+  ],
+  "pulled_at": "2026-08-19T07:59:18Z",
+  "range_end": "2026-08-19",
+  "range_start": "2026-08-04",
+  "recipes": [
+    {
+      "complexity": "Guess",
+      "recipe": "Gin & Tonic",
+      "started": 881
+    },
+    {
+      "complexity": "Guess",
+      "recipe": "Tom Collins",
+      "started": 121
+    },
+    {
+      "complexity": "Guess",
+      "recipe": "Mimosa",
+      "started": 87
+    },
+    {
+      "complexity": "Guess",
+      "recipe": "Bramble",
+      "started": 7
+    },
+    {
+      "complexity": "Guess",
+      "recipe": "Screwdriver",
+      "started": 6
+    },
+    {
+      "complexity": "Guess",
+      "recipe": "Black Russian",
+      "started": 4
+    },
+    {
+      "complexity": "Guess",
+      "recipe": "Roy Rogers",
+      "started": 4
+    },
+    {
+      "complexity": "Guess",
+      "recipe": "White Russian",
+      "started": 3
+    },
+    {
+      "complexity": "Guess",
+      "recipe": "Moscow Mule",
+      "started": 3
+    },
+    {
+      "complexity": "Guess",
+      "recipe": "Berry Fizz",
+      "started": 2
+    },
+    {
+      "complexity": "Guess",
+      "recipe": "Espresso Martini",
+      "started": 2
+    },
+    {
+      "complexity": "Guess",
+      "recipe": "Tequila Sunrise",
+      "started": 2
+    }
+  ],
+  "retention": [
+    {
+      "cohort_day": "2026-08-04",
+      "d0": 1,
+      "d1": 0,
+      "d7": 0
+    }
+  ],
+  "side_modes": {
+    "community_share": 1,
+    "cotd_started": 0,
+    "endless_over": 0,
+    "endless_started": 3,
+    "shop_open": 3,
+    "training_complete": 0,
+    "training_started": 2
+  },
+  "stars": [
+    {
+      "n": 5,
+      "stars": "0"
+    },
+    {
+      "n": 9,
+      "stars": "1"
+    },
+    {
+      "n": 9,
+      "stars": "2"
+    },
+    {
+      "n": 513,
+      "stars": "3"
+    }
+  ],
+  "totals": {
+    "abandoned": 0,
+    "devices": 0,
+    "events": 4151,
+    "identities": 2370,
+    "intro_complete": 0,
+    "intro_skip": 0,
+    "opens": 2349,
+    "profiles": 18,
+    "served": 536,
+    "sessions": 0,
+    "signed_in_players": 72,
+    "started": 1146
+  },
+  "venues": [
+    {
+      "started": 1009,
+      "venue": "snug"
+    },
+    {
+      "started": 88,
+      "venue": "aperitivo"
+    },
+    {
+      "started": 20,
+      "venue": "zavod"
+    },
+    {
+      "started": 8,
+      "venue": "soda_fountain"
+    },
+    {
+      "started": 7,
+      "venue": "beach_shack"
+    },
+    {
+      "started": 5,
+      "venue": "juice_bar"
+    },
+    {
+      "started": 5,
+      "venue": "cantina"
+    },
+    {
+      "started": 4,
+      "venue": "speakeasy"
+    }
+  ]
+}

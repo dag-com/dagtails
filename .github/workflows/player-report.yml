@@ -1,0 +1,59 @@
+name: Player report
+
+# Pulls live events from Supabase and commits docs/player-reports/
+# (latest.md + YYYY-MM-DD.md + history index). Does not build the game.
+
+on:
+  schedule:
+    # 07:00 UTC = 10:00 Israel summer / 09:00 winter
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: player-report
+  cancel-in-progress: true
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Require database URL
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "Add repo secret SUPABASE_DB_URL (Postgres URI from Supabase → Project Settings → Database)."
+            echo "The anon key cannot read events. See docs/player-reports/SETUP.md"
+            exit 1
+          fi
+
+      - name: Fetch snapshot
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: node .cursor/skills/player-report/scripts/fetch.js
+
+      - name: Render markdown
+        run: node .cursor/skills/player-report/scripts/render.js
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/player-reports
+          if git diff --cached --quiet; then
+            echo "No report changes"
+            exit 0
+          fi
+          git commit -m "player-report: snapshot $(date -u +%Y-%m-%d)"
+          git push

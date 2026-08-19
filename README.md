@@ -74,3 +74,9 @@ Append an entry to `RECIPES` in `data.js`:
 
 If you need a new ingredient/glass/garnish, add it to the relevant catalog array
 in the same file first.
+
+## Player reports
+
+How people are opening and finishing drinks (plain language, no names):
+[docs/player-reports](docs/player-reports/README.md). Latest snapshot:
+[latest.md](docs/player-reports/latest.md).

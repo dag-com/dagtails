@@ -6,6 +6,10 @@ name: Deploy GitHub Pages
 on:
   push:
     branches: [master]
+    paths-ignore:
+      # Player-report snapshots must not rebuild the live game
+      - "docs/player-reports/**"
+      - ".github/workflows/player-report.yml"
   workflow_dispatch:
 
 permissions:
