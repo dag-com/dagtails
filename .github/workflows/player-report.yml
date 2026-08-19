@@ -1,7 +1,7 @@
 name: Player report
 
-# Pulls live events from Supabase and commits docs/player-reports/
-# (latest.md + YYYY-MM-DD.md + history index). Does not build the game.
+# Pulls live events, commits docs/player-reports/, and publishes the
+# reviewer site to https://dag-com.github.io/last-call-bartending-game/player-reports/
 
 on:
   schedule:
@@ -11,6 +11,8 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 concurrency:
   group: player-report
@@ -27,6 +29,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
+          cache: npm
 
       - name: Require database URL
         env:
@@ -53,7 +56,34 @@ jobs:
           git add docs/player-reports
           if git diff --cached --quiet; then
             echo "No report changes"
-            exit 0
+          else
+            git commit -m "player-report: snapshot $(date -u +%Y-%m-%d)"
+            git push
           fi
-          git commit -m "player-report: snapshot $(date -u +%Y-%m-%d)"
-          git push
+          git pull --ff-only origin master || true
+
+      - name: Install
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: www
+
+  publish:
+    needs: snapshot
+    runs-on: ubuntu-latest
+    # Separate from the game ship so a daily report cannot cancel a Pages deploy in progress.
+    concurrency:
+      group: player-report-pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish reviewer URL
+        id: deployment
+        uses: actions/deploy-pages@v4

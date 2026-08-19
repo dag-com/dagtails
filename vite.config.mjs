@@ -25,10 +25,35 @@ function copyGameAssets() {
   };
 }
 
+/** Copy the reviewer HTML report so it is served at /player-reports/. */
+function copyPlayerReports() {
+  const src = path.join(process.cwd(), "docs", "player-reports", "site");
+  return {
+    name: "copy-player-reports",
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        const url = req.url?.split("?")[0] || "";
+        if (!url.startsWith("/player-reports")) return next();
+        let rel = url.replace(/^\/player-reports\/?/, "") || "index.html";
+        if (rel.endsWith("/")) rel += "index.html";
+        const file = path.join(src, rel);
+        if (!fs.existsSync(file) || fs.statSync(file).isDirectory()) return next();
+        res.setHeader("Content-Type", "text/html; charset=utf-8");
+        fs.createReadStream(file).pipe(res);
+      });
+    },
+    closeBundle() {
+      const dest = path.join(process.cwd(), "www", "player-reports");
+      if (!fs.existsSync(src)) return;
+      fs.cpSync(src, dest, { recursive: true });
+    },
+  };
+}
+
 export default defineConfig({
   // Relative base works for Capacitor `www/` and GitHub project Pages.
   base: "./",
-  plugins: [react(), copyGameAssets()],
+  plugins: [react(), copyGameAssets(), copyPlayerReports()],
   build: {
     outDir: "www",
     emptyOutDir: true,

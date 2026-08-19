@@ -11,6 +11,8 @@ const repoRoot = path.resolve(skillDir, "..", "..", "..");
 const snapshotPath = path.join(skillDir, "last-snapshot.json");
 const outDir = path.join(repoRoot, "docs", "player-reports");
 const dataDir = path.join(outDir, "data");
+const siteDir = path.join(outDir, "site");
+const PUBLIC_URL = "https://dag-com.github.io/last-call-bartending-game/player-reports/";
 
 const VENUE_LABEL = {
   snug: "The Snug",
@@ -243,6 +245,8 @@ function renderIndex(history, latestDate) {
     "",
     "Plain-language snapshots of how people play DAG Tails. Updated daily by GitHub Actions, and whenever the player-report agent runs.",
     "",
+    `**Reviewer URL** (no GitHub login): [${PUBLIC_URL}](${PUBLIC_URL})`,
+    "",
     latestLine,
     "",
     "## History",
@@ -254,6 +258,251 @@ function renderIndex(history, latestDate) {
     "Maintainers: [how the daily Action is wired](./SETUP.md).",
     "",
   ].join("\n");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function htmlTable(headers, rows) {
+  const head = `<tr>${headers.map((h) => `<th>${escapeHtml(h)}</th>`).join("")}</tr>`;
+  const body = rows
+    .map((r) => `<tr>${r.map((c) => `<td>${c}</td>`).join("")}</tr>`)
+    .join("");
+  return `<table><thead>${head}</thead><tbody>${body}</tbody></table>`;
+}
+
+function htmlPage({ title, heading, nav, body }) {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>${escapeHtml(title)}</title>
+  <link rel="canonical" href="${PUBLIC_URL}" />
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.45;
+      max-width: 44rem;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+      color: #1c1410;
+      background: #f6f1ea;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { color: #f3ece4; background: #16110e; }
+      a { color: #e8c38a; }
+      th, td { border-color: #3a3028; }
+      aside { background: #2a211c; }
+    }
+    a { color: #6b3a12; }
+    header nav { font-family: system-ui, sans-serif; font-size: 0.9rem; margin-bottom: 1.25rem; }
+    header nav a { margin-right: 1rem; }
+    h1 { font-size: 1.7rem; margin: 0 0 0.4rem; }
+    h2 { font-size: 1.15rem; margin: 1.6rem 0 0.5rem; }
+    .lede { font-size: 1.05rem; }
+    .meta, .foot { font-family: system-ui, sans-serif; font-size: 0.85rem; opacity: 0.8; }
+    ul { padding-left: 1.2rem; }
+    table { border-collapse: collapse; width: 100%; font-family: system-ui, sans-serif; font-size: 0.92rem; }
+    th, td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid #d9cfc4; }
+    th { font-weight: 600; }
+    aside {
+      background: #efe2d2;
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+    }
+    .foot { margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav>${nav}</nav>
+    <p class="meta">DAG Tails · player report</p>
+    <h1>${escapeHtml(heading)}</h1>
+  </header>
+  ${body}
+  <p class="foot">No player names, ages, or emails. Share this link with reviewers: ${escapeHtml(PUBLIC_URL)}</p>
+</body>
+</html>
+`;
+}
+
+function renderDayHtml(report, history, day) {
+  const t = report.totals || {};
+  const title = headline(report);
+  const qaDays = (report.daily || []).filter((d) => d.likely_qa).map((d) => d.day);
+  const parts = [];
+  parts.push(`<p class="lede"><strong>${escapeHtml(title)}</strong></p>`);
+  parts.push(
+    `<p class="meta">Live game events · ${escapeHtml(report.range_start)} to ${escapeHtml(report.range_end)} (UTC) · pulled ${escapeHtml(report.pulled_at)}</p>`
+  );
+  parts.push("<h2>At a glance</h2><ul>");
+  parts.push(`<li><strong>Opened the game:</strong> ${escapeHtml(fmt(t.opens))}</li>`);
+  parts.push(`<li><strong>Finished a drink:</strong> ${escapeHtml(fmt(t.served))}</li>`);
+  if (report.phase1_live || (t.abandoned || 0) > 0) {
+    parts.push(`<li><strong>Left without serving:</strong> ${escapeHtml(fmt(t.abandoned))}</li>`);
+  }
+  parts.push(`<li><strong>Signed-in players:</strong> ${escapeHtml(fmt(t.signed_in_players))}</li>`);
+  if ((t.devices || 0) > 0) {
+    parts.push(`<li><strong>Phones / browsers we can tell apart:</strong> ${escapeHtml(fmt(t.devices))}</li>`);
+  }
+  parts.push("</ul>");
+  if (qaDays.length) {
+    parts.push(
+      `<aside><strong>Automated test days</strong> (not real testers): ${escapeHtml(qaDays.join(", "))}. Ignore spikes on those dates.</aside>`
+    );
+  }
+  if (!report.phase1_live) {
+    parts.push(
+      "<aside>We cannot yet see who came back tomorrow or where someone quit mid-pour. That starts after the new tracking is on the live site.</aside>"
+    );
+  }
+  const daily = report.daily || [];
+  if (daily.length) {
+    parts.push("<h2>Opens over time</h2>");
+    parts.push(
+      htmlTable(
+        ["Day (UTC)", "Opened", "Started a drink", "Finished", "Note"],
+        daily.map((d) => [
+          escapeHtml(d.day),
+          escapeHtml(fmt(d.opens)),
+          escapeHtml(fmt(d.started)),
+          escapeHtml(fmt(d.served)),
+          d.likely_qa ? "Automated tests" : "Quiet / possible people",
+        ])
+      )
+    );
+  }
+  const stars = report.stars || [];
+  if (stars.length) {
+    parts.push("<h2>Did they finish the drink?</h2>");
+    parts.push(
+      htmlTable(
+        ["Stars", "Drinks served"],
+        stars.map((s) => [`${escapeHtml(s.stars)} stars`, escapeHtml(fmt(s.n))])
+      )
+    );
+    const three = stars.find((s) => String(s.stars) === "3");
+    const threeN = three ? three.n : 0;
+    const served = t.served || 0;
+    if (served && threeN / served > 0.8) {
+      parts.push(
+        "<p>Almost every served drink is 3 stars on the first teaching level. That usually means automated tests, not expert players.</p>"
+      );
+    }
+  }
+  const venues = report.venues || [];
+  if (venues.length) {
+    parts.push("<h2>Where they played</h2>");
+    parts.push(
+      htmlTable(
+        ["Bar", "Drinks started"],
+        venues.map((v) => [escapeHtml(VENUE_LABEL[v.venue] || v.venue), escapeHtml(fmt(v.started))])
+      )
+    );
+  }
+  const recipes = (report.recipes || []).slice(0, 8);
+  if (recipes.length) {
+    parts.push("<h2>Which drinks</h2>");
+    parts.push(
+      htmlTable(
+        ["Drink", "Teaching level", "Times started"],
+        recipes.map((r) => [escapeHtml(r.recipe), escapeHtml(r.complexity), escapeHtml(fmt(r.started))])
+      )
+    );
+  }
+  const hub = report.hub_cta || [];
+  if (hub.length) {
+    parts.push("<h2>What they tapped on the home screen</h2>");
+    parts.push(htmlTable(["Button", "Taps"], hub.map((h) => [escapeHtml(h.cta), escapeHtml(fmt(h.n))])));
+  }
+  const mix = report.mixologist || {};
+  if ((mix.started || 0) > 0 || (mix.finished || 0) > 0) {
+    parts.push("<h2>Invented drinks</h2>");
+    parts.push(
+      `<p>Started an invention: <strong>${escapeHtml(fmt(mix.started))}</strong>. Served it: <strong>${escapeHtml(fmt(mix.finished))}</strong>.</p>`
+    );
+    const verdicts = mix.verdicts || [];
+    if (verdicts.length) {
+      parts.push(
+        htmlTable(
+          ["Judges said", "Drinks", "Average score"],
+          verdicts.map((v) => [escapeHtml(v.verdict), escapeHtml(fmt(v.n)), escapeHtml(String(v.avg_score))])
+        )
+      );
+    }
+  }
+  const side = report.side_modes || {};
+  const sideRows = [
+    ["Endless shift starts", side.endless_started],
+    ["Training starts", side.training_started],
+    ["Cocktail of the Day starts", side.cotd_started],
+    ["Shop opens", side.shop_open],
+    ["Shared to Community", side.community_share],
+  ].filter(([, n]) => n);
+  if (sideRows.length) {
+    parts.push("<h2>Other modes</h2>");
+    parts.push(htmlTable(["What", "Count"], sideRows.map(([k, n]) => [escapeHtml(k), escapeHtml(fmt(n))])));
+  }
+  parts.push("<h2>What this means</h2><ul>");
+  if (qaDays.length) {
+    parts.push("<li>Do not brief testers from the spike days. Those are machines running the game.</li>");
+  }
+  if (venues[0] && venues[0].venue === "snug" && venues[0].started > (t.started || 1) * 0.7) {
+    parts.push("<li>Almost all recorded pours are at the first bar. We are not yet seeing the rest of the crawl.</li>");
+  }
+  if ((mix.finished || 0) > 0) {
+    parts.push("<li>When someone reaches Mixologist, they usually finish the drink. That is the strongest “they wanted another round” signal here.</li>");
+  }
+  if (!report.phase1_live) {
+    parts.push("<li>After the live site has the new tracking, this report will show who came back the next day and where people quit.</li>");
+  }
+  parts.push("</ul>");
+  if (history.length) {
+    parts.push("<h2>History</h2>");
+    parts.push(
+      htmlTable(
+        ["Date (UTC)", "Headline"],
+        history.map((h) => [
+          `<a href="./${escapeHtml(h.date)}.html">${escapeHtml(h.date)}</a>`,
+          escapeHtml(h.headline),
+        ])
+      )
+    );
+  }
+  const nav = `<a href="./index.html">Latest</a><a href="./history.html">History</a>`;
+  return htmlPage({
+    title: `How people are playing DAG Tails · ${day}`,
+    heading: "How people are playing DAG Tails",
+    nav,
+    body: parts.join("\n"),
+  });
+}
+
+function renderHistoryHtml(history, latestDate) {
+  const rows = history.map((h) => [
+    `<a href="./${escapeHtml(h.date)}.html">${escapeHtml(h.date)}</a>`,
+    escapeHtml(h.headline),
+  ]);
+  const body = [
+    latestDate
+      ? `<p class="lede">Latest snapshot: <a href="./index.html">${escapeHtml(latestDate)}</a></p>`
+      : "",
+    "<h2>History</h2>",
+    rows.length ? htmlTable(["Date (UTC)", "Headline"], rows) : "<p>No snapshots yet.</p>",
+  ].join("\n");
+  return htmlPage({
+    title: "DAG Tails player reports · history",
+    heading: "Player reports",
+    nav: `<a href="./index.html">Latest</a><a href="./history.html">History</a>`,
+    body,
+  });
 }
 
 if (!fs.existsSync(snapshotPath)) {
@@ -276,4 +525,10 @@ fs.writeFileSync(path.join(dataDir, `${day}.json`), JSON.stringify(report, null,
 
 const history = listHistory();
 fs.writeFileSync(path.join(outDir, "README.md"), renderIndex(history, day));
-process.stdout.write(`Wrote docs/player-reports/${day}.md and updated history index.\n`);
+
+const dayHtml = renderDayHtml(report, history, day);
+fs.mkdirSync(siteDir, { recursive: true });
+fs.writeFileSync(path.join(siteDir, "index.html"), dayHtml);
+fs.writeFileSync(path.join(siteDir, `${day}.html`), dayHtml);
+fs.writeFileSync(path.join(siteDir, "history.html"), renderHistoryHtml(history, day));
+process.stdout.write(`Wrote docs/player-reports/${day}.md and public site ${PUBLIC_URL}\n`);

@@ -2,20 +2,21 @@
 name: player-report
 description: >-
   Pull live DAG Tails analytics from Supabase, refresh the visual Canvas, and
-  write dated GitHub markdown under docs/player-reports (with a history index).
-  Use when the user says "player report", "analytics report", "how are testers
+  write dated GitHub markdown under docs/player-reports (with a history index)
+  and publish the public reviewer URL on GitHub Pages. Use when the user says "player report", "analytics report", "how are testers
   doing", "end user behaviour", or wants the GitHub report updated.
 ---
 
 # Player report
 
-Build a **Canvas** for the person in chat, and a **GitHub markdown history**
-everyone else can open. Audience is product / testers / non-engineers. Plain
-language. No event-name soup in headings.
+Build a **Canvas** for the person in chat, **GitHub markdown history**, and a
+**public HTML page** reviewers can open without a GitHub account:
+
+https://dag-com.github.io/last-call-bartending-game/player-reports/
 
 The **player-report** agent publishes to GitHub after this skill. GitHub
 Actions also refreshes `docs/player-reports/` daily when secret `SUPABASE_DB_URL`
-is set.
+is set, and publishes the reviewer URL on Pages.
 
 ## Steps
 
@@ -34,9 +35,9 @@ is set.
    canvas skill names). Filename: `player-report.canvas.tsx`. Overwrite it.
 5. **Embed** snapshot numbers inline, plus a **History** table from
    `docs/player-reports/YYYY-MM-DD.md` (date + headline). No `fetch()` in the canvas.
-6. **Chat** with 4–6 sentences: the headline finding, one caveat, a markdown
-   link to the canvas, and the GitHub latest + history URLs. Do not paste tables
-   in chat.
+6. **Chat** with 4–6 sentences: the headline finding, one caveat, the
+   **reviewer URL** (send this to outsiders), a markdown link to the canvas,
+   and the GitHub history URL. Do not paste tables in chat.
 
 Prefer `npm run report:players` when you only need fetch + markdown.
 

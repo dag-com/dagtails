@@ -2,13 +2,15 @@
 name: player-report
 description: >-
   Pulls DAG Tails play data from Supabase, refreshes the visual Canvas, and
-  publishes a dated markdown snapshot to GitHub (docs/player-reports) with a
-  readable history index. Use proactively for /player-report, "player report",
+  publishes a dated snapshot to GitHub and the public reviewer URL
+  (docs/player-reports plus GitHub Pages /player-reports/). Use proactively for /player-report, "player report",
   "how are testers doing", "end user behaviour", or when the user wants the
   GitHub report updated.
 ---
 
-You own the **player report**: a plain-language snapshot of how people play DAG Tails. Cursor Canvas is for the person in this chat. GitHub `docs/player-reports/` is the living copy everyone else can open, including past days.
+You own the **player report**: a plain-language snapshot of how people play DAG Tails. Cursor Canvas is for the person in this chat. GitHub `docs/player-reports/` is the markdown history. The **reviewer URL** is a public HTML page (no GitHub login):
+
+https://dag-com.github.io/last-call-bartending-game/player-reports/
 
 Follow `.cursor/skills/player-report/SKILL.md` and `.cursor/skills/player-report/canvas-spec.md`. Read the Cursor canvas skill before writing the `.canvas.tsx`.
 
@@ -21,9 +23,9 @@ Follow `.cursor/skills/player-report/SKILL.md` and `.cursor/skills/player-report
 | `docs/player-reports/YYYY-MM-DD.md` | Frozen snapshot for that day |
 | `docs/player-reports/data/YYYY-MM-DD.json` | Numbers behind that day |
 
-Public URL pattern (after push to `master`):
+Public URL pattern (after Pages deploy):
 
-https://github.com/dag-com/last-call-bartending-game/blob/master/docs/player-reports/latest.md
+https://dag-com.github.io/last-call-bartending-game/player-reports/
 
 ## Workflow
 
@@ -46,21 +48,29 @@ https://github.com/dag-com/last-call-bartending-game/blob/master/docs/player-rep
    - Message style: `v1.x.x - refresh player report` (why: keep GitHub current)
    - Follow the repo commit protocol: status, diff, log → stage → commit
 
-5. **Push** so GitHub shows the new day and the history index:
+5. **Push** so GitHub markdown and the HTML site are on `master`:
    ```bash
    git push -u origin HEAD
    ```
-   Default branch is `master`. Never force-push. Report commits must not rebuild the game — `deploy-pages.yml` ignores `docs/player-reports/**`.
+   Default branch is `master`. Never force-push.
 
-6. **Confirm to the user** (4–6 sentences, no tables in chat)
+6. **Publish the reviewer URL** so outsiders see the new day (report-only commits do not rebuild Pages by themselves):
+   ```bash
+   gh workflow run "Deploy GitHub Pages" --ref master
+   ```
+   Watch that run. Confirm:
+   https://dag-com.github.io/last-call-bartending-game/player-reports/
+
+7. **Confirm to the user** (4–6 sentences, no tables in chat)
    - Headline finding + one caveat
+   - The reviewer URL (this is what to send outside)
    - Link to the Canvas
-   - GitHub latest + history URLs
+   - GitHub history URL
    - Commit SHA
 
 ## Daily automation
 
-`.github/workflows/player-report.yml` runs at 07:00 UTC and on **Run workflow**. It needs repo secret **`SUPABASE_DB_URL`** (Postgres URI). Anon key cannot SELECT `events`. See `docs/player-reports/SETUP.md`. If the Action is missing the secret, say so and still publish from this machine when fetch works.
+`.github/workflows/player-report.yml` runs at 07:00 UTC and on **Run workflow**. It needs repo secret **`SUPABASE_DB_URL`** (Postgres URI). Anon key cannot SELECT `events`. After the snapshot it publishes https://dag-com.github.io/last-call-bartending-game/player-reports/ . See `docs/player-reports/SETUP.md`. If the Action is missing the secret, say so and still publish from this machine when fetch works, then dispatch **Deploy GitHub Pages**.
 
 ## Reading rules (required)
 
@@ -73,5 +83,5 @@ https://github.com/dag-com/last-call-bartending-game/blob/master/docs/player-rep
 
 - Query `events` with the anon key
 - Print JWT / database passwords / `SUPABASE_DB_URL`
-- Ship Pages or change the game unless the user asked
-- Skip the GitHub publish step when fetch succeeded
+- Change gameplay or ship unrelated game work unless the user asked
+- Skip the GitHub publish step or the Pages deploy that updates the reviewer URL

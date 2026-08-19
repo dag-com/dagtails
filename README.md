@@ -77,6 +77,9 @@ in the same file first.
 
 ## Player reports
 
-How people are opening and finishing drinks (plain language, no names):
-[docs/player-reports](docs/player-reports/README.md). Latest snapshot:
-[latest.md](docs/player-reports/latest.md).
+How people are opening and finishing drinks (plain language, no names).
+
+**Send this URL to outside reviewers** (no GitHub login):
+https://dag-com.github.io/last-call-bartending-game/player-reports/
+
+Repo copy and history: [docs/player-reports](docs/player-reports/README.md).
