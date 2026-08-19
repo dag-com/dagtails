@@ -110,4 +110,49 @@ test.describe("gameplay smoke", () => {
     expect(info.contentType).toMatch(/image\//i);
     expect(info.bg).toMatch(/url\(/i);
   });
+
+  test("boot funnel writes session, splash, and hub events", async ({ page }) => {
+    await seedPlayer(page, { cleared: 0 });
+    await gotoHub(page);
+
+    const names = await page.evaluate(() => {
+      try {
+        return JSON.parse(localStorage.getItem("dagtails_analytics_log") || "[]").map((e) => e.name);
+      } catch (e) {
+        return [];
+      }
+    });
+
+    expect(names).toContain("session_start");
+    expect(names).toContain("app_open");
+    expect(names).toContain("splash_continue");
+    expect(names).toContain("hub_view");
+
+    await openMap(page);
+    const afterMap = await page.evaluate(() => {
+      try {
+        return JSON.parse(localStorage.getItem("dagtails_analytics_log") || "[]").map((e) => e.name);
+      } catch (e) {
+        return [];
+      }
+    });
+    expect(afterMap).toContain("hub_cta");
+    expect(afterMap).toContain("map_view");
+
+    const cta = page.locator("#btn-map-play");
+    await cta.click({ force: true });
+    await page.locator("#map-path:not([hidden])").waitFor({ state: "visible", timeout: 10_000 });
+    await cta.click({ force: true });
+    await page.locator("#screen-game.is-active").waitFor({ state: "visible", timeout: 15_000 });
+    await page.locator("#btn-quit").click({ force: true });
+    const afterQuit = await page.evaluate(() => {
+      try {
+        return JSON.parse(localStorage.getItem("dagtails_analytics_log") || "[]").map((e) => e.name);
+      } catch (e) {
+        return [];
+      }
+    });
+    expect(afterQuit).toContain("stage_started");
+    expect(afterQuit).toContain("drink_abandoned");
+  });
 });

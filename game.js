@@ -186,26 +186,265 @@ function applyMixShareLock(classic) {
 // usage across every player from the SQL editor. Never blocks or throws.
 const ANALYTICS_KEY = "dagtails_analytics_log";
 const ANALYTICS_MAX = 300;
-const SESSION_ID = (() => {
+const DEVICE_KEY = "dagtails_device_id";
+const SESSION_KEY = "dagtails_session_id";
+const SESSION_N_KEY = "dagtails_session_n";
+const SESSION_GAP_MS = 30 * 60 * 1000;
+const APP_VERSION = "1.14.1";
+
+let sessionId = null;
+let sessionN = 0;
+let sessionStartedAt = 0;
+let sessionLastActive = 0;
+let sessionEnded = false;
+let drinksServedSession = 0;
+let lastScreenId = "screen-splash";
+let drinkOpen = false;
+let drinkStartedAt = 0;
+let stepsBack = 0;
+let lastMapViewKey = "";
+let introSource = "first_run";
+
+function getDeviceId() {
   try {
-    let sid = sessionStorage.getItem("dagtails_session_id");
-    if (!sid) { sid = genId(); sessionStorage.setItem("dagtails_session_id", sid); }
-    return sid;
-  } catch (e) { return genId(); }
-})();
+    let id = localStorage.getItem(DEVICE_KEY);
+    if (!id) {
+      id = "d_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 10);
+      localStorage.setItem(DEVICE_KEY, id);
+    }
+    return id;
+  } catch (e) {
+    return "d_ephemeral";
+  }
+}
+
+function analyticsPlatform() {
+  try {
+    const cap = window.Capacitor;
+    if (cap && typeof cap.getPlatform === "function") {
+      const p = cap.getPlatform();
+      if (p === "ios" || p === "android") return p;
+    }
+  } catch (e) { /* ignore */ }
+  const ua = navigator.userAgent || "";
+  if (/Expo|Exponent/i.test(ua)) {
+    if (/Android/i.test(ua)) return "android";
+    if (/iPhone|iPad|iPod/i.test(ua)) return "ios";
+  }
+  return "web";
+}
 
 function getAnalyticsLog() {
   try { return JSON.parse(localStorage.getItem(ANALYTICS_KEY) || "[]"); } catch (e) { return []; }
 }
 function clearAnalyticsLog() { try { localStorage.removeItem(ANALYTICS_KEY); } catch (e) { /* ignore */ } }
 
+function bumpSession() {
+  sessionId = genId();
+  sessionStartedAt = Date.now();
+  sessionLastActive = sessionStartedAt;
+  sessionEnded = false;
+  drinksServedSession = 0;
+  try {
+    sessionStorage.setItem(SESSION_KEY, sessionId);
+    sessionN = (parseInt(localStorage.getItem(SESSION_N_KEY) || "0", 10) || 0) + 1;
+    localStorage.setItem(SESSION_N_KEY, String(sessionN));
+  } catch (e) {
+    sessionN += 1;
+  }
+}
+
+function sessionStartProps() {
+  let streak = 0;
+  let cleared = 0;
+  try { streak = getDaily().streak || 0; } catch (e) { /* ignore */ }
+  try { cleared = getMap().cleared || 0; } catch (e) { /* ignore */ }
+  return {
+    session_n: sessionN,
+    returning: !!getProfile(),
+    streak,
+    cleared,
+  };
+}
+
+function emitSessionEnd(reason) {
+  if (!sessionId || sessionEnded) return;
+  sessionEnded = true;
+  track("session_end", {
+    duration_ms: Math.max(0, Date.now() - sessionStartedAt),
+    drinks_served: drinksServedSession,
+    last_screen: lastScreenId,
+    reason,
+  });
+}
+
+function ensureSession() {
+  const now = Date.now();
+  if (!sessionId || sessionEnded) {
+    bumpSession();
+    track("session_start", sessionStartProps());
+  } else if (now - sessionLastActive > SESSION_GAP_MS) {
+    emitSessionEnd("timeout");
+    bumpSession();
+    track("session_start", sessionStartProps());
+  }
+  sessionLastActive = now;
+}
+
+function superProps() {
+  let pointer = "fine";
+  try { pointer = window.matchMedia("(pointer: coarse)").matches ? "coarse" : "fine"; } catch (e) { /* ignore */ }
+  const vp = typeof liveViewport === "function" ? liveViewport() : { winW: 0, winH: 0 };
+  const p = getProfile();
+  let cleared = 0;
+  try { cleared = getMap().cleared || 0; } catch (e) { /* ignore */ }
+  let automation = false;
+  try { automation = !!navigator.webdriver; } catch (e) { /* ignore */ }
+  let host = "";
+  try { host = location.hostname || ""; } catch (e) { /* ignore */ }
+  return {
+    device_id: getDeviceId(),
+    session: sessionId,
+    session_id: sessionId,
+    platform: analyticsPlatform(),
+    build: APP_VERSION,
+    underage: p ? isUnderage() : null,
+    units: p ? (p.units || "metric") : null,
+    returning: !!p,
+    viewport_w: vp.winW,
+    viewport_h: vp.winH,
+    pointer,
+    cleared,
+    automation,
+    host,
+  };
+}
+
 function track(name, props = {}) {
   try {
+    if (name !== "session_start" && name !== "session_end") ensureSession();
+    const merged = { ...superProps(), ...props };
     const log = getAnalyticsLog();
-    log.push({ name, props, t: Date.now() });
+    log.push({ name, props: merged, t: Date.now() });
     localStorage.setItem(ANALYTICS_KEY, JSON.stringify(log.slice(-ANALYTICS_MAX)));
+    Backend.logEvent(name, merged);
   } catch (e) { /* ignore */ }
-  try { Backend.logEvent(name, { ...props, session: SESSION_ID }); } catch (e) { /* ignore */ }
+}
+
+function drinkContext() {
+  if (state.mode === "mixologist") {
+    return { mode: "mixologist", stage: null, recipe_id: null, venue_id: null, complexity: "Sandbox" };
+  }
+  const recipe = typeof currentRecipe === "function" ? currentRecipe() : null;
+  const venue = recipe && typeof venueOf === "function" ? venueOf(recipe) : null;
+  const stop = typeof venueForStage === "function" ? venueForStage(state.stage) : null;
+  return {
+    mode: state.mode,
+    stage: state.mode === "campaign" ? state.stage + 1 : null,
+    recipe_id: recipe && recipe.id ? recipe.id : null,
+    venue_id: (venue && venue.id) || (stop && stop.venue && stop.venue.id) || null,
+    complexity: (state.complexity && state.complexity.label) || null,
+  };
+}
+
+function beginDrink() {
+  drinkOpen = true;
+  drinkStartedAt = Date.now();
+  stepsBack = 0;
+}
+
+function trackDrinkStarted(extra = {}) {
+  beginDrink();
+  track("stage_started", { ...drinkContext(), ...extra });
+}
+
+function skillFlag(item) {
+  if (!item) return null;
+  if (item.kind === "auto") return "auto";
+  if (item.kind === "ok") return "ok";
+  if (item.kind === "near") return "near";
+  return "miss";
+}
+
+function scoreProps(result) {
+  const fb = (result && result.feedback) || [];
+  const glassFb = fb.find((x) => x.label === "Glass");
+  const methodFb = fb.find((x) => x.label === "Method");
+  const garnishFb = fb.find((x) => x.label === "Garnish");
+  const pours = fb.filter((x) => x.label !== "Glass" && x.label !== "Method" && x.label !== "Garnish");
+  return {
+    duration_ms: drinkStartedAt ? Date.now() - drinkStartedAt : 0,
+    stars: result ? result.stars : null,
+    pct: result && result.blended != null ? result.blended : (result ? result.pct : null),
+    glass_ok: skillFlag(glassFb),
+    method_ok: skillFlag(methodFb),
+    garnish_ok: skillFlag(garnishFb),
+    pour_ok: pours.filter((x) => x.kind === "ok").length,
+    pour_near: pours.filter((x) => x.kind === "near").length,
+    pour_miss: pours.filter((x) => x.kind === "bad").length,
+    steps_back: stepsBack,
+  };
+}
+
+function trackDrinkServed(result) {
+  drinkOpen = false;
+  drinksServedSession += 1;
+  const recipe = typeof currentRecipe === "function" ? currentRecipe() : null;
+  track("stage_result", {
+    ...drinkContext(),
+    recipe: recipe ? recipe.name : null,
+    ...scoreProps(result),
+  });
+}
+
+function drinkAbandoned(reason) {
+  if (!drinkOpen) return;
+  drinkOpen = false;
+  const step = (state.steps && state.steps[state.stepIndex]) || null;
+  track("drink_abandoned", {
+    ...drinkContext(),
+    last_step: step,
+    duration_ms: drinkStartedAt ? Date.now() - drinkStartedAt : 0,
+    ingredients_n: (state.build && state.build.ingredients ? state.build.ingredients.length : 0),
+    steps_back: stepsBack,
+    reason,
+  });
+}
+
+function trackMapView() {
+  const venue = (typeof focusedVenue === "function" && focusedVenue())
+    || (typeof currentHubVenue === "function" && currentHubVenue())
+    || null;
+  const key = `${(venue && venue.id) || ""}:${mapStep}`;
+  if (key === lastMapViewKey) return;
+  lastMapViewKey = key;
+  let frontier = 1;
+  try { frontier = (getMap().cleared || 0) + 1; } catch (e) { /* ignore */ }
+  track("map_view", {
+    venue_id: venue && venue.id ? venue.id : null,
+    step: mapStep,
+    frontier_stage: frontier,
+  });
+}
+
+function bootAnalytics() {
+  bumpSession();
+  track("session_start", sessionStartProps());
+  track("app_open", { returning: !!getProfile() });
+}
+
+function wireAnalyticsLifecycle() {
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      try { Backend.flushEvents({ keepalive: true }); } catch (e) { /* ignore */ }
+      return;
+    }
+    ensureSession();
+  });
+  window.addEventListener("pagehide", (e) => {
+    try { Backend.flushEvents({ keepalive: true }); } catch (err) { /* ignore */ }
+    if (!e.persisted) emitSessionEnd("pagehide");
+  });
 }
 
 // Intro comic: shown once after sign-up, before the first level (replayable in Settings).
@@ -436,6 +675,7 @@ function renderSplash() {
 }
 
 function dismissSplash() {
+  track("splash_continue", { returning: !!getProfile() });
   onShowStart();
   showScreen("screen-start");
   if (!getProfile()) openProfileForm(true);
@@ -982,7 +1222,7 @@ async function shareCreationToCommunity(payload, btn) {
     await Backend.shareCreation(payload);
     if (btn) btn.textContent = "Shared ✓";
     Sound.coin();
-    track("community_share", { name: payload && payload.name, score: payload && payload.score });
+    track("community_share", { score: payload && payload.score, family: payload && payload.family });
     showToast("Shared to the community!");
   } catch (e) {
     if (btn) { btn.textContent = original; btn.disabled = false; }
@@ -992,7 +1232,7 @@ async function shareCreationToCommunity(payload, btn) {
 
 // ============================ Cocktail of the Day (play) ============================
 function loadCotd() {
-  const { recipe } = todaysCotd();
+  const { recipe, done } = todaysCotd();
   if (!recipe) return;
   state.mode = "cotd";
   state.cotdRecipe = recipe;
@@ -1018,6 +1258,8 @@ function loadCotd() {
   renderStation();
   enterStep();
   showScreen("screen-game");
+  track("cotd_started", { recipe_id: recipe.id, already_done_today: !!done });
+  trackDrinkStarted();
 }
 
 // ============================ Badges screen ============================
@@ -1390,7 +1632,13 @@ function renderPath(venue, map, cleared) {
 
 function onPathNodeTap(venue, drink) {
   const cleared = getMap().cleared || 0;
-  if (drink.index > cleared) {
+  const locked = drink.index > cleared;
+  track("map_drink_tap", {
+    recipe_id: drink.recipe && drink.recipe.id,
+    venue_id: venue.id,
+    locked,
+  });
+  if (locked) {
     Sound.fail();
     showToast("🔒 Clear earlier drinks first.");
     return;
@@ -1403,6 +1651,8 @@ function onPathNodeTap(venue, drink) {
 
 function renderMap(opts = {}) {
   if (!$("#map-hero") || !$("#map-path")) return;
+  const prevStep = mapStep;
+  const prevVenue = selectedVenueId;
   const pool = drinkPool();
   const map = getMap();
   const cleared = map.cleared || 0;
@@ -1443,6 +1693,12 @@ function renderMap(opts = {}) {
       playVenueHop(trip.fromVenue, trip.toVenue);
       updateMapCta();
     }, 180);
+  }
+
+  const onMap = $("#screen-map")?.classList.contains("is-active");
+  if (onMap && (mapStep !== prevStep || selectedVenueId !== prevVenue)) {
+    lastMapViewKey = "";
+    trackMapView();
   }
 }
 
@@ -1677,12 +1933,22 @@ const STEP_META = {
 const $ = (sel) => document.querySelector(sel);
 
 function showScreen(id) {
+  lastScreenId = id;
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("is-active"));
   $("#" + id).classList.add("is-active");
   document.body.classList.toggle("is-phone-play", isPhonePlay());
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
-  if (id === "screen-start") onShowStart();
-  if (id === "screen-map") ensureMapAssets();
+  if (id === "screen-start") {
+    onShowStart();
+    track("hub_view", {
+      unlocked_modes: mapUnlocked(),
+    });
+  }
+  if (id === "screen-map") {
+    ensureMapAssets();
+    lastMapViewKey = "";
+    trackMapView();
+  }
   if (id === "screen-mix-result") {
     applyMixResultLayout();
     const commBtn = $("#btn-community");
@@ -3001,11 +3267,13 @@ async function goNext() {
 function goBack() {
   if (state.stepIndex > 0) {
     state.stepIndex--;
+    stepsBack += 1;
     enterStep();
     return;
   }
   // First step: leave the station (same destinations as Quit).
   Sound.click();
+  drinkAbandoned("back");
   if (state.mode === "campaign") {
     const stop = venueForStage(state.stage);
     renderMap({ step: "path", openVenueId: stop.venue.id, stageIndex: state.stage });
@@ -3211,7 +3479,7 @@ function loadStage(index) {
   enterStep();
   showScreen("screen-game");
   maybeShowTierIntro(state.complexity.label);
-  track("stage_started", { stage: index + 1, recipe: recipe.name, complexity: state.complexity.label, venue: stop.venue?.id });
+  trackDrinkStarted({ recipe: recipe.name, venue: stop.venue?.id });
 }
 
 // ============================ Endless shift ============================
@@ -3265,6 +3533,7 @@ function loadEndless(next = false) {
   renderStation();
   enterStep();
   showScreen("screen-game");
+  trackDrinkStarted({ recipe: recipe.name });
 }
 
 function serveEndless() {
@@ -3314,6 +3583,12 @@ function showEndlessFinish() {
     bestEl.classList.remove("is-new");
   }
   renderStartBest();
+  track("endless_over", {
+    served: state.served,
+    best_streak: state.bestStreak,
+    score: state.totalScore,
+    lives: state.lives,
+  });
   showScreen("screen-endless");
 }
 
@@ -3453,6 +3728,7 @@ function loadTraining() {
   renderStation();
   enterStep();
   showScreen("screen-game");
+  trackDrinkStarted({ recipe: r.name });
 }
 
 function renderCoach() {
@@ -3756,6 +4032,7 @@ function startMixologist() {
   renderStation();
   enterStep();
   showScreen("screen-game");
+  trackDrinkStarted();
 }
 
 let lastMix = null;
@@ -3906,7 +4183,14 @@ function renderFlavorBars(p) {
 
 function showMixResult(result) {
   const panel = result.judges || scoreWithJudges(result, pickJudges(3));
-  track("mixologist_result", { score: panel.total, verdict: panel.verdict, classic: result.classic ? result.classic.name : null });
+  drinkOpen = false;
+  drinksServedSession += 1;
+  track("mixologist_result", {
+    score: panel.total,
+    verdict: panel.verdict,
+    classic: result.classic ? result.classic.name : null,
+    duration_ms: drinkStartedAt ? Date.now() - drinkStartedAt : 0,
+  });
   $("#mix-name").textContent = "Your Creation";
   $("#mix-score").textContent = panel.total;
   $("#mix-verdict").textContent = panel.verdict;
@@ -4055,6 +4339,7 @@ function loadChallenge(recipe) {
   renderStation();
   enterStep();
   showScreen("screen-game");
+  trackDrinkStarted({ recipe: recipe.name });
 }
 
 function playInvention(inv) {
@@ -4073,13 +4358,14 @@ function playInvention(inv) {
 
 function showResult(result) {
   const recipe = currentRecipe();
-  track("stage_result", {
-    mode: state.mode,
-    stage: state.stage + 1,
-    recipe: recipe.name,
-    stars: result.stars,
-    pct: result.blended != null ? result.blended : result.pct,
-  });
+  trackDrinkServed(result);
+  if (state.mode === "training") {
+    track("training_complete", {
+      recipe_id: recipe && recipe.id,
+      stars: result.stars,
+      duration_ms: drinkStartedAt ? Date.now() - drinkStartedAt : 0,
+    });
+  }
 
   clearResultRevealTimers();
 
@@ -4269,6 +4555,7 @@ function showFinish() {
 function hubPlayJourney() {
   Sound.init();
   Sound.click();
+  track("hub_cta", { cta: "journey" });
   maybePlayIntro(() => {
     recordPlayDay();
     renderMap({ step: "hero" });
@@ -4278,17 +4565,19 @@ function hubPlayJourney() {
 
 function hubOpenMixologist() {
   Sound.init();
+  track("hub_cta", { cta: "mix", unlocked: mapUnlocked() });
   if (!mapUnlocked()) { Sound.fail(); showToast(`🔒 Clear ${STAGES_TO_UNLOCK} stages to unlock Mixologist`); return; }
   Sound.coin();
-  track("mixologist_started");
+  track("mixologist_started", { cleared: getMap().cleared || 0 });
   startMixologist();
 }
 
 function hubOpenEndless() {
   Sound.init();
+  track("hub_cta", { cta: "endless", unlocked: mapUnlocked() });
   if (!mapUnlocked()) { Sound.fail(); showToast(`🔒 Clear ${STAGES_TO_UNLOCK} stages to unlock Endless Shift`); return; }
   Sound.coin();
-  track("endless_started");
+  track("endless_started", { cleared: getMap().cleared || 0 });
   recordPlayDay();
   state.totalScore = 0;
   state.starsEarned = 0;
@@ -4304,6 +4593,7 @@ function hubOpenEndless() {
 function hubOpenTraining() {
   Sound.init();
   Sound.click();
+  track("hub_cta", { cta: "training" });
   track("training_started");
   loadTraining();
 }
@@ -4311,12 +4601,14 @@ function hubOpenTraining() {
 function hubOpenCotd() {
   Sound.init();
   Sound.coin();
+  track("hub_cta", { cta: "cotd" });
   loadCotd();
 }
 
 function hubOpenBadges() {
   Sound.init();
   Sound.click();
+  track("hub_cta", { cta: "badges" });
   renderBadges();
   showScreen("screen-badges");
 }
@@ -4328,10 +4620,10 @@ function registerHubActions() {
     openMixologist: hubOpenMixologist,
     openCotd: hubOpenCotd,
     openTraining: hubOpenTraining,
-    openHelp: () => $("#modal-how").classList.add("is-open"),
+    openHelp: () => { track("hub_cta", { cta: "help" }); $("#modal-how").classList.add("is-open"); },
     openBadges: hubOpenBadges,
-    openSettings: () => { Sound.init(); Sound.click(); openSettings(); },
-    editProfile: () => { Sound.click(); openProfileForm(); },
+    openSettings: () => { Sound.init(); Sound.click(); track("hub_cta", { cta: "settings" }); openSettings(); },
+    editProfile: () => { Sound.click(); track("hub_cta", { cta: "profile" }); openProfileForm(); },
   });
   refreshHub();
 }
@@ -4553,6 +4845,7 @@ $("#order-ticket")?.addEventListener("keydown", (e) => {
 
 $("#btn-quit").addEventListener("click", () => {
   Sound.click();
+  drinkAbandoned("quit");
   if (state.mode === "campaign") {
     const stop = venueForStage(state.stage);
     renderMap({ step: "path", openVenueId: stop.venue.id, stageIndex: state.stage });
@@ -4717,8 +5010,9 @@ function openShop(recipe) {
   shopScopeRecipe = recipe || null;
   shopKindFilter = "all";
   renderShopScreen();
+  const from = lastScreenId;
   showScreen("screen-shop");
-  track("shop_open", { recipe: recipe ? recipe.name : null });
+  track("shop_open", { recipe: recipe ? recipe.name : null, recipe_id: recipe ? recipe.id : null, source_screen: from });
 }
 
 /** Where secondary screens (shop / recipes / lounge) should return. */
@@ -4758,7 +5052,7 @@ $("#btn-shop-checkout").addEventListener("click", () => {
   if (!items.length) return;
   const total = items.reduce((sum, it) => sum + it.price, 0);
   Sound.coin();
-  track("shop_checkout", { items: items.length, total: Math.round(total * 100) / 100 });
+  track("shop_checkout", { items: items.length, total: Math.round(total * 100) / 100, item_ids: items.map((it) => it.id).filter(Boolean) });
   showToast(`🎉 Demo order placed — ${items.length} item${items.length === 1 ? "" : "s"} for $${total.toFixed(2)}. No real purchase was made.`);
   Object.keys(shopCart).forEach((k) => delete shopCart[k]);
   renderShopScreen();
@@ -4921,12 +5215,14 @@ function renderComicPanel(i) {
   next.setAttribute("aria-label", last ? "Start my shift" : "Next");
 }
 
-function playIntro(onDone) {
+function playIntro(onDone, source = "first_run") {
   comicOnDone = onDone || null;
   comicIndex = 0;
+  introSource = source;
   preloadComicAround(0);
   renderComicPanel(0);
   showScreen("screen-intro");
+  track("intro_start", { source });
 }
 
 // Plays the intro only the first time; otherwise runs the callback immediately.
@@ -4942,7 +5238,9 @@ function comicNext() {
   renderComicPanel(comicIndex);
 }
 
-function finishIntro() {
+function finishIntro(skipped = false) {
+  if (skipped) track("intro_skip", { panel_index: comicIndex, source: introSource });
+  else track("intro_complete", { panels: INTRO_COMIC.length, source: introSource });
   markIntroSeen();
   const done = comicOnDone;
   comicOnDone = null;
@@ -4955,7 +5253,7 @@ $("#comic-panel").addEventListener("click", (e) => {
   if (e.target.closest("button")) return;
   comicNext();
 });
-$("#comic-skip").addEventListener("click", (e) => { e.stopPropagation(); Sound.click(); finishIntro(); });
+$("#comic-skip").addEventListener("click", (e) => { e.stopPropagation(); Sound.click(); finishIntro(true); });
 
 // ============================ Settings ============================
 function syncSoundButtons() {
@@ -5014,7 +5312,7 @@ $("#set-ambient").addEventListener("click", () => {
   if (on) Sound.click();
 });
 
-$("#set-replay-intro").addEventListener("click", () => { Sound.click(); playIntro(() => openSettings()); });
+$("#set-replay-intro").addEventListener("click", () => { Sound.click(); playIntro(() => openSettings(), "settings"); });
 $("#set-edit").addEventListener("click", () => { Sound.click(); openProfileForm(); });
 $("#set-switch").addEventListener("click", () => { Sound.click(); logoutToGate(); });
 $("#set-logout").addEventListener("click", () => {
@@ -5054,7 +5352,8 @@ function renderDiagnostics() {
   if (status) {
     const p = getProfile();
     status.innerHTML = [
-      `<span class="diag-chip">Session ${escapeHtml(SESSION_ID.slice(0, 10))}</span>`,
+      `<span class="diag-chip">Device ${escapeHtml(getDeviceId().slice(0, 10))}</span>`,
+      `<span class="diag-chip">Session ${escapeHtml((sessionId || "").slice(0, 10))}</span>`,
       `<span class="diag-chip ${p ? "is-on" : "is-off"}">${p ? "Profile set" : "No profile"}</span>`,
       (() => {
         const h = Backend.getLastHealth();
@@ -5179,11 +5478,12 @@ syncSoundButtons();
 checkBadges();
 renderSplash();
 showScreen("screen-splash");
-track("app_open", { returning: !!getProfile() });
+wireAnalyticsLifecycle();
+bootAnalytics();
 
 // Debug-only deep link to preview the intro reel directly (localhost or ?debug).
 if (debugEnabled() && location.hash.includes("introtest")) {
-  playIntro(() => { onShowStart(); showScreen("screen-start"); });
+  playIntro(() => { onShowStart(); showScreen("screen-start"); }, "debug");
   const m = location.hash.match(/introtest(\d+)/);
   if (m) { comicIndex = Math.min(parseInt(m[1], 10), INTRO_COMIC.length - 1); renderComicPanel(comicIndex); }
 }

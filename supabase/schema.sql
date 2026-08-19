@@ -92,6 +92,7 @@ create table if not exists public.events (
 );
 create index if not exists events_created_idx on public.events (created_at desc);
 create index if not exists events_name_idx on public.events (name);
+create index if not exists events_device_id_idx on public.events ((props->>'device_id'));
 
 -- ============================================================================
 -- Row Level Security
@@ -162,5 +163,81 @@ create or replace view public.leaderboard_streak as
 create or replace view public.analytics_daily as
   select date_trunc('day', created_at) as day, name, count(*) as count
   from public.events
+  where name not in ('ops_healthcheck', 'backend_health')
+    and coalesce(props->>'automation', 'false') not in ('true', 't', '1')
   group by 1, 2
   order by 1 desc, 3 desc;
+
+-- Distinct playing days per device (session_start / app_open). Used by retention.
+create or replace view public.analytics_player_days as
+  select
+    coalesce(nullif(props->>'device_id', ''), player_id::text, 'unknown') as device_id,
+    (created_at at time zone 'utc')::date as day
+  from public.events
+  where name in ('session_start', 'app_open')
+    and coalesce(props->>'automation', 'false') not in ('true', 't', '1')
+  group by 1, 2;
+
+-- Day-0 funnel step counts. Convert with devices(step n+1) / devices(step n).
+create or replace view public.analytics_ftue as
+  select
+    (created_at at time zone 'utc')::date as day,
+    name as step,
+    count(*)::int as events,
+    count(distinct coalesce(nullif(props->>'device_id', ''), player_id::text))::int as devices
+  from public.events
+  where name in (
+    'app_open', 'session_start', 'splash_continue', 'profile_created',
+    'intro_complete', 'intro_skip', 'hub_view', 'hub_cta', 'map_view',
+    'stage_started', 'stage_result', 'drink_abandoned'
+  )
+    and coalesce(props->>'automation', 'false') not in ('true', 't', '1')
+  group by 1, 2
+  order by 1 desc, 2;
+
+-- Cohort retention from first seen device-day. D1 = returned the next UTC day.
+create or replace view public.analytics_retention as
+  with firsts as (
+    select device_id, min(day) as cohort_day
+    from public.analytics_player_days
+    group by 1
+  )
+  select
+    f.cohort_day,
+    count(*)::int as d0,
+    count(*) filter (
+      where exists (
+        select 1 from public.analytics_player_days p
+        where p.device_id = f.device_id and p.day = f.cohort_day + 1
+      )
+    )::int as d1,
+    count(*) filter (
+      where exists (
+        select 1 from public.analytics_player_days p
+        where p.device_id = f.device_id and p.day = f.cohort_day + 7
+      )
+    )::int as d7
+  from firsts f
+  group by 1
+  order by 1 desc;
+
+-- Serve vs abandon and star quality by complexity / venue / mode.
+create or replace view public.analytics_drink_quality as
+  select
+    (created_at at time zone 'utc')::date as day,
+    coalesce(props->>'complexity', 'unknown') as complexity,
+    coalesce(props->>'venue_id', props->>'venue', 'unknown') as venue_id,
+    coalesce(props->>'mode', 'unknown') as mode,
+    count(*) filter (where name = 'stage_result')::int as served,
+    count(*) filter (where name = 'drink_abandoned')::int as abandoned,
+    round(
+      avg((props->>'stars')::numeric) filter (
+        where name = 'stage_result' and (props->>'stars') is not null
+      ),
+      2
+    ) as avg_stars
+  from public.events
+  where name in ('stage_result', 'drink_abandoned')
+    and coalesce(props->>'automation', 'false') not in ('true', 't', '1')
+  group by 1, 2, 3, 4
+  order by 1 desc;

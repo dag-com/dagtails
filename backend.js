@@ -228,16 +228,61 @@ export async function leaderboardStreak() {
 }
 
 // ============================ Diagnostics / analytics ============================
-// Fire-and-forget product analytics. Never throws and never blocks gameplay —
-// if the backend isn't configured (or the insert fails), this is a silent no-op.
-export async function logEvent(name, props = {}) {
+// Fire-and-forget product analytics. Events are queued and flushed in small
+// batches so a phone radio is not woken once per tap. Never throws and never
+// blocks gameplay — if the backend isn't configured (or the insert fails),
+// this is a silent no-op.
+const EVENT_FLUSH_MS = 10_000;
+const EVENT_FLUSH_N = 10;
+const EVENT_QUEUE_MAX = 80;
+const eventQueue = [];
+let eventFlushTimer = null;
+let eventFlushInFlight = false;
+
+export function logEvent(name, props = {}) {
   try {
+    if (!isConfigured()) return;
+    eventQueue.push({ player_id: myId || null, name, props });
+    if (eventQueue.length > EVENT_QUEUE_MAX) eventQueue.splice(0, eventQueue.length - EVENT_QUEUE_MAX);
+    if (eventQueue.length >= EVENT_FLUSH_N) flushEvents();
+    else if (!eventFlushTimer) eventFlushTimer = setTimeout(() => flushEvents(), EVENT_FLUSH_MS);
+  } catch (e) { /* analytics must never break the game */ }
+}
+
+/** Flush queued events. Pass `{ keepalive: true }` on hide / pagehide. */
+export function flushEvents(opts = {}) {
+  try {
+    if (eventFlushTimer) {
+      clearTimeout(eventFlushTimer);
+      eventFlushTimer = null;
+    }
+    if (!eventQueue.length) return;
+    if (eventFlushInFlight && !opts.keepalive) return;
+    if (!isConfigured()) {
+      eventQueue.length = 0;
+      return;
+    }
+    const batch = eventQueue.splice(0, eventQueue.length).map((row) => ({
+      player_id: row.player_id || myId || null,
+      name: row.name,
+      props: row.props || {},
+    }));
+    const keepalive = !!opts.keepalive;
+    if (keepalive) {
+      fetch(`${SUPABASE_URL}/rest/v1/events`, {
+        method: "POST",
+        headers: restHeaders({ Prefer: "return=minimal" }),
+        body: JSON.stringify(batch),
+        keepalive: true,
+      }).catch(() => { /* ignore */ });
+      return;
+    }
     const client = getClient();
     if (!client) return;
-    await client.from("events").insert({
-      player_id: myId || null,
-      name,
-      props,
-    });
+    eventFlushInFlight = true;
+    client.from("events").insert(batch).then(
+      () => { eventFlushInFlight = false; if (eventQueue.length) flushEvents(); },
+      () => { eventFlushInFlight = false; }
+    );
   } catch (e) { /* analytics must never break the game */ }
 }
