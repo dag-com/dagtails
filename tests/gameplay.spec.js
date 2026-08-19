@@ -154,5 +154,22 @@ test.describe("gameplay smoke", () => {
     });
     expect(afterQuit).toContain("stage_started");
     expect(afterQuit).toContain("drink_abandoned");
+
+    for (let i = 0; i < 3; i += 1) {
+      const onHub = await page.locator("#screen-start.is-active").isVisible().catch(() => false);
+      if (onHub) break;
+      const back = page.locator("#btn-map-back");
+      if (await back.isVisible().catch(() => false)) {
+        await back.click({ force: true });
+      }
+    }
+    const afterMenu = await page.evaluate(() => {
+      try {
+        return JSON.parse(localStorage.getItem("dagtails_analytics_log") || "[]").map((e) => e.name);
+      } catch (e) {
+        return [];
+      }
+    });
+    expect(afterMenu).toContain("menu_return");
   });
 });

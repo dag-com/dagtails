@@ -411,6 +411,31 @@ function drinkAbandoned(reason) {
   });
 }
 
+const MENU_FROM = {
+  "screen-game": "station",
+  "screen-map": "map",
+  "screen-mix-result": "mix_result",
+  "screen-settings": "settings",
+  "screen-shop": "shop",
+  "screen-badges": "badges",
+  "screen-finish": "finish",
+  "screen-endless": "endless",
+  "screen-mybar": "mybar",
+  "screen-result": "result",
+  "screen-community": "community",
+  "screen-leaderboard": "leaderboard",
+  "screen-recipes": "recipes",
+  "screen-intro": "intro",
+};
+
+/** Explicit Back/Quit/Menu to the home screen (not first arrival after splash). */
+function returnToMenu(from) {
+  const origin = from || MENU_FROM[lastScreenId] || lastScreenId || "unknown";
+  track("menu_return", { from: origin, mode: state.mode || null });
+  try { renderStartBest(); } catch (e) { /* ignore */ }
+  showScreen("screen-start");
+}
+
 function trackMapView() {
   const venue = (typeof focusedVenue === "function" && focusedVenue())
     || (typeof currentHubVenue === "function" && currentHubVenue())
@@ -3279,8 +3304,7 @@ function goBack() {
     renderMap({ step: "path", openVenueId: stop.venue.id, stageIndex: state.stage });
     showScreen("screen-map");
   } else {
-    renderStartBest();
-    showScreen("screen-start");
+    returnToMenu("station");
   }
 }
 
@@ -4636,7 +4660,7 @@ $("#btn-map-back").addEventListener("click", () => {
     renderMap({ step: "hero", openVenueId: selectedVenueId });
     return;
   }
-  showScreen("screen-start");
+  returnToMenu("map");
 });
 $("#btn-map-play")?.addEventListener("click", () => {
   playMapCta();
@@ -4726,7 +4750,7 @@ $("#btn-next-stage").addEventListener("click", () => {
     return;
   }
   if (state.mode === "cotd") {
-    showScreen("screen-start");
+    returnToMenu("result");
     return;
   }
   if (state.mode === "challenge") {
@@ -4777,8 +4801,7 @@ $("#btn-mix-shop").addEventListener("click", () => {
   }
 });
 $("#btn-mix-quit").addEventListener("click", () => {
-  renderStartBest();
-  showScreen("screen-start");
+  returnToMenu("mixologist");
 });
 $("#btn-mix-save").addEventListener("click", () => {
   $("#invent-name").value = "";
@@ -4788,7 +4811,7 @@ $("#btn-mix-save").addEventListener("click", () => {
 
 // Training / COTD / Badges — wired through DagTailsHub (React hub).
 
-$("#btn-badges-back").addEventListener("click", () => showScreen("screen-start"));
+$("#btn-badges-back").addEventListener("click", () => returnToMenu("badges"));
 
 // My Bar
 $("#btn-mybar").addEventListener("click", () => {
@@ -4825,8 +4848,7 @@ $("#btn-replay").addEventListener("click", () => {
 });
 $("#btn-finish-menu")?.addEventListener("click", () => {
   Sound.click();
-  renderStartBest();
-  showScreen("screen-start");
+  returnToMenu("finish");
 });
 
 $("#order-ticket")?.addEventListener("click", () => {
@@ -4851,8 +4873,7 @@ $("#btn-quit").addEventListener("click", () => {
     renderMap({ step: "path", openVenueId: stop.venue.id, stageIndex: state.stage });
     showScreen("screen-map");
   } else {
-    renderStartBest();
-    showScreen("screen-start");
+    returnToMenu("station");
   }
 });
 
@@ -5026,8 +5047,11 @@ function rememberSecondaryReturn() {
 }
 function backFromSecondary() {
   const dest = secondaryReturn || "screen-start";
+  if (dest === "screen-start") {
+    returnToMenu(MENU_FROM[lastScreenId] || "overlay");
+    return;
+  }
   showScreen(dest);
-  if (dest === "screen-start") onShowStart();
 }
 
 $("#btn-shop").addEventListener("click", () => {
@@ -5072,8 +5096,7 @@ $("#btn-endless-again").addEventListener("click", () => {
   loadEndless();
 });
 $("#btn-endless-menu").addEventListener("click", () => {
-  renderStartBest();
-  showScreen("screen-start");
+  returnToMenu("endless");
 });
 
 // ============================ Profile / identification modal ============================
@@ -5285,7 +5308,7 @@ function logoutToGate() {
   openProfileForm(true);
 }
 
-$("#btn-settings-back").addEventListener("click", () => { Sound.click(); onShowStart(); showScreen("screen-start"); });
+$("#btn-settings-back").addEventListener("click", () => { Sound.click(); returnToMenu("settings"); });
 
 wireSeg("set-units", (units) => {
   const p = getProfile();

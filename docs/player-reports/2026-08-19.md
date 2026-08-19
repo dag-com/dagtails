@@ -3,7 +3,7 @@
 
 **Most recorded play is automated testing, not testers**
 
-Source: live game events · 2026-08-04 to 2026-08-19 (UTC) · pulled 2026-08-19T07:59:18Z
+Source: live game events · 2026-08-04 to 2026-08-19 (UTC) · pulled 2026-08-19T09:15:49Z
 
 ## At a glance
 
@@ -65,6 +65,18 @@ Almost every served drink is 3 stars on the first teaching level. That usually m
 | Black Russian | Guess | 4 |
 | Roy Rogers | Guess | 4 |
 | White Russian | Guess | 3 |
+
+## Did they skip the intro?
+
+The live log does not yet include intro skip vs finish. That starts after testers play a build with the new tracking.
+
+## Who left without serving
+
+We cannot yet see where someone quit mid-pour. That is in the new tracking, after testers play the current live build.
+
+## Who went back to the home screen
+
+Returns to the home menu (from the map, settings, Mixologist, and so on) are not in this log yet. Campaign Quit still goes to the map, not home — that will show under “left without serving.”
 
 ## Invented drinks
 

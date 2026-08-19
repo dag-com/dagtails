@@ -188,8 +188,8 @@ create or replace view public.analytics_ftue as
   from public.events
   where name in (
     'app_open', 'session_start', 'splash_continue', 'profile_created',
-    'intro_complete', 'intro_skip', 'hub_view', 'hub_cta', 'map_view',
-    'stage_started', 'stage_result', 'drink_abandoned'
+    'intro_complete', 'intro_skip', 'intro_start', 'hub_view', 'hub_cta', 'map_view',
+    'stage_started', 'stage_result', 'drink_abandoned', 'menu_return'
   )
     and coalesce(props->>'automation', 'false') not in ('true', 't', '1')
   group by 1, 2

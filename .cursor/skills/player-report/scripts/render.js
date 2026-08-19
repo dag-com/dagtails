@@ -29,6 +29,49 @@ function fmt(n) {
   return Number(n || 0).toLocaleString("en-US");
 }
 
+function pct(part, whole) {
+  if (!whole) return null;
+  return Math.round((1000 * Number(part || 0)) / Number(whole)) / 10;
+}
+
+function pctLabel(part, whole) {
+  const p = pct(part, whole);
+  return p == null ? null : `${p}%`;
+}
+
+const STEP_LABEL = {
+  glass: "Choosing a glass",
+  method: "Picking a mix method",
+  ingredients: "Pouring",
+  garnish: "Adding a garnish",
+  unknown: "Unknown step",
+};
+
+const REASON_LABEL = {
+  quit: "Quit",
+  back: "Back on the first step",
+  unknown: "Unknown",
+};
+
+const FROM_LABEL = {
+  map: "The map",
+  station: "Mixing a drink",
+  mixologist: "Mixologist",
+  mix_result: "After inventing a drink",
+  settings: "Settings",
+  shop: "Shop",
+  badges: "Badges",
+  finish: "End of the crawl",
+  endless: "Endless shift",
+  mybar: "My bar",
+  result: "After serving",
+  community: "Community",
+  leaderboard: "Leaderboard",
+  recipes: "Recipe book",
+  overlay: "Another screen",
+  intro: "The intro comic",
+};
+
 function headline(report) {
   const daily = report.daily || [];
   const opens = report.totals?.opens || 0;
@@ -165,6 +208,118 @@ function renderDay(report) {
     lines.push("");
     lines.push(mdTable(["Button", "Taps"], hub.map((h) => [h.cta, fmt(h.n)])));
     lines.push("");
+  }
+
+  const intro = report.intro || {};
+  const introShown = (intro.people_started || 0) + (intro.started || 0) + (intro.skipped || 0) + (intro.finished || 0);
+  lines.push("## Did they skip the intro?");
+  lines.push("");
+  if (!introShown) {
+    lines.push("The live log does not yet include intro skip vs finish. That starts after testers play a build with the new tracking.");
+    lines.push("");
+  } else {
+    const peoplePct = pctLabel(intro.people_skipped, intro.people_started);
+    const eventDenom = (intro.skipped || 0) + (intro.finished || 0);
+    const eventPct = pctLabel(intro.skipped, eventDenom);
+    const firstDenom = (intro.first_run_skipped || 0) + (intro.first_run_finished || 0);
+    const firstPct = pctLabel(intro.first_run_skipped, intro.first_run_started || firstDenom);
+    if (peoplePct) {
+      lines.push(
+        `**${peoplePct}** of people who were shown the comic skipped it (${fmt(intro.people_skipped)} of ${fmt(intro.people_started)}).`
+      );
+    } else if (eventPct) {
+      lines.push(`**${eventPct}** of intro plays were skipped (${fmt(intro.skipped)} of ${fmt(eventDenom)}).`);
+    }
+    lines.push("");
+    lines.push(
+      mdTable(
+        ["What", "Count"],
+        [
+          ["Shown the comic", fmt(intro.started || intro.people_started)],
+          ["Skipped it", fmt(intro.skipped)],
+          ["Watched to the end", fmt(intro.finished)],
+        ]
+      )
+    );
+    lines.push("");
+    if (firstPct && (intro.first_run_started || firstDenom)) {
+      lines.push(`On a first visit (not replay from Settings): **${firstPct}** skipped.`);
+      lines.push("");
+    }
+  }
+
+  const left = report.left_drink || {};
+  const leftN = left.n || t.abandoned || 0;
+  const leftSteps = left.by_step || report.abandon_steps || [];
+  const leftReasons = left.by_reason || [];
+  lines.push("## Who left without serving");
+  lines.push("");
+  if (!leftN && !report.phase1_live) {
+    lines.push("We cannot yet see where someone quit mid-pour. That is in the new tracking, after testers play the current live build.");
+    lines.push("");
+  } else if (!leftN) {
+    lines.push("Nobody in this log left a drink without serving.");
+    lines.push("");
+  } else {
+    const ofStarts = pctLabel(leftN, left.started || t.started);
+    const ofPeople = pctLabel(left.people, left.people_started);
+    if (ofStarts) {
+      lines.push(`**${ofStarts}** of drinks that were started were left without serving (${fmt(leftN)} of ${fmt(left.started || t.started)}).`);
+    }
+    if (ofPeople) {
+      lines.push(`**${ofPeople}** of people who started a drink left at least one unfinished.`);
+    }
+    lines.push("");
+    if (leftSteps.length) {
+      lines.push("From where in the pour:");
+      lines.push("");
+      lines.push(
+        mdTable(
+          ["Where they were", "Times left", "Share"],
+          leftSteps.map((s) => [
+            STEP_LABEL[s.last_step] || s.last_step,
+            fmt(s.n),
+            pctLabel(s.n, leftN) || "—",
+          ])
+        )
+      );
+      lines.push("");
+    }
+    if (leftReasons.length) {
+      lines.push(
+        mdTable(
+          ["How they left", "Times"],
+          leftReasons.map((r) => [REASON_LABEL[r.reason] || r.reason, fmt(r.n)])
+        )
+      );
+      lines.push("");
+    }
+  }
+
+  const menu = report.menu_return || {};
+  const menuFrom = menu.by_from || [];
+  lines.push("## Who went back to the home screen");
+  lines.push("");
+  if (!(menu.n || 0) && !menuFrom.length) {
+    lines.push("Returns to the home menu (from the map, settings, Mixologist, and so on) are not in this log yet. Campaign Quit still goes to the map, not home — that will show under “left without serving.”");
+    lines.push("");
+  } else {
+    lines.push(`**${fmt(menu.people || 0)}** people went back to the home screen **${fmt(menu.n)}** times.`);
+    lines.push("");
+    if (menuFrom.length) {
+      lines.push(
+        mdTable(
+          ["Came from", "Times", "People", "Share of returns"],
+          menuFrom.map((row) => [
+            FROM_LABEL[row.from] || row.from,
+            fmt(row.n),
+            fmt(row.people),
+            pctLabel(row.n, menu.n) || "—",
+          ])
+        )
+      );
+      lines.push("");
+    }
   }
 
   const mix = report.mixologist || {};
@@ -422,6 +577,111 @@ function renderDayHtml(report, history, day) {
     parts.push("<h2>What they tapped on the home screen</h2>");
     parts.push(htmlTable(["Button", "Taps"], hub.map((h) => [escapeHtml(h.cta), escapeHtml(fmt(h.n))])));
   }
+
+  const intro = report.intro || {};
+  const introShown = (intro.people_started || 0) + (intro.started || 0) + (intro.skipped || 0) + (intro.finished || 0);
+  parts.push("<h2>Did they skip the intro?</h2>");
+  if (!introShown) {
+    parts.push("<p>The live log does not yet include intro skip vs finish. That starts after testers play a build with the new tracking.</p>");
+  } else {
+    const peoplePct = pctLabel(intro.people_skipped, intro.people_started);
+    const eventDenom = (intro.skipped || 0) + (intro.finished || 0);
+    const eventPct = pctLabel(intro.skipped, eventDenom);
+    const firstDenom = (intro.first_run_skipped || 0) + (intro.first_run_finished || 0);
+    const firstPct = pctLabel(intro.first_run_skipped, intro.first_run_started || firstDenom);
+    if (peoplePct) {
+      parts.push(
+        `<p><strong>${escapeHtml(peoplePct)}</strong> of people who were shown the comic skipped it (${escapeHtml(fmt(intro.people_skipped))} of ${escapeHtml(fmt(intro.people_started))}).</p>`
+      );
+    } else if (eventPct) {
+      parts.push(
+        `<p><strong>${escapeHtml(eventPct)}</strong> of intro plays were skipped (${escapeHtml(fmt(intro.skipped))} of ${escapeHtml(fmt(eventDenom))}).</p>`
+      );
+    }
+    parts.push(
+      htmlTable(
+        ["What", "Count"],
+        [
+          ["Shown the comic", escapeHtml(fmt(intro.started || intro.people_started))],
+          ["Skipped it", escapeHtml(fmt(intro.skipped))],
+          ["Watched to the end", escapeHtml(fmt(intro.finished))],
+        ]
+      )
+    );
+    if (firstPct && (intro.first_run_started || firstDenom)) {
+      parts.push(`<p>On a first visit (not replay from Settings): <strong>${escapeHtml(firstPct)}</strong> skipped.</p>`);
+    }
+  }
+
+  const left = report.left_drink || {};
+  const leftN = left.n || t.abandoned || 0;
+  const leftSteps = left.by_step || report.abandon_steps || [];
+  const leftReasons = left.by_reason || [];
+  parts.push("<h2>Who left without serving</h2>");
+  if (!leftN && !report.phase1_live) {
+    parts.push("<p>We cannot yet see where someone quit mid-pour. That is in the new tracking, after testers play the current live build.</p>");
+  } else if (!leftN) {
+    parts.push("<p>Nobody in this log left a drink without serving.</p>");
+  } else {
+    const ofStarts = pctLabel(leftN, left.started || t.started);
+    const ofPeople = pctLabel(left.people, left.people_started);
+    if (ofStarts) {
+      parts.push(
+        `<p><strong>${escapeHtml(ofStarts)}</strong> of drinks that were started were left without serving (${escapeHtml(fmt(leftN))} of ${escapeHtml(fmt(left.started || t.started))}).</p>`
+      );
+    }
+    if (ofPeople) {
+      parts.push(
+        `<p><strong>${escapeHtml(ofPeople)}</strong> of people who started a drink left at least one unfinished.</p>`
+      );
+    }
+    if (leftSteps.length) {
+      parts.push("<p>From where in the pour:</p>");
+      parts.push(
+        htmlTable(
+          ["Where they were", "Times left", "Share"],
+          leftSteps.map((s) => [
+            escapeHtml(STEP_LABEL[s.last_step] || s.last_step),
+            escapeHtml(fmt(s.n)),
+            escapeHtml(pctLabel(s.n, leftN) || "—"),
+          ])
+        )
+      );
+    }
+    if (leftReasons.length) {
+      parts.push(
+        htmlTable(
+          ["How they left", "Times"],
+          leftReasons.map((r) => [escapeHtml(REASON_LABEL[r.reason] || r.reason), escapeHtml(fmt(r.n))])
+        )
+      );
+    }
+  }
+
+  const menu = report.menu_return || {};
+  const menuFrom = menu.by_from || [];
+  parts.push("<h2>Who went back to the home screen</h2>");
+  if (!(menu.n || 0) && !menuFrom.length) {
+    parts.push("<p>Returns to the home menu (from the map, settings, Mixologist, and so on) are not in this log yet. Campaign Quit still goes to the map, not home — that will show under “left without serving.”</p>");
+  } else {
+    parts.push(
+      `<p><strong>${escapeHtml(fmt(menu.people || 0))}</strong> people went back to the home screen <strong>${escapeHtml(fmt(menu.n))}</strong> times.</p>`
+    );
+    if (menuFrom.length) {
+      parts.push(
+        htmlTable(
+          ["Came from", "Times", "People", "Share of returns"],
+          menuFrom.map((row) => [
+            escapeHtml(FROM_LABEL[row.from] || row.from),
+            escapeHtml(fmt(row.n)),
+            escapeHtml(fmt(row.people)),
+            escapeHtml(pctLabel(row.n, menu.n) || "—"),
+          ])
+        )
+      );
+    }
+  }
+
   const mix = report.mixologist || {};
   if ((mix.started || 0) > 0 || (mix.finished || 0) > 0) {
     parts.push("<h2>Invented drinks</h2>");

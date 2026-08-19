@@ -52,7 +52,32 @@ select jsonb_build_object(
     'abandoned', (select count(*)::int from play where name = 'drink_abandoned'),
     'profiles', (select count(*)::int from play where name = 'profile_created'),
     'intro_skip', (select count(*)::int from play where name = 'intro_skip'),
-    'intro_complete', (select count(*)::int from play where name = 'intro_complete')
+    'intro_complete', (select count(*)::int from play where name = 'intro_complete'),
+    'intro_start', (select count(*)::int from play where name = 'intro_start'),
+    'menu_return', (select count(*)::int from play where name = 'menu_return')
+  ),
+  'intro', jsonb_build_object(
+    'started', (select count(*)::int from play where name = 'intro_start'),
+    'skipped', (select count(*)::int from play where name = 'intro_skip'),
+    'finished', (select count(*)::int from play where name = 'intro_complete'),
+    'people_started', (select count(distinct ident)::int from play where name = 'intro_start'),
+    'people_skipped', (select count(distinct ident)::int from play where name = 'intro_skip'),
+    'people_finished', (select count(distinct ident)::int from play where name = 'intro_complete'),
+    'first_run_started', (
+      select count(*)::int from play
+      where name = 'intro_start'
+        and coalesce(nullif(props->>'source', ''), 'first_run') = 'first_run'
+    ),
+    'first_run_skipped', (
+      select count(*)::int from play
+      where name = 'intro_skip'
+        and coalesce(nullif(props->>'source', ''), 'first_run') = 'first_run'
+    ),
+    'first_run_finished', (
+      select count(*)::int from play
+      where name = 'intro_complete'
+        and coalesce(nullif(props->>'source', ''), 'first_run') = 'first_run'
+    )
   ),
   'daily', coalesce((
     select jsonb_agg(jsonb_build_object(
@@ -80,8 +105,8 @@ select jsonb_build_object(
       from play
       where name in (
         'app_open', 'session_start', 'splash_continue', 'profile_created',
-        'intro_complete', 'intro_skip', 'hub_view', 'hub_cta', 'map_view',
-        'stage_started', 'stage_result', 'drink_abandoned'
+        'intro_complete', 'intro_skip', 'intro_start', 'hub_view', 'hub_cta', 'map_view',
+        'stage_started', 'stage_result', 'drink_abandoned', 'menu_return'
       )
       group by name
     ) s
@@ -169,6 +194,57 @@ select jsonb_build_object(
       group by 1
     ) s
   ), '[]'::jsonb),
+  'left_drink', jsonb_build_object(
+    'n', (select count(*)::int from play where name = 'drink_abandoned'),
+    'people', (select count(distinct ident)::int from play where name = 'drink_abandoned'),
+    'started', (select count(*)::int from play where name = 'stage_started'),
+    'people_started', (select count(distinct ident)::int from play where name = 'stage_started'),
+    'by_step', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'last_step', last_step,
+        'n', n
+      ) order by n desc)
+      from (
+        select coalesce(nullif(props->>'last_step', ''), 'unknown') as last_step,
+          count(*)::int as n
+        from play
+        where name = 'drink_abandoned'
+        group by 1
+      ) s
+    ), '[]'::jsonb),
+    'by_reason', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'reason', reason,
+        'n', n
+      ) order by n desc)
+      from (
+        select coalesce(nullif(props->>'reason', ''), 'unknown') as reason,
+          count(*)::int as n
+        from play
+        where name = 'drink_abandoned'
+        group by 1
+      ) s
+    ), '[]'::jsonb)
+  ),
+  'menu_return', jsonb_build_object(
+    'n', (select count(*)::int from play where name = 'menu_return'),
+    'people', (select count(distinct ident)::int from play where name = 'menu_return'),
+    'by_from', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'from', origin,
+        'n', n,
+        'people', people
+      ) order by n desc)
+      from (
+        select coalesce(nullif(props->>'from', ''), 'unknown') as origin,
+          count(*)::int as n,
+          count(distinct ident)::int as people
+        from play
+        where name = 'menu_return'
+        group by 1
+      ) s
+    ), '[]'::jsonb)
+  ),
   'mixologist', jsonb_build_object(
     'started', (select count(*)::int from play where name = 'mixologist_started'),
     'finished', (select count(*)::int from play where name = 'mixologist_result'),

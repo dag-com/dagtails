@@ -55,6 +55,8 @@ If `totals.events` is 0, skip the canvas and say nothing has been logged yet.
 | stage_started | Started mixing |
 | stage_result | Finished and served |
 | drink_abandoned | Left without serving |
+| menu_return | Went back to the home screen |
+| intro_skip | Skipped the intro comic |
 | hub_cta | What they tapped on the home screen |
 | device_id | Phones / browsers we can tell apart |
 | QA / Playwright | Automated test runs (not real players) |

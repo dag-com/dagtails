@@ -115,6 +115,30 @@
     }
   ],
   "hub_cta": [],
+  "intro": {
+    "finished": 0,
+    "first_run_finished": 0,
+    "first_run_skipped": 0,
+    "first_run_started": 0,
+    "people_finished": 0,
+    "people_skipped": 0,
+    "people_started": 0,
+    "skipped": 0,
+    "started": 0
+  },
+  "left_drink": {
+    "by_reason": [],
+    "by_step": [],
+    "n": 0,
+    "people": 0,
+    "people_started": 987,
+    "started": 1146
+  },
+  "menu_return": {
+    "by_from": [],
+    "n": 0,
+    "people": 0
+  },
   "mixologist": {
     "finished": 27,
     "started": 37,
@@ -156,7 +180,7 @@
       "platform": "unknown"
     }
   ],
-  "pulled_at": "2026-08-19T07:59:18Z",
+  "pulled_at": "2026-08-19T09:15:49Z",
   "range_end": "2026-08-19",
   "range_start": "2026-08-04",
   "recipes": [
@@ -263,6 +287,8 @@
     "identities": 2370,
     "intro_complete": 0,
     "intro_skip": 0,
+    "intro_start": 0,
+    "menu_return": 0,
     "opens": 2349,
     "profiles": 18,
     "served": 536,
