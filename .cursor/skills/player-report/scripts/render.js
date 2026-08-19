@@ -204,6 +204,42 @@ function htmlPairBars(rows, labelFn, aFn, bFn, aName, bName) {
   return `${legend}<div class="bars">${body}</div>`;
 }
 
+function hookAndPremium(report) {
+  const modes = report.play_modes || [];
+  const mix = modes.find((m) => m.mode === "mixologist") || report.mixologist || {};
+  const started = Number(mix.started || 0);
+  const served = Number(mix.served || mix.finished || 0);
+  const people = Number(mix.people_started || 0);
+  const rate = started ? Math.round((100 * served) / started) : 0;
+  const qaHeavy = (report.daily || []).filter((d) => d.likely_qa).reduce((s, d) => s + (d.opens || 0), 0)
+    > (report.totals?.opens || 0) * 0.5;
+  const unused = modes.filter((m) => !m.started && !m.served).map((m) => m.label);
+  const mixIsHook = started >= 8 && rate >= 50;
+  return {
+    hook: mixIsHook ? "Mixologist" : "the first bar-hop drink",
+    hookLine: mixIsHook
+      ? `The strongest hook is Mixologist: ${people ? fmt(people) : "a handful of"} people started ${fmt(started)} inventions and finished ${fmt(served)} (${rate}%). That is the only mode that looks like “make another,” not a lesson.`
+      : "The log does not yet show a mode people return to on purpose. Until Mixologist (or another sandbox) is used, do not sell a subscription.",
+    keepFree: "Keep the bar-hop journey free. That is how people learn, and almost all recorded pours are still the first Guess drink — charging for it would sell the tutorial.",
+    sell: mixIsHook
+      ? "Charge for a Mixologist Pass: invent without clearing five stages, extra bottles, save inventions, and make another round. Do not charge for Endless, Cocktail of the Day, or My Bar until people actually start them."
+      : "Do not put a paywall on unused modes. Wait until a sandbox mode is finished more than once.",
+    skipCharge: unused.length
+      ? unused.length === 1
+        ? `Do not sell: ${unused[0]} — nobody started it.`
+        : `Do not sell: ${unused.join(", ")} — nobody started those.`
+      : null,
+    priceMonth: "$4.99",
+    priceYear: "$29.99",
+    priceLine: mixIsHook
+      ? "Suggested price: $4.99 a month, or $29.99 a year (about $2.50 a month). That is a hobby-game pass, not a hardcore MMO. The shop is still a demo (3 opens) — do not make merch the subscription."
+      : "No price until a real hook shows up in the log.",
+    caveat: qaHeavy
+      ? "This is a first read from a log that is mostly automated tests. Revisit the price after real testers play and we can see who comes back tomorrow."
+      : "Revisit the price once we can see who comes back the next day.",
+  };
+}
+
 function headline(report) {
   const daily = report.daily || [];
   const opens = report.totals?.opens || 0;
@@ -553,6 +589,24 @@ function renderDay(report) {
   if (!report.phase1_live) {
     lines.push("- After the live site has the new tracking, this report will show who came back the next day and where people quit.");
   }
+  lines.push("");
+
+  const reco = hookAndPremium(report);
+  lines.push("## What hooked them, and what to charge");
+  lines.push("");
+  lines.push(reco.hookLine);
+  lines.push("");
+  lines.push(reco.keepFree);
+  lines.push("");
+  lines.push(reco.sell);
+  lines.push("");
+  if (reco.skipCharge) {
+    lines.push(reco.skipCharge);
+    lines.push("");
+  }
+  lines.push(reco.priceLine);
+  lines.push("");
+  lines.push(reco.caveat);
   lines.push("");
   lines.push("See the [full history](./README.md).");
   lines.push("");
@@ -945,6 +999,13 @@ function renderDayHtml(report, history, day) {
     parts.push("<li>After the live site has the new tracking, this report will show who came back the next day and where people quit.</li>");
   }
   parts.push("</ul>");
+  const reco = hookAndPremium(report);
+  parts.push("<h2>What hooked them, and what to charge</h2>");
+  parts.push(`<p>${escapeHtml(reco.hookLine)}</p>`);
+  parts.push(`<p>${escapeHtml(reco.keepFree)}</p>`);
+  parts.push(`<p>${escapeHtml(reco.sell)}</p>`);
+  if (reco.skipCharge) parts.push(`<p>${escapeHtml(reco.skipCharge)}</p>`);
+  parts.push(`<aside><strong>Suggested price:</strong> ${escapeHtml(reco.priceMonth)} / month or ${escapeHtml(reco.priceYear)} / year. ${escapeHtml(reco.caveat)}</aside>`);
   if (history.length) {
     parts.push("<h2>History</h2>");
     parts.push(

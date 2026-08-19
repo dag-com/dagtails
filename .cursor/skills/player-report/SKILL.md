@@ -37,7 +37,8 @@ is set, and publishes the reviewer URL on Pages.
    `docs/player-reports/YYYY-MM-DD.md` (date + headline). No `fetch()` in the canvas.
 6. **Chat** with 4–6 sentences: the headline finding, one caveat, the
    **reviewer URL** (send this to outsiders), a markdown link to the canvas,
-   and the GitHub history URL. Do not paste tables in chat.
+   and the GitHub history URL. Do not paste tables in chat. The report
+   ends with a hook + premium-price suggestion generated from the snapshot.
 
 Prefer `npm run report:players` when you only need fetch + markdown.
 

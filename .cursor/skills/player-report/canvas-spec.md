@@ -48,7 +48,13 @@ the canvas skill (not inside this repo’s source tree).
     Needs work, Back to the drawing board. Optional families chart with zeros.
 14. **H2** `What this means` — what they do, what they skip, what that
     suggests they want. No jargon.
-15. **H2** `History`
+15. **H2** `What hooked them, and what to charge` — the strongest
+    “make another” signal (usually Mixologist if they finish inventions),
+    what to keep free (the teaching crawl), and a subscription price
+    (`$4.99 / month` or `$29.99 / year` when Mixologist is the hook).
+    Caveat QA / missing retention. Do not recommend charging for unused
+    modes.
+16. **H2** `History`
 
 Include a `serve rate` only as a sentence with the QA caveat, not as a KPI
 stat, unless `phase1_live` is true and QA days are a minority of opens.

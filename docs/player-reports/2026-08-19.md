@@ -197,4 +197,18 @@ Drink families they invented:
 - When someone reaches Mixologist, they usually finish the drink. That is the strongest “they wanted another round” signal here.
 - After the live site has the new tracking, this report will show who came back the next day and where people quit.
 
+## What hooked them, and what to charge
+
+The strongest hook is Mixologist: 19 people started 37 inventions and finished 27 (73%). That is the only mode that looks like “make another,” not a lesson.
+
+Keep the bar-hop journey free. That is how people learn, and almost all recorded pours are still the first Guess drink — charging for it would sell the tutorial.
+
+Charge for a Mixologist Pass: invent without clearing five stages, extra bottles, save inventions, and make another round. Do not charge for Endless, Cocktail of the Day, or My Bar until people actually start them.
+
+Do not sell: My Bar challenge — nobody started it.
+
+Suggested price: $4.99 a month, or $29.99 a year (about $2.50 a month). That is a hobby-game pass, not a hardcore MMO. The shop is still a demo (3 opens) — do not make merch the subscription.
+
+This is a first read from a log that is mostly automated tests. Revisit the price after real testers play and we can see who comes back tomorrow.
+
 See the [full history](./README.md).
