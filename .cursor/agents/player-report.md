@@ -21,7 +21,7 @@ Follow `.cursor/skills/player-report/SKILL.md` and `.cursor/skills/player-report
 | [docs/player-reports/latest.md](../../docs/player-reports/latest.md) | Today’s report |
 | [docs/player-reports/README.md](../../docs/player-reports/README.md) | History index (headline per UTC day) |
 | `docs/player-reports/YYYY-MM-DD.md` | Frozen snapshot for that day |
-| `docs/player-reports/data/YYYY-MM-DD.json` | Numbers behind that day |
+| `docs/player-reports/analytics.md` | Tracking spec (what we log) |
 
 Public URL pattern (after Pages deploy):
 

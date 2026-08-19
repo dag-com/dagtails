@@ -16,7 +16,8 @@ https://dag-com.github.io/last-call-bartending-game/player-reports/
 
 The **player-report** agent publishes to GitHub after this skill. GitHub
 Actions also refreshes `docs/player-reports/` daily when secret `SUPABASE_DB_URL`
-is set, and publishes the reviewer URL on Pages.
+is set, and publishes the reviewer URL on Pages. The tracking spec lives at
+the same site: `/player-reports/analytics.html`.
 
 ## Steps
 

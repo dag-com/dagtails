@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DAG Tails analytics spec</title>
+  <link rel="canonical" href="https://dag-com.github.io/last-call-bartending-game/player-reports/analytics.html" />
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.45;
+      max-width: 44rem;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+      color: #1c1410;
+      background: #f6f1ea;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { color: #f3ece4; background: #16110e; }
+      a { color: #e8c38a; }
+      th, td { border-color: #3a3028; }
+      aside { background: #2a211c; }
+    }
+    a { color: #6b3a12; }
+    header nav { font-family: system-ui, sans-serif; font-size: 0.9rem; margin-bottom: 1.25rem; }
+    header nav a { margin-right: 1rem; }
+    h1 { font-size: 1.7rem; margin: 0 0 0.4rem; }
+    h2 { font-size: 1.15rem; margin: 1.6rem 0 0.5rem; }
+    h3 { font-size: 1rem; margin: 1.2rem 0 0.4rem; }
+    .lede { font-size: 1.05rem; }
+    .meta, .foot { font-family: system-ui, sans-serif; font-size: 0.85rem; opacity: 0.8; }
+    ul { padding-left: 1.2rem; }
+    table { border-collapse: collapse; width: 100%; font-family: system-ui, sans-serif; font-size: 0.92rem; }
+    th, td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid #d9cfc4; }
+    th { font-weight: 600; }
+    aside {
+      background: #efe2d2;
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+    }
+    .bars { margin: 0.6rem 0 1.1rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.55rem; margin: 0.28rem 0; font-family: system-ui, sans-serif; font-size: 0.85rem; }
+    .bar-lab { flex: 0 0 10rem; }
+    .bar-track { flex: 1; height: 0.65rem; background: #e4d9cc; }
+    .bar-fill { height: 100%; background: #6b3a12; }
+    .bar-fill.alt { background: #a67c52; }
+    .bar-n { flex: 0 0 6.4rem; text-align: right; opacity: 0.85; }
+    .bar-row.is-zero .bar-lab, .bar-row.is-zero .bar-n { opacity: 0.55; }
+    .bar-row.is-zero .bar-track { background: #eee8e1; outline: 1px dashed #cbbfb2; }
+    .bar-stack { flex: 1; display: flex; flex-direction: column; gap: 0.18rem; }
+    .bar-pair .bar-track { flex: none; }
+    .bar-legend { font-family: system-ui, sans-serif; font-size: 0.8rem; opacity: 0.85; margin: 0.2rem 0 0.4rem; }
+    .swatch { display: inline-block; width: 0.7rem; height: 0.55rem; margin: 0 0.25rem 0 0.1rem; vertical-align: middle; background: #6b3a12; }
+    .swatch.b { background: #a67c52; }
+    .foot { margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav><a href="./index.html">Latest</a><a href="./history.html">History</a><a href="./analytics.html">Spec</a></nav>
+    <p class="meta">DAG Tails · player report</p>
+    <h1>DAG Tails analytics spec</h1>
+  </header>
+  <p class="lede">What we log, why, and what we do not log. This is the tracking spec — not today’s player numbers.</p>
+<p class="meta">Live snapshots: <a href="./index.html">latest report</a>. Stage: testers on web / Expo / Capacitor. North star: first drink served, and came back the next day.</p>
+<aside>Keep the current pipe: <code>track()</code> in the game, a local debug log, write-only events in Supabase. Do not buy Amplitude or Mixpanel yet.</aside>
+<h2>North-star pair</h2><ul>
+<li><strong>D0 first-serve</strong> — share of new sessions that finish and serve a drink (the aha moment).</li>
+<li><strong>D1 return</strong> — share of those people who open the game the next calendar day.</li>
+</ul>
+<p>Supporting: time to first serve, started vs served vs left unfinished, 3-star rate by teaching level, mode mix after unlock, which bar loses people.</p>
+<h2>Casual-mobile sanity checks</h2>
+<p>Planning bands, not live DAG Tails traffic.</p>
+<table><thead><tr><th>Check</th><th>Floor (investigate)</th><th>Healthy target</th></tr></thead><tbody><tr><td>Came back next day</td><td>25%</td><td>40%</td></tr><tr><td>Came back in a week</td><td>8%</td><td>15%</td></tr><tr><td>Came back in a month</td><td>3%</td><td>6%</td></tr><tr><td>Typical session</td><td>—</td><td>4–8 minutes</td></tr><tr><td>First-session complete</td><td>—</td><td>70%+ reach a served drink</td></tr></tbody></table>
+<h2>Predicted leak points</h2>
+<table><thead><tr><th>Leak</th><th>Why it matters</th><th>Event that proves it</th></tr></thead><tbody><tr><td>Profile gate</td><td>Name + age before any pour</td><td>app_open → profile_created</td></tr><tr><td>Intro comic</td><td>Story before the loop</td><td>intro_start / skip / complete</td></tr><tr><td>Map after first home tap</td><td>Highest-friction surface</td><td>hub_cta=journey → map_view → stage_started</td></tr><tr><td>Mid-pour quit</td><td>Skill wall on a phone</td><td>drink_abandoned vs stage_result</td></tr><tr><td>Teaching ramp</td><td>Guess → Pour → Mix → Garnish → Full bar</td><td>stage_result.complexity + stars</td></tr><tr><td>Unlock at 5 clears</td><td>Sandbox modes hide until then</td><td>stage_result.stage + mixologist_started</td></tr></tbody></table>
+<h2>First-session funnel</h2>
+<p>One chain. Conversion is count(step n+1) / count(step n) among the same phone/browser on day 0. Phase 1 is in the game; older logs still show zeros until testers play the current build.</p>
+<table><thead><tr><th>Step</th><th>In the game?</th><th>Question it answers</th></tr></thead><tbody><tr><td>app_open</td><td>Yes</td><td>Did the build boot?</td></tr><tr><td>splash_continue</td><td>Yes</td><td>Did they leave on the title card?</td></tr><tr><td>profile_created</td><td>Yes</td><td>Did the age gate kill the session?</td></tr><tr><td>intro_complete</td><td>Yes</td><td>Did the comic stall them?</td></tr><tr><td>hub_view</td><td>Yes</td><td>Did they reach the home screen?</td></tr><tr><td>map_view</td><td>Yes</td><td>Did Journey actually open the map?</td></tr><tr><td>stage_started</td><td>Yes</td><td>Did they enter the station?</td></tr><tr><td>stage_result</td><td>Yes</td><td>Did they finish a drink?</td></tr></tbody></table>
+<h2>Already shipping</h2>
+<table><thead><tr><th>Event</th><th>When</th><th>Used for</th></tr></thead><tbody><tr><td>app_open</td><td>Boot</td><td>Who opened, who came back</td></tr><tr><td>profile_modal_open</td><td>Create / edit</td><td>Gate drop</td></tr><tr><td>profile_created</td><td>Save new profile (underage only, never name/age)</td><td>Age-gate split</td></tr><tr><td>stage_started</td><td>Enter station</td><td>Loop start</td></tr><tr><td>stage_result</td><td>Serve</td><td>Quality, aha</td></tr><tr><td>training_started / endless_started / mixologist_started</td><td>Hub modes</td><td>After unlock</td></tr><tr><td>mixologist_result</td><td>Invent + serve (score, verdict, family)</td><td>Sandbox quality</td></tr><tr><td>shop_open / shop_checkout</td><td>Demo shop</td><td>Demand, not revenue</td></tr><tr><td>community_share</td><td>Share invention</td><td>Sharing</td></tr></tbody></table>
+<h2>Phase 1 — in the game now</h2>
+<table><thead><tr><th>Event</th><th>Fire when</th><th>Decision it unlocks</th></tr></thead><tbody><tr><td>session_start / session_end</td><td>30-minute session envelope</td><td>Sessions and length</td></tr><tr><td>splash_continue</td><td>Enter tap on splash</td><td>Title drop-off</td></tr><tr><td>intro_start / skip / complete</td><td>Comic</td><td>Is the comic a leak?</td></tr><tr><td>hub_view / hub_cta</td><td>Home screen</td><td>What they tap</td></tr><tr><td>map_view / map_drink_tap</td><td>Map</td><td>Map friction</td></tr><tr><td>drink_abandoned</td><td>Leave without serving</td><td>Station leak</td></tr><tr><td>menu_return</td><td>Back to home</td><td>Where they left</td></tr><tr><td>cotd_started / training_complete / endless_over</td><td>Side modes</td><td>Did those loops work?</td></tr></tbody></table>
+<h2>Phase 2 — later</h2>
+<p>venue_complete, modes_unlocked, badge_unlock, ticket_flip, result_cta, community_view/like, leaderboard_view, shop_add_item, boot_ready, rotate_lock_shown, client_error. Add only once first-serve and next-day return are visible every morning.</p>
+<h2>Do not log</h2>
+<table><thead><tr><th>Tempting event</th><th>Why skip</th></tr></thead><tbody><tr><td>Every millilitre of a pour</td><td>Fold accuracy into served (ok / near / miss)</td></tr><tr><td>Every Back / Next step</td><td>last_step on drink_abandoned is enough</td></tr><tr><td>Player name, location, exact age</td><td>Analytics only needs underage true/false</td></tr><tr><td>Mixologist display names</td><td>Use classic / score / verdict / family</td></tr></tbody></table>
+<h2>How to log</h2>
+<p>Three IDs: device_id (once, in local storage), session_id (reset after 30 minutes), player_id (optional signed-in uid). Super-properties on every event: platform, build, underage, units, returning, viewport. Split dashboards by platform and underage. Never block Serve Drink if analytics is down. Batch inserts so a phone radio is not woken per tap.</p>
+<aside><strong>Age gate is a legal line.</strong> Log underage true/false only. Do not log exact age, date of birth, or the typed name.</aside>
+<h2>BA recommendation</h2>
+<p>Read first-serve and next-day return by platform. Use those two numbers to decide whether to fix the profile gate, the map, or the pour station — not all three at once. Leave shop, community, and a third-party SDK until those two numbers are visible every morning.</p>
+  <p class="foot">No player names, ages, or emails. Share this link with reviewers: https://dag-com.github.io/last-call-bartending-game/player-reports/</p>
+</body>
+</html>
