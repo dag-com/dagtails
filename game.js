@@ -4212,6 +4212,7 @@ function showMixResult(result) {
   track("mixologist_result", {
     score: panel.total,
     verdict: panel.verdict,
+    family: result.family || null,
     classic: result.classic ? result.classic.name : null,
     duration_ms: drinkStartedAt ? Date.now() - drinkStartedAt : 0,
   });

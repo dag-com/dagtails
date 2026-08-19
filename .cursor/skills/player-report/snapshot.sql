@@ -155,6 +155,19 @@ select jsonb_build_object(
       limit 12
     ) s
   ), '[]'::jsonb),
+  'complexities', coalesce((
+    select jsonb_agg(jsonb_build_object(
+      'complexity', complexity,
+      'started', started
+    ) order by started desc)
+    from (
+      select coalesce(props->>'complexity', 'unknown') as complexity,
+        count(*)::int as started
+      from play
+      where name = 'stage_started'
+      group by 1
+    ) s
+  ), '[]'::jsonb),
   'modes', coalesce((
     select jsonb_agg(jsonb_build_object(
       'mode', mode,
@@ -263,7 +276,66 @@ select jsonb_build_object(
         where name = 'mixologist_result'
         group by 1
       ) s
+    ), '[]'::jsonb),
+    'families', coalesce((
+      select jsonb_agg(jsonb_build_object(
+        'family', family,
+        'n', n
+      ) order by n desc)
+      from (
+        select coalesce(nullif(props->>'family', ''), 'unknown') as family,
+          count(*)::int as n
+        from play
+        where name = 'mixologist_result'
+        group by 1
+      ) s
     ), '[]'::jsonb)
+  ),
+  'play_modes', (
+    select jsonb_build_array(
+      jsonb_build_object(
+        'mode', 'campaign',
+        'started', (select count(*)::int from play where name = 'stage_started' and coalesce(nullif(props->>'mode', ''), 'campaign') = 'campaign'),
+        'served', (select count(*)::int from play where name = 'stage_result' and coalesce(nullif(props->>'mode', ''), 'campaign') = 'campaign'),
+        'abandoned', (select count(*)::int from play where name = 'drink_abandoned' and coalesce(nullif(props->>'mode', ''), 'campaign') = 'campaign'),
+        'people_started', (select count(distinct ident)::int from play where name = 'stage_started' and coalesce(nullif(props->>'mode', ''), 'campaign') = 'campaign')
+      ),
+      jsonb_build_object(
+        'mode', 'mixologist',
+        'started', (select count(*)::int from play where name = 'mixologist_started'),
+        'served', (select count(*)::int from play where name = 'mixologist_result'),
+        'abandoned', (select count(*)::int from play where name = 'drink_abandoned' and props->>'mode' = 'mixologist'),
+        'people_started', (select count(distinct ident)::int from play where name = 'mixologist_started')
+      ),
+      jsonb_build_object(
+        'mode', 'endless',
+        'started', (select count(*)::int from play where name = 'endless_started'),
+        'served', (select count(*)::int from play where name = 'stage_result' and props->>'mode' = 'endless'),
+        'abandoned', (select count(*)::int from play where name = 'drink_abandoned' and props->>'mode' = 'endless'),
+        'people_started', (select count(distinct ident)::int from play where name = 'endless_started')
+      ),
+      jsonb_build_object(
+        'mode', 'training',
+        'started', (select count(*)::int from play where name = 'training_started'),
+        'served', (select count(*)::int from play where name = 'stage_result' and props->>'mode' = 'training'),
+        'abandoned', (select count(*)::int from play where name = 'drink_abandoned' and props->>'mode' = 'training'),
+        'people_started', (select count(distinct ident)::int from play where name = 'training_started')
+      ),
+      jsonb_build_object(
+        'mode', 'cotd',
+        'started', (select count(*)::int from play where name = 'cotd_started'),
+        'served', (select count(*)::int from play where name = 'stage_result' and props->>'mode' = 'cotd'),
+        'abandoned', (select count(*)::int from play where name = 'drink_abandoned' and props->>'mode' = 'cotd'),
+        'people_started', (select count(distinct ident)::int from play where name = 'cotd_started')
+      ),
+      jsonb_build_object(
+        'mode', 'challenge',
+        'started', (select count(*)::int from play where name = 'stage_started' and props->>'mode' = 'challenge'),
+        'served', (select count(*)::int from play where name = 'stage_result' and props->>'mode' = 'challenge'),
+        'abandoned', (select count(*)::int from play where name = 'drink_abandoned' and props->>'mode' = 'challenge'),
+        'people_started', (select count(distinct ident)::int from play where name = 'stage_started' and props->>'mode' = 'challenge')
+      )
+    )
   ),
   'side_modes', jsonb_build_object(
     'endless_started', (select count(*)::int from play where name = 'endless_started'),

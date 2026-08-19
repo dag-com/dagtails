@@ -25,35 +25,30 @@ the canvas skill (not inside this repo’s source tree).
    - `warning` if `phase1_live` is false
    - `info` otherwise
 5. **H2** `Opens over time` + `LineChart`
-   - categories: daily `day` (short dates)
-   - series name `Game opens`
-   - caption with units and source
-6. **H2** `Did they finish the drink?` + `BarChart` of stars if `stars` is
-   non-empty. Caption: count of served drinks by star rating.
-7. **H2** `Where they played` — `UsageBar` or table of venues if non-empty.
-   Map ids for readers: `snug` → The Snug, `zavod` → Zavod, `cantina` →
-   La Cantina, `aperitivo` → Aperitivo, `speakeasy` → Speakeasy,
-   `soda_fountain` / `juice_bar` / `beach_shack` → mocktail bars.
-8. **H2** `What they tapped` — hub_cta table only if the array has rows.
-9. **H2** `Did they skip the intro?` — people-skip % (`intro.people_skipped` /
-    `intro.people_started`) if either count is > 0. Else one sentence that it
-    is not in the log yet. No empty chart.
-10. **H2** `Who left without serving` — % of started drinks that were abandoned
-    (`left_drink.n` / `left_drink.started`) plus a table of `by_step` (plain
-    labels: glass → Choosing a glass, ingredients → Pouring, method → Picking
-    a mix method, garnish → Adding a garnish) and `by_reason` (quit / back).
-    Omit tables if empty. If `n` is 0 and Phase 1 is not live, one caveat
-    sentence instead of “nobody quit.”
-11. **H2** `Who went back to the home screen` — `menu_return.n` / people plus
-    `by_from` table (map, station, mixologist, settings, shop, …). If empty,
-    one sentence that hub returns are not in the log yet.
-12. **H2** `Invented drinks` — Mixologist started vs finished + verdicts, omit
-    if both counts are 0.
-13. **H2** `What this means` — 3–5 bullets in `Text`: hook clues, turnoffs,
-    what not to decide yet. No jargon.
-14. **H2** `History` — `Table` of GitHub snapshots from
-    `docs/player-reports/*.md` (columns: Date UTC, Headline). Newest first,
-    including today. Caption: same pages as `docs/player-reports/` on GitHub.
+6. **H2** `Did they finish the drink?` + `BarChart` of stars **0–3 always**
+   (include zero counts).
+7. **H2** `Play modes` + grouped `BarChart` (started vs finished) for all six
+   modes: Bar-hop journey, Mixologist, Endless shift, Training, Cocktail of
+   the Day, My Bar challenge. Include zeros. Caption: what they start vs skip.
+8. **H2** `Where they played` — horizontal `BarChart` of **all** venues
+   (snug, zavod, cantina, aperitivo, floridita, speakeasy, boudoir, still,
+   soda_fountain, juice_bar, beach_shack) including zeros.
+8b. **H2** `Teaching levels` — `BarChart` of Guess, Pour, Mix, Garnish,
+   Full bar, Sandbox including zeros.
+9. **H2** `What they tapped` — `BarChart` of **all** hub buttons (journey,
+   mix, endless, training, cotd, badges, help, settings, profile) including
+   zeros. If Phase 1 is not live, caption that zeros mean not recorded yet.
+10. **H2** `Did they skip the intro?` — people-skip % if recorded; else one
+    sentence that it is not in the log yet.
+11. **H2** `Who left without serving` — all pour steps (glass, pour, method,
+    garnish) including zeros.
+12. **H2** `Who went back to the home screen` — all origins including zeros.
+13. **H2** `Invented drinks` — Mixologist started vs finished. **BarChart of
+    every judge verdict** even at 0: Outstanding, Crowd-pleaser, Solid pour,
+    Needs work, Back to the drawing board. Optional families chart with zeros.
+14. **H2** `What this means` — what they do, what they skip, what that
+    suggests they want. No jargon.
+15. **H2** `History`
 
 Include a `serve rate` only as a sentence with the QA caveat, not as a KPI
 stat, unless `phase1_live` is true and QA days are a minority of opens.

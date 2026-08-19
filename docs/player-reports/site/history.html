@@ -38,6 +38,20 @@
       padding: 0.75rem 1rem;
       margin: 1rem 0;
     }
+    .bars { margin: 0.6rem 0 1.1rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.55rem; margin: 0.28rem 0; font-family: system-ui, sans-serif; font-size: 0.85rem; }
+    .bar-lab { flex: 0 0 10rem; }
+    .bar-track { flex: 1; height: 0.65rem; background: #e4d9cc; }
+    .bar-fill { height: 100%; background: #6b3a12; }
+    .bar-fill.alt { background: #a67c52; }
+    .bar-n { flex: 0 0 6.4rem; text-align: right; opacity: 0.85; }
+    .bar-row.is-zero .bar-lab, .bar-row.is-zero .bar-n { opacity: 0.55; }
+    .bar-row.is-zero .bar-track { background: #eee8e1; outline: 1px dashed #cbbfb2; }
+    .bar-stack { flex: 1; display: flex; flex-direction: column; gap: 0.18rem; }
+    .bar-pair .bar-track { flex: none; }
+    .bar-legend { font-family: system-ui, sans-serif; font-size: 0.8rem; opacity: 0.85; margin: 0.2rem 0 0.4rem; }
+    .swatch { display: inline-block; width: 0.7rem; height: 0.55rem; margin: 0 0.25rem 0 0.1rem; vertical-align: middle; background: #6b3a12; }
+    .swatch.b { background: #a67c52; }
     .foot { margin-top: 2rem; }
   </style>
 </head>

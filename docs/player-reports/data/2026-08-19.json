@@ -1,5 +1,31 @@
 {
   "abandon_steps": [],
+  "complexities": [
+    {
+      "complexity": "Guess",
+      "started": 1146
+    },
+    {
+      "complexity": "Pour",
+      "started": 0
+    },
+    {
+      "complexity": "Mix",
+      "started": 0
+    },
+    {
+      "complexity": "Garnish",
+      "started": 0
+    },
+    {
+      "complexity": "Full bar",
+      "started": 0
+    },
+    {
+      "complexity": "Sandbox",
+      "started": 0
+    }
+  ],
   "daily": [
     {
       "abandoned": 0,
@@ -114,7 +140,53 @@
       "step": "profile_created"
     }
   ],
-  "hub_cta": [],
+  "hub_cta": [
+    {
+      "cta": "journey",
+      "label": "Start the journey",
+      "n": 0
+    },
+    {
+      "cta": "mix",
+      "label": "Mixologist",
+      "n": 0
+    },
+    {
+      "cta": "endless",
+      "label": "Endless shift",
+      "n": 0
+    },
+    {
+      "cta": "training",
+      "label": "Training",
+      "n": 0
+    },
+    {
+      "cta": "cotd",
+      "label": "Cocktail of the Day",
+      "n": 0
+    },
+    {
+      "cta": "badges",
+      "label": "Badges",
+      "n": 0
+    },
+    {
+      "cta": "help",
+      "label": "How to play",
+      "n": 0
+    },
+    {
+      "cta": "settings",
+      "label": "Settings",
+      "n": 0
+    },
+    {
+      "cta": "profile",
+      "label": "Profile",
+      "n": 0
+    }
+  ],
   "intro": {
     "finished": 0,
     "first_run_finished": 0,
@@ -127,31 +199,180 @@
     "started": 0
   },
   "left_drink": {
-    "by_reason": [],
-    "by_step": [],
+    "by_reason": [
+      {
+        "reason": "quit",
+        "n": 0
+      },
+      {
+        "reason": "back",
+        "n": 0
+      }
+    ],
+    "by_step": [
+      {
+        "last_step": "glass",
+        "n": 0
+      },
+      {
+        "last_step": "ingredients",
+        "n": 0
+      },
+      {
+        "last_step": "method",
+        "n": 0
+      },
+      {
+        "last_step": "garnish",
+        "n": 0
+      }
+    ],
     "n": 0,
     "people": 0,
     "people_started": 987,
     "started": 1146
   },
   "menu_return": {
-    "by_from": [],
+    "by_from": [
+      {
+        "from": "map",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "station",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "mixologist",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "mix_result",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "settings",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "shop",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "badges",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "finish",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "endless",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "mybar",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "result",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "community",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "leaderboard",
+        "n": 0,
+        "people": 0
+      },
+      {
+        "from": "recipes",
+        "n": 0,
+        "people": 0
+      }
+    ],
     "n": 0,
     "people": 0
   },
   "mixologist": {
+    "families": [
+      {
+        "family": "Spirit-forward",
+        "label": "Spirit-forward",
+        "n": 0
+      },
+      {
+        "family": "Sour",
+        "label": "Sour",
+        "n": 0
+      },
+      {
+        "family": "Long / Fizz",
+        "label": "Long / Fizz",
+        "n": 0
+      },
+      {
+        "family": "Creamy",
+        "label": "Creamy",
+        "n": 0
+      },
+      {
+        "family": "Frozen",
+        "label": "Frozen",
+        "n": 0
+      },
+      {
+        "family": "Mixed",
+        "label": "Mixed",
+        "n": 0
+      },
+      {
+        "family": "unknown",
+        "n": 27,
+        "label": "unknown"
+      }
+    ],
     "finished": 27,
     "started": 37,
     "verdicts": [
       {
-        "avg_score": 65.1,
-        "n": 14,
-        "verdict": "Solid pour"
+        "verdict": "Outstanding",
+        "n": 0,
+        "avg_score": null
       },
       {
-        "avg_score": 76.8,
+        "verdict": "Crowd-pleaser",
         "n": 13,
-        "verdict": "Crowd-pleaser"
+        "avg_score": 76.8
+      },
+      {
+        "verdict": "Solid pour",
+        "n": 14,
+        "avg_score": 65.1
+      },
+      {
+        "verdict": "Needs work",
+        "n": 0,
+        "avg_score": null
+      },
+      {
+        "verdict": "Back to the drawing board",
+        "n": 0,
+        "avg_score": null
       }
     ]
   },
@@ -180,7 +401,57 @@
       "platform": "unknown"
     }
   ],
-  "pulled_at": "2026-08-19T09:15:49Z",
+  "play_modes": [
+    {
+      "mode": "campaign",
+      "label": "Bar-hop journey",
+      "started": 1146,
+      "served": 533,
+      "abandoned": 0,
+      "people_started": 987
+    },
+    {
+      "mode": "mixologist",
+      "label": "Mixologist",
+      "started": 37,
+      "served": 27,
+      "abandoned": 0,
+      "people_started": 19
+    },
+    {
+      "mode": "endless",
+      "label": "Endless shift",
+      "started": 3,
+      "served": 1,
+      "abandoned": 0,
+      "people_started": 2
+    },
+    {
+      "mode": "training",
+      "label": "Training",
+      "started": 2,
+      "served": 1,
+      "abandoned": 0,
+      "people_started": 2
+    },
+    {
+      "mode": "cotd",
+      "label": "Cocktail of the Day",
+      "started": 0,
+      "served": 1,
+      "abandoned": 0,
+      "people_started": 0
+    },
+    {
+      "mode": "challenge",
+      "label": "My Bar challenge",
+      "started": 0,
+      "served": 0,
+      "abandoned": 0,
+      "people_started": 0
+    }
+  ],
+  "pulled_at": "2026-08-19T09:23:07Z",
   "range_end": "2026-08-19",
   "range_start": "2026-08-04",
   "recipes": [
@@ -264,20 +535,20 @@
   },
   "stars": [
     {
-      "n": 5,
-      "stars": "0"
+      "stars": "0",
+      "n": 5
     },
     {
-      "n": 9,
-      "stars": "1"
+      "stars": "1",
+      "n": 9
     },
     {
-      "n": 9,
-      "stars": "2"
+      "stars": "2",
+      "n": 9
     },
     {
-      "n": 513,
-      "stars": "3"
+      "stars": "3",
+      "n": 513
     }
   ],
   "totals": {
@@ -298,36 +569,59 @@
   },
   "venues": [
     {
-      "started": 1009,
-      "venue": "snug"
+      "venue": "snug",
+      "label": "The Snug",
+      "started": 1009
     },
     {
-      "started": 88,
-      "venue": "aperitivo"
+      "venue": "zavod",
+      "label": "Zavod",
+      "started": 20
     },
     {
-      "started": 20,
-      "venue": "zavod"
+      "venue": "cantina",
+      "label": "La Cantina",
+      "started": 5
     },
     {
-      "started": 8,
-      "venue": "soda_fountain"
+      "venue": "aperitivo",
+      "label": "Aperitivo",
+      "started": 88
     },
     {
-      "started": 7,
-      "venue": "beach_shack"
+      "venue": "floridita",
+      "label": "El Floridita",
+      "started": 0
     },
     {
-      "started": 5,
-      "venue": "juice_bar"
+      "venue": "speakeasy",
+      "label": "Speakeasy",
+      "started": 4
     },
     {
-      "started": 5,
-      "venue": "cantina"
+      "venue": "boudoir",
+      "label": "Le Boudoir",
+      "started": 0
     },
     {
-      "started": 4,
-      "venue": "speakeasy"
+      "venue": "still",
+      "label": "The Still",
+      "started": 0
+    },
+    {
+      "venue": "soda_fountain",
+      "label": "Soda fountain",
+      "started": 8
+    },
+    {
+      "venue": "juice_bar",
+      "label": "Juice bar",
+      "started": 5
+    },
+    {
+      "venue": "beach_shack",
+      "label": "Beach shack",
+      "started": 7
     }
   ]
 }

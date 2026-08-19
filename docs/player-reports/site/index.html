@@ -38,6 +38,20 @@
       padding: 0.75rem 1rem;
       margin: 1rem 0;
     }
+    .bars { margin: 0.6rem 0 1.1rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.55rem; margin: 0.28rem 0; font-family: system-ui, sans-serif; font-size: 0.85rem; }
+    .bar-lab { flex: 0 0 10rem; }
+    .bar-track { flex: 1; height: 0.65rem; background: #e4d9cc; }
+    .bar-fill { height: 100%; background: #6b3a12; }
+    .bar-fill.alt { background: #a67c52; }
+    .bar-n { flex: 0 0 6.4rem; text-align: right; opacity: 0.85; }
+    .bar-row.is-zero .bar-lab, .bar-row.is-zero .bar-n { opacity: 0.55; }
+    .bar-row.is-zero .bar-track { background: #eee8e1; outline: 1px dashed #cbbfb2; }
+    .bar-stack { flex: 1; display: flex; flex-direction: column; gap: 0.18rem; }
+    .bar-pair .bar-track { flex: none; }
+    .bar-legend { font-family: system-ui, sans-serif; font-size: 0.8rem; opacity: 0.85; margin: 0.2rem 0 0.4rem; }
+    .swatch { display: inline-block; width: 0.7rem; height: 0.55rem; margin: 0 0.25rem 0 0.1rem; vertical-align: middle; background: #6b3a12; }
+    .swatch.b { background: #a67c52; }
     .foot { margin-top: 2rem; }
   </style>
 </head>
@@ -48,7 +62,7 @@
     <h1>How people are playing DAG Tails</h1>
   </header>
   <p class="lede"><strong>Most recorded play is automated testing, not testers</strong></p>
-<p class="meta">Live game events · 2026-08-04 to 2026-08-19 (UTC) · pulled 2026-08-19T09:15:49Z</p>
+<p class="meta">Live game events · 2026-08-04 to 2026-08-19 (UTC) · pulled 2026-08-19T09:23:07Z</p>
 <h2>At a glance</h2><ul>
 <li><strong>Opened the game:</strong> 2,349</li>
 <li><strong>Finished a drink:</strong> 536</li>
@@ -59,25 +73,330 @@
 <h2>Opens over time</h2>
 <table><thead><tr><th>Day (UTC)</th><th>Opened</th><th>Started a drink</th><th>Finished</th><th>Note</th></tr></thead><tbody><tr><td>2026-08-04</td><td>3</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-08-07</td><td>1</td><td>6</td><td>6</td><td>Quiet / possible people</td></tr><tr><td>2026-08-08</td><td>758</td><td>446</td><td>216</td><td>Automated tests</td></tr><tr><td>2026-08-09</td><td>2</td><td>2</td><td>1</td><td>Quiet / possible people</td></tr><tr><td>2026-08-14</td><td>1</td><td>3</td><td>3</td><td>Quiet / possible people</td></tr><tr><td>2026-08-16</td><td>459</td><td>236</td><td>119</td><td>Automated tests</td></tr><tr><td>2026-08-17</td><td>3</td><td>7</td><td>5</td><td>Quiet / possible people</td></tr><tr><td>2026-08-18</td><td>1,097</td><td>446</td><td>186</td><td>Automated tests</td></tr><tr><td>2026-08-19</td><td>25</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr></tbody></table>
 <h2>Did they finish the drink?</h2>
+<div class="bars"><div class="bar-row">
+      <span class="bar-lab">0 stars</span>
+      <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div>
+      <span class="bar-n">5</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">1 stars</span>
+      <div class="bar-track"><div class="bar-fill" style="width:2%"></div></div>
+      <span class="bar-n">9</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">2 stars</span>
+      <div class="bar-track"><div class="bar-fill" style="width:2%"></div></div>
+      <span class="bar-n">9</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">3 stars</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">513</span>
+    </div></div>
 <table><thead><tr><th>Stars</th><th>Drinks served</th></tr></thead><tbody><tr><td>0 stars</td><td>5</td></tr><tr><td>1 stars</td><td>9</td></tr><tr><td>2 stars</td><td>9</td></tr><tr><td>3 stars</td><td>513</td></tr></tbody></table>
 <p>Almost every served drink is 3 stars on the first teaching level. That usually means automated tests, not expert players.</p>
+<h2>Play modes</h2>
+<p>What people start versus finish. A dashed empty bar means the mode was available and nobody used it.</p>
+<p class="bar-legend"><span class="swatch a"></span>Started · <span class="swatch b"></span>Finished</p><div class="bars"><div class="bar-row bar-pair">
+      <span class="bar-lab">Bar-hop journey</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:47%"></div></div>
+      </div>
+      <span class="bar-n">1,146 / 533</span>
+    </div><div class="bar-row bar-pair">
+      <span class="bar-lab">Mixologist</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:3%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:2%"></div></div>
+      </div>
+      <span class="bar-n">37 / 27</span>
+    </div><div class="bar-row bar-pair">
+      <span class="bar-lab">Endless shift</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:0%"></div></div>
+      </div>
+      <span class="bar-n">3 / 1</span>
+    </div><div class="bar-row bar-pair">
+      <span class="bar-lab">Training</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:0%"></div></div>
+      </div>
+      <span class="bar-n">2 / 1</span>
+    </div><div class="bar-row bar-pair">
+      <span class="bar-lab">Cocktail of the Day</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:0%"></div></div>
+      </div>
+      <span class="bar-n">0 / 1</span>
+    </div><div class="bar-row bar-pair is-zero">
+      <span class="bar-lab">My Bar challenge</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:0%"></div></div>
+      </div>
+      <span class="bar-n">0 / 0 · none</span>
+    </div></div>
+<table><thead><tr><th>Mode</th><th>Started</th><th>Finished</th><th>Left unfinished</th><th>People</th></tr></thead><tbody><tr><td>Bar-hop journey</td><td>1,146</td><td>533</td><td>0</td><td>987</td></tr><tr><td>Mixologist</td><td>37</td><td>27</td><td>0</td><td>19</td></tr><tr><td>Endless shift</td><td>3</td><td>1</td><td>0</td><td>2</td></tr><tr><td>Training</td><td>2</td><td>1</td><td>0</td><td>2</td></tr><tr><td>Cocktail of the Day</td><td>0</td><td>1</td><td>0</td><td>0</td></tr><tr><td>My Bar challenge</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></tbody></table>
+<p>Nobody started: My Bar challenge.</p>
 <h2>Where they played</h2>
-<table><thead><tr><th>Bar</th><th>Drinks started</th></tr></thead><tbody><tr><td>The Snug</td><td>1,009</td></tr><tr><td>Aperitivo</td><td>88</td></tr><tr><td>Zavod</td><td>20</td></tr><tr><td>Soda fountain</td><td>8</td></tr><tr><td>Beach shack</td><td>7</td></tr><tr><td>Juice bar</td><td>5</td></tr><tr><td>La Cantina</td><td>5</td></tr><tr><td>Speakeasy</td><td>4</td></tr></tbody></table>
+<div class="bars"><div class="bar-row">
+      <span class="bar-lab">The Snug</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">1,009</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Zavod</span>
+      <div class="bar-track"><div class="bar-fill" style="width:2%"></div></div>
+      <span class="bar-n">20</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">La Cantina</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">5</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Aperitivo</span>
+      <div class="bar-track"><div class="bar-fill" style="width:9%"></div></div>
+      <span class="bar-n">88</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">El Floridita</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Speakeasy</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">4</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Le Boudoir</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">The Still</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Soda fountain</span>
+      <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div>
+      <span class="bar-n">8</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Juice bar</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">5</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Beach shack</span>
+      <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div>
+      <span class="bar-n">7</span>
+    </div></div>
+<table><thead><tr><th>Bar</th><th>Drinks started</th></tr></thead><tbody><tr><td>The Snug</td><td>1,009</td></tr><tr><td>Zavod</td><td>20</td></tr><tr><td>La Cantina</td><td>5</td></tr><tr><td>Aperitivo</td><td>88</td></tr><tr><td>El Floridita</td><td>0</td></tr><tr><td>Speakeasy</td><td>4</td></tr><tr><td>Le Boudoir</td><td>0</td></tr><tr><td>The Still</td><td>0</td></tr><tr><td>Soda fountain</td><td>8</td></tr><tr><td>Juice bar</td><td>5</td></tr><tr><td>Beach shack</td><td>7</td></tr></tbody></table>
+<h2>Teaching levels</h2>
+<p>Every lesson type, including unused. A dashed empty bar means that level was available and nobody started it.</p>
+<div class="bars"><div class="bar-row">
+      <span class="bar-lab">Guess</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">1,146</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Pour</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Mix</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Garnish</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Full bar</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Sandbox</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div></div>
 <h2>Which drinks</h2>
 <table><thead><tr><th>Drink</th><th>Teaching level</th><th>Times started</th></tr></thead><tbody><tr><td>Gin &amp; Tonic</td><td>Guess</td><td>881</td></tr><tr><td>Tom Collins</td><td>Guess</td><td>121</td></tr><tr><td>Mimosa</td><td>Guess</td><td>87</td></tr><tr><td>Bramble</td><td>Guess</td><td>7</td></tr><tr><td>Screwdriver</td><td>Guess</td><td>6</td></tr><tr><td>Black Russian</td><td>Guess</td><td>4</td></tr><tr><td>Roy Rogers</td><td>Guess</td><td>4</td></tr><tr><td>White Russian</td><td>Guess</td><td>3</td></tr></tbody></table>
+<h2>What they tapped on the home screen</h2>
+<p>Home-button taps are not in this log yet. Every button is listed at zero so later reports can show skips. Play-mode starts above are the better signal for what they chose.</p>
+<div class="bars"><div class="bar-row is-zero">
+      <span class="bar-lab">Start the journey</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Mixologist</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Endless shift</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Training</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Cocktail of the Day</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Badges</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">How to play</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Settings</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Profile</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div></div>
+<table><thead><tr><th>Button</th><th>Taps</th></tr></thead><tbody><tr><td>Start the journey</td><td>0</td></tr><tr><td>Mixologist</td><td>0</td></tr><tr><td>Endless shift</td><td>0</td></tr><tr><td>Training</td><td>0</td></tr><tr><td>Cocktail of the Day</td><td>0</td></tr><tr><td>Badges</td><td>0</td></tr><tr><td>How to play</td><td>0</td></tr><tr><td>Settings</td><td>0</td></tr><tr><td>Profile</td><td>0</td></tr></tbody></table>
 <h2>Did they skip the intro?</h2>
 <p>The live log does not yet include intro skip vs finish. That starts after testers play a build with the new tracking.</p>
 <h2>Who left without serving</h2>
-<p>We cannot yet see where someone quit mid-pour. That is in the new tracking, after testers play the current live build.</p>
+<p>We cannot yet see where someone quit mid-pour. Every station step is listed at zero until testers play the current live build.</p>
+<p>From where in the pour:</p>
+<div class="bars"><div class="bar-row is-zero">
+      <span class="bar-lab">Choosing a glass</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Pouring</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Picking a mix method</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Adding a garnish</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div></div>
+<table><thead><tr><th>How they left</th><th>Times</th></tr></thead><tbody><tr><td>Quit</td><td>0</td></tr><tr><td>Back on the first step</td><td>0</td></tr></tbody></table>
 <h2>Who went back to the home screen</h2>
-<p>Returns to the home menu (from the map, settings, Mixologist, and so on) are not in this log yet. Campaign Quit still goes to the map, not home — that will show under “left without serving.”</p>
+<p>No home-menu returns are in this log yet. Every origin is listed at zero. Campaign Quit still goes to the map, not home.</p>
+<div class="bars"><div class="bar-row is-zero">
+      <span class="bar-lab">The map</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Mixing a drink</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Mixologist</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">After inventing a drink</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Settings</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Shop</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Badges</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">End of the crawl</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Endless shift</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">My bar</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">After serving</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Community</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Leaderboard</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Recipe book</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div></div>
 <h2>Invented drinks</h2>
 <p>Started an invention: <strong>37</strong>. Served it: <strong>27</strong>.</p>
-<table><thead><tr><th>Judges said</th><th>Drinks</th><th>Average score</th></tr></thead><tbody><tr><td>Solid pour</td><td>14</td><td>65.1</td></tr><tr><td>Crowd-pleaser</td><td>13</td><td>76.8</td></tr></tbody></table>
-<h2>Other modes</h2>
-<table><thead><tr><th>What</th><th>Count</th></tr></thead><tbody><tr><td>Endless shift starts</td><td>3</td></tr><tr><td>Training starts</td><td>2</td></tr><tr><td>Shop opens</td><td>3</td></tr><tr><td>Shared to Community</td><td>1</td></tr></tbody></table>
+<p>What the judges said (every possible panel verdict, including unused):</p>
+<div class="bars"><div class="bar-row is-zero">
+      <span class="bar-lab">Outstanding</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Crowd-pleaser</span>
+      <div class="bar-track"><div class="bar-fill" style="width:93%"></div></div>
+      <span class="bar-n">13</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Solid pour</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">14</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Needs work</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Back to the drawing board</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div></div>
+<table><thead><tr><th>Judges said</th><th>Drinks</th><th>Average score</th></tr></thead><tbody><tr><td>Outstanding</td><td>0</td><td>—</td></tr><tr><td>Crowd-pleaser</td><td>13</td><td>76.8</td></tr><tr><td>Solid pour</td><td>14</td><td>65.1</td></tr><tr><td>Needs work</td><td>0</td><td>—</td></tr><tr><td>Back to the drawing board</td><td>0</td><td>—</td></tr></tbody></table>
+<p>Drink families they invented:</p>
+<div class="bars"><div class="bar-row is-zero">
+      <span class="bar-lab">Spirit-forward</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Sour</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Long / Fizz</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Creamy</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Frozen</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Mixed</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">unknown</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">27</span>
+    </div></div>
+<h2>Shop and Community</h2>
+<table><thead><tr><th>What</th><th>Count</th></tr></thead><tbody><tr><td>Shop opens</td><td>3</td></tr><tr><td>Shared to Community</td><td>1</td></tr></tbody></table>
 <h2>What this means</h2><ul>
 <li>Do not brief testers from the spike days. Those are machines running the game.</li>
+<li>Nobody started: My Bar challenge. That is a skip signal, not a missing chart.</li>
 <li>Almost all recorded pours are at the first bar. We are not yet seeing the rest of the crawl.</li>
 <li>When someone reaches Mixologist, they usually finish the drink. That is the strongest “they wanted another round” signal here.</li>
 <li>After the live site has the new tracking, this report will show who came back the next day and where people quit.</li>

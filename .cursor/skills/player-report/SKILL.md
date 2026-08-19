@@ -71,7 +71,12 @@ Never log or display player names, ages, or emails. `underage` boolean only.
 - 3-star Guess drinks at The Snug are the default test path. Do not call that
   “players are experts.”
 - D1 only means something among people who **served a drink** on day 0.
-- Omit any chart or table whose array is empty.
+- Pad known catalogs with zeros (judge verdicts, play modes, venues, hub
+  buttons, star buckets, pour steps, teaching levels, drink families).
+  Unused options stay visible.
+- Omit a section only if the whole family has no tracking in the schema yet
+  *and* showing zeros would imply “nobody did it” when we simply were not
+  recording it (intro skip / menu return before Phase 1).
 
 ## Do not
 
