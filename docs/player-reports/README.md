@@ -2,9 +2,9 @@
 
 Plain-language snapshots of how people play DAG Tails. Updated daily by GitHub Actions, and whenever the player-report agent runs.
 
-**Reviewer URL** (no GitHub login): [https://dag-com.github.io/last-call-bartending-game/player-reports/](https://dag-com.github.io/last-call-bartending-game/player-reports/)
+**Reviewer URL** (no GitHub login): [https://dag-com.github.io/dagtails/player-reports/](https://dag-com.github.io/dagtails/player-reports/)
 
-**Tracking spec** (what we log, not today’s numbers): [analytics.md](./analytics.md) · public page [analytics.html](https://dag-com.github.io/last-call-bartending-game/player-reports/analytics.html)
+**Tracking spec** (what we log, not today’s numbers): [analytics.md](./analytics.md) · public page [analytics.html](https://dag-com.github.io/dagtails/player-reports/analytics.html)
 
 **Latest:** [2026-08-19](./2026-08-19.md) · also [latest.md](./latest.md)
 

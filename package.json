@@ -14,8 +14,8 @@
     "ios:open": "npm run cap:sync && npx cap open ios",
     "expo:start": "npm --prefix mobile start",
     "expo:tunnel": "npm --prefix mobile run tunnel",
-    "play:url": "node -e \"console.log('https://dag-com.github.io/last-call-bartending-game/')\"",
-    "report:url": "node -e \"console.log('https://dag-com.github.io/last-call-bartending-game/player-reports/')\"",
+    "play:url": "node -e \"console.log('https://dag-com.github.io/dagtails/')\"",
+    "report:url": "node -e \"console.log('https://dag-com.github.io/dagtails/player-reports/')\"",
     "test": "playwright test",
     "test:ui": "playwright test --ui",
     "test:perf": "playwright test tests/performance.spec.js",
@@ -33,16 +33,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dag-com/last-call-bartending-game.git"
+    "url": "git+https://github.com/dag-com/dagtails.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/dag-com/last-call-bartending-game/issues"
+    "url": "https://github.com/dag-com/dagtails/issues"
   },
-  "homepage": "https://github.com/dag-com/last-call-bartending-game#readme",
+  "homepage": "https://github.com/dag-com/dagtails#readme",
   "dependencies": {
     "@capacitor/android": "^8.4.1",
     "@capacitor/cli": "^8.4.1",

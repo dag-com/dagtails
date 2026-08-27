@@ -1,7 +1,7 @@
 name: Player report
 
 # Pulls live events, commits docs/player-reports/, and publishes the
-# reviewer site to https://dag-com.github.io/last-call-bartending-game/player-reports/
+# reviewer site to https://dag-com.github.io/dagtails/player-reports/
 
 on:
   schedule:

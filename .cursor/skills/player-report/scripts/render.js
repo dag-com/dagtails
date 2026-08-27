@@ -12,7 +12,7 @@ const snapshotPath = path.join(skillDir, "last-snapshot.json");
 const outDir = path.join(repoRoot, "docs", "player-reports");
 const dataDir = path.join(outDir, "data");
 const siteDir = path.join(outDir, "site");
-const PUBLIC_URL = "https://dag-com.github.io/last-call-bartending-game/player-reports/";
+const PUBLIC_URL = "https://dag-com.github.io/dagtails/player-reports/";
 const SITE_NAV = `<a href="./index.html">Latest</a><a href="./history.html">History</a><a href="./analytics.html">Spec</a>`;
 const CATALOGS = require("../catalogs.js");
 
@@ -1061,7 +1061,7 @@ function renderAnalyticsMarkdown() {
     "",
     "What we log, why, and what we do not log. This is the tracking spec — not today’s player numbers. Live snapshots: [latest.md](./latest.md).",
     "",
-    "Public page (no GitHub login): [analytics.html](./site/analytics.html) on Pages as [player-reports/analytics.html](https://dag-com.github.io/last-call-bartending-game/player-reports/analytics.html).",
+    "Public page (no GitHub login): [analytics.html](./site/analytics.html) on Pages as [player-reports/analytics.html](https://dag-com.github.io/dagtails/player-reports/analytics.html).",
     "",
     "Stage: pre-monetization bartender sim for testers (web, Expo, Capacitor). North star: **first drink served** and **came back the next day**. Shop checkout is a demo — demand, not revenue.",
     "",

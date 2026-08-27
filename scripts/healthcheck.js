@@ -15,7 +15,7 @@ const path = require("path");
 const ROOT = path.resolve(__dirname, "..");
 const PAGES_URL =
   process.env.DAGTAILS_PAGES_URL ||
-  "https://dag-com.github.io/last-call-bartending-game/";
+  "https://dag-com.github.io/dagtails/";
 const TIMEOUT_MS = Number(process.env.HEALTH_TIMEOUT_MS || 12_000);
 
 const args = new Set(process.argv.slice(2));
@@ -248,7 +248,7 @@ async function runChecks() {
   // --- Optional: GitHub Actions latest Pages deploy ---
   const actions = await timed(async () => {
     const { res, text } = await fetchText(
-      "https://api.github.com/repos/dag-com/last-call-bartending-game/actions/workflows/deploy-pages.yml/runs?per_page=1",
+      "https://api.github.com/repos/dag-com/dagtails/actions/workflows/deploy-pages.yml/runs?per_page=1",
       {
         headers: {
           Accept: "application/vnd.github+json",

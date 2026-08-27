@@ -100,7 +100,7 @@ test.describe("asset integrity", () => {
         u.hash = "";
         return u.href;
       }
-      const expoDoc = "https://dag-com.github.io/last-call-bartending-game?v=expo";
+      const expoDoc = "https://dag-com.github.io/dagtails?v=expo";
       const naive = new URL(rel, expoDoc).href;
       const fixed = new URL(rel, baseHrefFrom(expoDoc)).href;
       return { live, naive, fixed };
@@ -109,7 +109,7 @@ test.describe("asset integrity", () => {
     expect(report.live).toMatch(/\/assets\/venues\/interiors\/snug\.png$/i);
     expect(report.naive).toBe("https://dag-com.github.io/assets/venues/interiors/snug.png");
     expect(report.fixed).toBe(
-      "https://dag-com.github.io/last-call-bartending-game/assets/venues/interiors/snug.png"
+      "https://dag-com.github.io/dagtails/assets/venues/interiors/snug.png"
     );
     const res = await page.request.get(report.live);
     expect(res.ok(), report.live).toBe(true);

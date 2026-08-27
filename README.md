@@ -80,6 +80,6 @@ in the same file first.
 How people are opening and finishing drinks (plain language, no names).
 
 **Send this URL to outside reviewers** (no GitHub login):
-https://dag-com.github.io/last-call-bartending-game/player-reports/
+https://dag-com.github.io/dagtails/player-reports/
 
 Repo copy and history: [docs/player-reports](docs/player-reports/README.md).

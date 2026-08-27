@@ -16,7 +16,7 @@ import type { WebViewNavigation } from "react-native-webview";
 
 /** Live GitHub Pages build — always on, works from any network (no laptop). */
 export const PAGES_URL =
-  "https://dag-com.github.io/last-call-bartending-game/";
+  "https://dag-com.github.io/dagtails/";
 
 /**
  * Override at runtime with EXPO_PUBLIC_GAME_URL

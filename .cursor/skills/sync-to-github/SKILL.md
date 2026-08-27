@@ -55,15 +55,15 @@ Every commit or push **must** pass **legal-watch** on the new additions. Do not 
    - Report branch, commit SHA/message, and remote URL
    - Lead with the code-review findings (or “no outgoing diff”)
    - For this project’s Pages site after `master` push:
-     https://dag-com.github.io/last-call-bartending-game/
+     https://dag-com.github.io/dagtails/
 
 ## DAG Tails specifics
 
 - Default deploy branch: **`master`** (not `main`)
-- Remote: `https://github.com/dag-com/last-call-bartending-game.git`
+- Remote: `https://github.com/dag-com/dagtails.git`
 - `www/` is gitignored — GitHub Actions builds and deploys `www/` via `.github/workflows/deploy-pages.yml`
 - After a successful `master` push (or workflow dispatch), live site:
-  https://dag-com.github.io/last-call-bartending-game/
+  https://dag-com.github.io/dagtails/
 - For a full ship gate (healthcheck + watch deploy), prefer the **ship-pages** skill / **pages-shipper** agent
 - Leave `experiment/*` branches unmerged unless the user asks
 

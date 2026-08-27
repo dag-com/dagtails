@@ -11,7 +11,7 @@ You ship DAG Tails to the always-on remote play URL. You do not redesign feature
 
 ## Always-on URL
 
-https://dag-com.github.io/last-call-bartending-game/
+https://dag-com.github.io/dagtails/
 
 ## Workflow
 
@@ -42,7 +42,7 @@ https://dag-com.github.io/last-call-bartending-game/
 5. **Confirm to the user**
    - Commit SHA + message
    - Actions run URL / success
-   - Live URL: https://dag-com.github.io/last-call-bartending-game/
+   - Live URL: https://dag-com.github.io/dagtails/
    - Optional: `npm run play:url`
 
 ## Do not

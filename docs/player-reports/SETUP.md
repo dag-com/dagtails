@@ -2,7 +2,7 @@
 
 Daily snapshots live in this folder. Outside reviewers should use the public page (no GitHub login):
 
-https://dag-com.github.io/last-call-bartending-game/player-reports/
+https://dag-com.github.io/dagtails/player-reports/
 
 The Action `.github/workflows/player-report.yml` needs a secret that can **read** `public.events` (the game’s anon key cannot). After each snapshot it also publishes that URL via GitHub Pages.
 

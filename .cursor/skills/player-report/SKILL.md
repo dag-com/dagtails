@@ -12,7 +12,7 @@ description: >-
 Build a **Canvas** for the person in chat, **GitHub markdown history**, and a
 **public HTML page** reviewers can open without a GitHub account:
 
-https://dag-com.github.io/last-call-bartending-game/player-reports/
+https://dag-com.github.io/dagtails/player-reports/
 
 The **player-report** agent publishes to GitHub after this skill. GitHub
 Actions also refreshes `docs/player-reports/` daily when secret `SUPABASE_DB_URL`

@@ -37,7 +37,7 @@ You operate the DAG Tails Supabase backend safely.
    - Prefer `enable_anonymous_sign_ins = true` in `supabase/config.toml` then:
      `supabase config push --project-ref <ref> --yes`
    - Set `site_url` / `additional_redirect_urls` to include Pages:
-     `https://dag-com.github.io/last-call-bartending-game`
+     `https://dag-com.github.io/dagtails`
    - Avoid leaving localhost-only redirects as the only production URLs
 
 5. **Verify**

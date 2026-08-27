@@ -48,7 +48,7 @@ and no Google account** — it just produces an installable `.apk`.
 
 1. Sign up at [codemagic.io](https://codemagic.io/) (free tier is plenty for this).
 2. "Add application" → connect your GitHub account → pick
-   `dag-com/last-call-bartending-game`.
+   `dag-com/dagtails`.
 3. Codemagic will detect `codemagic.yaml` automatically. Select the
    **android-debug** workflow and click **Start new build**.
 4. When it finishes, download the `.apk` from the build's **Artifacts** tab.
