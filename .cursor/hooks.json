@@ -1,0 +1,21 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "python .cursor/hooks/legal-watch.py --session-start"
+      }
+    ],
+    "afterFileEdit": [
+      {
+        "command": "python .cursor/hooks/legal-watch.py"
+      }
+    ],
+    "postToolUse": [
+      {
+        "command": "python .cursor/hooks/legal-watch.py",
+        "matcher": "Write|StrReplace"
+      }
+    ]
+  }
+}

@@ -1,0 +1,248 @@
+{
+  "version": 1,
+  "disclaimer": "Clearance flags, not legal advice.",
+  "text_extensions": [".js", ".ts", ".tsx", ".jsx", ".html", ".css", ".json", ".md", ".txt", ".svg"],
+  "image_extensions": [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".ico"],
+  "exclude_path_parts": [
+    "node_modules",
+    ".git",
+    "www",
+    "dist",
+    ".cursor",
+    "exports/LEGAL-RISKS",
+    "exports/DAG-Tails-Legal",
+    "exports/dag-tails-brand-pack"
+  ],
+  "live_brand_path_parts": [
+    "assets/brand",
+    "assets/duck",
+    "assets/hero-duck",
+    "resources/icon",
+    "resources/splash",
+    "resources/android",
+    "ios/App/App/Assets.xcassets/AppIcon",
+    "mobile/assets"
+  ],
+  "patterns": [
+    {
+      "id": "top-gun",
+      "severity": "ship-stopper",
+      "terms": ["top gun", "topgun", "maverick"],
+      "reason": "Paramount / US Navy marks. Do not ship patches, name tapes, or study art.",
+      "safer": "Quarantine the unused jacket study; invent original patches."
+    },
+    {
+      "id": "ducktales",
+      "severity": "ship-stopper",
+      "terms": ["ducktales", "duck tales", "duck-tales", "scrooge mcduck"],
+      "reason": "Disney live Class 9 DuckTales registrations. Closest famous entertainment mark to the painted wordmark.",
+      "safer": "Redesign the live wordmark away from gold brush + teal 3D + feather underline."
+    },
+    {
+      "id": "dark-n-stormy",
+      "severity": "ship-stopper",
+      "terms": ["dark 'n' stormy", "dark n stormy", "dark and stormy", "dark n' stormy", "gosling"],
+      "reason": "Gosling Brothers live USPTO mark; they have sued over the name.",
+      "safer": "Dark Storm / Storm Highball. Strip Gosling lore."
+    },
+    {
+      "id": "painkiller",
+      "severity": "ship-stopper",
+      "terms": ["painkiller", "pusser", "pussers", "soggy dollar"],
+      "reason": "Pusser's live marks for the cocktail and bar services.",
+      "safer": "Island Soother. Strip Pusser's / Soggy Dollar lore."
+    },
+    {
+      "id": "el-floridita",
+      "severity": "ship-stopper",
+      "terms": ["el floridita", "floridita", "hemingway", "constante ribalaigua", "constantino"],
+      "reason": "Real operating Havana landmark plus estate-controlled Hemingway name/likeness.",
+      "safer": "Invented Havana rum bar. No Hemingway."
+    },
+    {
+      "id": "vans-stripe",
+      "severity": "ship-stopper",
+      "terms": ["vans", "jazz stripe", "sidestripe"],
+      "reason": "Wavy white sneaker sidestripe is a well-known Vans trademark (also on live Ace).",
+      "safer": "Recolor or drop the wave on Ace / hoodie / jacket shoes."
+    },
+    {
+      "id": "aperol-campari",
+      "severity": "high",
+      "terms": ["aperol spritz", "aperol", "campari"],
+      "reason": "Campari Group house marks, including APEROL SPRITZ in drinks/hospitality.",
+      "safer": "Drink: Spritz / Piazza Spritz. Ingredients: bitter orange aperitivo, red bitter."
+    },
+    {
+      "id": "baby-guinness",
+      "severity": "high",
+      "terms": ["baby guinness", "guinness"],
+      "reason": "Diageo GUINNESS mark. The shot contains no Guinness.",
+      "safer": "Baby Stout / Mini Pint."
+    },
+    {
+      "id": "cinderella",
+      "severity": "high",
+      "terms": ["cinderella"],
+      "reason": "Disney character mark on the kids path.",
+      "safer": "Midnight Cooler / Ballroom Fizz."
+    },
+    {
+      "id": "shirley-temple",
+      "severity": "high",
+      "terms": ["shirley temple"],
+      "reason": "Celebrity name; Temple sued over bottled use. A kids game is closer to a product than a bar menu.",
+      "safer": "Cherry Fizz."
+    },
+    {
+      "id": "roy-rogers",
+      "severity": "high",
+      "terms": ["roy rogers"],
+      "reason": "Celebrity-named mocktail on the kids path.",
+      "safer": "Cola Cherry."
+    },
+    {
+      "id": "ray-ban",
+      "severity": "high",
+      "terms": ["ray-ban", "rayban", "ray ban", "aviator sunglasses"],
+      "reason": "Ray-Ban Aviator trade dress; jacket study may show a circled-B brandlet.",
+      "safer": "Change frame shape; no temple/lens logo."
+    },
+    {
+      "id": "bacardi-tails",
+      "severity": "high",
+      "terms": ["bacardi", "wipo ir 1572190"],
+      "reason": "Bacardi Madrid IR 1572190 is two feathers + the word TAILS (cl. 32/33).",
+      "safer": "Watch merch/mixers. Do not lean harder into feather+TAILS on drinks goods."
+    },
+    {
+      "id": "disney-paramount",
+      "severity": "high",
+      "terms": ["disney", "pixar", "marvel", "star wars", "paramount", "nintendo", "pokemon", "mickey mouse", "harry potter", "hogwarts", "warner bros"],
+      "reason": "Famous entertainment houses. Any name, character, or logo use is high risk.",
+      "safer": "Invent original names and art."
+    },
+    {
+      "id": "spirit-house-marks",
+      "severity": "high",
+      "terms": [
+        "jack daniel", "johnnie walker", "hennessy", "grey goose", "absolut",
+        "captain morgan", "malibu rum", "patron tequila", "jose cuervo",
+        "tanqueray", "bombay sapphire", "hendrick's", "baileys", "jameson",
+        "red bull", "coca-cola", "coca cola", "pepsi", "heineken", "corona extra"
+      ],
+      "reason": "House spirit/soft-drink marks. Recipe use of a generic category is fine; the brand name as a bottle or title is not.",
+      "safer": "Use generic category names (bourbon, vodka, cola)."
+    },
+    {
+      "id": "sazerac-company",
+      "severity": "medium",
+      "terms": ["sazerac"],
+      "reason": "IBA classic and Sazerac Company marks for whisky/bars/recipe sites.",
+      "safer": "OK as a recipe name; avoid merch that says SAZERAC."
+    },
+    {
+      "id": "godfather",
+      "severity": "medium",
+      "terms": ["godfather"],
+      "reason": "Cocktail widely understood to ride the Paramount film.",
+      "safer": "Word-only recipe name is common; no puppet-hand logo or movie type."
+    },
+    {
+      "id": "aviation-gin",
+      "severity": "medium",
+      "terms": ["aviation american gin", "aviation gin"],
+      "reason": "IBA cocktail name is common; Aviation American Gin is a living brand.",
+      "safer": "Fine as a drink title if that bottle is not shown."
+    },
+    {
+      "id": "house-tied-classics",
+      "severity": "medium",
+      "terms": ["raffles", "trader vic", "harry's bar", "drambuie"],
+      "reason": "Singapore Sling / Mai Tai / Bellini houses, or a liqueur house mark.",
+      "safer": "Keep as generic recipes. Do not claim invention or use house logos."
+    },
+    {
+      "id": "angostura",
+      "severity": "medium",
+      "terms": ["angostura"],
+      "reason": "House bitters mark. Common as a generic bar term, still a brand.",
+      "safer": "Aromatic bitters if you want zero house-name use."
+    }
+  ],
+  "filename_terms": [
+    "topgun", "top-gun", "maverick", "ducktales", "vans", "rayban", "ray-ban",
+    "hemingway", "floridita", "guinness", "disney"
+  ],
+  "cleared_keep": [
+    "Negroni",
+    "Americano",
+    "Boulevardier",
+    "Sazerac",
+    "Godfather",
+    "Mai Tai",
+    "Singapore Sling",
+    "Aviation",
+    "Sex on the Beach",
+    "Daiquiri",
+    "Cuba Libre",
+    "Mojito",
+    "Shirley Temple",
+    "Roy Rogers",
+    "Jamaican Mule",
+    "Bahama Mama",
+    "Garibaldi",
+    "Sidecar",
+    "Pussyfoot",
+    "Casa Caña",
+    "Red Bitter",
+    "Bitter Orange Aperitivo"
+  ],
+  "known_names": [
+    "Rocks (Old Fashioned)", "Highball", "Collins", "Coupe", "Martini",
+    "Margarita", "Hurricane", "Wine", "Shot",
+    "Shake", "Stir", "Build", "Muddle", "Blend",
+    "Jigger", "Cocktail Shaker", "Hawthorne Strainer", "Mixing Glass",
+    "Bar Spoon", "Muddler", "Electric Blender",
+    "White Rum", "Dark Rum", "Gin", "Vodka", "Citron Vodka", "Tequila",
+    "Mezcal", "Bourbon", "Rye Whiskey", "Cognac", "Cachaça", "Scotch Whisky",
+    "Pisco", "Absinthe",
+    "Triple Sec", "Red Bitter", "Bitter Orange Aperitivo", "Sweet Vermouth", "Dry Vermouth",
+    "Coffee Liqueur", "Amaretto", "Maraschino", "Elderflower Liqueur",
+    "Peach Schnapps", "Blue Curaçao", "Crème de Cassis", "Crème de Violette",
+    "Cherry Liqueur", "Raspberry Liqueur", "Drambuie", "Irish Cream",
+    "Lime Juice", "Lemon Juice", "Grapefruit Juice", "Cranberry Juice",
+    "Orange Juice", "Pineapple Juice", "Tomato Juice", "Passion Fruit Purée",
+    "Peach Purée",
+    "Soda Water", "Tonic Water", "Cola", "Ginger Beer", "Ginger Ale",
+    "Prosecco", "Espresso",
+    "Sugar Syrup", "Grenadine", "Honey Syrup", "Agave Syrup",
+    "Orgeat (Almond)", "Raspberry Syrup",
+    "Angostura Bitters", "Orange Bitters",
+    "Egg White", "Cream", "Coconut Cream", "Mint Leaves", "Hot Sauce",
+    "No Garnish", "Lime Wheel", "Lemon Twist", "Orange Peel", "Mint Sprig",
+    "Olive", "Cocktail Cherry", "Coffee Beans", "Salt Rim", "Pineapple Wedge",
+    "Gin & Tonic", "Screwdriver", "Cuba Libre", "Moscow Mule",
+    "Jamaican Mule", "Tequila Sunrise", "Paloma", "Mimosa", "Bellini",
+    "Kir Royale", "Black Russian", "White Russian", "Americano",
+    "Garibaldi", "Tom Collins", "Sex on the Beach", "Blue Lagoon",
+    "Bramble", "Bloody Mary", "Godfather", "Long Island Iced Tea",
+    "Daiquiri", "Gimlet", "Whiskey Sour", "Amaretto Sour", "Cosmopolitan",
+    "French 75", "Clover Club", "Pisco Sour", "Aviation",
+    "Corpse Reviver #2", "Negroni", "Boulevardier", "Rob Roy", "Rusty Nail",
+    "Old Fashioned", "Manhattan", "Sazerac", "Dry Martini", "Mojito",
+    "Caipirinha", "Mint Julep", "Mai Tai", "Bahama Mama", "Singapore Sling",
+    "Piña Colada", "Espresso Martini", "Penicillin",
+    "Virgin Sunrise", "Roy Rogers", "Shirley Temple", "Virgin Piña Colada",
+    "Fresh Lemonade", "Ginger Fizz", "Berry Fizz", "Virgin Mary",
+    "Virgin Mojito", "Pussyfoot", "Tropical Cooler", "Berry Nojito",
+    "Kamikaze", "Sidecar", "Lemon Drop", "B-52", "Green Tea Shot",
+    "The Snug", "Zavod", "La Cantina", "Aperitivo Piazza", "Casa Caña", "CASA CAÑA",
+    "The Speakeasy", "Le Boudoir", "The Still", "Sunset Tiki",
+    "Soda Fountain", "Juice Bar", "Beach Shack",
+    "Old Tom", "Irina Frost", "Don Raúl", "Signora Rosa", "Constanza",
+    "Silas Crowe", "Madame Colette", "Hamish MacPeck", "Koa",
+    "Miss Cherry", "Green Jay", "Sandy",
+    "House", "House Taste"
+  ]
+}

@@ -14,15 +14,16 @@ const PROFILE = {
 
 /**
  * @param {import('@playwright/test').Page} page
- * @param {{ cleared?: number, seenTiers?: Record<string, number>, introSeen?: boolean }} [opts]
+ * @param {{ cleared?: number, seenTiers?: Record<string, number>, introSeen?: boolean, cotdId?: string }} [opts]
  */
 async function seedPlayer(page, opts = {}) {
   const cleared = opts.cleared ?? 0;
   // Default: mark Guess tier seen so the rules announce does not block pours.
   const seenTiers = opts.seenTiers ?? { Guess: 1 };
   const introSeen = opts.introSeen !== false;
+  const cotdId = opts.cotdId || null;
   await page.addInitScript(
-    ({ profile, cleared: c, seenTiers: tiers, introSeen: seen }) => {
+    ({ profile, cleared: c, seenTiers: tiers, introSeen: seen, cotdId: dailyId }) => {
       localStorage.setItem("dagtails_migrated", "1");
       if (seen) localStorage.setItem("dagtails_intro_seen", "1");
       else localStorage.removeItem("dagtails_intro_seen");
@@ -37,8 +38,17 @@ async function seedPlayer(page, opts = {}) {
         })
       );
       localStorage.setItem("dagtails_settings", JSON.stringify({ sound: false }));
+      if (dailyId) {
+        localStorage.setItem("dagtails_cotd", JSON.stringify({
+          date: new Date().toISOString().slice(0, 10),
+          id: dailyId,
+          queue: [],
+          doneDate: null,
+          count: 0,
+        }));
+      }
     },
-    { profile: PROFILE, cleared, seenTiers, introSeen }
+    { profile: PROFILE, cleared, seenTiers, introSeen, cotdId }
   );
 }
 
@@ -139,9 +149,11 @@ function escapeRegExp(s) {
 
 /**
  * Serve from ingredients step (campaign guess mode → result).
+ * COTD / mix lanes wait on the judge animation (~8s) before the verdict lands.
  * @param {import('@playwright/test').Page} page
+ * @param {{ verdictTimeout?: number }} [opts]
  */
-async function serveDrink(page) {
+async function serveDrink(page, opts = {}) {
   const next = page.locator("#btn-next");
   await next.waitFor({ state: "visible", timeout: 10_000 });
   await page.waitForFunction(() => {
@@ -153,8 +165,28 @@ async function serveDrink(page) {
     // Verdict reveal is deferred ~120ms on campaign (no judge panel).
     await page.locator("#result-actions:not(.is-pending)").waitFor({
       state: "visible",
-      timeout: 15_000,
+      timeout: opts.verdictTimeout ?? 15_000,
     });
+}
+
+/**
+ * Hub → Cocktail of the Day station.
+ * @param {import('@playwright/test').Page} page
+ */
+async function openCotd(page) {
+  const started = await page.evaluate(() => {
+    const fn = window.DagTailsHub?.getActions()?.openCotd;
+    if (typeof fn !== "function") return false;
+    fn();
+    return true;
+  });
+  if (!started) throw new Error("DagTailsHub.openCotd is not registered");
+  await page.locator("#screen-game.is-active").waitFor({ state: "visible", timeout: 15_000 });
+  await dismissAnnounce(page);
+  await page.locator("#ingredient-catalog .cat-item").first().waitFor({
+    state: "visible",
+    timeout: 15_000,
+  });
 }
 
 /**
@@ -217,6 +249,7 @@ module.exports = {
   enterStation,
   pickIngredients,
   serveDrink,
+  openCotd,
   openMixologistPour,
   mixChip,
   isPortraitProject,

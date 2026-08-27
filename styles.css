@@ -766,16 +766,26 @@ body {
 .result-guest-bg[hidden] {
   display: none !important;
 }
-.result-guest-backdrop {
-  width: min(100%, 360px);
+body.is-cotd-result .result-guest-bg {
+  align-items: center;
+  justify-content: center;
+}
+body.is-cotd-result .result-guest-backdrop {
+  display: block;
+  width: 100%;
   height: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  object-position: center bottom;
-  opacity: 0.95;
-  filter: drop-shadow(0 10px 28px rgba(0, 0, 0, 0.55));
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 78%, transparent 100%);
-  mask-image: linear-gradient(180deg, transparent 0%, #000 18%, #000 78%, transparent 100%);
+  object-fit: cover;
+  object-position: center 10%;
+  opacity: 1;
+  filter: drop-shadow(0 14px 28px rgba(0, 0, 0, 0.55));
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, #000 6%, #000 78%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0%, #000 6%, #000 78%, transparent 100%);
+}
+body.is-cotd-result #result-judges-wrap {
+  display: none !important;
+}
+body.is-cotd-result .result-points {
+  display: none;
 }
 .result-verdict-fore {
   position: relative;
@@ -865,6 +875,21 @@ body {
   font-weight: 700;
   margin: 8px 0;
   color: var(--text);
+}
+.result-score-label,
+.result-score-sub {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+}
+.result-score-sub {
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--muted);
 }
 .result-pct-sign {
   font-size: 18px;
@@ -1234,12 +1259,16 @@ body {
   mix-blend-mode: soft-light;
   opacity: 0.7;
 }
-.bar-guest img {
+.bar-guest.is-house {
+  width: min(58%, 260px);
+  height: 70%;
+}
+.bar-guest.is-house img {
+  display: block;
   width: 100%;
   height: 100%;
-  display: block;
-  object-fit: contain;
-  object-position: center bottom;
+  object-fit: cover;
+  object-position: center 12%;
 }
 .bar-guest-drink {
   position: absolute;
@@ -3080,6 +3109,9 @@ body {
   padding: 6px 10px 0;
   align-items: end;
   border-radius: 20px;
+  overflow: visible;
+}
+.judge-scene.is-mix-ux {
   overflow: hidden;
 }
 .judge-table {
@@ -3194,6 +3226,21 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
+}
+.judge-portrait--chip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(233, 185, 73, 0.45);
+  flex: 0 0 auto;
+}
+.judge-portrait--chip img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 22%;
 }
 .judge-portrait {
   width: 132px;
@@ -5216,8 +5263,8 @@ body {
     border-width: 2px;
   }
   .judge-scene.is-compact .judge-portrait {
-    width: 78px;
-    height: 78px;
+    width: 52px;
+    height: 52px;
   }
   .judge-avatar-name,
   .judge-avatar-title,
@@ -5436,35 +5483,56 @@ body.is-phone-play .result-name {
   margin: 0 0 2px;
 }
 body.is-phone-play #result-judges-wrap {
-  flex: 1 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
   margin: 0;
 }
 body.is-phone-play .judges-title {
   font-size: 11px;
   margin: 0 0 4px;
 }
-/* Campaign result only — mixologist `#judges-panel` is one of many
-   siblings in a flex card, so height:100% + min-height:0 collapses it. */
 body.is-phone-play #result-judges {
-  height: 100%;
+  height: auto;
   min-height: 0;
 }
-body.is-phone-play .judge-scene {
-  height: 100%;
-  align-items: end;
+body.is-phone-play #result-judges .judge-table {
+  display: none;
+}
+body.is-phone-play #result-judges .judge-scene {
+  height: auto;
+  align-items: stretch;
+  overflow: visible;
+  gap: 8px;
+  padding: 0;
   grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
 }
-body.is-phone-play .judge-scene.is-compact .judge-portrait {
-  width: 76px;
-  height: 76px;
+body.is-phone-play #result-judges .judge-seat {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding-bottom: 0;
 }
-body.is-phone-play .judge-bubble {
+body.is-phone-play #result-judges .judge-avatar-wrap {
+  display: none;
+}
+body.is-phone-play #result-judges .judge-portrait--chip {
+  width: 22px;
+  height: 22px;
+  border-width: 1px;
+  flex: 0 0 auto;
+}
+body.is-phone-play #result-judges .judge-bubble-top {
+  align-items: center;
+}
+body.is-phone-play #result-judges .judge-bubble {
   min-height: 0;
-  padding: 7px 8px;
+  padding: 6px 8px;
 }
-body.is-phone-play .judge-bubble-quote {
+body.is-phone-play #result-judges .judge-bubble::after {
+  display: none;
+}
+body.is-phone-play #result-judges .judge-bubble-quote {
   -webkit-line-clamp: 2;
   font-size: 10.5px;
 }
@@ -5476,13 +5544,13 @@ body.is-phone-play .result-top {
   gap: 10px 16px;
   margin-top: 4px;
   align-items: stretch;
-  overflow: hidden;
+  overflow: visible;
 }
 body.is-phone-play .result-left {
   justify-content: center;
   gap: 6px;
   min-height: 0;
-  overflow: hidden;
+  overflow: visible;
 }
 body.is-phone-play .result-right {
   max-height: none;
@@ -5492,10 +5560,30 @@ body.is-phone-play .result-right {
   overflow: hidden;
 }
 body.is-phone-play .result-right .feedback {
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   flex: 1 1 auto;
   min-height: 0;
-  overscroll-behavior: contain;
+  padding-bottom: 0;
+}
+body.is-phone-play .game-stage .feedback li {
+  padding: 3px 0;
+  font-size: 11.5px;
+}
+body.is-phone-play .result-right .feedback li:last-child {
+  padding-bottom: 4px;
+}
+body.is-phone-play .stars {
+  font-size: 22px;
+  letter-spacing: 2px;
+}
+body.is-phone-play .result-score {
+  margin: 2px 0 0;
+  font-size: 22px;
+}
+body.is-phone-play .result-score-label {
+  margin-top: 2px;
 }
 body.is-phone-play .result-actions {
   flex: 0 0 auto;
@@ -6669,10 +6757,10 @@ body.is-phone-play .mix-card .judge-scene,
   margin: 2px 0 0;
 }
 .game-stage #result-judges-wrap {
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   min-height: 0;
-  max-height: 36%;
-  overflow: hidden;
+  max-height: none;
+  overflow: visible;
 }
 .game-stage .result-top {
   flex: 1 1 auto;
@@ -6700,6 +6788,12 @@ body.is-phone-play .mix-card .judge-scene,
 .game-stage .result-score {
   font-size: clamp(28px, 4.5vw, 40px);
 }
+body.is-phone-play .game-stage .stars {
+  font-size: 22px;
+}
+body.is-phone-play .game-stage .result-score {
+  font-size: 22px;
+}
 .game-stage .result-right {
   max-height: none;
   min-height: 0;
@@ -6715,6 +6809,7 @@ body.is-phone-play .mix-card .judge-scene,
   flex: 1 1 auto;
   min-height: 0;
   overscroll-behavior: contain;
+  padding-bottom: 12px;
   scrollbar-width: thin;
   scrollbar-color: rgba(233, 185, 73, 0.45) rgba(255, 255, 255, 0.04);
 }

@@ -1,0 +1,1 @@
+Scan the current DAG Tails additions and changes for trademark, trade-dress, publicity, and real-bar risk. Follow the **legal-watch** skill: run the scanner on the diff, inspect new or changed brand images, and alarm on ship-stoppers. Do not treat this as legal advice.

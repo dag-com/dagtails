@@ -65,3 +65,5 @@ Severity guide:
 3. Trace Hub → Map → Game → Result → Map/Hub as the primary journey
 4. Spot-check secondary screens for chrome drift
 5. Produce the report; do not implement fixes unless the user asks
+
+`/gameplay-qa` must also apply player-visual agreement (one labeled score story, copy matches the pour). Tappable exits are not a UX pass. See `.cursor/agents/gameplay-qa.md`.

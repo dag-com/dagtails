@@ -41,3 +41,9 @@ supabase/.temp/
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Local studies, unused wordmarks, and brand-pack dumps (not shipped)
+mocks/
+exports/
+assets/brand/dag-tails-logo-[1-6].png
+mobile/expo-lan-qr.png

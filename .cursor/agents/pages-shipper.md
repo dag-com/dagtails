@@ -27,6 +27,7 @@ https://dag-com.github.io/last-call-bartending-game/
    - Message style: `v1.x.x - …` (why over what)
    - Never commit: `.env`, `.supabase-db-password`, `mocks/*-fix-*.png`, throwaway screenshots, secrets
    - `www/` is gitignored — Actions builds it; do not force-add `www/`
+   - Run legal-watch first (`python .cursor/skills/legal-watch/scripts/scan.py --diff --gate`). Let the git hooks run. Do not `--no-verify`.
 
 3. **Push**
    - `git push -u origin HEAD` to publish `master`

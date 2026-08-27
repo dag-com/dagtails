@@ -14,6 +14,7 @@ Delegate shipping to the **pages-shipper** project subagent and follow its workf
 
 1. Run **healthcheck** first (skill or `npm run healthcheck`). Stop if required checks fail.
 2. Invoke / follow **pages-shipper**:
+   - Legal-watch must pass on new additions before commit or push
    - Commit meaningful changes (`v1.x.x - …`) if needed
    - Push `master`
    - Watch `Deploy GitHub Pages`

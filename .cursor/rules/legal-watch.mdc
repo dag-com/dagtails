@@ -1,0 +1,16 @@
+---
+description: Alarm on trademark / publicity risk when brand names or art change
+globs: data.js,assets/**,resources/**,mocks/**,mobile/assets/**,index.html
+alwaysApply: false
+---
+
+# Legal watch
+
+After adding or editing venues, drinks, ingredients, lore, logos, mascots, or icons:
+
+1. Treat a LEGAL ALARM hook message as a blocker until reviewed
+2. Run `python .cursor/skills/legal-watch/scripts/scan.py --diff` or invoke **legal-watch**
+3. Do not ship Top Gun / Maverick art, a DuckTales-like wordmark, a Vans-like shoe stripe, Dark 'n' Stormy, Painkiller, or El Floridita + Hemingway
+4. New names not in the watchlist baseline are unreviewed — invent or genericize if they look like a real bar, celebrity, or house brand
+
+This is a clearance alarm, not legal advice.

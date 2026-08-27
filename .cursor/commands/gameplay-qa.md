@@ -1,0 +1,1 @@
+Play and gate the current DAG Tails path. Follow the **gameplay-qa** agent: run the handheld specs, then judge the landscape screenshot as a player. Tappable CTAs are not a UX pass — numbers, stars, copy, and layout must tell one story the player would agree with.

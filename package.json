@@ -21,11 +21,15 @@
     "test:perf": "playwright test tests/performance.spec.js",
     "test:health": "playwright test tests/health.spec.js tests/backend.spec.js --project=pc",
     "test:qa": "node scripts/run-qa.js",
-    "test:qa:quick": "playwright test tests/health.spec.js tests/backend.spec.js tests/gameplay.spec.js tests/play-journey.spec.js tests/layout-integrity.spec.js tests/hub-layout.spec.js tests/mixology.spec.js tests/player-fixes.spec.js tests/station-fit.spec.js tests/text-readability.spec.js --project=android --project=ios",
+    "test:qa:quick": "playwright test tests/health.spec.js tests/backend.spec.js tests/gameplay.spec.js tests/play-journey.spec.js tests/layout-integrity.spec.js tests/hub-layout.spec.js tests/mixology.spec.js tests/judges.spec.js tests/player-fixes.spec.js tests/station-fit.spec.js tests/text-readability.spec.js --project=android --project=ios",
     "test:qa:devices": "node scripts/run-qa.js",
     "healthcheck": "node scripts/healthcheck.js",
     "healthcheck:json": "node scripts/healthcheck.js --json",
-    "report:players": "node .cursor/skills/player-report/scripts/fetch.js && node .cursor/skills/player-report/scripts/render.js"
+    "report:players": "node .cursor/skills/player-report/scripts/fetch.js && node .cursor/skills/player-report/scripts/render.js",
+    "prepare": "node scripts/install-git-hooks.js",
+    "legal-watch": "python .cursor/skills/legal-watch/scripts/scan.py --diff",
+    "legal-watch:staged": "python .cursor/skills/legal-watch/scripts/scan.py --staged --gate",
+    "legal-watch:outgoing": "python .cursor/skills/legal-watch/scripts/scan.py --outgoing --gate"
   },
   "repository": {
     "type": "git",

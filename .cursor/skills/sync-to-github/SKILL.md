@@ -12,6 +12,8 @@ Publish the current branch to `origin`. Prefer committing unfinished work first 
 
 Every `/sync-to-github` (and this skill) **must** run a **/code-review** of the outgoing change set. Follow `.cursor/commands/code-review.md`. Do not skip it. Do not auto-fix unless asked.
 
+Every commit or push **must** pass **legal-watch** on the new additions. Do not skip it. Do not use `--no-verify`.
+
 ## Steps
 
 1. **Inspect**
@@ -29,12 +31,19 @@ Every `/sync-to-github` (and this skill) **must** run a **/code-review** of the 
    - If there is no outgoing diff, say so in one sentence instead of reviewing unrelated files
    - Do not make code changes unless the user explicitly asks
 
-3. **Commit if needed** (only when there are meaningful uncommitted changes and the user asked to sync those updates)
+3. **Legal watch** (required before commit and before push)
+   ```bash
+   python .cursor/skills/legal-watch/scripts/scan.py --diff --gate
+   ```
+   After staging, the git `pre-commit` hook runs `--staged --gate`. Before push, `pre-push` runs `--outgoing --gate`. If either exits 2, **stop** — report the LEGAL ALARM and do not commit or push. Do not `--no-verify`.
+
+4. **Commit if needed** (only when there are meaningful uncommitted changes and the user asked to sync those updates)
    - Follow the repo’s commit protocol: status, diff, log → stage → commit via HEREDOC/here-string
    - Do **not** commit secrets, `.env`, or throwaway screenshot dumps unless asked
    - Version-style messages match this repo (`v1.x.x - …`)
+   - The pre-commit hook must be allowed to run
 
-4. **Push**
+5. **Push**
    ```bash
    git push -u origin HEAD
    ```
@@ -42,7 +51,7 @@ Every `/sync-to-github` (and this skill) **must** run a **/code-review** of the 
    - First push of a new branch needs `-u`
    - If Auto-review blocks a protected-branch push, retry with smart-mode approval
 
-5. **Confirm**
+6. **Confirm**
    - Report branch, commit SHA/message, and remote URL
    - Lead with the code-review findings (or “no outgoing diff”)
    - For this project’s Pages site after `master` push:
@@ -65,3 +74,4 @@ Every `/sync-to-github` (and this skill) **must** run a **/code-review** of the 
 - Update git config
 - Push unrelated local branches
 - Skip the code-review step
+- Skip legal-watch or commit/push with `--no-verify`

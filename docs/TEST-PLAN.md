@@ -3,8 +3,34 @@
 Player-reported fixes from the Aug 16–19 session. If a 10-year-old, Expo Go, or a short landscape phone can still hit the original bug, the gate fails.
 
 **Gate:** `npm run test:qa`  
-**Specs:** listed in `scripts/run-qa.js`  
+**Specs:** listed in `scripts/run-qa.js` (includes `tests/judges.spec.js`)  
 **Matrix:** `playwright.devices.js` (phones, tablets, Flip/Fold, iPhone Air) + `phone-portrait` rotate-lock
+
+A green Playwright run is not a UX pass. `/gameplay-qa` still fails the run if the landscape screenshot would make a tester argue with the screen.
+
+## QA checklist (what is tested)
+
+**Automated (Playwright, every `test:qa` run)**
+
+1. Boot / health / Supabase
+2. Hub → map → serve → result journey
+3. Dead-end exits stay tappable (finish, result, intro, mix, map)
+4. Glass SVG draws on handhelds; station tools sit in the bowl
+5. Hub venue photo, Learn/Help/Badges, gold CTA
+6. Map candy stars + current pulse
+7. Mixologist chips + classic-share block
+8. Assets load as absolute URLs
+9. Type stays readable; portrait shows rotate-lock
+10. **P23 live COTD serve:** House Taste robot is the only reviewer; Recipe match + stars match the pour; no three-judge strip; Try again + Back to menu tappable
+
+**Agent must still look (fails the QA run even if specs are green)**
+
+- One score story — numbers, stars, copy agree
+- Copy agrees with the pour that just happened
+- Portraits not on furniture; no fake scrollbar over empty space
+- Short landscape (844×390 / Flip cover), not desktop
+
+Full player-fix table: P1–P23 below. Visual audit aid: `.cursor/skills/dag-tails-ui-ux/checklist.md`.
 
 ## How to run
 
@@ -45,6 +71,7 @@ Quick two-phone smoke: `npm run test:qa:quick`
 | P19 | Hub CTA gold split-button; caret must not cover badges | Hub | `hub-layout` | `#btn-start` gold; `#cta-menu` does not swallow badges |
 | P21 | Muddler graphic sits through coupe/stem | Station (muddle) | visual / `placeMuddler` | Pestle sits in the bowl; handle tilts out of the rim; not a full-mount brown bar |
 | P22 | Tool must sit IN the glass, in proportion | Station | `station-fit` all glass × method | Pestle in bowl with handle at/above rim; not a toothpick; spoon clears mixing-glass rim; prep hidden for muddle/build |
+| P23 | Result/COTD visuals disagree with the pour | Result | `judges` live COTD serve | House Taste robot only; Recipe match 100% + 3 stars; no three-judge panel; quote agrees with the pour |
 
 ## Out of scope for this gate
 
@@ -55,7 +82,7 @@ Quick two-phone smoke: `npm run test:qa:quick`
 
 ## Hunt list (QA agents)
 
-Keep hunting these classes on every `device-qa` / `gameplay-qa` run — they are the same bugs as P1–P22, not new product ideas:
+Keep hunting these classes on every `device-qa` / `gameplay-qa` run — they are the same bugs as P1–P23, not new product ideas:
 
 - Dead-end screens (clipped Menu / Play again / Serve / Make another / intro Next)
 - Intro copy below the fold (Expo chrome)
@@ -65,3 +92,4 @@ Keep hunting these classes on every `device-qa` / `gameplay-qa` run — they are
 - Map white-glass discs or missing star fills
 - Mixologist pour still showing `#build-list` or a full-row tall editing chip
 - Muddler / spoon sitting through the stem or outside the bowl on any glass
+- **Player-visual disagreement:** two unlabeled grades on one result (recipe % vs panel verdict vs /100), duplicate judge copy, clipped portraits, checklist scrollbar over empty space. If a tester would argue with the screenshot, fail — even when Retry / Back to menu are tappable

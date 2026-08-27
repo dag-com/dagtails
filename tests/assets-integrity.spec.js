@@ -7,6 +7,7 @@ const RUNTIME_PATHS = [
   "assets/comic/comic1.png",
   "assets/customers/mallard_petite.png",
   "assets/judges/vera.png",
+  "assets/judges/house-taste.png",
   "assets/station/bar-stage.png",
   "assets/duck-hub-mascot.png",
   "assets/brand/dag-tails-logo.png",

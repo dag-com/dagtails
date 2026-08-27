@@ -1,4 +1,210 @@
-# DAG Tails UI/UX Audit — Game lanes (mobile)
+# DAG Tails UI/UX — Rank-2 house jacket (M02)
+
+**Date:** 2026-08-24  
+**Agent:** `.cursor/skills/dag-tails-ui-ux`  
+**Audience:** Landscape phones (primary).  
+**Scope:** Replace the rank-2 shearling flight bomber so hub rank-up is one duck changing clothes. Live file: `assets/duck-hub-mascot-jacket.png` (`.mascot-duck.tier-2`).  
+**Compared to:** hoodie `assets/duck-hub-mascot.png`, Ace `assets/duck-hub-mascot-ace.png`, north-star `mocks/map-ideas/map-v3-venue-hero.jpg`
+
+---
+
+## 1. Summary
+
+**Ship option A — the charcoal house service jacket.** Rank 2 should read as the hoodie duck earning the bar uniform, not putting on a naval flight costume. Patching first-party marks onto a shearling bomber still looks like the same movie silhouette (M02). A skipper bomber with DAG tapes is not enough.
+
+Option A keeps the hoodie face (open eyes, same yellow duck), swaps the garment for a bartender captain blazer, and keeps first-party marks only: **DAG TAILS** nameplate, martini pin, heart-figures. No fur collar, no name tapes, no aviators. Option B (tobacco chore coat) is a valid craftsman look but too close to the hoodie pocket-pose for a promotion beat.
+
+**Maturity: beta, ready to live on hub rank 2.** Ace pose (M01) is still a separate fix. This is not a legal opinion.
+
+---
+
+## 2. Findings
+
+| ID | Severity | Screen | Problem | Evidence | Suggested fix | Visual-system? |
+|---|---|---|---|---|---|---|
+| J01 | **Blocker** (legal + UX) | Hub rank-up | Shearling bomber + patch salad is a different character from the hoodie, even after DAG labels. Rank-up should be wardrobe, not a costume change. | Live `.mascot-duck.tier-2` → `assets/duck-hub-mascot-jacket.png`. Quarantine: `mocks/legal-before-skipper/`. Skipper DAG-patch still bomber: `mocks/legal-before-service-jacket/`. | **Option A service jacket** (live). Same duck, hospitality coat, no fur. | Y |
+| J02 | **Major** | Hub | Rank 2 wearing sunglasses while hoodie is open-faced makes the promotion feel like a new mascot. Ace can keep the closer look later. | Hoodie: open eyes. Old jacket: round shades. Ace: gold aviators. | Option A: open face, hoodie eyes. | Y |
+| J03 | **Minor** | Hub rank-up | Three files still do not share one frame (M05). New jacket is 1024×1536; hoodie is 492×1000. `background-size: contain` on `.hub-duck` `aspect-ratio: 0.65` will still jump a little. | `.hub-duck` `styles.css` ~6072. | Crop later to hoodie baseline; do not block this swap. | Y |
+
+**Pass:** Option A and B both drop fur collar and third-party tapes. Heart-figures + DAG TAILS + martini pin stay in-family.
+
+---
+
+## 3. Jacket options (this pass)
+
+1. **A — House service jacket (ship).** Charcoal bartender blazer, notch lapels, rocks glass, left hand in pocket. `mocks/jacket-opt-a-service.png` → live `assets/duck-hub-mascot-jacket.png`.
+2. **B — Tobacco chore coat (alt).** Workwear hospitality coat, both hands in pockets. Warmer gold-night craftsman; weaker “I got promoted” read. `mocks/jacket-opt-b-chore.png`.
+3. **Do not ship:** shearling G-1 bomber, skipper-with-DAG-tapes on the same bomber, Ace aviators on rank 2.
+
+---
+
+## 4. Out of scope
+
+- Ace pointing pose / scarf (M01, M03).
+- COTD House Taste robot (separate role).
+- Shop, mixology, map crawl.
+
+---
+
+## 5. Resolved / remaining
+
+**Resolved this pass**  
+- M02 / J01 — live rank-2 file is the house service jacket, not the flight bomber.
+
+**Remaining**  
+- Ace guide pose (M01).  
+- Rank-up frame jump (M05 / J03).
+
+---
+
+
+
+**Date:** 2026-08-24  
+**Agent:** `.cursor/skills/dag-tails-ui-ux`  
+**Audience:** Landscape phones (primary).  
+**Scope:** Proposal only — one robot / house duck as the COTD reviewer. Not implemented.  
+**Surfaces:** Hub `.cotd-card`, `#screen-game` `#bar-guest`, `#screen-result` `#result-judges-wrap`  
+**Compared to:** Journey guest (`pickCustomer`), Mixologist `#screen-mix-result` three-judge panel, north-star `mocks/map-ideas/map-v3-venue-hero.jpg`
+
+---
+
+## 1. Summary
+
+**Do it — for Cocktail of the Day only.** Replace the random three-seat panel with **one house duck** who reviews today's recipe. Do not put that duck on the journey, and do not replace Mixologist's three palates.
+
+COTD is a daily assignment with a known spec. The player just asked why Amir / Bruno / Lili appear there when the journey has a guest. That confusion is the UX bug: COTD borrowed Mixologist's invent-mode cast. Three competing palates on a short landscape result already failed player-visual agreement (Crowd-pleaser vs 75%, then praise vs roast on the same pour). One reviewer is the mode's job.
+
+Call it a **house reviewer**, not a sci-fi robot. The north-star duck is warm gold-night bartender (`map-v3-venue-hero`, hoodie Ace family). A chrome LED visor would read as a different game. A duck with a small brass tasting kit / house pin is still "the bar's daily computer" without purple cyber chrome.
+
+**Maturity of the idea: beta, worth the next COTD pass.** Do not ship three robot ducks, a second /100, or a new mascot IP.
+
+---
+
+## 2. Findings
+
+| ID | Severity | Screen | Problem | Evidence | Suggested fix | Visual-system? |
+|---|---|---|---|---|---|---|
+| D01 | **Major** (if we keep the trio) | COTD result | Three random house judges are a different app from hub → duck → station. Journey uses one guest; Mixologist uses a panel because there is no recipe. COTD has a recipe and still loads Mixologist's cast. | `usesJudgePanel()` in `game.js` (~3834) is true for every non-campaign / non-training mode. `pickJudges(3)` is random. `loadCotd()` calls `clearCustomer()` so `#bar-guest` is empty, then `#result-judges-wrap` fills with three chips. Hub duck is `.hub-duck` in `HubScreen.tsx`. | One duck reviewer on COTD result. Keep `pickCustomer` for journey. Keep the three-judge `#judges-panel` for Mixologist. | Y |
+| D02 | **Major** (if the robot fights gold night) | COTD station + result | A hard robot (LED visor, purple plating, second silhouette) breaks duck-as-guide and gold cocktail night. Rank-up already failed when jacket became a different character (M02). | North-star: `mocks/map-ideas/map-v3-venue-hero.jpg` (warm bartender duck). Live guide: `assets/duck-hub-mascot.png`. Result chrome: `#result-judges` compact 3-across on `body.is-phone-play`. | Same duck family, same Rail Sole language. "Robot" = house tool (brass clip / tasting visor / skipper pin), not a new species. | Y |
+| D03 | **Major** | COTD result | Any reviewer who posts a second grade will relitigate P23. Recipe match is the COTD grade. The duck's job is to *say why* the checklist looks like that. | Live rule: Guess COTD hides panel /100 (`judgeScoring.mode === "flavor-only"`). 75% + missing Sugar Syrup + two bitterness lines is one story; Amir's "Exactly my kind of drink!" next to that is still two stories. | One quote. No /100 on the duck. Quote must name the miss or the hit (`Sugar syrup's missing — that's the bitter edge`). Stars follow recipe %. | N |
+| D04 | **Minor** | COTD station | Reviewer appearing only after Serve is a jump scare. Journey guests already sit in `#bar-guest` during the pour. | `#bar-guest` in `index.html` ~265; `clearCustomer()` in `loadCotd()`. F21 in the 2026-08-16 audit: duck drops off after hub. | Park the house duck in `#bar-guest` for COTD (where the guest would be). Result is the same character, closer, talking. | Y |
+| D05 | **Polish** | Hub COTD chip | Daily card is a dashboard widget with no duck ("today's special" has no face). | `HubScreen.tsx` `#cotd-card` — name + Make it, no mascot. Lane 2 audit (2026-08-16). | Optional: tiny house-duck chip on `.cotd-card` so the reviewer is introduced before the station. Do not steal Journey CTA size (F08). | Y |
+
+**Pass (do not "fix" with this idea):** Mixologist three-judge drama. Journey one-guest table. Duck remaining the hub/map guide — reviewer is a *role*, not a replacement Ace.
+
+---
+
+## 3. Top 10 (if we take the idea)
+
+1. **COTD only** — one house duck reviewer. Journey stays guests. Mixologist stays three palates.
+2. **One voice, one grade** — `Recipe match` + stars; duck line explains the checklist. No panel avg, no /100 chips.
+3. **Same duck family** — gold night, Rail Sole, readable face. Brass tasting kit, not cyberpunk.
+4. **Guide, don't pose** — on a miss, look or point at the checklist; on 100%, toast. Same lesson as Ace's lost point (M01).
+5. **Sit at the bar during the pour** — `#bar-guest` for COTD, then the same duck on `#screen-result` (retire `#result-judges` three-seat strip for this mode).
+6. **Copy contract** — if Sugar Syrup is missing, the duck says that. No random "bubbles" on an Espresso Martini.
+7. **Short landscape** — one portrait + one quote. Three cards on 343px height was the clip class.
+8. **Hub teaser** — optional small duck on `#cotd-card`; Journey remains the only large CTA.
+9. **Name it in-world** — "House tasting" / skipper's review, not "Robot Judge 3000."
+10. **Don't draw a fourth mascot IP** — not a new species, not a movie robot, not three robot ducks.
+
+---
+
+## 4. Out of scope
+
+- Implementing the character or wiring it (this pass is review only).
+- Mixology scoring math, shop, legal clearance of Ace aviators / wordmark.
+- Replacing Mixologist judges or journey customers.
+
+---
+
+## 5. Resolved / remaining
+
+**Resolved (context, not this proposal)**  
+- COTD Guess result no longer shows Crowd-pleaser vs a second /100 (P23). Trio is still the wrong *cast*.
+
+**Remaining if we greenlight**  
+- Art: house-duck reviewer in the existing mascot family.  
+- Station: duck in `#bar-guest` for `mode === "cotd"`.  
+- Result: single quote that agrees with `#feedback-list`.  
+- Keep Mixologist `#judges-panel` unchanged.
+
+---
+
+# DAG Tails UI/UX Audit — New mascot images (Rail Sole)
+
+
+**Date:** 2026-08-24  
+**Agent:** `.cursor/skills/dag-tails-ui-ux`  
+**Audience:** Landscape phones (primary).  
+**Scope:** The new live ducks after the sneaker swap — not a full-lane re-audit.  
+**Files:** `assets/duck-hub-mascot-ace.png` (splash + rank 3), `assets/duck-hub-mascot.png` (hub default / map / avatar), `assets/duck-hub-mascot-jacket.png` (rank 2), `resources/splash.png`  
+**Compared to:** `mocks/legal-before-rail-sole/`  
+**Surfaces:** `#splash-hero-img`, `#hub-duck` / `.mascot-duck`, `.map-hero-duck`, `.hub-avatar`
+
+---
+
+## 1. Summary
+
+The Rail Sole swap did the right visual-system job on the **feet**: black upper, cream cupsole, thin gold rail. At splash and hub scale those shoes now read as DAG Tails gold-night, not a skate brand. That is a pass.
+
+The **Ace** redraw did more than shoes. The splash hero used to point (“your shift”). It now throws a peace sign, with a wider scarf and a busier embossed jacket. On a landscape splash that is already logo + duck + copy + CTA, the duck stopped being a guide and became a fashion pose. The **hoodie** is still the best orientation mascot (open face, pockets, readable silhouette). Rank 2 now wears the house service jacket (same duck, bartender blazer) so promotion is wardrobe, not a movie costume.
+
+**Maturity for this art pass: beta.** Shoes are shippable for testers. Ace pose is not polish-ready. Rank-2 wardrobe is the house service jacket. Do not treat this as a legal opinion.
+
+---
+
+## 2. Findings
+
+| ID | Severity | Screen | Problem | Evidence | Suggested fix | Visual-system? |
+|---|---|---|---|---|---|---|
+| M01 | **Major** | Splash | Ace no longer *guides*. Old art pointed; new art peace-signs. The duck should aim the player at the shift / CTA, not pose for a poster. | `#splash-hero-img` → `assets/duck-hub-mascot-ace.png` vs `mocks/legal-before-rail-sole/duck-hub-mascot-ace.png`. Landscape splash is a row (`styles.css` ~5632–5648): duck sits beside greet + **Get started**. | Redraw Ace shoes-only onto the old pointing pose, or have the raised hand indicate the CTA. Keep Rail Sole. | Y |
+| M02 | **Major** | Hub / rank-up | Rank 2 was a flight-bomber costume, not a DAG Tails promotion. | `.mascot-duck.tier-2` → `assets/duck-hub-mascot-jacket.png`. | **Done:** charcoal house service jacket (option A). Same open-faced duck as the hoodie. | Y |
+| M03 | **Minor** | Splash landscape | Ace’s trailing scarf adds width the short-landscape card does not have. Duck + copy share one row; extra horizontal chrome crowds the greet. | `.splash-hero-img` `width: min(28vw, 160px)` / `max-height: 78vh`. New Ace ~686×971 with scarf blowing right. | Tuck or shorten the scarf on the splash crop, or use a tighter Ace cut. | Y |
+| M04 | **Minor** | Map | Busy Ace (scarf, V-sign, many chest marks) is a weak pin at map size. `.map-path-duck` is `display: none`; `.map-hero-duck` is only `min(28vw, 180px)` × `min(58%, 240px)`. Fingers and scarf turn to noise. | `.map-hero-duck` in `styles.css` ~3793–3807. North-star mock: `mocks/map-ideas/map-v3-venue-hero.jpg` (duck as guide, not ornament). | Keep hoodie on the map, or a cropped Ace without the peace sign. | Y |
+| M05 | **Minor** | Hub rank-up | The three files do not share one body proportion. CSS forces `aspect-ratio: 0.65`; Ace is ~0.71, hoodie ~0.49, jacket ~0.52. `background-size: contain` will make the duck jump size/width when the player ranks up. | `.hub-duck` `aspect-ratio: 0.65` (~5984). File sizes: Ace 686×971, hoodie 492×1000, jacket 511×987. Old Ace was 674×945 (similar ratio) but the *pose* is wider now. | Lock all three to the same safe frame (feet on a common baseline, similar silhouette width). | Y |
+| M06 | **Polish** | Ace all surfaces | New Ace leather is a heavy repeating emboss; hoodie is matte. The three-tier wardrobe no longer looks like one fabric family. | Ace vs hoodie side by side. | Calm the Ace texture toward the hoodie / old Ace leather. | Y |
+| M07 | **Polish** | Hub avatar | 26px circular crop of the hoodie head. New hoodie face is still readable (open eyes, no glasses). | `.hub-avatar` `center 12% / 220%` of `duck-hub-mascot.png`. | Leave. | N |
+
+**Pass (do not “fix”):** Rail Sole on all three ducks. Cream cupsole + gold rail matches gold cocktail night and stays legible at hub floor scale (`#hub-duck` `bottom: var(--hub-mascot-floor)`).
+
+---
+
+## 3. Top 10 fixes (this art branch)
+
+1. **M02** — Done: rank-2 is the house service jacket. Next: Ace pointing pose (M01).
+2. **M01** — Restore Ace’s pointing “your shift” pose; keep Rail Sole.
+3. **M03** — Tighten Ace’s scarf so landscape splash does not shove copy.
+4. **M04** — Map uses the hoodie (or a quiet Ace crop), not the peace-sign full figure.
+5. **M05** — Same bounding box / baseline for hoodie, jacket, Ace so rank-up does not jump.
+6. **M06** — One leather language across Ace and jacket.
+7. Keep Rail Sole as the shared shoe (already done).
+8. Do not put Ace on `#hub-avatar` — the 26px crop wants an open face (hoodie already does this).
+9. When Ace is redrawn, copy it to `resources/splash.png` again so native splash matches web.
+10. Leave hub venue-hero layout alone in this pass (`#hub-duck` on `--hub-mascot-floor` is the right grammar).
+
+---
+
+## 4. Out of scope
+
+- Journey map crawl vs venue-hero (F01–F03 from 2026-08-16) — still open, not caused by this art.
+- Mixology, shop, profile fields, tokens/purple chrome.
+- Legal clearance of aviators / wordmark / cocktail names.
+- Implementing the redraws (this pass is review only).
+
+---
+
+## 5. Resolved / remaining
+
+**Resolved**
+- Wavy sneaker side stripe on Ace, hoodie, and jacket shoes. Replaced with Rail Sole (black + cream + gold rail).
+
+**Remaining (from this art)**
+- Ace pose / scarf / texture (M01, M03, M04, M06).
+- Rank-up aspect-ratio jump (M05).
+
+---
+
+# Archive — 2026-08-16 game lanes (mobile)
 
 **Date:** 2026-08-16  
 **Agent:** `.cursor/skills/dag-tails-ui-ux`  
@@ -140,7 +346,7 @@ flowchart LR
   S["🇬🇧 The Snug<br/>London · 3 drinks<br/>Guess"] --> Z["🇷🇺 Zavod<br/>Moscow · 6<br/>Guess → Pour"]
   Z --> C["🇲🇽 La Cantina<br/>CDMX · 3<br/>Pour"]
   C --> A["🇮🇹 Aperitivo<br/>Milan · 8<br/>Mix → Garnish"]
-  A --> F["🇨🇺 El Floridita<br/>Havana · 3<br/>Garnish"]
+  A --> F["🇨🇺 Casa Caña<br/>Havana · 3<br/>Garnish"]
   F --> SP["🇺🇸 Speakeasy<br/>NOLA · 14<br/>Garnish → Full bar"]
   SP --> B["🇫🇷 Le Boudoir<br/>Paris · 6<br/>Full bar"]
   B --> ST["🏴󠁧󠁢󠁳󠁣󠁴󠁿 The Still<br/>Edinburgh · 4<br/>Full bar"]
@@ -155,7 +361,7 @@ Candy-path length vs the v3 mock (~5 nodes on a landscape bar top):
 | Zavod | 6 | Tight | Guess then Pour at drink 3 |
 | La Cantina | 3 | Fits | Pour |
 | Aperitivo Piazza | 8 | Overflow | Mix; last drink flips to Garnish |
-| El Floridita | 3 | Fits | Garnish |
+| Casa Caña | 3 | Fits | Garnish |
 | **The Speakeasy** | **14** | **Breaks the pattern** | Garnish → Full bar mid-lane |
 | Le Boudoir | 6 | Tight | Full bar |
 | The Still | 4 | Fits | Full bar |
@@ -223,7 +429,7 @@ Early journey hides later steps via `complexityForStage` (Guess → Pour → Mix
 - **Not a venue hero.** `renderMap` paints **all nine venues** as stacked `.map-venue` cards with nested `<ol class="map-stages">`. On a phone you see ~one card and a sliver of the next. North-star #1 and `map-v3-venue-hero` rejected.
 - **Not a candy path.** Drinks are list rows, not nodes on a gold ribbon. Duck placement is a no-op (`.map-duck { display: none }`, `placeDuckOnMap()` empty).
 - **Hop auto-skips the map.** `finishVenueHop` calls `loadStage(cleared)` after 1.1s. The player never lands on “new bar hero → Enter → candy path → Pour”. Farewell copy from venue masters (`data.js` `master.farewell`) is unused in the hop banner.
-- **Venue length is uneven.** Snug/Cantina/Floridita are 3-node paths (good). Speakeasy is **14 drinks including a shot cluster** — a landscape candy path cannot show 14 nodes without paging, and the current list makes NOLA feel like a homework sheet.
+- **Venue length is uneven.** Snug/Cantina/Casa Caña are 3-node paths (good). Speakeasy is **14 drinks including a shot cluster** — a landscape candy path cannot show 14 nodes without paging, and the current list makes NOLA feel like a homework sheet.
 - **Complexity ignores venue walls.** Guess ends mid-Zavod; Mix fills most of Aperitivo; Full bar starts mid-Speakeasy. The player is taught a new rule in the middle of a bar, not at the door.
 - Two drink UIs: inline stages **and** leftover `#map-sheet`.
 - CTA dialects: hub gold lip vs map `.btn-primary` vs result ghost cluster.
@@ -249,7 +455,7 @@ Each of these should be: hero (exterior) → path (drinks) → interior station 
 
 **Aperitivo Piazza (8)** — Too long for one ribbon; natural split is spritz/bubbles vs bitter (Negroni family). Mix tutorial currently fires on drink 1 of this bar (`stageNo` 13) — good *if* the hero said “tonight you mix.” It doesn’t.
 
-**El Floridita (3)** — Perfect short rum trio. Garnish rule is already on; treat as a palate cleanser after Milan, not another list block.
+**Casa Caña (3)** — Perfect short rum trio. Garnish rule is already on; treat as a palate cleanser after Milan, not another list block.
 
 **The Speakeasy (14)** — **Lane failure.** 14 nodes on ~800×360 is unreadable as a path and exhausting as a list. Shot cluster (Kamikaze, Baby Guinness, B-52, Green Tea, Lemon Drop) should not sit on the same ribbon as Old Fashioned / Sazerac. Split or gate.
 

@@ -735,7 +735,7 @@ function nextRewardCopy(map, prog) {
 
 // The apprentice duck mascot visually levels up as the player climbs bartender
 // titles (still paced by cleared stages, independent of crawl venues):
-// hoodie -> flight jacket + shades -> full "ace" look.
+// hoodie -> house service jacket -> full "ace" look.
 function mascotTierClass(rankIdx) {
   if (rankIdx >= 5) return "tier-3";
   if (rankIdx >= 2) return "tier-2";
@@ -1268,7 +1268,7 @@ function loadCotd() {
   applyComplexity(complexityForStage(getMap().cleared + 1), recipe);
   $(".progress-wrap").style.display = "none";
   $("#endless-hud").style.display = "none";
-  clearCustomer();
+  setHouseReviewer();
   setGameVenue("Cocktail of the Day");
   applyVenueChrome(venueForStage(getMap().cleared || 0)?.venue);
   $("#stage-pill").textContent = "🍹 Daily";
@@ -1962,6 +1962,7 @@ function showScreen(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.remove("is-active"));
   $("#" + id).classList.add("is-active");
   document.body.classList.toggle("is-phone-play", isPhonePlay());
+  if (id !== "screen-result") document.body.classList.remove("is-cotd-result");
   window.scrollTo({ top: 0, behavior: "instant" in window ? "instant" : "auto" });
   if (id === "screen-start") {
     onShowStart();
@@ -3680,11 +3681,13 @@ function renderBarGuest(opts = {}) {
     el.hidden = true;
     img.removeAttribute("src");
     img.alt = "";
+    el.classList.remove("is-house");
     return;
   }
   img.src = resolveAssetUrl(c.portrait);
   img.alt = c.name || "";
   el.hidden = false;
+  el.classList.toggle("is-house", c.id === "house_taste");
   if (opts.entering) {
     void el.offsetWidth;
     el.classList.add("is-entering");
@@ -3832,7 +3835,33 @@ function highlightChips(name) {
 // Journey stages (and the tutorial) score on recipe accuracy only; every other
 // recipe lane still gets the judges' palate verdict.
 function usesJudgePanel() {
-  return state.mode !== "training" && state.mode !== "campaign";
+  return state.mode !== "training" && state.mode !== "campaign" && state.mode !== "cotd";
+}
+
+function usesHouseReviewer() {
+  return state.mode === "cotd";
+}
+
+const HOUSE_TASTE = {
+  id: "house_taste",
+  name: "House",
+  portrait: "assets/judges/house-taste.png",
+};
+
+function setHouseReviewer() {
+  state.customer = { ...HOUSE_TASTE };
+  renderBarGuest({ entering: true });
+}
+
+function houseReviewQuote(result) {
+  const misses = (result.feedback || []).filter((f) => f.kind === "bad");
+  if (result.pct >= 85) return "That's the one.";
+  if (misses.length) {
+    const label = misses[0].label || "That spec";
+    return `${label} is the gap.`;
+  }
+  if (result.stars >= 1) return "Close. I'd run it again.";
+  return "Spec missed. Retry the build.";
 }
 
 function scoreBuild() {
@@ -3960,7 +3989,7 @@ function scoreBuild() {
   // lanes, where there's no target recipe to measure against.
   if (usesJudgePanel()) {
     const evalResult = evaluate(state.build, { strictness: STRICTNESS });
-    const panel = scoreWithJudges(evalResult, pickJudges(3));
+    const panel = scoreWithJudges(evalResult, pickJudges(3), { recipePct: pct });
     result.judgePanel = panel;
     result.judgeEval = evalResult;
     const blendable = !isGuessMode();
@@ -4106,6 +4135,7 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
   const animated = !!opts.animated;
   const mixUx = panelSel === "#judges-panel" && !mixResultLegacyPreferred();
   const compact = mixUx ? false : (opts.compact != null ? !!opts.compact : isPhonePlay());
+  const hidePanelGrade = compact && opts.scoring && opts.scoring.mode === "flavor-only";
   const note = mixUx || compact ? "" : judgeSceneNote(opts.scoring);
   el.innerHTML = `
     ${note ? `<div class="judge-scene-note">${escapeHtml(note)}</div>` : ""}
@@ -4115,8 +4145,9 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
       <article class="judge-seat judge-seat-${escapeHtml(j.id)}${animated ? "" : " is-in"}" data-judge-id="${escapeHtml(j.id)}">
         <div class="judge-bubble">
           <div class="judge-bubble-top">
+            ${compact ? `<div class="judge-portrait judge-portrait--chip"><img src="${resolveAssetUrl(`assets/judges/${j.id}.png`)}" alt=""></div>` : ""}
             <span class="judge-bubble-name">${escapeHtml(j.name)}</span>
-            <span class="judge-score"><span class="judge-score-num">${animated ? "···" : j.score100}</span><small>/100</small></span>
+            ${hidePanelGrade ? "" : `<span class="judge-score"><span class="judge-score-num">${animated ? "···" : j.score100}</span><small>/100</small></span>`}
           </div>
           <div class="judge-bubble-quote">“${escapeHtml(j.comment)}”</div>
           ${mixUx || compact ? "" : `<div class="judge-bubble-reason">${escapeHtml(j.reason)}</div>`}
@@ -4124,16 +4155,16 @@ function renderJudgesInteractive(judges, panelSel = "#judges-panel", opts = {}) 
           ${!mixUx && !compact && j.likes ? `<div class="judge-bubble-prefs"><span class="pref-like">Loves:</span> ${escapeHtml(j.likes)}</div>` : ""}
           ${!mixUx && !compact && j.dislikes ? `<div class="judge-bubble-prefs pref-avoid"><span class="pref-hate">Avoids:</span> ${escapeHtml(j.dislikes)}</div>` : ""}
         </div>
-        <div class="judge-avatar-wrap">
+        ${compact ? "" : `<div class="judge-avatar-wrap">
           <div class="judge-portrait">
             <img src="${resolveAssetUrl(`assets/judges/${j.id}.png`)}" alt="${escapeHtml(j.name)}" loading="lazy">
           </div>
           ${mixUx ? `<span class="judge-score-coin">${animated ? "···" : j.score100}</span>` : ""}
           <span class="judge-avatar-name">${escapeHtml(j.name)}</span>
-          ${compact || mixUx ? "" : `<span class="judge-avatar-title">${escapeHtml(j.title || j.blurb)}</span>`}
-          ${!compact && !mixUx && j.breed ? `<span class="judge-avatar-breed">${escapeHtml(j.breed)}</span>` : ""}
-          ${!compact && !mixUx && j.character ? `<span class="judge-avatar-character">${escapeHtml(j.character)}</span>` : ""}
-        </div>
+          ${mixUx ? "" : `<span class="judge-avatar-title">${escapeHtml(j.title || j.blurb)}</span>`}
+          ${!mixUx && j.breed ? `<span class="judge-avatar-breed">${escapeHtml(j.breed)}</span>` : ""}
+          ${!mixUx && j.character ? `<span class="judge-avatar-character">${escapeHtml(j.character)}</span>` : ""}
+        </div>`}
       </article>`).join("")}
     </div>`;
 
@@ -4397,8 +4428,13 @@ function showResult(result) {
   // Nothing that gives away the outcome shows yet — just the drink name and
   // a neutral "still tasting" header. The verdict (stars, score, checklist)
   // stays hidden until the judges have talked and scored.
-  $("#result-eyebrow").textContent = result.judgePanel ? "The judges are tasting…" : "Tasting…";
+  $("#result-eyebrow").textContent = result.judgePanel
+    ? "The judges are tasting…"
+    : (usesHouseReviewer() ? "House is tasting…" : "Tasting…");
   $("#result-name").textContent = recipe.name;
+  if (result.judgePanel) {
+    $("#result-judges-title").textContent = "⚖️ The judges taste it";
+  }
 
   const starsEl = $("#result-stars");
   starsEl.innerHTML = [0, 1, 2].map(() => `<span>★</span>`).join("");
@@ -4408,18 +4444,13 @@ function showResult(result) {
   const actions = $("#result-actions");
   actions.classList.add("is-pending");
 
-  // Judges' reaction panel (every served cocktail except the tutorial).
+  // Mixologist / endless keep the three-seat panel. COTD uses the house robot.
   const jWrap = $("#result-judges-wrap");
   const phone = isPhonePlay();
   document.body.classList.toggle("is-phone-play", phone);
+  document.body.classList.toggle("is-cotd-result", usesHouseReviewer());
   if (result.judgePanel) {
     const p = result.judgePanel;
-    const label = phone
-      ? `⚖️ Judges · ${p.verdict} · avg ${p.total}`
-      : result.blended != null
-        ? `⚖️ Tonight's panel: ${p.verdict} (3 of ${JUDGES.length} judges, avg ${p.total})`
-        : `⚖️ Tonight's panel: flavour check (3 of ${JUDGES.length} judges, avg ${p.total})`;
-    $("#result-judges-title").textContent = label;
     jWrap.style.display = "";
     renderJudgesInteractive(p.judges, "#result-judges", {
       scoring: result.judgeScoring,
@@ -4429,8 +4460,6 @@ function showResult(result) {
     });
   } else {
     jWrap.style.display = "none";
-    // Journey and tutorial results have no panel to wait on — land the verdict
-    // right away, just off this frame so the reveal transition still plays.
     resultRevealTimers.push(setTimeout(() => revealResultVerdict(result, recipe), 120));
   }
 
@@ -4439,19 +4468,57 @@ function showResult(result) {
 
 // The "at last" beat: stars, score, bartender checklist, customer reaction,
 // and the retry/next controls all land together once the judges are done.
+function judgesRevealTitle(result) {
+  const p = result.judgePanel;
+  if (!p) return "";
+  return "Tasting notes";
+}
+
 function revealResultVerdict(result, recipe) {
   $("#result-eyebrow").textContent = result.stars >= 1 ? "Stage cleared" : "Needs work";
+  if (result.judgePanel) {
+    $("#result-judges-title").textContent = judgesRevealTitle(result);
+  }
 
   const starsEl = $("#result-stars");
   const spans = [...starsEl.children];
-  for (let i = 0; i < result.stars; i++) {
-    resultRevealTimers.push(setTimeout(() => {
-      spans[i].classList.add("on", "pop");
-      Sound.starDing(i);
-    }, 350 + i * 450));
+  const phone = isPhonePlay();
+  if (phone) {
+    for (let i = 0; i < result.stars; i++) spans[i].classList.add("on", "pop");
+    if (result.stars > 0) Sound.starDing(0);
+  } else {
+    for (let i = 0; i < result.stars; i++) {
+      resultRevealTimers.push(setTimeout(() => {
+        spans[i].classList.add("on", "pop");
+        Sound.starDing(i);
+      }, 350 + i * 450));
+    }
   }
 
-  $("#result-pct").textContent = result.blended != null ? result.blended : result.pct;
+  const grade = result.blended != null ? result.blended : result.pct;
+  $("#result-pct").textContent = grade;
+  const scoreLabel = $("#result-score-label");
+  const scoreSub = $("#result-score-sub");
+  if (scoreLabel) {
+    if (usesHouseReviewer()) {
+      scoreLabel.hidden = false;
+      scoreLabel.textContent = "Recipe match";
+    } else if (result.judgePanel) {
+      scoreLabel.hidden = false;
+      scoreLabel.textContent = result.blended != null ? "Your score" : "Recipe match";
+    } else {
+      scoreLabel.hidden = true;
+    }
+  }
+  if (scoreSub) {
+    const flavorOnly = result.judgeScoring && result.judgeScoring.mode === "flavor-only";
+    if (result.judgePanel && !flavorOnly) {
+      scoreSub.hidden = false;
+      scoreSub.textContent = `Panel avg ${result.judgePanel.total}`;
+    } else {
+      scoreSub.hidden = true;
+    }
+  }
   const pts = result.stagePoints + (result.tip || 0);
   $("#result-points").textContent = pts;
   const bonusEl = $("#result-bonus");
@@ -4472,6 +4539,7 @@ function revealResultVerdict(result, recipe) {
     const c = state.customer;
     if (guestBg && guestImg && c.portrait) {
       guestImg.src = resolveAssetUrl(c.portrait);
+      guestImg.alt = c.name || "";
       guestBg.hidden = false;
       guestBg.setAttribute("aria-hidden", "false");
     } else if (guestBg) {
@@ -4479,8 +4547,13 @@ function revealResultVerdict(result, recipe) {
       guestBg.setAttribute("aria-hidden", "true");
       if (guestImg) guestImg.removeAttribute("src");
     }
-    const tip = result.tip ? ` <span class="result-tip">💵 +${result.tip} tip</span>` : "";
-    custEl.innerHTML = `<span class="result-cust-text"><strong>${c.name}</strong>: "${reactionFor(result.stars, recipe.name)}"${tip}</span>`;
+    const tip = (!usesHouseReviewer() && result.tip)
+      ? ` <span class="result-tip">💵 +${result.tip} tip</span>`
+      : "";
+    const line = usesHouseReviewer()
+      ? houseReviewQuote(result)
+      : reactionFor(result.stars, recipe.name);
+    custEl.innerHTML = `<span class="result-cust-text"><strong>${c.name}</strong>: "${line}"${tip}</span>`;
     custEl.style.display = "";
   } else {
     if (guestBg) {
@@ -4493,7 +4566,9 @@ function revealResultVerdict(result, recipe) {
 
   const list = $("#feedback-list");
   list.innerHTML = "";
+  const hideAuto = isPhonePlay();
   result.feedback.forEach((f) => {
+    if (hideAuto && f.kind === "auto") return;
     const icon = f.kind === "ok" ? "✓" : f.kind === "near" ? "≈" : f.kind === "auto" ? "•" : "✗";
     const li = document.createElement("li");
     li.innerHTML = `<span class="fb-icon fb-${f.kind}">${icon}</span><span class="fb-text"><strong>${f.label}:</strong> <span>${f.text}</span></span>`;
@@ -4503,8 +4578,10 @@ function revealResultVerdict(result, recipe) {
   const retryBtn = $("#btn-retry");
   const nextBtn = $("#btn-next-stage");
   const mapBtn = $("#btn-result-map");
+  const shopBtn = $("#btn-result-shop");
   mapBtn.style.display = "none";
   nextBtn.style.display = "";
+  if (shopBtn) shopBtn.style.display = state.mode === "cotd" ? "none" : "";
   if (state.mode === "training") {
     retryBtn.style.display = "";
     retryBtn.textContent = "Try again";
@@ -4522,7 +4599,7 @@ function revealResultVerdict(result, recipe) {
   } else if (state.mode === "cotd") {
     retryBtn.style.display = "";
     retryBtn.textContent = "Try again";
-    $("#result-eyebrow").textContent = result.stars >= 1 ? "🍹 Cocktail of the Day" : "Needs work";
+    $("#result-eyebrow").textContent = result.stars >= 1 ? "Cocktail of the Day" : "Needs work";
     nextBtn.textContent = "Back to menu";
   } else {
     // Campaign — must earn at least 1 star to advance to the next node.
@@ -5457,7 +5534,14 @@ function renderDiagnostics() {
 applyMixResultLayout();
 window.addEventListener("resize", () => applyMixResultLayout());
 if (debugEnabled()) {
-  window.__dagtailsMixology = { detectClassic, classicBlocksCommunityShare, evaluate };
+  window.__dagtailsMixology = {
+    detectClassic,
+    classicBlocksCommunityShare,
+    evaluate,
+    scoreWithJudges,
+    pickJudges,
+    JUDGES,
+  };
 }
 
 $("#btn-diag-close").addEventListener("click", () => $("#modal-diagnostics").classList.remove("is-open"));

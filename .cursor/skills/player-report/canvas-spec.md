@@ -31,7 +31,7 @@ the canvas skill (not inside this repo’s source tree).
    modes: Bar-hop journey, Mixologist, Endless shift, Training, Cocktail of
    the Day, My Bar challenge. Include zeros. Caption: what they start vs skip.
 8. **H2** `Where they played` — horizontal `BarChart` of **all** venues
-   (snug, zavod, cantina, aperitivo, floridita, speakeasy, boudoir, still,
+   (snug, zavod, cantina, aperitivo, casa_cana, speakeasy, boudoir, still,
    soda_fountain, juice_bar, beach_shack) including zeros.
 8b. **H2** `Teaching levels` — `BarChart` of Guess, Pour, Mix, Garnish,
    Full bar, Sandbox including zeros.

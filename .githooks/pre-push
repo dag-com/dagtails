@@ -1,0 +1,17 @@
+#!/bin/sh
+# Block pushes to GitHub that introduce high / ship-stopper legal risk.
+root=$(git rev-parse --show-toplevel) || exit 1
+cd "$root" || exit 1
+
+if command -v python >/dev/null 2>&1; then
+  PY=python
+elif command -v python3 >/dev/null 2>&1; then
+  PY=python3
+elif command -v py >/dev/null 2>&1; then
+  PY="py -3"
+else
+  echo "legal-watch: python not found on PATH" >&2
+  exit 1
+fi
+
+exec $PY .cursor/skills/legal-watch/scripts/scan.py --outgoing --gate

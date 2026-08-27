@@ -31,7 +31,7 @@ Portrait is covered only by `phone-portrait` → `tests/rotate-lock.spec.js` (as
    ```bash
    npm run test:qa
    ```
-   (= `node scripts/run-qa.js` → health + backend + gameplay + play-journey + layout + hub-layout + mixology + player-fixes + station-fit + assets + text + rotate-lock on all `QA_PROJECT_NAMES` + `phone-portrait`)
+   (= `node scripts/run-qa.js` → health + backend + gameplay + play-journey + layout + hub-layout + mixology + judges + player-fixes + station-fit + assets + text + rotate-lock on all `QA_PROJECT_NAMES` + `phone-portrait`)
 
 2. **Busy port (PowerShell)**
    ```powershell
@@ -57,6 +57,7 @@ Portrait is covered only by `phone-portrait` → `tests/rotate-lock.spec.js` (as
    - **Map:** stars in discs, current pulse, no white glass tokens
    - **Pour chips:** Mixologist measures on the chip; editing grows width only
    - **Station tools:** muddler pestle in the serving bowl (not the stem); spoon in the mixing glass; prep vessel only for shake/stir/blend
+   - **Player-visual agreement:** tappable CTAs are not a UX pass. Result/COTD must not show two unlabeled grades (recipe % vs Crowd-pleaser vs /100). See gameplay-qa “UX critical thinking” and P23 in `docs/TEST-PLAN.md`
 
 5. **Report**
    - Pass / skip / fail counts

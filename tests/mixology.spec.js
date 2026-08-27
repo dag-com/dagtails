@@ -31,7 +31,7 @@ test.describe("mixology classic detection", () => {
         ingredients: [
           { id: "gin", amount: 40 },
           { id: "vodka", amount: 20 },
-          { id: "campari", amount: 15 },
+          { id: "red_bitter", amount: 15 },
           { id: "orange_juice", amount: 40 },
         ],
       });
@@ -39,7 +39,7 @@ test.describe("mixology classic detection", () => {
         method: "stir",
         ingredients: [
           { id: "bourbon", amount: 30 },
-          { id: "campari", amount: 30 },
+          { id: "red_bitter", amount: 30 },
           { id: "sweet_vermouth", amount: 30 },
         ],
       });

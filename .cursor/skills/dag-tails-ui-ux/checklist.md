@@ -36,6 +36,8 @@ Use during audits. Mark Pass / Fail / N/A. Do not paste this whole list into the
 - [ ] Errors recoverable
 - [ ] Result → next drink / next venue / hub paths clear
 - [ ] Finish / result / intro never trap the player (clipped or missing exit CTA)
+- [ ] Result numbers, stars, and copy tell one story the player would agree with (labeled `Your score` vs panel notes — not Crowd-pleaser fighting 75%)
+- [ ] Judge quotes are distinct; portraits not clipped onto furniture; checklist not a fake scrollbar over empty space
 
 ## Secondary (badges, recipes, community, shop, settings…)
 - [ ] Same header/back chrome family

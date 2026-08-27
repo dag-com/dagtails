@@ -16,6 +16,7 @@ const SPECS = [
   "tests/layout-integrity.spec.js",
   "tests/hub-layout.spec.js",
   "tests/mixology.spec.js",
+  "tests/judges.spec.js",
   "tests/player-fixes.spec.js",
   "tests/station-fit.spec.js",
   "tests/assets-integrity.spec.js",
