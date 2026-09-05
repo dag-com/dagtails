@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/** Copy versioned .githooks into .git/hooks so legal-watch gates commits and pushes. */
+/** Copy versioned .githooks into .git/hooks so legal-watch and cyber-watch gate commits and pushes. */
 const fs = require("fs");
 const path = require("path");
 

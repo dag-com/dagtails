@@ -14,3 +14,12 @@
 // ============================================================================
 export const SUPABASE_URL = "https://suhrxksuwjsfeenztvdn.supabase.co";
 export const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN1aHJ4a3N1d2pzZmVlbnp0dmRuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU4MzgwNzIsImV4cCI6MjEwMTQxNDA3Mn0.zld6dpk9iAdK_vOo_EEoSPzntsky0XPduKGuyexd5P0";
+
+/** True on the GitHub Pages build (`VITE_BETA_LOCK=1`). Local / Playwright stay open. */
+export const BETA_LOCK = (() => {
+  try {
+    return String((import.meta.env && import.meta.env.VITE_BETA_LOCK) || "") === "1";
+  } catch {
+    return false;
+  }
+})();

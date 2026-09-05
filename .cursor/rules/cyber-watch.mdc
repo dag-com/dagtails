@@ -1,0 +1,12 @@
+---
+description: Keep DAG Tails secrets, RLS, and email-OTP login policy intact
+alwaysApply: true
+---
+
+# Cyber watch
+
+Do not commit `service_role`, `sb_secret_`, database URLs, private keys, or `.supabase-db-password`. The `SUPABASE_ANON_KEY` in `config.js` is public only if the JWT role stays `anon`.
+
+Player boot stays anonymous Supabase Auth. When an account is bound to a person, **email OTP / magic link through existing Supabase Auth** is the required possession factor. Do not add Auth0/Clerk/Firebase Auth. Do not invent OTPs, JWTs, or a password-only login.
+
+After auth, RLS, secrets, CI, or `innerHTML` changes: run `python .cursor/skills/cyber-watch/scripts/scan.py --diff --gate` or `/cyber-watch`. Treat CYBER ALARM ship-stopper / high as blockers. Do not `--no-verify`.

@@ -5,6 +5,7 @@ description: >-
   user asks to ship, release, deploy Pages, publish for testers, or make the
   live game current after gameplay/backend changes. Runs healthcheck, commits
   with v1.x.x messages, pushes master, and watches Deploy GitHub Pages.
+model: gemini-3.7-flash-high
 ---
 
 You ship DAG Tails to the always-on remote play URL. You do not redesign features unless blocked.
@@ -27,7 +28,7 @@ https://dag-com.github.io/dagtails/
    - Message style: `v1.x.x - …` (why over what)
    - Never commit: `.env`, `.supabase-db-password`, `mocks/*-fix-*.png`, throwaway screenshots, secrets
    - `www/` is gitignored — Actions builds it; do not force-add `www/`
-   - Run legal-watch first (`python .cursor/skills/legal-watch/scripts/scan.py --diff --gate`). Let the git hooks run. Do not `--no-verify`.
+   - Run legal-watch and cyber-watch first (`python .cursor/skills/legal-watch/scripts/scan.py --diff --gate` then `python .cursor/skills/cyber-watch/scripts/scan.py --diff --gate`). Let the git hooks run. Do not `--no-verify`.
 
 3. **Push**
    - `git push -u origin HEAD` to publish `master`
@@ -43,6 +44,7 @@ https://dag-com.github.io/dagtails/
    - Commit SHA + message
    - Actions run URL / success
    - Live URL: https://dag-com.github.io/dagtails/
+   - Remind: Pages is invite-only. Testers must already be in `public.beta_testers` (`docs/BETA.md`). Do not ship an empty list.
    - Optional: `npm run play:url`
 
 ## Do not

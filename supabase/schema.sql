@@ -241,3 +241,33 @@ create or replace view public.analytics_drink_quality as
     and coalesce(props->>'automation', 'false') not in ('true', 't', '1')
   group by 1, 2, 3, 4
   order by 1 desc;
+
+-- ============================================================================
+-- Beta tester allowlist (invite-only Pages gate).
+-- Clients cannot read or write this table. Admission is via beta_access_ok()
+-- after a Supabase email OTP session exists. Add testers in the SQL editor:
+--   insert into public.beta_testers (email) values ('alex@example.com');
+-- ============================================================================
+create table if not exists public.beta_testers (
+  email      text primary key,
+  note       text,
+  created_at timestamptz not null default now()
+);
+alter table public.beta_testers enable row level security;
+
+create or replace function public.beta_access_ok()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.beta_testers t
+    where lower(t.email) = lower(nullif(auth.jwt() ->> 'email', ''))
+  );
+$$;
+
+revoke all on function public.beta_access_ok() from public;
+grant execute on function public.beta_access_ok() to anon, authenticated;

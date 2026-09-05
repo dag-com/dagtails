@@ -5,6 +5,20 @@
  * Usage: node scripts/run-qa.js
  * Extra args are forwarded to Playwright (e.g. --grep "venue interior").
  */
+const path = require("path");
+const fs = require("fs");
+const os = require("os");
+
+const defaultBrowserDir = path.join(os.homedir(), "AppData", "Local", "ms-playwright");
+const cur = process.env.PLAYWRIGHT_BROWSERS_PATH;
+try {
+  if (!cur || !fs.existsSync(cur) || fs.readdirSync(cur).length === 0) {
+    if (fs.existsSync(defaultBrowserDir)) {
+      process.env.PLAYWRIGHT_BROWSERS_PATH = defaultBrowserDir;
+    }
+  }
+} catch (e) { /* ignore */ }
+
 const { spawnSync } = require("child_process");
 const { QA_PROJECT_NAMES } = require("../playwright.devices");
 

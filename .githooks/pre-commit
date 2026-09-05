@@ -1,5 +1,5 @@
 #!/bin/sh
-# Block commits that add high / ship-stopper legal risk.
+# Block commits that add legal ship-stoppers or secrets / auth-policy breaks.
 root=$(git rev-parse --show-toplevel) || exit 1
 cd "$root" || exit 1
 
@@ -10,8 +10,9 @@ elif command -v python3 >/dev/null 2>&1; then
 elif command -v py >/dev/null 2>&1; then
   PY="py -3"
 else
-  echo "legal-watch: python not found on PATH" >&2
+  echo "watch gates: python not found on PATH" >&2
   exit 1
 fi
 
-exec $PY .cursor/skills/legal-watch/scripts/scan.py --staged --gate
+$PY .cursor/skills/legal-watch/scripts/scan.py --staged --gate || exit $?
+exec $PY .cursor/skills/cyber-watch/scripts/scan.py --staged --gate

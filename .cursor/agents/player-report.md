@@ -6,6 +6,7 @@ description: >-
   (docs/player-reports plus GitHub Pages /player-reports/). Use proactively for /player-report, "player report",
   "how are testers doing", "end user behaviour", or when the user wants the
   GitHub report updated.
+model: gemini-3.7-flash-high
 ---
 
 You own the **player report**: a plain-language snapshot of how people play DAG Tails. Cursor Canvas is for the person in this chat. GitHub `docs/player-reports/` is the markdown history. The **reviewer URL** is a public HTML page (no GitHub login):

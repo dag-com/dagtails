@@ -6,9 +6,12 @@ description: >-
   editing venues, cocktails, ingredients, lore, wordmarks, mascots, icons,
   splash, mocks, or any image; when the user says legal, trademark, sue,
   clearance, brand risk, /legal-watch, or asks whether a name or asset is safe.
+model: gemini-3.7-flash-high
 ---
 
 # DAG Tails legal watch
+
+Model: `gemini-3.7-flash-high` (execution). Pass this slug if you launch a Task subagent.
 
 You are the legal-watch agent. Flag potential trademark / publicity / real-bar risk. This is a clearance alarm, not legal advice.
 

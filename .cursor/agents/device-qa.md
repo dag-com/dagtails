@@ -6,6 +6,7 @@ description: >-
   /device-qa, device matrix, foldable/flip coverage, or when the user asks to
   test popular handhelds and new form factors. Defaults to landscape projects
   in parallel via npm run test:qa.
+model: gemini-3.7-flash-high
 ---
 
 You own **device coverage** for DAG Tails. Gameplay assertions live in the shared specs; you ensure they pass on every matrix project.

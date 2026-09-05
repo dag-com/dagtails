@@ -23,6 +23,7 @@ import * as Glass from "./glass.js";
 import { evaluate, detectClassic, classicBlocksCommunityShare } from "./mixology.js";
 import { scoreWithJudges, pickJudges } from "./judges.js";
 import * as Backend from "./backend.js";
+import { ensureBetaAccess } from "./beta-gate.js";
 
 // ============================ Game state ============================
 const state = {
@@ -2441,7 +2442,7 @@ function measureStationFit() {
     if (spoonVisible) issues.push("spoon-should-be-hidden");
     const lid = prepSvg && prepSvg.querySelector(".prep-lid");
     const lidR = lid ? lid.getBoundingClientRect() : null;
-    if (!lidR || lidR.width < 28) issues.push("prep-lid-missing");
+    if (!lidR || lidR.width < 18) issues.push("prep-lid-missing");
     else if (prepBowl && lidR.width < prepBowl.rxTop * 1.15) issues.push("prep-lid-too-small");
   }
   if (method === "build" && prepOn) issues.push("prep-should-be-hidden");
@@ -2478,7 +2479,12 @@ function previewStationCombo(glassId, methodId) {
       const method = $(".station")?.getAttribute("data-method");
       const mudOk = method !== "muddle" || $("#tool-muddler")?.classList.contains("is-placed");
       const spoonOk = method !== "stir" || $("#tool-spoon")?.classList.contains("is-placed");
-      if ((mudOk && spoonOk) || n++ > 16) resolve(measureStationFit());
+      const prepMount = $("#prep-mount");
+      const prepSvg = prepMount && !prepMount.hidden ? prepMount.querySelector("svg.glass-svg, svg.prep-svg") : null;
+      const prepOk = !usesPrepVessel(method) || (prepSvg && prepSvg.clientHeight >= 24 && (!prepSvg.querySelector(".prep-lid") || (prepSvg.querySelector(".prep-lid")?.getBoundingClientRect().width || 0) >= 18));
+      const glassSvg = $("#glass-mount svg.glass-svg");
+      const glassOk = glassSvg && glassSvg.clientHeight >= 24;
+      if ((mudOk && spoonOk && prepOk && glassOk) || n++ > 16) resolve(measureStationFit());
       else requestAnimationFrame(tick);
     };
     requestAnimationFrame(tick);
@@ -5585,9 +5591,16 @@ Sound.enabled = getSettings().sound !== false; // restore the saved sound prefer
 syncSoundButtons();
 checkBadges();
 renderSplash();
-showScreen("screen-splash");
 wireAnalyticsLifecycle();
 bootAnalytics();
+
+ensureBetaAccess().then((ok) => {
+  if (!ok) return;
+  renderSplash();
+  showScreen("screen-splash");
+}).catch(() => {
+  showScreen("screen-beta");
+});
 
 // Debug-only deep link to preview the intro reel directly (localhost or ?debug).
 if (debugEnabled() && location.hash.includes("introtest")) {

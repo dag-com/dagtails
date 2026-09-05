@@ -1,0 +1,1 @@
+Invite, list, or remove DAG Tails beta testers. Follow the **create-users** skill: add the named emails to `public.beta_testers` with `node .cursor/skills/create-users/scripts/invite.js`, confirm with `list`, and tell them to open the Pages URL and enter that email for a 6-digit code. Do not put emails in git or invent a second auth vendor.

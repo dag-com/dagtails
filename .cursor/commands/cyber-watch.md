@@ -1,0 +1,1 @@
+Scan the current DAG Tails changes for secrets, auth holes, RLS bypass, XSS sinks, and login-policy breaks. Follow the **cyber-watch** skill: run the scanner on the diff, review the same files for logic the regex will miss, and alarm on ship-stoppers. Email OTP via existing Supabase Auth is the MFA factor — do not add another IdP or DIY crypto. Do not write exploit PoCs.

@@ -4,16 +4,26 @@
     "sessionStart": [
       {
         "command": "python .cursor/hooks/legal-watch.py --session-start"
+      },
+      {
+        "command": "python .cursor/hooks/cyber-watch.py --session-start"
       }
     ],
     "afterFileEdit": [
       {
         "command": "python .cursor/hooks/legal-watch.py"
+      },
+      {
+        "command": "python .cursor/hooks/cyber-watch.py"
       }
     ],
     "postToolUse": [
       {
         "command": "python .cursor/hooks/legal-watch.py",
+        "matcher": "Write|StrReplace"
+      },
+      {
+        "command": "python .cursor/hooks/cyber-watch.py",
         "matcher": "Write|StrReplace"
       }
     ]

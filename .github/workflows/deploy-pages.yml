@@ -38,6 +38,8 @@ jobs:
         run: npm ci
 
       - name: Build
+        env:
+          VITE_BETA_LOCK: "1"
         run: npm run build
 
       - name: Upload Pages artifact

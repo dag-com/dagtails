@@ -59,10 +59,19 @@ async function seedPlayer(page, opts = {}) {
  */
 async function gotoHub(page) {
   await page.goto("/");
-  if (await page.locator("#screen-splash.is-active").isVisible().catch(() => false)) {
-    await page.locator("#btn-splash-continue").click({ force: true });
+  const startScreen = page.locator("#screen-start.is-active");
+  const splashBtn = page.locator("#btn-splash-continue");
+  const deadline = Date.now() + 15_000;
+  while (Date.now() < deadline) {
+    if (await startScreen.isVisible().catch(() => false)) {
+      break;
+    }
+    if (await splashBtn.isVisible().catch(() => false)) {
+      await splashBtn.click({ force: true }).catch(() => {});
+    }
+    await page.waitForTimeout(100);
   }
-  await page.locator("#screen-start.is-active").waitFor({ state: "visible", timeout: 15_000 });
+  await startScreen.waitFor({ state: "visible", timeout: 5_000 });
   // Portrait rotate-lock blocks taps on phone emulation — clear for automated play.
   await clearRotateLock(page);
 }

@@ -1,0 +1,23 @@
+name: Cyber watch
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  cyber-watch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Scan secrets and auth policy
+        env:
+          CYBER_WATCH_BASE: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || github.event.before }}
+        run: python .cursor/skills/cyber-watch/scripts/scan.py --outgoing --gate

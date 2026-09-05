@@ -4,11 +4,7 @@ const { seedPlayer, gotoHub, openMap } = require("./helpers");
 test.describe("performance", () => {
   test("cold hub load stays under soft transfer budget", async ({ page }) => {
     await seedPlayer(page, { cleared: 0 });
-    await page.goto("/");
-    if (await page.locator("#screen-splash.is-active").isVisible().catch(() => false)) {
-      await page.locator("#btn-splash-continue").click({ force: true });
-    }
-    await page.locator("#screen-start.is-active").waitFor({ state: "visible", timeout: 15_000 });
+    await gotoHub(page);
 
     const stats = await page.evaluate(() => {
       const nav = performance.getEntriesByType("navigation")[0];

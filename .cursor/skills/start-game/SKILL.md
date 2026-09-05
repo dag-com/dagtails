@@ -4,9 +4,12 @@ description: >-
   Start the DAG Tails local web build and open the game in the browser.
   Use when the user says "start game", "run the game", "open the game",
   "launch locally", or wants to play/test DAG Tails in the browser.
+model: gemini-3.7-flash-high
 ---
 
 # Start game
+
+Model: `gemini-3.7-flash-high` (execution). Pass this slug if you launch a Task subagent.
 
 Serve the **Vite-built** game (`www/`) and open it in the default browser.
 Repo-root `index.html` alone is not enough (it loads `/src/main.tsx` without a bundler).

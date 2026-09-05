@@ -87,6 +87,7 @@ test.describe("asset integrity", () => {
 
   test("resolveAssetUrl keeps assets in the game directory when the slash is dropped", async ({ page }) => {
     await page.goto("/");
+    await page.waitForFunction(() => typeof window.__dagtailsResolveAssetUrl === "function");
     const report = await page.evaluate(() => {
       const resolve = window.__dagtailsResolveAssetUrl;
       const rel = "assets/venues/interiors/snug.png";

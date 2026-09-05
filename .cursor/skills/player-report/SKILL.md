@@ -5,9 +5,12 @@ description: >-
   write dated GitHub markdown under docs/player-reports (with a history index)
   and publish the public reviewer URL on GitHub Pages. Use when the user says "player report", "analytics report", "how are testers
   doing", "end user behaviour", or wants the GitHub report updated.
+model: gemini-3.7-flash-high
 ---
 
 # Player report
+
+Model: `gemini-3.7-flash-high` (execution). Pass this slug if you launch a Task subagent.
 
 Build a **Canvas** for the person in chat, **GitHub markdown history**, and a
 **public HTML page** reviewers can open without a GitHub account:

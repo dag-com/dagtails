@@ -4,6 +4,16 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
     <title>DAG Tails — Bartending Game</title>
+    <meta name="robots" content="noindex, nofollow" />
+    <script>
+      (function () {
+        var host = location.hostname || "";
+        var q = location.search || "";
+        if (/\.github\.io$/i.test(host) || /(?:\?|&)betaLock=1(?:&|$)/.test(q)) {
+          document.documentElement.classList.add("is-beta-lock");
+        }
+      })();
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -53,6 +63,44 @@
         </div>
       </div>
 
+      <!-- ============================== BETA GATE (Pages builds) ============================== -->
+      <section id="screen-beta" class="screen" aria-label="Private beta sign-in">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="splash-card beta-card">
+          <img class="brand-logo brand-logo--splash" src="assets/brand/dag-tails-logo.png" alt="DAG Tails" draggable="false" />
+          <p class="eyebrow">Private beta</p>
+          <p class="splash-greet">Testers only</p>
+          <p class="splash-sub">We'll email you a 6-digit code. Only invited addresses can open the bar.</p>
+
+          <form id="beta-email-form" class="beta-form" novalidate>
+            <div id="beta-step-email">
+              <label class="pf-field">
+                <span class="pf-label">Email</span>
+                <input id="beta-email" class="name-input" type="email" autocomplete="email" inputmode="email" placeholder="you@email.com" required />
+              </label>
+              <button type="submit" id="beta-send" class="btn btn-primary btn-lg">Send code →</button>
+            </div>
+          </form>
+
+          <form id="beta-code-form" class="beta-form" novalidate>
+            <div id="beta-step-code" hidden>
+              <p class="splash-sub" id="beta-code-hint">We sent a 6-digit code.</p>
+              <label class="pf-field">
+                <span class="pf-label">Code</span>
+                <input id="beta-code" class="name-input" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="000000" required />
+              </label>
+              <button type="submit" id="beta-verify" class="btn btn-primary btn-lg">Enter the bar →</button>
+              <div class="beta-actions">
+                <button type="button" id="beta-resend" class="btn btn-ghost btn-sm">Resend code</button>
+                <button type="button" id="beta-back" class="btn btn-ghost btn-sm">Use another email</button>
+              </div>
+            </div>
+          </form>
+
+          <p class="pf-error" id="beta-error" role="alert"></p>
+        </div>
+      </section>
+
       <!-- ============================== BRAND SPLASH ============================== -->
       <!-- Always shown on boot. Continues only via Enter the bar (no auto-advance). -->
       <section id="screen-splash" class="screen is-active">
@@ -77,6 +125,14 @@
           <button id="btn-splash-continue" class="btn btn-primary btn-lg" type="button">Enter the bar →</button>
         </div>
       </section>
+      <script>
+        if (document.documentElement.classList.contains("is-beta-lock")) {
+          var splash = document.getElementById("screen-splash");
+          var beta = document.getElementById("screen-beta");
+          if (splash) splash.classList.remove("is-active");
+          if (beta) beta.classList.add("is-active");
+        }
+      </script>
 
       <!-- ============================== START SCREEN (React hub) ============================== -->
       <section id="screen-start" class="screen">

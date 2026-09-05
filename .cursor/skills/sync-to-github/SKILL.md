@@ -4,15 +4,18 @@ description: >-
   Commit pending work if needed, code-review the outgoing diff, and push the
   current branch to GitHub. Use when the user says "sync to GitHub", "/sync",
   "push to GitHub", "push updates", or wants local commits published to origin.
+model: gemini-3.7-flash-high
 ---
 
 # Sync to GitHub
+
+Model: `gemini-3.7-flash-high` (execution). Pass this slug if you launch a Task subagent.
 
 Publish the current branch to `origin`. Prefer committing unfinished work first when the user asked to sync “updates” or “changes”.
 
 Every `/sync-to-github` (and this skill) **must** run a **/code-review** of the outgoing change set. Follow `.cursor/commands/code-review.md`. Do not skip it. Do not auto-fix unless asked.
 
-Every commit or push **must** pass **legal-watch** on the new additions. Do not skip it. Do not use `--no-verify`.
+Every commit or push **must** pass **legal-watch** and **cyber-watch** on the new additions. Do not skip them. Do not use `--no-verify`.
 
 ## Steps
 
@@ -31,11 +34,12 @@ Every commit or push **must** pass **legal-watch** on the new additions. Do not 
    - If there is no outgoing diff, say so in one sentence instead of reviewing unrelated files
    - Do not make code changes unless the user explicitly asks
 
-3. **Legal watch** (required before commit and before push)
+3. **Legal watch + cyber watch** (required before commit and before push)
    ```bash
    python .cursor/skills/legal-watch/scripts/scan.py --diff --gate
+   python .cursor/skills/cyber-watch/scripts/scan.py --diff --gate
    ```
-   After staging, the git `pre-commit` hook runs `--staged --gate`. Before push, `pre-push` runs `--outgoing --gate`. If either exits 2, **stop** — report the LEGAL ALARM and do not commit or push. Do not `--no-verify`.
+   After staging, the git `pre-commit` hook runs both `--staged --gate`. Before push, `pre-push` runs both `--outgoing --gate`. If either exits 2, **stop** — report the LEGAL ALARM or CYBER ALARM and do not commit or push. Do not `--no-verify`.
 
 4. **Commit if needed** (only when there are meaningful uncommitted changes and the user asked to sync those updates)
    - Follow the repo’s commit protocol: status, diff, log → stage → commit via HEREDOC/here-string
@@ -74,4 +78,4 @@ Every commit or push **must** pass **legal-watch** on the new additions. Do not 
 - Update git config
 - Push unrelated local branches
 - Skip the code-review step
-- Skip legal-watch or commit/push with `--no-verify`
+- Skip legal-watch or cyber-watch, or commit/push with `--no-verify`

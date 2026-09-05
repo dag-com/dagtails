@@ -1,0 +1,21 @@
+---
+description: Keep mascot and species experiments in mocks; never wire them into the live game
+alwaysApply: true
+---
+
+# Experiment mocks stay out of the game
+
+Horse, K9, ape/monkey, duck-recolor, and other species studies are **mocks only**. Do not use them in the running game.
+
+Live mascot and judges stay the ducks:
+
+- Hub / map / rank-up: `assets/duck-hub-mascot.png`, `assets/duck-hub-mascot-jacket.png`, `assets/duck-hub-mascot-ace.png`
+- Mixologist judges: `data.js` `JUDGES` + `assets/judges/{id}.png` (duck roster)
+
+Keep experiments under `mocks/` only, including:
+
+- `mocks/mascot-alts/`
+- `mocks/horse-judges/`
+- `mocks/duck-recolor/`
+
+Do not copy those files into `assets/`, `assets/judges/`, `resources/`, or `mobile/assets/`. Do not add horse/K9/primate IDs to `JUDGES`, `CUSTOMER_BASES`, or CSS `url()` for hub/map/splash. Do not flip a pilot flag that swaps the live duck roster.

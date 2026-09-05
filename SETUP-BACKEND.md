@@ -12,9 +12,12 @@ You only have to do this once.
 ## What you'll end up with
 
 - A free hosted database that every player's game talks to.
-- **Anonymous accounts**: each device automatically gets its own secure account —
-  no passwords, no sign-up forms. (We can add "log in with email to sync across
-  devices" later if you want.)
+- **Anonymous accounts** (local play): each device automatically gets its own secure account —
+  no passwords, no sign-up forms.
+- **Public Pages beta** is invite-only. Re-run this schema, then insert tester emails
+  into `public.beta_testers`. Details: `docs/BETA.md`. Claimed login uses
+  **email OTP via existing Supabase Auth**.
+  Do not add Auth0/Clerk or a homemade code mailer.
 
 ---
 

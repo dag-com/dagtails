@@ -1,4 +1,18 @@
 // @ts-check
+const path = require("path");
+const fs = require("fs");
+const os = require("os");
+
+const defaultBrowserDir = path.join(os.homedir(), "AppData", "Local", "ms-playwright");
+const cur = process.env.PLAYWRIGHT_BROWSERS_PATH;
+try {
+  if (!cur || !fs.existsSync(cur) || fs.readdirSync(cur).length === 0) {
+    if (fs.existsSync(defaultBrowserDir)) {
+      process.env.PLAYWRIGHT_BROWSERS_PATH = defaultBrowserDir;
+    }
+  }
+} catch (e) { /* ignore */ }
+
 const { defineConfig, devices } = require("@playwright/test");
 const { handheldProjects } = require("./playwright.devices");
 

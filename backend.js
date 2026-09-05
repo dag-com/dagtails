@@ -1,14 +1,14 @@
 // ============================================================================
 // Backend client (Supabase). Powers the online features: Community sharing,
-// likes, and global leaderboards. Uses anonymous auth so there's no login
-// friction — each device gets a real, secure account.
+// likes, and global leaderboards. Local play uses anonymous auth. The public
+// Pages beta is invite-only (email OTP + beta_testers allowlist).
 //
 // Everything here degrades gracefully: if config.js still has the placeholder
 // values, isConfigured() returns false and the rest of the game keeps working
 // offline. The SDK is bundled via Vite (no CDN fetch at runtime).
 // ============================================================================
 import { createClient } from "@supabase/supabase-js";
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
+import { SUPABASE_URL, SUPABASE_ANON_KEY, BETA_LOCK } from "./config.js";
 
 let sb = null; // Supabase client
 let myId = null; // current (anonymous) auth user id
@@ -27,6 +27,19 @@ export function isConfigured() {
 
 export function isReady() { return ready; }
 export function currentUserId() { return myId; }
+
+/** Invite-only lock for the public Pages beta. Local play uses `?betaLock=1` to preview. */
+export function isBetaLocked() {
+  try {
+    const host = String(location.hostname || "");
+    const q = new URLSearchParams(location.search);
+    if (q.get("betaLock") === "1") return true;
+    if (/\.github\.io$/i.test(host)) return true;
+  } catch {
+    /* non-browser */
+  }
+  return !!BETA_LOCK;
+}
 
 /** @type {{ ok: boolean, configured: boolean, ready: boolean, latencyMs: number, error: string | null } | null} */
 let lastHealth = null;
@@ -133,9 +146,22 @@ export async function initBackend(profile) {
     if (!sb) sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     let { data: { session } } = await sb.auth.getSession();
     if (!session) {
+      if (isBetaLocked()) return false;
       const { data, error } = await sb.auth.signInAnonymously();
       if (error) throw error;
       session = data.session;
+    }
+    if (isBetaLocked()) {
+      const email = session.user && session.user.email;
+      if (!email) return false;
+      const { data: allowed, error: gateErr } = await sb.rpc("beta_access_ok");
+      if (gateErr) throw gateErr;
+      if (!allowed) {
+        await sb.auth.signOut();
+        myId = null;
+        ready = false;
+        return false;
+      }
     }
     myId = session.user.id;
     await sb.from("players").upsert(
@@ -286,3 +312,92 @@ export function flushEvents(opts = {}) {
     );
   } catch (e) { /* analytics must never break the game */ }
 }
+
+function authRedirectTo() {
+  try {
+    return `${location.origin}${location.pathname}`;
+  } catch {
+    return undefined;
+  }
+}
+
+async function sessionIsInvited(client) {
+  const { data: allowed, error } = await client.rpc("beta_access_ok");
+  if (error) throw error;
+  return !!allowed;
+}
+
+/** Restore a persisted email session if it is still on the tester list. */
+export async function restoreBetaSession() {
+  if (!isConfigured()) return { ok: false, reason: "not_configured" };
+  try {
+    const client = getClient();
+    if (!client) return { ok: false, reason: "not_configured" };
+    const { data: { session } } = await client.auth.getSession();
+    const email = session && session.user && session.user.email;
+    if (!email) return { ok: false, reason: "no_session" };
+    if (!(await sessionIsInvited(client))) {
+      await client.auth.signOut();
+      myId = null;
+      ready = false;
+      return { ok: false, reason: "not_invited" };
+    }
+    myId = session.user.id;
+    return { ok: true, email };
+  } catch (e) {
+    const msg = e && e.message ? e.message : String(e);
+    const reason = /beta_access_ok|schema cache|does not exist/i.test(msg)
+      ? "gate_missing"
+      : "error";
+    return { ok: false, reason };
+  }
+}
+
+/** Send a 6-digit email OTP via Supabase Auth. Does not reveal whether the address is invited. */
+export async function requestBetaOtp(email) {
+  const client = getClient();
+  if (!client) throw new Error("not_configured");
+  const trimmed = String(email || "").trim().toLowerCase();
+  if (!trimmed || !trimmed.includes("@")) throw new Error("invalid_email");
+  const { error } = await client.auth.signInWithOtp({
+    email: trimmed,
+    options: {
+      shouldCreateUser: true,
+      emailRedirectTo: authRedirectTo(),
+    },
+  });
+  if (error) throw error;
+  return trimmed;
+}
+
+/** Verify the email OTP, then admit only allowlisted testers. */
+export async function verifyBetaOtp(email, token) {
+  const client = getClient();
+  if (!client) throw new Error("not_configured");
+  const trimmed = String(email || "").trim().toLowerCase();
+  const code = String(token || "").replace(/\s+/g, "");
+  if (!trimmed || !code) throw new Error("invalid_code");
+  const { data, error } = await client.auth.verifyOtp({
+    email: trimmed,
+    token: code,
+    type: "email",
+  });
+  if (error) throw error;
+  let allowed = false;
+  try {
+    allowed = await sessionIsInvited(client);
+  } catch (e) {
+    await client.auth.signOut();
+    throw new Error("gate_missing");
+  }
+  if (!allowed) {
+    await client.auth.signOut();
+    myId = null;
+    ready = false;
+    throw new Error("not_invited");
+  }
+  const user = data && data.user;
+  myId = (user && user.id) || (data && data.session && data.session.user && data.session.user.id) || null;
+  return (user && user.email) || trimmed;
+}
+

@@ -5,6 +5,7 @@ description: >-
   and analytics events. Use proactively when Community/Leaderboard fails,
   healthcheck reports backend down, events stop flowing, or the user mentions
   Supabase, analytics, or online features.
+model: gemini-3.7-flash-high
 ---
 
 You operate the DAG Tails Supabase backend safely.
@@ -39,6 +40,7 @@ You operate the DAG Tails Supabase backend safely.
    - Set `site_url` / `additional_redirect_urls` to include Pages:
      `https://dag-com.github.io/dagtails`
    - Avoid leaving localhost-only redirects as the only production URLs
+   - Invite-only Pages beta: `public.beta_testers` + RPC `beta_access_ok()` (schema.sql). Add tester emails with the **create-users** skill (`/create-users`) before ship. See `docs/BETA.md`.
 
 5. **Verify**
    - Re-run healthcheck until anon + REST + events PASS
@@ -55,3 +57,4 @@ You operate the DAG Tails Supabase backend safely.
 - Disable RLS “to make it work”
 - Use management API tokens in logs
 - Break offline play when Supabase is down (`isConfigured` graceful path must remain)
+- Add a second IdP or homemade OTP/JWT; claimed login is email OTP via existing Supabase Auth (cyber-watch / login policy)

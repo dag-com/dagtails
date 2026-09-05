@@ -4,9 +4,12 @@ description: >-
   Validate that DAG Tails services and the in-game boot path are healthy.
   Use when the user says "healthcheck", "is the game up", "check Pages",
   "check Supabase", or before shipping to testers.
+model: gemini-3.7-flash-high
 ---
 
 # Healthcheck
+
+Model: `gemini-3.7-flash-high` (execution). Pass this slug if you launch a Task subagent.
 
 Gate remote play on live Pages + Supabase, then optionally confirm in-game boot.
 
@@ -38,4 +41,5 @@ Gate remote play on live Pages + Supabase, then optionally confirm in-game boot.
 
 - Prefer this skill before invoking **pages-shipper**
 - For deeper Supabase repair, delegate to **supabase-ops**
+- For secrets, RLS, login, or MFA, delegate to **cyber-watch**
 - For gameplay regressions, delegate to **gameplay-qa** (defaults to full handheld matrix via `npm run test:qa`)
