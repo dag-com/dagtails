@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+<html>
+  <body style="margin:0;padding:24px;background:#12080a;color:#f6efe6;font-family:Georgia,serif;">
+    <p style="letter-spacing:0.18em;text-transform:uppercase;font-size:12px;color:#d4a017;">DAG Tails</p>
+    <h1 style="font-size:22px;font-weight:normal;">Your bar code</h1>
+    <p>Enter this 6-digit code in the game. It expires in about an hour and works once.</p>
+    <p style="font-size:36px;letter-spacing:0.28em;font-weight:bold;font-family:ui-monospace,Consolas,monospace;">{{ .Token }}</p>
+    <p style="font-size:14px;color:#c8b8a8;">Prefer a link? <a href="{{ .ConfirmationURL }}" style="color:#d4a017;">Open the bar</a> in the same browser you started from.</p>
+    <p style="font-size:13px;color:#8a7a70;">If you did not request this, ignore the email.</p>
+  </body>
+</html>

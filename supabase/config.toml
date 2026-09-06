@@ -243,10 +243,15 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Hosted dashboard templates do not pick this up until you push or paste them.
+# Live Pages OTP mail must include {{ .Token }} (default Magic Link is a button only).
+[auth.email.template.magic_link]
+subject = "DAG Tails code: {{ .Token }}"
+content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.confirmation]
+subject = "DAG Tails code: {{ .Token }}"
+content_path = "./supabase/templates/confirmation.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]

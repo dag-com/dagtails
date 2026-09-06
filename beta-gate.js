@@ -72,7 +72,10 @@ export async function ensureBetaAccess() {
       if (sendBtn) sendBtn.disabled = true;
       try {
         pendingEmail = await Backend.requestBetaOtp(email);
-        setText($("#beta-code-hint"), `We sent a 6-digit code to ${pendingEmail}.`);
+        setText(
+          $("#beta-code-hint"),
+          `We sent a 6-digit code to ${pendingEmail}. Check spam. If the mail only has a sign-in button, open it in this same browser.`
+        );
         showStep("code");
       } catch (e) {
         setText($("#beta-error"), friendlyError(e));

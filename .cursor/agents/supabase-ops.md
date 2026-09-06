@@ -41,6 +41,7 @@ You operate the DAG Tails Supabase backend safely.
      `https://dag-com.github.io/dagtails`
    - Avoid leaving localhost-only redirects as the only production URLs
    - Invite-only Pages beta: `public.beta_testers` + RPC `beta_access_ok()` (schema.sql). Add tester emails with the **create-users** skill (`/create-users`) before ship. See `docs/BETA.md`.
+   - Beta OTP mail: hosted **Magic Link** and **Confirm signup** templates must include `{{ .Token }}` (`supabase/templates/`). Dashboard paste or `scripts/push-auth-email-templates.js`. Do not full `config push` only to fix the template — that can wipe custom SMTP.
 
 5. **Verify**
    - Re-run healthcheck until anon + REST + events PASS
