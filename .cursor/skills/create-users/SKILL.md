@@ -14,6 +14,8 @@ Model: `gemini-3.7-flash-high` (execution). Pass this slug if you launch a Task 
 
 Add people to the **invite-only Pages gate**. That is an allowlisted email, not a password account and not a second IdP. Testers prove the inbox with Supabase email OTP. Policy: [login-policy.md](../cyber-watch/login-policy.md) and [docs/BETA.md](../../../docs/BETA.md).
 
+Paste-ready instruction for a new Agent chat: [create-users-instructions.md](../../../docs/create-users-instructions.md)
+
 ## When you run
 
 The user names one or more emails (and optional notes). Do not invent addresses. If none were given, ask.

@@ -47,3 +47,6 @@ mocks/
 exports/
 assets/brand/dag-tails-logo-[1-6].png
 mobile/expo-lan-qr.png
+
+# SonarQube scanner working directory
+.scannerwork/

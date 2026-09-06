@@ -24,7 +24,7 @@ You already have **admin** access to the game repo on GitHub (`ATARGR` on the `d
    npx supabase login
    npx supabase link --project-ref suhrxksuwjsfeenztvdn
    ```
-5. Open a new **Agent** chat. Paste **Part B** as the first message.
+5. Open a new **Agent** chat. Attach or paste [create-users-instructions.md](./create-users-instructions.md), or paste **Part B** below as the first message.
 
 ### What inviting actually does
 
@@ -44,7 +44,7 @@ Default branch: master
 Live game (invite-only): https://dag-com.github.io/dagtails/
 Owner: Danny (GitHub: dhavis)
 
-Your job is to invite, list, and remove beta testers the same way Danny does: the **create-users** skill. Read `.cursor/skills/create-users/SKILL.md` and follow it. Prefer the project **create-users** agent if one is available.
+Read `.cursor/skills/create-users/SKILL.md` and follow it. Prefer the project **create-users** agent if one is available. The paste-ready instruction is `docs/create-users-instructions.md`.
 
 ==================================================
 1. ACCESS CHECK — do this first

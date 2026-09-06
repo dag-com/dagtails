@@ -32,7 +32,7 @@ Portrait is covered only by `phone-portrait` → `tests/rotate-lock.spec.js` (as
    ```bash
    npm run test:qa
    ```
-   (= `node scripts/run-qa.js` → health + backend + gameplay + play-journey + layout + hub-layout + mixology + judges + player-fixes + station-fit + assets + text + rotate-lock on all `QA_PROJECT_NAMES` + `phone-portrait`)
+   (= `node scripts/run-qa.js` → health + backend + beta-gate + privacy-profile + gameplay + play-journey + layout + hub-layout + mixology + judges + player-fixes + station-fit + assets + text + rotate-lock on all `QA_PROJECT_NAMES` + `phone-portrait`)
 
 2. **Busy port (PowerShell)**
    ```powershell

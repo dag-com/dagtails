@@ -12,6 +12,7 @@ const RUNTIME_PATHS = [
   "assets/duck-hub-mascot.png",
   "assets/brand/dag-tails-logo.png",
   "assets/shop/jigger.svg",
+  "legal/privacy.html",
 ];
 
 test.describe("asset integrity", () => {

@@ -164,8 +164,11 @@ export async function initBackend(profile) {
       }
     }
     myId = session.user.id;
+    const publicName = profile && String(profile.alias || "").trim()
+      ? String(profile.alias).trim()
+      : "Anonymous";
     await sb.from("players").upsert(
-      { id: myId, name: (profile && profile.name) || "Anonymous", location: (profile && profile.location) || null },
+      { id: myId, name: publicName, location: (profile && profile.location) || null },
       { onConflict: "id" }
     );
     ready = true;

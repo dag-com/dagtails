@@ -6,15 +6,17 @@
 const PROFILE = {
   id: "p_test",
   name: "Test Duck",
+  alias: "TestDuck",
   age: 28,
   location: "London",
   email: "",
   units: "metric",
+  privacyConsentAt: 1,
 };
 
 /**
  * @param {import('@playwright/test').Page} page
- * @param {{ cleared?: number, seenTiers?: Record<string, number>, introSeen?: boolean, cotdId?: string }} [opts]
+ * @param {{ cleared?: number, seenTiers?: Record<string, number>, introSeen?: boolean, cotdId?: string, profile?: Partial<typeof PROFILE> }} [opts]
  */
 async function seedPlayer(page, opts = {}) {
   const cleared = opts.cleared ?? 0;
@@ -22,6 +24,7 @@ async function seedPlayer(page, opts = {}) {
   const seenTiers = opts.seenTiers ?? { Guess: 1 };
   const introSeen = opts.introSeen !== false;
   const cotdId = opts.cotdId || null;
+  const profile = { ...PROFILE, ...(opts.profile || {}) };
   await page.addInitScript(
     ({ profile, cleared: c, seenTiers: tiers, introSeen: seen, cotdId: dailyId }) => {
       localStorage.setItem("dagtails_migrated", "1");
@@ -48,7 +51,7 @@ async function seedPlayer(page, opts = {}) {
         }));
       }
     },
-    { profile: PROFILE, cleared, seenTiers, introSeen, cotdId }
+    { profile, cleared, seenTiers, introSeen, cotdId }
   );
 }
 

@@ -7,7 +7,7 @@ This is a **social + allowlist** lock, not a vault. The game is still a static d
 ## Before you ship to testers
 
 1. Re-run `supabase/schema.sql` in the Supabase SQL editor (safe to re-run). That creates `public.beta_testers` and `beta_access_ok()`.
-2. Add every tester (and yourself) **before** they open the URL. Prefer the **create-users** skill / `/create-users`:
+2. Add every tester (and yourself) **before** they open the URL. Prefer `/create-users` or attach [create-users-instructions.md](./create-users-instructions.md).
    ```bash
    npm run users:add -- you@your-domain.com tester@example.com --note beta
    npm run users:list
@@ -30,7 +30,10 @@ This is a **social + allowlist** lock, not a vault. The game is still a static d
 1. Open https://dag-com.github.io/dagtails/
 2. Enter the **email you invited**
 3. Type the **6-digit code** (or tap the magic link)
-4. Play. The session sticks on that browser until it expires or you remove them from the list.
+4. Create a **private name** (device only) and a **public alias** (Community / Leaderboards)
+5. Tick the **privacy notice** box, then play. The session sticks on that browser until it expires or you remove them from the list.
+
+Lawyer placeholders: `docs/legal/PRIVACY-NOTICE.md`, invite copy in `docs/legal/BETA-TESTER-EMAIL.md`, pack `docs/legal/lawyer-review.zip`.
 
 Unlisted emails can request a code but are turned away after verify. Do not put the allowlist in the game bundle.
 

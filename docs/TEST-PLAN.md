@@ -22,6 +22,8 @@ A green Playwright run is not a UX pass. `/gameplay-qa` still fails the run if t
 8. Assets load as absolute URLs
 9. Type stays readable; portrait shows rotate-lock
 10. **P23 live COTD serve:** House Taste robot is the only reviewer; Recipe match + stars match the pour; no three-judge strip; Try again + Back to menu tappable
+11. **Privacy / alias:** create-user requires public alias + privacy consent; notice is served; Google Fonts are not requested; hub keeps the private name; Settings shows the public alias (`tests/privacy-profile.spec.js`)
+12. **Beta door:** invite lock stays off locally; `?betaLock=1` shows the email door and requires privacy consent (`tests/beta-gate.spec.js`)
 
 **Agent must still look (fails the QA run even if specs are green)**
 

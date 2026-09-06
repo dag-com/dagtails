@@ -93,6 +93,15 @@ function getProfile() {
 function setProfile(p) {
   try { localStorage.setItem(PROFILE_KEY, JSON.stringify(p)); } catch (e) { /* ignore */ }
 }
+/** Name other players see. Never the private profile name. */
+function publicAlias(p) {
+  const alias = p && String(p.alias || "").trim();
+  return alias || "Anonymous";
+}
+function profileReady() {
+  const p = getProfile();
+  return !!(p && String(p.name || "").trim() && String(p.alias || "").trim() && p.privacyConsentAt);
+}
 function isUnderage() {
   const p = getProfile();
   return !!p && Number(p.age) < LEGAL_AGE;
@@ -704,7 +713,7 @@ function dismissSplash() {
   track("splash_continue", { returning: !!getProfile() });
   onShowStart();
   showScreen("screen-start");
-  if (!getProfile()) openProfileForm(true);
+  if (!profileReady()) openProfileForm(!getProfile());
 }
 
 function nextRewardCopy(map, prog) {
@@ -1118,7 +1127,7 @@ function syncBackendStats() {
     bestStreak: d.best || 0,
     level: levelForXp(prog.xp),
     xp: prog.xp || 0,
-    name: p && p.name,
+    name: publicAlias(p),
     location: p && p.location,
   });
 }
@@ -5187,20 +5196,24 @@ $("#btn-endless-menu").addEventListener("click", () => {
 function openProfileForm(blank = false) {
   const p = blank ? null : getProfile();
   $("#pf-name").value = p?.name || "";
+  const aliasEl = $("#pf-alias");
+  if (aliasEl) aliasEl.value = p?.alias || "";
   $("#pf-age").value = p?.age || "";
   $("#pf-location").value = p?.location || "";
   $("#pf-email").value = p?.email || "";
+  const consent = $("#pf-privacy");
+  if (consent) consent.checked = !!(p && p.privacyConsentAt);
   setSegActive("pf-units", p?.units || "metric");
   $("#pf-error").textContent = "";
   // First-time setup can't be dismissed; editing an existing profile can be.
   const closeBtn = $("#btn-profile-close");
-  if (closeBtn) closeBtn.style.display = getProfile() ? "" : "none";
+  if (closeBtn) closeBtn.style.display = profileReady() ? "" : "none";
   $("#modal-profile").classList.add("is-open");
   setTimeout(() => $("#pf-name").focus(), 50);
-  track("profile_modal_open", { mode: getProfile() ? "edit" : "create" });
+  track("profile_modal_open", { mode: profileReady() ? "edit" : "create" });
 }
 function closeProfileModal() {
-  if (!getProfile()) return; // required for first-time visitors
+  if (!profileReady()) return; // required for first-time visitors
   $("#modal-profile").classList.remove("is-open");
 }
 
@@ -5231,17 +5244,22 @@ $("#profile-form").addEventListener("submit", (e) => {
   e.preventDefault();
   Sound.init();
   const name = ($("#pf-name").value || "").trim();
+  const alias = ($("#pf-alias") && $("#pf-alias").value || "").trim();
   const age = parseInt($("#pf-age").value, 10);
   const location = ($("#pf-location").value || "").trim();
   const email = ($("#pf-email").value || "").trim();
+  const consented = !!( $("#pf-privacy") && $("#pf-privacy").checked );
   const err = $("#pf-error");
-  if (!name) { err.textContent = "Please enter your name."; $("#pf-name").focus(); return; }
+  if (!name) { err.textContent = "Please enter your private name."; $("#pf-name").focus(); return; }
+  if (!alias || alias.length < 2) { err.textContent = "Please choose a public alias (2–24 characters)."; $("#pf-alias").focus(); return; }
   if (!Number.isFinite(age) || age < 1 || age > 120) { err.textContent = "Please enter a valid age (1–120)."; $("#pf-age").focus(); return; }
+  if (!consented) { err.textContent = "Please read and agree to the privacy notice."; $("#pf-privacy").focus(); return; }
   const existing = getProfile();
   const profile = {
     id: existing?.id || (email || genId()),
-    name, age, location, email,
+    name, alias, age, location, email,
     units: segValue("pf-units"),
+    privacyConsentAt: existing?.privacyConsentAt || Date.now(),
     createdAt: existing?.createdAt || Date.now(),
     updatedAt: Date.now(),
   };
@@ -5377,7 +5395,9 @@ function openSettings() {
   const amb = $("#set-ambient");
   amb.textContent = Sound.ambientEnabled ? "On" : "Off";
   amb.setAttribute("aria-pressed", Sound.ambientEnabled ? "true" : "false");
-  $("#set-account-who").textContent = p ? `Signed in as ${p.name}${p.age ? " · " + p.age : ""}` : "";
+  $("#set-account-who").textContent = p
+    ? `Signed in as ${p.name}${p.age ? " · " + p.age : ""} · public ${publicAlias(p)}`
+    : "";
   showScreen("screen-settings");
 }
 

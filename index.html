@@ -14,12 +14,6 @@
         }
       })();
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
   </head>
   <body>
     <div class="game-shell">
@@ -34,8 +28,12 @@
 
           <form id="profile-form" class="profile-form" novalidate>
             <label class="pf-field">
-              <span class="pf-label">Name <span class="pf-req">*</span></span>
+              <span class="pf-label">Private name <span class="pf-req">*</span></span>
               <input id="pf-name" class="name-input" type="text" maxlength="32" placeholder="e.g. Alex" autocomplete="name" />
+            </label>
+            <label class="pf-field">
+              <span class="pf-label">Public alias <span class="pf-req">*</span></span>
+              <input id="pf-alias" class="name-input" type="text" maxlength="24" placeholder="e.g. BarAce" autocomplete="nickname" />
             </label>
             <label class="pf-field">
               <span class="pf-label">Age <span class="pf-req">*</span></span>
@@ -56,8 +54,12 @@
                 <button type="button" class="seg-tab" data-units="imperial">Imperial (oz)</button>
               </div>
             </div>
+            <label class="pf-consent">
+              <input id="pf-privacy" type="checkbox" />
+              <span>I have read and agree to the <a id="pf-privacy-link" class="pf-link" href="legal/privacy.html" target="_blank" rel="noopener noreferrer">privacy notice</a> <span class="pf-req">*</span></span>
+            </label>
             <p class="pf-error" id="pf-error"></p>
-            <p class="name-hint">Stored only on this device for now. Under 18 means a mocktail-only (no alcohol) experience.</p>
+            <p class="name-hint">Private name and age stay on this device. Public alias (and location, if you add one) can appear on Community and Leaderboards. Cocktails you build belong to the game operator — see the notice. Under 18 means a mocktail-only (no alcohol) experience.</p>
             <button type="submit" id="btn-profile-save" class="btn btn-primary">Enter the bar →</button>
           </form>
         </div>
@@ -77,6 +79,10 @@
               <label class="pf-field">
                 <span class="pf-label">Email</span>
                 <input id="beta-email" class="name-input" type="email" autocomplete="email" inputmode="email" placeholder="you@email.com" required />
+              </label>
+              <label class="pf-consent">
+                <input id="beta-privacy" type="checkbox" />
+                <span>I have read and agree to the <a id="beta-privacy-link" class="pf-link" href="legal/privacy.html" target="_blank" rel="noopener noreferrer">privacy notice</a> <span class="pf-req">*</span></span>
               </label>
               <button type="submit" id="beta-send" class="btn btn-primary btn-lg">Send code →</button>
             </div>

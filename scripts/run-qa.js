@@ -25,6 +25,8 @@ const { QA_PROJECT_NAMES } = require("../playwright.devices");
 const SPECS = [
   "tests/health.spec.js",
   "tests/backend.spec.js",
+  "tests/beta-gate.spec.js",
+  "tests/privacy-profile.spec.js",
   "tests/gameplay.spec.js",
   "tests/play-journey.spec.js",
   "tests/layout-integrity.spec.js",

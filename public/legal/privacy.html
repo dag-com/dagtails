@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Privacy notice (placeholder) — DAG Tails</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+        line-height: 1.5;
+        color: #1b1424;
+        background: #f6f1ea;
+      }
+      main {
+        max-width: 42rem;
+        margin: 0 auto;
+        padding: 1.5rem 1.25rem 3rem;
+      }
+      .banner {
+        background: #3a1430;
+        color: #f4eefb;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+      }
+      h1 { font-size: 1.6rem; }
+      h2 { font-size: 1.15rem; margin-top: 1.6rem; }
+      table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+      th, td { border: 1px solid #cfc4d8; padding: 0.4rem 0.5rem; text-align: left; vertical-align: top; }
+      th { background: #ece4f4; }
+    </style>
+  </head>
+  <body>
+    <p class="banner">PLACEHOLDER — not legal advice. Replace with a lawyer-approved document before a public or store launch.</p>
+    <main>
+      <h1>Privacy notice — DAG Tails (placeholder)</h1>
+      <p><strong>Product:</strong> DAG Tails (a bartending game)<br />
+      <strong>Operator (placeholder legal name):</strong> DAG.com, operating DAG Tails<br />
+      <strong>Last updated:</strong> 6 September 2026</p>
+
+      <h2>1. Who this is for</h2>
+      <p>This draft describes how the private beta of DAG Tails handles information. Testers are invited by email. The live game is at https://dag-com.github.io/dagtails/</p>
+
+      <h2>2. What we collect</h2>
+      <table>
+        <thead>
+          <tr><th>Information</th><th>Why</th><th>Where it is stored</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Invite email</td><td>Send a one-time login code; keep the tester list</td><td>Supabase Auth and beta_testers</td></tr>
+          <tr><td>Private name, age</td><td>Personalise the device; choose cocktail vs mocktail menu (18+)</td><td>This device only (localStorage)</td></tr>
+          <tr><td>Public alias / username</td><td>Show on Community and Leaderboards</td><td>Supabase players.name (publicly readable)</td></tr>
+          <tr><td>Optional location</td><td>Optional leaderboard line</td><td>Supabase players.location if you type one</td></tr>
+          <tr><td>Optional profile email / id field</td><td>Optional local note — not used as the beta login</td><td>This device only unless you also use it at the beta door</td></tr>
+          <tr><td>Play events</td><td>Understand how the beta is used</td><td>Supabase events (not a public feed of named people)</td></tr>
+          <tr><td>Shared recipes</td><td>Community</td><td>Supabase creations (publicly readable)</td></tr>
+        </tbody>
+      </table>
+      <p>We do not intend to collect payment card data. In-game “shop checkout” is a demo of intent, not a real purchase. Analytics events are not supposed to include your private name, age, or email — only an underage true/false flag and a random device id created on this browser.</p>
+
+      <h2>3. Public vs private names</h2>
+      <ul>
+        <li><strong>Private name</strong> stays on this device. It is not written to the public player row.</li>
+        <li><strong>Public alias</strong> is the only name other players should see (Community “by …”, leaderboards).</li>
+      </ul>
+
+      <h2>4. Intellectual property — cocktails you build</h2>
+      <p><strong>Placeholder — lawyer must confirm.</strong> Every cocktail, recipe, drink name, garnish combination, and Community share you create in DAG Tails is the <strong>property of the operator</strong> (placeholder: DAG.com / DAG Tails). You get a limited licence to play the game and to display your public alias with those creations. You do not keep ownership of in-game recipes or shares. Classic real-world drink names that appear as catalogue titles remain third-party recipe names used as game content, not a claim that the operator invented those classics.</p>
+
+      <h2>5. Who can see data</h2>
+      <ul>
+        <li>Other players can see public alias, optional location, shared recipe cards, and like counts.</li>
+        <li>The operator can read play events and the invite list in order to run the beta and the player-report (aggregated). The public player-report pages are not supposed to list names, ages, or emails.</li>
+        <li>Hosts: GitHub Pages (static game files), Supabase (database and email codes). Fonts are stored with the game files so the page does not call Google Fonts.</li>
+      </ul>
+
+      <h2>6. Children</h2>
+      <p>DAG Tails is a cocktail game. The alcohol menu is for players 18 or over. Mocktails are shown under 18. This beta is not directed at children. Do not invite testers who are under 18. The profile age field is a menu split, not parental consent.</p>
+
+      <h2>7. How long we keep it</h2>
+      <p>Invite emails and play events stay until the operator deletes the beta project or you ask to be removed from the tester list. Device data stays until you clear site data for this game.</p>
+
+      <h2>8. Your requests (placeholder)</h2>
+      <p>To access, correct, or delete beta data, email the operator (placeholder contact: the person who invited you). Removal from beta_testers stops new logins; ask if you also want Auth/events rows deleted.</p>
+
+      <h2>9. International</h2>
+      <p>Servers may be outside your country (Supabase / GitHub). This draft does not choose a lead data-protection law. Counsel should add GDPR/UK GDPR/CCPA (or other) clauses, a lawful basis, and a real company address.</p>
+
+      <h2>10. Consent</h2>
+      <p>Checking the box on the beta door and/or the create-profile screen means you confirm you have read this placeholder notice and agree to use the beta on these terms until a lawyer-approved document replaces it.</p>
+    </main>
+  </body>
+</html>

@@ -84,6 +84,11 @@ export async function ensureBetaAccess() {
 
     emailForm?.addEventListener("submit", (ev) => {
       ev.preventDefault();
+      const box = $("#beta-privacy");
+      if (box && !box.checked) {
+        setText($("#beta-error"), "Please read and agree to the privacy notice.");
+        return;
+      }
       sendCode($("#beta-email") && $("#beta-email").value);
     });
 
