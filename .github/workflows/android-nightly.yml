@@ -112,18 +112,16 @@ jobs:
           set -euo pipefail
           cp android/app/build/outputs/apk/debug/app-debug.apk DAG-Tails-debug.apk
           SHA="${{ needs.decide.outputs.sha }}"
-          NOTES=$(cat <<EOF
-Nightly sideload APK for testers (debug-signed, not Play Store).
+          BUILT=$(date -u +%Y-%m-%dT%H:%M:%SZ)
+          NOTES="Nightly sideload APK for testers (debug-signed, not Play Store).
 
-<!--sha:${SHA}-->
-Commit: ${SHA}
-Built: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          <!--sha:${SHA}-->
+          Commit: ${SHA}
+          Built: ${BUILT}
 
-Install: allow unknown sources the first time. If Android refuses an update, uninstall the previous DAG Tails build first.
+          Install: allow unknown sources the first time. If Android refuses an update, uninstall the previous DAG Tails build first.
 
-Download page: https://dag-com.github.io/dagtails/android.html
-EOF
-)
+          Download page: https://dag-com.github.io/dagtails/android.html"
           if gh release view android-nightly >/dev/null 2>&1; then
             gh release upload android-nightly DAG-Tails-debug.apk --clobber
             gh release edit android-nightly --notes "$NOTES"
