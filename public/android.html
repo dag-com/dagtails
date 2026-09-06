@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Android nightly — DAG Tails</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, sans-serif;
+        line-height: 1.5;
+        color: #1b1424;
+        background: #f6f1ea;
+      }
+      .banner {
+        background: #3a1430;
+        color: #f4eefb;
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+      }
+      main {
+        max-width: 42rem;
+        margin: 0 auto;
+        padding: 1.5rem 1.25rem 3rem;
+      }
+      a.btn {
+        display: inline-block;
+        margin: 0.5rem 0 1rem;
+        padding: 0.7rem 1.1rem;
+        background: #3a1430;
+        color: #f4eefb;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+      }
+      a.btn:hover { filter: brightness(1.15); }
+      code { font-size: 0.92em; }
+    </style>
+  </head>
+  <body>
+    <p class="banner">Sideload tester build — not the Play Store listing.</p>
+    <main>
+      <h1>DAG Tails for Android</h1>
+      <p>
+        This link always points at the latest nightly APK. GitHub rebuilds it
+        overnight when <code>master</code> has new commits. You do not need to
+        upload a new file.
+      </p>
+      <p>
+        <a class="btn" href="https://github.com/dag-com/dagtails/releases/download/android-nightly/DAG-Tails-debug.apk">Download APK</a>
+      </p>
+      <h2>Install</h2>
+      <ol>
+        <li>Open the file on an Android phone.</li>
+        <li>Allow install from this source if Android asks (expected for a non–Play Store APK).</li>
+        <li>Rotate to landscape — the app is locked that way.</li>
+      </ol>
+      <p>
+        To update later, tap the same download link again. If Android refuses the
+        update, uninstall the old DAG Tails app once, then install this file.
+      </p>
+      <p>
+        Play in a browser instead:
+        <a href="./">https://dag-com.github.io/dagtails/</a>
+      </p>
+    </main>
+  </body>
+</html>

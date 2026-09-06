@@ -40,22 +40,24 @@ Run this before every native build/test.
 
 ## 2. Android — two ways to test
 
-### Option A: Cloud build, zero installs (fastest way to get an APK on your phone)
+### Option A: Nightly APK (stable download link)
 
-This repo already has a [Codemagic](https://codemagic.io/) config
-(`codemagic.yaml`) with an `android-debug` workflow that needs **no signing
-and no Google account** — it just produces an installable `.apk`.
+GitHub Actions builds a debug APK overnight when `master` has new commits,
+then replaces the same Release asset. No manual upload.
 
-1. Sign up at [codemagic.io](https://codemagic.io/) (free tier is plenty for this).
-2. "Add application" → connect your GitHub account → pick
-   `dag-com/dagtails`.
-3. Codemagic will detect `codemagic.yaml` automatically. Select the
-   **android-debug** workflow and click **Start new build**.
-4. When it finishes, download the `.apk` from the build's **Artifacts** tab.
-5. Get it onto your phone (AirDrop-style: email it to yourself, upload to
-   Google Drive, or use `adb install` if the phone's plugged in) and open it.
-   Android will ask you to allow "install from unknown sources" the first
-   time — that's expected for a non-Play-Store APK.
+- Landing page: https://dag-com.github.io/dagtails/android.html
+- Direct APK: https://github.com/dag-com/dagtails/releases/download/android-nightly/DAG-Tails-debug.apk
+
+Schedule: 02:00 Israel (23:00 UTC), workflow `Android nightly APK`. Use
+**Actions → Android nightly APK → Run workflow** to rebuild immediately.
+
+Android will ask to allow “install from unknown sources” the first time —
+that's expected for a non-Play-Store APK. If an update is refused, uninstall
+the previous DAG Tails build once (debug signing can change if GitHub’s
+keystore cache misses).
+
+Codemagic (`codemagic.yaml` `android-debug`) remains an optional extra cloud
+builder; the GitHub nightly is the link to share with testers.
 
 ### Option B: Local builds with Android Studio (better for iterating quickly)
 

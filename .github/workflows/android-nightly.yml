@@ -1,0 +1,135 @@
+name: Android nightly APK
+
+# Builds a sideload debug APK when master has moved, then replaces the
+# stable GitHub Release asset so testers can keep the same download URL.
+# Direct APK: https://github.com/dag-com/dagtails/releases/download/android-nightly/DAG-Tails-debug.apk
+# Landing page (after Pages deploy): https://dag-com.github.io/dagtails/android.html
+
+on:
+  schedule:
+    # 02:00 Israel (UTC+3) / 23:00 UTC
+    - cron: "0 23 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-nightly
+  cancel-in-progress: false
+
+jobs:
+  decide:
+    runs-on: ubuntu-latest
+    outputs:
+      build: ${{ steps.decide.outputs.build }}
+      sha: ${{ steps.decide.outputs.sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Skip if this commit is already published
+        id: decide
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          SHA=$(git rev-parse HEAD)
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ]; then
+            echo "build=true" >> "$GITHUB_OUTPUT"
+            echo "Manual run — building."
+            exit 0
+          fi
+          if gh release view android-nightly >/dev/null 2>&1; then
+            BODY=$(gh release view android-nightly --json body --jq .body)
+            if printf '%s' "$BODY" | grep -Fq "<!--sha:${SHA}-->"; then
+              echo "build=false" >> "$GITHUB_OUTPUT"
+              echo "HEAD ${SHA} already published — skip."
+              exit 0
+            fi
+          fi
+          echo "build=true" >> "$GITHUB_OUTPUT"
+          echo "New commits since last nightly — building."
+
+  apk:
+    needs: decide
+    if: needs.decide.outputs.build == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Cache debug keystore
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: android-debug-keystore-v1
+
+      - name: Install
+        run: npm ci
+
+      - name: Build web and sync Android
+        run: |
+          npm run build
+          npx cap sync android
+
+      - name: Assemble debug APK
+        run: |
+          set -euo pipefail
+          SDK="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-}}"
+          echo "sdk.dir=${SDK}" > android/local.properties
+          chmod +x android/gradlew
+          VERSION_CODE=$((10000 + ${{ github.run_number }}))
+          VERSION_NAME="nightly-$(date -u +%Y%m%d)-${GITHUB_SHA::7}"
+          cd android
+          ./gradlew assembleDebug --no-daemon \
+            -PciVersionCode="$VERSION_CODE" \
+            -PciVersionName="$VERSION_NAME"
+
+      - name: Publish nightly release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          cp android/app/build/outputs/apk/debug/app-debug.apk DAG-Tails-debug.apk
+          SHA="${{ needs.decide.outputs.sha }}"
+          NOTES=$(cat <<EOF
+Nightly sideload APK for testers (debug-signed, not Play Store).
+
+<!--sha:${SHA}-->
+Commit: ${SHA}
+Built: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+Install: allow unknown sources the first time. If Android refuses an update, uninstall the previous DAG Tails build first.
+
+Download page: https://dag-com.github.io/dagtails/android.html
+EOF
+)
+          if gh release view android-nightly >/dev/null 2>&1; then
+            gh release upload android-nightly DAG-Tails-debug.apk --clobber
+            gh release edit android-nightly --notes "$NOTES"
+          else
+            gh release create android-nightly DAG-Tails-debug.apk \
+              --prerelease \
+              --title "DAG Tails Android (nightly)" \
+              --notes "$NOTES"
+          fi
