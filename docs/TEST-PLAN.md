@@ -22,6 +22,7 @@ A green Playwright run is not a UX pass. `/gameplay-qa` still fails the run if t
 8. Assets load as absolute URLs
 9. Type stays readable; portrait shows rotate-lock
 10. **P23 live COTD serve:** House Taste robot is the only reviewer; Recipe match + stars match the pour; no three-judge strip; Try again + Back to menu tappable
+11. **P24 result guest in-bounds:** campaign `#result-guest-img` stays inside `.result-left` / `#game-stage` on the handheld matrix (`layout-integrity`)
 11. **Privacy / alias:** create-user requires public alias + privacy consent; notice is served; Google Fonts are not requested; hub keeps the private name; Settings shows the public alias (`tests/privacy-profile.spec.js`)
 12. **Beta door:** invite lock stays off locally; `?betaLock=1` shows the email door and requires privacy consent (`tests/beta-gate.spec.js`)
 
@@ -74,6 +75,7 @@ Quick two-phone smoke: `npm run test:qa:quick`
 | P21 | Muddler graphic sits through coupe/stem | Station (muddle) | visual / `placeMuddler` | Pestle sits in the bowl; handle tilts out of the rim; not a full-mount brown bar |
 | P22 | Tool must sit IN the glass, in proportion | Station | `station-fit` all glass × method | Pestle in bowl with handle at/above rim; not a toothpick; spoon clears mixing-glass rim; prep hidden for muddle/build |
 | P23 | Result/COTD visuals disagree with the pour | Result | `judges` live COTD serve | House Taste robot only; Recipe match 100% + 3 stars; no three-judge panel; quote agrees with the pour |
+| P24 | Result guest / judge clipped by stage | Result | `layout-integrity` guest inside `.result-left` | `#result-guest-img` box equals the left column; head not cut by `#game-stage` |
 
 ## Out of scope for this gate
 

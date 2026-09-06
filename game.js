@@ -1766,7 +1766,62 @@ function animateDuckTravel() {
   duck.classList.remove("is-travel");
   void duck.offsetWidth;
   duck.classList.add("is-travel");
-  return new Promise((resolve) => setTimeout(resolve, 700));
+  return new Promise((resolve) => setTimeout(resolve, VENUE_HOP_MS));
+}
+
+function hopPlaceCopy(venue, fallbackName) {
+  if (!venue) {
+    return { flag: "", name: fallbackName || "Home roost", geo: "" };
+  }
+  const geo = [venue.city, venue.country].filter(Boolean).join(" · ");
+  return { flag: venue.flag || "", name: venue.name, geo };
+}
+
+function setHopPlace(flagSel, nameSel, geoSel, venue, fallbackName) {
+  const copy = hopPlaceCopy(venue, fallbackName);
+  const flagEl = $(flagSel);
+  const nameEl = $(nameSel);
+  const geoEl = $(geoSel);
+  if (flagEl) {
+    flagEl.textContent = copy.flag;
+    flagEl.hidden = !copy.flag;
+  }
+  if (nameEl) nameEl.textContent = copy.name;
+  if (geoEl) {
+    geoEl.textContent = copy.geo;
+    geoEl.hidden = !copy.geo;
+  }
+}
+
+const VENUE_HOP_MS = 3400;
+let hopTimer = null;
+
+function playVenueHop(fromVenue, toVenue) {
+  if (!fromVenue) {
+    finishVenueHop();
+    return;
+  }
+  mapStep = "hero";
+  selectedVenueId = toVenue ? toVenue.id : fromVenue.id;
+  selectedStageIndex = null;
+  renderMap({ step: "hero", openVenueId: selectedVenueId });
+  const stage = $("#map-stage");
+  if (stage) stage.classList.add("is-hopping");
+  const hop = $("#map-hop");
+  if (hop) {
+    const farewell = fromVenue.master && fromVenue.master.farewell;
+    $("#map-hop-eyebrow").textContent = toVenue
+      ? (farewell ? "Off you hop" : "Next stop")
+      : "Crawl complete";
+    setHopPlace("#map-hop-from-flag", "#map-hop-from", "#map-hop-from-geo", fromVenue);
+    setHopPlace("#map-hop-to-flag", "#map-hop-to", "#map-hop-to-geo", toVenue, "Home roost");
+    hop.hidden = false;
+    hop.classList.add("is-open");
+  }
+  Sound.coin();
+  animateDuckTravel();
+  if (hopTimer) clearTimeout(hopTimer);
+  hopTimer = setTimeout(finishVenueHop, VENUE_HOP_MS);
 }
 
 function shiftFocusedVenue(dir) {
@@ -1814,35 +1869,6 @@ function playMapCta() {
   startStageFromMap(idx);
 }
 
-function playVenueHop(fromVenue, toVenue) {
-  if (!fromVenue) {
-    finishVenueHop();
-    return;
-  }
-  mapStep = "hero";
-  selectedVenueId = toVenue ? toVenue.id : fromVenue.id;
-  selectedStageIndex = null;
-  renderMap({ step: "hero", openVenueId: selectedVenueId });
-  const stage = $("#map-stage");
-  if (stage) stage.classList.add("is-hopping");
-  const hop = $("#map-hop");
-  if (hop) {
-    const farewell = fromVenue.master && fromVenue.master.farewell;
-    $("#map-hop-eyebrow").textContent = toVenue
-      ? (farewell ? "Off you hop" : "Next stop")
-      : "Crawl complete";
-    $("#map-hop-from").textContent = `${fromVenue.flag || ""} ${fromVenue.name}`.trim();
-    $("#map-hop-to").textContent = toVenue
-      ? `${toVenue.flag || ""} ${toVenue.name}`.trim()
-      : "Home roost";
-    hop.hidden = false;
-    hop.classList.add("is-open");
-  }
-  Sound.coin();
-  animateDuckTravel();
-  setTimeout(finishVenueHop, 1200);
-}
-
 function hideMapHop() {
   const hop = $("#map-hop");
   if (!hop) return;
@@ -1852,6 +1878,10 @@ function hideMapHop() {
 }
 
 function finishVenueHop() {
+  if (hopTimer) {
+    clearTimeout(hopTimer);
+    hopTimer = null;
+  }
   hideMapHop();
   clearMapFlightZoom();
   const cleared = getMap().cleared || 0;

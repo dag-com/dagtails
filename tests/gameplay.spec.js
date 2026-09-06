@@ -13,6 +13,8 @@ test.describe("gameplay smoke", () => {
     await expect(page.locator("#map-hero-title")).toContainText(/SNUG|The Snug/i);
     await expect(page.locator("#map-hero-duck")).toBeVisible();
     await expect(page.locator("#map-dots .map-dot.is-current")).toHaveCount(1);
+    await expect(page.locator("#map-hop-from-flag")).toHaveCount(1);
+    await expect(page.locator("#map-hop-to-flag")).toHaveCount(1);
   });
 
   test("Enter bar opens candy path; Pour starts the station", async ({ page }) => {

@@ -50,6 +50,12 @@ test.describe("layout integrity", () => {
           r.right <= vw + 2 &&
           r.bottom <= vh + 2;
 
+        const containedIn = (child, parent) =>
+          child.top >= parent.top - 2 &&
+          child.left >= parent.left - 2 &&
+          child.right <= parent.right + 2 &&
+          child.bottom <= parent.bottom + 2;
+
         const rects = {};
         const missing = [];
         const outOfBounds = [];
@@ -86,7 +92,15 @@ test.describe("layout integrity", () => {
           }
         }
 
-        return { missing, outOfBounds, overlaps, rects, vw, vh };
+        const overflowing = [];
+        for (const [childKey, parentKey] of opts.inside || []) {
+          const child = rects[childKey];
+          const parent = rects[parentKey];
+          if (!child || !parent) continue;
+          if (!containedIn(child, parent)) overflowing.push(`${childKey}!in${parentKey}`);
+        }
+
+        return { missing, outOfBounds, overlaps, overflowing, rects, vw, vh };
       };
     });
   });
@@ -221,20 +235,67 @@ test.describe("layout integrity", () => {
     await enterStation(page);
     await pickIngredients(page, ["Gin", "Tonic Water"]);
     await serveDrink(page);
+    await page.locator("#result-guest-img").waitFor({ state: "visible", timeout: 10_000 });
 
     const report = await page.evaluate(() => window.measureLayout([
       ["#btn-retry", "retry"],
       ["#btn-next-stage", "next"],
       ["#result-name", "name"],
       ["#result-stars", "stars"],
+      ["#result-guest-img", "guest"],
+      [".result-left", "leftCol"],
+      ["#game-stage", "stage"],
+      ["#result-customer", "quote"],
+      ["#feedback-list", "checklist"],
     ], {
       pairs: [["retry", "next"]],
       allowAdjacent: true,
+      inside: [
+        ["guest", "leftCol"],
+        ["guest", "stage"],
+        ["leftCol", "stage"],
+        ["quote", "leftCol"],
+        ["checklist", "stage"],
+        ["retry", "stage"],
+        ["next", "stage"],
+      ],
     }));
 
     expect(report.missing, JSON.stringify(report)).toEqual([]);
     expect(report.outOfBounds, JSON.stringify(report)).toEqual([]);
     expect(report.overlaps, JSON.stringify(report)).toEqual([]);
+    expect(report.overflowing, JSON.stringify(report)).toEqual([]);
+  });
+
+  test("splash hero stays inside the stage", async ({ page }) => {
+    await seedPlayer(page, { cleared: 0 });
+    await page.goto("/");
+    await page.locator("#screen-splash.is-active").waitFor({ state: "visible", timeout: 15_000 });
+    await page.waitForFunction(() => {
+      const stage = document.getElementById("game-stage");
+      if (!stage) return false;
+      const r = stage.getBoundingClientRect();
+      return r.height > 80 && r.height <= window.innerHeight + 2 && r.width <= window.innerWidth + 2;
+    }, null, { timeout: 10_000 });
+    await page.evaluate(() => {
+      const el = document.getElementById("rotate-lock");
+      if (el) {
+        el.style.display = "none";
+        el.style.pointerEvents = "none";
+      }
+    });
+
+    const report = await page.evaluate(() => window.measureLayout([
+      ["#splash-hero-img", "hero"],
+      ["#btn-splash-continue", "enter"],
+      ["#game-stage", "stage"],
+    ], {
+      inside: [["hero", "stage"], ["enter", "stage"]],
+    }));
+
+    expect(report.missing, JSON.stringify(report)).toEqual([]);
+    expect(report.outOfBounds, JSON.stringify(report)).toEqual([]);
+    expect(report.overflowing, JSON.stringify(report)).toEqual([]);
   });
 
   test("finish screen keeps Menu and Play again in viewport", async ({ page }) => {
