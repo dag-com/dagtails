@@ -11,7 +11,8 @@
     ".cursor",
     "exports/LEGAL-RISKS",
     "exports/DAG-Tails-Legal",
-    "exports/dag-tails-brand-pack"
+    "exports/dag-tails-brand-pack",
+    "docs/legal"
   ],
   "live_brand_path_parts": [
     "assets/brand",

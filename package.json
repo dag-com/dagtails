@@ -28,6 +28,7 @@
     "report:players": "node .cursor/skills/player-report/scripts/fetch.js && node .cursor/skills/player-report/scripts/render.js",
     "prepare": "node scripts/install-git-hooks.js",
     "legal:pack": "node docs/legal/pack-lawyer-review.js",
+    "legal:pack:counsel": "node docs/legal/pack-counsel-review.js",
     "legal-watch": "python .cursor/skills/legal-watch/scripts/scan.py --diff",
     "legal-watch:staged": "python .cursor/skills/legal-watch/scripts/scan.py --staged --gate",
     "legal-watch:outgoing": "python .cursor/skills/legal-watch/scripts/scan.py --outgoing --gate",
