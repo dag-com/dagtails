@@ -53,9 +53,9 @@ Ship-stoppers already in the game or pack:
 - Unused Top Gun / Maverick jacket study (removed from the pack and skipper / rail-sole quarantines; do not reintroduce)
 - Old painted DuckTales-like wordmarks (deleted; live splash uses the menu mark)
 
-High: Ray-Ban-like aviators on Ace/splash, Bacardi TAILS (WIPO IR 1572190) if merch/mixers.
+High: Bacardi TAILS (WIPO IR 1572190) if merch/mixers. Ray-Ban **wordmark or temple logo** (generic aviator frames on Ace are operator-approved).
 
-Cleared as in-game recipe titles (`cleared_keep` in watchlist.json): Negroni, Americano, Boulevardier, Sazerac, Godfather, Mai Tai, Singapore Sling, Aviation, Sex on the Beach, Daiquiri, Cuba Libre, Mojito, Shirley Temple, Roy Rogers, Jamaican Mule, Bahama Mama, Garibaldi, Sidecar, Pussyfoot. Rail bottles: Red Bitter, Bitter Orange Aperitivo. Venue: Casa Caña (invented Havana rum bar).
+Cleared as in-game recipe titles (`cleared_keep` in watchlist.json): Negroni, Americano, Boulevardier, Sazerac, Godfather, Mai Tai, Singapore Sling, Aviation, Sex on the Beach, Daiquiri, Cuba Libre, Mojito, Shirley Temple, Roy Rogers, Jamaican Mule, Bahama Mama, Garibaldi, Sidecar, Pussyfoot. Rail bottles: Red Bitter, Bitter Orange Aperitivo. Venue: Casa Caña (invented Havana rum bar). Generic Ace aviators (no temple logo) and cupsole sneakers without a jazz stripe are operator-approved.
 
 A **new** venue, drink, master, or ingredient `name` that is not in `known_names` is always at least **watch**, even if it is not on the pattern list.
 
@@ -64,8 +64,8 @@ A **new** venue, drink, master, or ingredient `name` that is not in `known_names
 Look for and alarm on:
 - Third-party wordmarks (Top Gun, Disney, house spirits, soda brands)
 - DuckTales-like gold brush + teal 3D stacked title + feather underline
-- Wavy white sneaker sidestripe
-- Aviator frames with temple/lens logos
+- Wavy white sneaker sidestripe on the **upper** (Vans jazz stripe). A thin foxing line in the rubber sole is generic.
+- Aviator frames **with temple/lens logos**. Plain gold teardrop aviators without logos are operator-approved.
 - Real-bar neon or celebrity likeness
 - Copied app / fashion / sports logos
 

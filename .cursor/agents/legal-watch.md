@@ -33,7 +33,9 @@ Read `.cursor/skills/legal-watch/SKILL.md` and follow it.
 
 ## Already-known ship-stoppers
 
-Do not regress or reintroduce: Top Gun / Maverick jacket, DuckTales-like live wordmark, Vans-like sidestripe, Dark 'n' Stormy / Gosling, Painkiller / Pusser's, El Floridita / Hemingway.
+Do not regress or reintroduce: Top Gun / Maverick jacket, DuckTales-like live wordmark, Vans jazz stripe on a shoe **upper**, Dark 'n' Stormy / Gosling, Painkiller / Pusser's, El Floridita / Hemingway.
+
+Operator-approved (do not re-open as live defects): Shirley Temple / Roy Rogers as **recipe titles** only; Ace generic aviators without logos; cupsole foxing (not a jazz stripe).
 
 ## Do not
 

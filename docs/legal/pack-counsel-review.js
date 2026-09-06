@@ -181,8 +181,8 @@ This is a clearance and documents pack for a **private beta** of a web bartendin
 |---|---|---|
 | Wordmark **DAG Tails** / **DAG TAILS** | Yes — logo, splash, hub | Clearance to use; search/file classes (games, entertainment, maybe later merch). Watch **Bacardi** Madrid IR 1572190 (feathers + the word TAILS, cl. 32/33) if we ever put TAILS on drinks goods. |
 | Duck mascot (hoodie / service jacket / Ace bomber) | Yes — \`brand-images/\` | Original character? Any Disney DuckTales-like trade dress left? (Old painted gold-brush wordmarks were deleted.) |
-| Ace gold teardrop **aviators** | Yes — Ace rank still | HIGH: Ray-Ban Aviator trade dress. Change frame shape / drop temple logos before a commercial launch? |
-| Wavy white **sneaker sidestripe** on Ace | Yes — live Ace shoes | Ship-stopper watch: Vans sidestripe trade dress. Recolor or drop the wave? |
+| Ace gold teardrop sunglasses | Yes — Ace / splash | **Closed in-house.** Generic aviator frames, no temple/lens logo. Operator-approved. |
+| Mascot sneakers | Yes — hoodie / jacket / Ace | **Closed in-house.** Thin foxing line in the rubber sole only. No Vans jazz stripe on the upper. |
 | Invented DAG patches on the bomber | Yes | Keep if original. |
 
 ### 2. Do not ship / not in the live pack (confirm they stay out)
@@ -200,7 +200,7 @@ See \`catalog/NAMES.md\`. In-house notes (not a clearance):
 | Topic | In-house note | Ask |
 |---|---|---|
 | IBA-style classics (Negroni, Daiquiri, Mai Tai, …) | Kept as **recipe titles**, generic bottles | Ok as game content? Any we must rename? |
-| Shirley Temple / Roy Rogers | On the **under-18 mocktail** path | HIGH: celebrity names in a kids-facing menu. Rename (Cherry Fizz / Cola Cherry) for beta or only for public launch? |
+| Shirley Temple / Roy Rogers | Under-18 mocktail path | **Closed in-house** as recipe titles (common bar names). No likeness, no bottled soda. |
 | Casa Caña | Invented Havana rum bar (replaced a real landmark) | Confirm invented name is ok. |
 | Red Bitter / Bitter Orange Aperitivo | Genericized; not Campari/Aperol house marks | Confirm. |
 | Angostura Bitters | House bitters mark, common bar term | Keep or say “aromatic bitters”? |
@@ -270,6 +270,12 @@ write(
 
 **Not legal advice.** Copied from the engineering watchlist so counsel can see what the team is already treating as risk.
 
+## Closed in-house (operator-approved — not asking counsel to rename or redraw)
+
+${(watch.operator_approved || [])
+    .map((item) => `- **${item.item}** — ${item.note}`)
+    .join("\n") || "_None._"}
+
 ## Ship-stoppers (do not add; keep out of live art)
 
 ${watch.patterns
@@ -288,6 +294,13 @@ ${watch.patterns
 
 ${watch.patterns
     .filter((p) => p.severity === "medium")
+    .map((p) => `- **${p.id}** — ${p.reason} Safer: ${p.safer}`)
+    .join("\n")}
+
+## Watch (keep as-is unless we merch, bottle, or add a likeness)
+
+${watch.patterns
+    .filter((p) => p.severity === "watch")
     .map((p) => `- **${p.id}** — ${p.reason} Safer: ${p.safer}`)
     .join("\n")}
 
@@ -372,7 +385,7 @@ These are the files actually used on hub / splash / rank-up. Mocks (horses, K9s,
 - \`dag-tails-logo.png\` — current wordmark
 - \`duck-hub-mascot.png\` — hoodie guide
 - \`duck-hub-mascot-jacket.png\` — service-jacket rank
-- \`duck-hub-mascot-ace.png\` — Ace bomber (aviators + shoe stripe to review)
+- \`duck-hub-mascot-ace.png\` — Ace bomber. Generic gold aviators (no temple logo). Plain cupsole sneakers (foxing line only, no jazz stripe).
 `
 );
 

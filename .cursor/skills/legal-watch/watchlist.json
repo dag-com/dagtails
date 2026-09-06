@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "disclaimer": "Clearance flags, not legal advice.",
   "text_extensions": [".js", ".ts", ".tsx", ".jsx", ".html", ".css", ".json", ".md", ".txt", ".svg"],
   "image_extensions": [".png", ".jpg", ".jpeg", ".webp", ".gif", ".svg", ".ico"],
@@ -63,9 +63,9 @@
     {
       "id": "vans-stripe",
       "severity": "ship-stopper",
-      "terms": ["vans", "jazz stripe", "sidestripe"],
-      "reason": "Wavy white sneaker sidestripe is a well-known Vans trademark (also on live Ace).",
-      "safer": "Recolor or drop the wave on Ace / hoodie / jacket shoes."
+      "terms": ["vans", "jazz stripe"],
+      "reason": "The Vans Sidestripe (wavy band on the shoe upper) is a well-known mark. Live Ace/hoodie/jacket sneakers use a plain cupsole with a thin foxing line in the rubber — not a jazz stripe. Do not put a wavy white stripe back on the quarter.",
+      "safer": "Keep a plain dark sneaker. No wave on the upper."
     },
     {
       "id": "aperol-campari",
@@ -90,24 +90,24 @@
     },
     {
       "id": "shirley-temple",
-      "severity": "high",
+      "severity": "watch",
       "terms": ["shirley temple"],
-      "reason": "Celebrity name; Temple sued over bottled use. A kids game is closer to a product than a bar menu.",
-      "safer": "Cherry Fizz."
+      "reason": "In-game recipe title is the common bar/mocktail name (historically on the IBA non-alcoholic list). Temple sued bottled soda using her name in 1988, not bar menus. Keep as a drink title; do not bottle, merch, or draw her likeness.",
+      "safer": "Cherry Fizz only if we sell a soda or put a child-star portrait on the card."
     },
     {
       "id": "roy-rogers",
-      "severity": "high",
+      "severity": "watch",
       "terms": ["roy rogers"],
-      "reason": "Celebrity-named mocktail on the kids path.",
-      "safer": "Cola Cherry."
+      "reason": "In-game recipe title is the common cola-grenadine mocktail. ROY ROGERS restaurant marks are foodservice, not this drink. Keep as a drink title; no cowboy likeness or restaurant logo.",
+      "safer": "Cola Cherry only if we brand a product or use the cowboy."
     },
     {
       "id": "ray-ban",
       "severity": "high",
-      "terms": ["ray-ban", "rayban", "ray ban", "aviator sunglasses"],
-      "reason": "Ray-Ban Aviator trade dress; jacket study may show a circled-B brandlet.",
-      "safer": "Change frame shape; no temple/lens logo."
+      "terms": ["ray-ban", "rayban", "ray ban"],
+      "reason": "Ray-Ban wordmark and temple/lens logos. Generic teardrop aviator frames without logos (live Ace/splash) are operator-approved as generic sunglasses.",
+      "safer": "Do not add Ray-Ban text or a temple logo. Generic aviators may stay."
     },
     {
       "id": "bacardi-tails",
@@ -174,6 +174,23 @@
   "filename_terms": [
     "topgun", "top-gun", "maverick", "ducktales", "vans", "rayban", "ray-ban",
     "hemingway", "floridita", "guinness", "disney"
+  ],
+  "operator_approved": [
+    {
+      "id": "recipe-titles-shirley-roy",
+      "item": "Shirley Temple / Roy Rogers as in-game recipe titles",
+      "note": "Common bar mocktail names. Keep titles. Do not bottle soda, merch a likeness, or draw the child star / cowboy."
+    },
+    {
+      "id": "ace-generic-aviators",
+      "item": "Ace / splash gold teardrop sunglasses",
+      "note": "Generic aviator frames with no temple or lens logo. Operator-approved. Still block the Ray-Ban wordmark."
+    },
+    {
+      "id": "cupsole-foxing",
+      "item": "Live mascot sneakers",
+      "note": "Plain cupsole with a thin foxing line in the rubber. Not a Vans jazz stripe on the upper. Do not put a wavy white stripe back on the quarter."
+    }
   ],
   "cleared_keep": [
     "Negroni",
