@@ -99,4 +99,57 @@ test.describe("beta gate", () => {
     await expect(page.locator("#screen-splash.is-active")).toBeVisible({ timeout: 15_000 });
     await expect(page.locator("#btn-splash-continue")).toBeVisible();
   });
+
+  test("magic-link callback params admit an invited session and clear the lock", async ({ page }, testInfo) => {
+    skipIfPortrait(testInfo);
+
+    await page.route(/\/auth\/v1\//, async (route) => {
+      const req = route.request();
+      const url = req.url();
+      const method = req.method();
+      const post = String(req.postData() || "");
+      if (method === "POST" && (/\/token/.test(url) || /grant_type=pkce/.test(post) || post.includes("code"))) {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({
+            access_token: "eyJhbGciOiJub25lIn0.test",
+            token_type: "bearer",
+            expires_in: 3600,
+            expires_at: Math.floor(Date.now() / 1000) + 3600,
+            refresh_token: "refresh_test",
+            user: {
+              id: "u_link",
+              aud: "authenticated",
+              role: "authenticated",
+              email: "tester@example.com",
+              app_metadata: { provider: "email" },
+              user_metadata: {},
+            },
+          }),
+        });
+      }
+      if (method === "GET" && /\/user(\?|$)/.test(url)) {
+        return route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: JSON.stringify({ id: "u_link", email: "tester@example.com" }),
+        });
+      }
+      return route.fulfill({ status: 200, contentType: "application/json", body: "{}" });
+    });
+
+    await page.route(/\/rest\/v1\/rpc\/beta_access_ok/, async (route) => {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "true",
+      });
+    });
+
+    await page.goto("/?betaLock=1&code=mock-auth-code");
+    await expect(page.locator("html")).not.toHaveClass(/is-beta-lock/, { timeout: 20_000 });
+    await expect(page.locator("#screen-splash.is-active")).toBeVisible({ timeout: 20_000 });
+    await expect(page).not.toHaveURL(/[?&]code=/);
+  });
 });

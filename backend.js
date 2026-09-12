@@ -61,7 +61,15 @@ function restHeaders(extra = {}) {
 // before a player has set up a profile.
 function getClient() {
   if (!isConfigured()) return null;
-  if (!sb) sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  if (!sb) {
+    sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: {
+        detectSessionInUrl: true,
+        persistSession: true,
+        autoRefreshToken: true,
+      },
+    });
+  }
   return sb;
 }
 
@@ -143,21 +151,22 @@ export async function checkHealth() {
 export async function initBackend(profile) {
   if (!isConfigured()) return false;
   try {
-    if (!sb) sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    let { data: { session } } = await sb.auth.getSession();
+    const client = getClient();
+    if (!client) return false;
+    let { data: { session } } = await client.auth.getSession();
     if (!session) {
       if (isBetaLocked()) return false;
-      const { data, error } = await sb.auth.signInAnonymously();
+      const { data, error } = await client.auth.signInAnonymously();
       if (error) throw error;
       session = data.session;
     }
     if (isBetaLocked()) {
       const email = session.user && session.user.email;
       if (!email) return false;
-      const { data: allowed, error: gateErr } = await sb.rpc("beta_access_ok");
+      const { data: allowed, error: gateErr } = await client.rpc("beta_access_ok");
       if (gateErr) throw gateErr;
       if (!allowed) {
-        await sb.auth.signOut();
+        await client.auth.signOut();
         myId = null;
         ready = false;
         return false;
@@ -167,7 +176,7 @@ export async function initBackend(profile) {
     const publicName = profile && String(profile.alias || "").trim()
       ? String(profile.alias).trim()
       : "Anonymous";
-    await sb.from("players").upsert(
+    await client.from("players").upsert(
       { id: myId, name: publicName, location: (profile && profile.location) || null },
       { onConflict: "id" }
     );
@@ -318,10 +327,101 @@ export function flushEvents(opts = {}) {
 
 function authRedirectTo() {
   try {
-    return `${location.origin}${location.pathname}`;
+    // Prefer the directory URL so magic-link redirects match the allowlist.
+    const path = location.pathname.replace(/index\.html$/i, "");
+    return `${location.origin}${path || "/"}`;
   } catch {
     return undefined;
   }
+}
+
+function authCallbackKind() {
+  try {
+    const q = new URLSearchParams(location.search || "");
+    if (q.get("code")) return "pkce";
+    if (q.get("token_hash") && q.get("type")) return "token_hash";
+    const hash = String(location.hash || "").replace(/^#/, "");
+    if (!hash) return null;
+    const h = new URLSearchParams(hash);
+    if (h.get("error") || h.get("error_description")) return "error";
+    if (h.get("access_token") || h.get("refresh_token")) return "implicit";
+  } catch {
+    /* non-browser */
+  }
+  return null;
+}
+
+function scrubAuthParamsFromUrl() {
+  try {
+    const url = new URL(location.href);
+    ["code", "token_hash", "type", "error", "error_description", "error_code"].forEach((key) => {
+      url.searchParams.delete(key);
+    });
+    url.hash = "";
+    const next = url.pathname + (url.search || "");
+    history.replaceState({}, "", next);
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * Wait until auth finishes reading storage / magic-link redirect params.
+ * Do not call other Supabase APIs inside the auth-state callback (deadlock risk).
+ */
+function waitForAuthSession(client, timeoutMs) {
+  return new Promise((resolve) => {
+    let settled = false;
+    const finish = (session) => {
+      if (settled) return;
+      settled = true;
+      try { subscription.unsubscribe(); } catch { /* ignore */ }
+      clearTimeout(timer);
+      resolve(session || null);
+    };
+    const { data: { subscription } } = client.auth.onAuthStateChange((event, session) => {
+      if (session && (event === "INITIAL_SESSION" || event === "SIGNED_IN" || event === "TOKEN_REFRESHED")) {
+        finish(session);
+        return;
+      }
+      if (event === "INITIAL_SESSION" && !session) finish(null);
+    });
+    const timer = setTimeout(() => finish(null), timeoutMs);
+    client.auth.getSession().then(({ data }) => {
+      if (data && data.session) finish(data.session);
+    }).catch(() => { /* wait for events / timeout */ });
+  });
+}
+
+/** Turn a magic-link / PKCE redirect into a session, then clear tokens from the URL. */
+async function settleAuthFromUrl(client) {
+  const kind = authCallbackKind();
+  if (kind === "error") {
+    scrubAuthParamsFromUrl();
+    return null;
+  }
+  if (kind === "pkce") {
+    const code = new URLSearchParams(location.search).get("code");
+    const { data, error } = await client.auth.exchangeCodeForSession(code);
+    if (!error && data && data.session) {
+      scrubAuthParamsFromUrl();
+      return data.session;
+    }
+  }
+  if (kind === "token_hash") {
+    const q = new URLSearchParams(location.search);
+    const { data, error } = await client.auth.verifyOtp({
+      token_hash: q.get("token_hash"),
+      type: q.get("type"),
+    });
+    if (!error && data && data.session) {
+      scrubAuthParamsFromUrl();
+      return data.session;
+    }
+  }
+  const session = await waitForAuthSession(client, kind ? 12_000 : 2_500);
+  if (session && kind) scrubAuthParamsFromUrl();
+  return session;
 }
 
 async function sessionIsInvited(client) {
@@ -336,7 +436,7 @@ export async function restoreBetaSession() {
   try {
     const client = getClient();
     if (!client) return { ok: false, reason: "not_configured" };
-    const { data: { session } } = await client.auth.getSession();
+    const session = await settleAuthFromUrl(client);
     const email = session && session.user && session.user.email;
     if (!email) return { ok: false, reason: "no_session" };
     if (!(await sessionIsInvited(client))) {
