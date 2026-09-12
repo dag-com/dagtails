@@ -40,6 +40,7 @@ jobs:
       - name: Build
         env:
           VITE_BETA_LOCK: "1"
+          VITE_PAGES_BASE: "/dagtails/"
         run: npm run build
 
       - name: Upload Pages artifact

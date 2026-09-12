@@ -7,6 +7,15 @@
     <meta name="robots" content="noindex, nofollow" />
     <script>
       (function () {
+        // Magic-link redirects sometimes land on /dagtails (no slash). Relative
+        // CSS/JS then 404 under github.io/assets/. Force the project trailing slash.
+        try {
+          var path = location.pathname || "";
+          if (/\/dagtails$/i.test(path)) {
+            location.replace(path + "/" + (location.search || "") + (location.hash || ""));
+            return;
+          }
+        } catch (e) { /* ignore */ }
         var host = location.hostname || "";
         var q = location.search || "";
         if (/\.github\.io$/i.test(host) || /(?:\?|&)betaLock=1(?:&|$)/.test(q)) {

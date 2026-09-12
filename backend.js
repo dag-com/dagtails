@@ -327,9 +327,11 @@ export function flushEvents(opts = {}) {
 
 function authRedirectTo() {
   try {
-    // Prefer the directory URL so magic-link redirects match the allowlist.
-    const path = location.pathname.replace(/index\.html$/i, "");
-    return `${location.origin}${path || "/"}`;
+    // Prefer the directory URL with a trailing slash so relative assets keep working
+    // if the magic-link redirect is opened before our client-side slash fix runs.
+    let path = location.pathname.replace(/index\.html$/i, "");
+    if (!path.endsWith("/")) path += "/";
+    return `${location.origin}${path}`;
   } catch {
     return undefined;
   }

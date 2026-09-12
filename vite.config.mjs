@@ -51,8 +51,9 @@ function copyPlayerReports() {
 }
 
 export default defineConfig({
-  // Relative base works for Capacitor `www/` and GitHub project Pages.
-  base: "./",
+  // Relative `./` for Capacitor/local. Absolute `/dagtails/` on Pages so
+  // magic-link redirects without a trailing slash still load CSS/JS.
+  base: process.env.VITE_PAGES_BASE || "./",
   plugins: [react(), copyGameAssets(), copyPlayerReports()],
   build: {
     outDir: "www",
