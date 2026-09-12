@@ -745,7 +745,7 @@ function nextRewardCopy(map, prog) {
 
 // The apprentice duck mascot visually levels up as the player climbs bartender
 // titles (still paced by cleared stages, independent of crawl venues):
-// hoodie -> house service jacket -> full "ace" look.
+// hoodie -> skipper shearling bomber -> full "ace" look.
 function mascotTierClass(rankIdx) {
   if (rankIdx >= 5) return "tier-3";
   if (rankIdx >= 2) return "tier-2";

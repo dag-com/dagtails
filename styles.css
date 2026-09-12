@@ -5692,7 +5692,7 @@ body.is-phone-play .chip {
     linear-gradient(180deg, #120b1f 0%, #140d22 44%, #0c0814 100%);
 }
 /* Shared rank-based mascot: the apprentice duck visually levels up as the
-   player climbs ranks (hoodie -> flight jacket -> "ace" look). */
+   player climbs ranks (hoodie -> skipper bomber -> "ace" look). */
 .mascot-duck {
   background-image: url("assets/duck-hub-mascot.png");
   background-position: center bottom;

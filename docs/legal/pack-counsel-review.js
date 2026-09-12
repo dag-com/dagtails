@@ -180,7 +180,7 @@ This is a clearance and documents pack for a **private beta** of a web bartendin
 | Item | In the live game? | Ask |
 |---|---|---|
 | Wordmark **DAG Tails** / **DAG TAILS** | Yes — logo, splash, hub | Clearance to use; search/file classes (games, entertainment, maybe later merch). Watch **Bacardi** Madrid IR 1572190 (feathers + the word TAILS, cl. 32/33) if we ever put TAILS on drinks goods. |
-| Duck mascot (hoodie / service jacket / Ace bomber) | Yes — \`brand-images/\` | Original character? Any Disney DuckTales-like trade dress left? (Old painted gold-brush wordmarks were deleted.) |
+| Duck mascot (hoodie / skipper bomber / Ace bomber) | Yes — \`brand-images/\` | Original character? Any Disney DuckTales-like trade dress left? (Old painted gold-brush wordmarks were deleted.) |
 | Ace gold teardrop sunglasses | Yes — Ace / splash | **Closed in-house.** Generic aviator frames, no temple/lens logo. Operator-approved. |
 | Mascot sneakers | Yes — hoodie / jacket / Ace | **Closed in-house.** Thin foxing line in the rubber sole only. No Vans jazz stripe on the upper. |
 | Invented DAG patches on the bomber | Yes | Keep if original. |
@@ -191,7 +191,7 @@ This is a clearance and documents pack for a **private beta** of a web bartendin
 |---|---|---|
 | Top Gun / Maverick jacket study (name tapes, patches) | Quarantined under \`mocks/\` — **not** copied into \`assets/\` | Confirm: never ship, never composite onto Ace. |
 | Old DuckTales-like painted title explorations | Deleted from the live splash | Confirm live logo in \`brand-images/dag-tails-logo.png\` is far enough from Disney gold-brush + teal 3D + feather underline. |
-| Horse / K9 / ape mascot studies | \`mocks/mascot-alts/\` only | Confirm: mocks-only is enough; do not put them on hub/map. |
+| Horse / K9 / ape / rabbit / bear mascot studies | \`mocks/mascot-alts/\`, \`mocks/horse-judges/\`, \`mocks/rabbit-judges/\`, \`mocks/bear-judges/\` only | Confirm: mocks-only is enough; do not put them on hub/map. |
 
 ### 3. Cocktail, venue, and ingredient names (live catalog)
 
@@ -384,7 +384,7 @@ These are the files actually used on hub / splash / rank-up. Mocks (horses, K9s,
 
 - \`dag-tails-logo.png\` — current wordmark
 - \`duck-hub-mascot.png\` — hoodie guide
-- \`duck-hub-mascot-jacket.png\` — service-jacket rank
+- \`duck-hub-mascot-jacket.png\` — skipper bomber rank (DAG tapes, shearling G-1; not the house service jacket)
 - \`duck-hub-mascot-ace.png\` — Ace bomber. Generic gold aviators (no temple logo). Plain cupsole sneakers (foxing line only, no jazz stripe).
 `
 );

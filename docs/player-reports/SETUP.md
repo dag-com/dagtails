@@ -8,11 +8,16 @@ The Action `.github/workflows/player-report.yml` needs a secret that can **read*
 
 ## Secret
 
-1. In Supabase: **Project Settings → Database → Connection string** (URI).
-2. Use the **direct** connection (port `5432`) or **session** pooler. Transaction pooler (port `6543`) can fail this query.
-3. In GitHub: **Settings → Secrets and variables → Actions → New repository secret**
+The URI is **not** under Project Settings → Database anymore (that page is mostly password reset).
+
+1. Open the **dag-tails** project: https://supabase.com/dashboard/project/suhrxksuwjsfeenztvdn  
+2. Click **Connect** at the top of the dashboard (green button next to the project name), or open:  
+   https://supabase.com/dashboard/project/suhrxksuwjsfeenztvdn?showConnect=true&method=session  
+3. Copy the **Session pooler** URI (port `5432`). Direct (`db.…:5432`) is fine if your network supports it. Do **not** use Transaction pooler (port `6543`) — that can fail this query.  
+4. If the URI shows `[YOUR-PASSWORD]`, replace it with the database password. Forgot it? **Project Settings → Database** → **Reset database password**, then paste the new password into the URI.  
+5. In GitHub: **Settings → Secrets and variables → Actions → New repository secret**
    - Name: `SUPABASE_DB_URL`
-   - Value: the Postgres URI (includes the database password)
+   - Value: the full `postgresql://…` URI (password included)
 
 Then **Actions → Player report → Run workflow** once to confirm. After that it runs every day at 07:00 UTC.
 

@@ -22,6 +22,17 @@ function showStep(step) {
   }
 }
 
+/** Drop the fail-closed CSS lock so splash/hub can show after a valid session. */
+function unlockBetaUi() {
+  try {
+    document.documentElement.classList.remove("is-beta-lock");
+  } catch {
+    /* non-browser */
+  }
+  const screen = $("#screen-beta");
+  if (screen) screen.classList.remove("is-active");
+}
+
 function friendlyError(err) {
   const raw = err && err.message ? err.message : String(err || "");
   const code = err && err.code ? String(err.code) : "";
@@ -51,7 +62,10 @@ export async function ensureBetaAccess() {
   }
 
   const restored = await Backend.restoreBetaSession();
-  if (restored.ok) return true;
+  if (restored.ok) {
+    unlockBetaUi();
+    return true;
+  }
 
   setText($("#beta-error"), restored.reason === "gate_missing" ? friendlyError({ message: "gate_missing" }) : "");
   showStep("email");
@@ -63,9 +77,10 @@ export async function ensureBetaAccess() {
     const back = $("#beta-back");
     let pendingEmail = "";
     let busy = false;
+    let admitted = false;
 
     async function sendCode(email) {
-      if (busy) return;
+      if (busy || admitted) return;
       busy = true;
       setText($("#beta-error"), "");
       const sendBtn = $("#beta-send");
@@ -81,7 +96,7 @@ export async function ensureBetaAccess() {
         setText($("#beta-error"), friendlyError(e));
       } finally {
         busy = false;
-        if (sendBtn) sendBtn.disabled = false;
+        if (sendBtn && !admitted) sendBtn.disabled = false;
       }
     }
 
@@ -97,19 +112,21 @@ export async function ensureBetaAccess() {
 
     codeForm?.addEventListener("submit", async (ev) => {
       ev.preventDefault();
-      if (busy) return;
+      if (busy || admitted) return;
       busy = true;
       setText($("#beta-error"), "");
       const goBtn = $("#beta-verify");
       if (goBtn) goBtn.disabled = true;
       try {
         await Backend.verifyBetaOtp(pendingEmail, $("#beta-code") && $("#beta-code").value);
+        admitted = true;
+        unlockBetaUi();
         resolve(true);
       } catch (e) {
         setText($("#beta-error"), friendlyError(e));
+        if (goBtn) goBtn.disabled = false;
       } finally {
         busy = false;
-        if (goBtn) goBtn.disabled = false;
       }
     });
 
