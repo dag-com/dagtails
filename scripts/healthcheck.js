@@ -91,15 +91,15 @@ async function runChecks() {
     const hasRawTsx = /\/src\/main\.tsx/.test(text);
     const hasHashedAsset =
       /assets\/index-[A-Za-z0-9_-]+\.(js|css)/.test(text) ||
-      /type="module"[^>]+src="\.?\/?assets\//.test(text);
+      /type="module"[^>]+src="[^"]*assets\//.test(text);
     if (hasRawTsx && !hasHashedAsset) {
       throw new Error("Pages is serving source HTML (needs Vite www deploy)");
     }
     if (!/DAG Tails|dag-tails|screen-splash|hub-root/i.test(text)) {
       throw new Error("HTML does not look like the DAG Tails shell");
     }
-    const jsMatch = text.match(/src="(\.?\/?assets\/[^"]+\.js)"/i);
-    const cssMatch = text.match(/href="(\.?\/?assets\/[^"]+\.css)"/i);
+    const jsMatch = text.match(/src="([^"]*assets\/[^"]+\.js)"/i);
+    const cssMatch = text.match(/href="([^"]*assets\/[^"]+\.css)"/i);
     return {
       detail: `status=${res.status}; hashed=${hasHashedAsset}`,
       jsHref: jsMatch ? jsMatch[1] : null,

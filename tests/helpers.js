@@ -66,6 +66,7 @@ async function gotoHub(page) {
   const splashBtn = page.locator("#btn-splash-continue");
   const deadline = Date.now() + 15_000;
   while (Date.now() < deadline) {
+    await clearRotateLock(page);
     if (await startScreen.isVisible().catch(() => false)) {
       break;
     }

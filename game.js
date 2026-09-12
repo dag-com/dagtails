@@ -5477,6 +5477,13 @@ $("#set-logout").addEventListener("click", () => {
     logoutToGate();
   }
 });
+$("#set-reset")?.addEventListener("click", () => {
+  Sound.click();
+  const ok = window.confirm(
+    "Reset everything?\n\nThis wipes your profile and all progress (map, stars, streaks, badges, My Bar) and restarts at sign-in."
+  );
+  if (ok) resetEverything();
+});
 
 // ============================ Debug / testing toolbar ============================
 // Wipe all saved identity + progress (and any backend session) and reload so the
@@ -5560,7 +5567,8 @@ function renderDiagnostics() {
   const mixLayoutBtn = $("#dbg-mix-layout");
   if (!bar || !toggle || !reset) return;
   if (!debugEnabled()) { bar.remove(); return; }
-  bar.style.display = "";
+  bar.style.display = "flex";
+  bar.hidden = false;
   applyMixResultLayout();
   toggle.addEventListener("click", () => bar.classList.toggle("is-open"));
   if (mixLayoutBtn) {

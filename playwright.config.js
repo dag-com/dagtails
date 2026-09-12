@@ -34,10 +34,17 @@ module.exports = defineConfig({
     trace: "on-first-retry",
   },
   webServer: {
+    // Local Playwright must not inherit Pages-only Vite env (absolute /dagtails/
+    // base or beta lock), or CSS/JS 404 and the debug toolbar never appears.
     command: `npm run build && npx --yes serve -l ${process.env.PW_PORT || 4173} www`,
     url: `http://127.0.0.1:${process.env.PW_PORT || 4173}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
+    env: {
+      ...process.env,
+      VITE_PAGES_BASE: "",
+      VITE_BETA_LOCK: "",
+    },
   },
   projects: [
     {

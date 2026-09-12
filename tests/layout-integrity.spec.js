@@ -7,6 +7,7 @@ const {
   pickIngredients,
   serveDrink,
   skipIfPortrait,
+  clearRotateLock,
 } = require("./helpers");
 
 /**
@@ -462,5 +463,82 @@ test.describe("layout integrity", () => {
       expect(scale.w, JSON.stringify(scale)).toBeGreaterThanOrEqual(60);
       expect(scale.w, JSON.stringify(scale)).toBeLessThanOrEqual(96);
     }
+  });
+
+  test("debug toolbar is mounted outside game-shell and accessible with ?debug", async ({ page }) => {
+    await seedPlayer(page, { cleared: 0 });
+    await page.goto("/?debug");
+    await clearRotateLock(page);
+    await page.locator("#debug-toolbar").waitFor({ state: "visible", timeout: 15_000 });
+
+    const toolbarInfo = await page.evaluate(() => {
+      const dbg = document.getElementById("debug-toolbar");
+      const shell = document.querySelector(".game-shell");
+      const toggle = document.getElementById("dbg-toggle");
+      const reset = document.getElementById("dbg-reset");
+      if (!dbg || !toggle || !reset) return null;
+      const isOutsideShell = !shell || !shell.contains(dbg);
+      const rToggle = toggle.getBoundingClientRect();
+      return {
+        isOutsideShell,
+        toggleVisible: rToggle.width > 0 && rToggle.height > 0,
+        toggleBottom: rToggle.bottom,
+        toggleLeft: rToggle.left,
+        vh: window.innerHeight,
+        vw: window.innerWidth,
+      };
+    });
+
+    expect(toolbarInfo).not.toBeNull();
+    expect(toolbarInfo.isOutsideShell).toBe(true);
+    expect(toolbarInfo.toggleVisible).toBe(true);
+    expect(toolbarInfo.toggleLeft).toBeGreaterThanOrEqual(0);
+    expect(toolbarInfo.toggleBottom).toBeLessThanOrEqual(toolbarInfo.vh + 2);
+
+    // Click toggle to open debug tools
+    await page.locator("#dbg-toggle").click();
+    await expect(page.locator("#dbg-reset")).toBeVisible();
+  });
+
+  test("settings screen is scrollable and switch/logout buttons are reachable on short landscape", async ({ page }) => {
+    await seedPlayer(page, { cleared: 0 });
+    await gotoHub(page);
+    await page.evaluate(() => {
+      document.querySelectorAll(".screen").forEach((s) => s.classList.remove("is-active"));
+      const settings = document.getElementById("screen-settings");
+      settings.classList.add("is-active");
+    });
+
+    await expect(page.locator("#screen-settings.is-active")).toBeVisible();
+    await expect(page.locator("#set-switch")).toBeVisible();
+    await expect(page.locator("#set-logout")).toBeVisible();
+    await expect(page.locator("#set-reset")).toBeVisible();
+
+    const checkButtons = await page.evaluate(() => {
+      const btnSwitch = document.getElementById("set-switch");
+      const btnLogout = document.getElementById("set-logout");
+      const btnReset = document.getElementById("set-reset");
+      btnReset.scrollIntoView({ block: "center" });
+      const rSwitch = btnSwitch.getBoundingClientRect();
+      const rLogout = btnLogout.getBoundingClientRect();
+      const rReset = btnReset.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const vw = window.innerWidth;
+      return {
+        switchInBounds: rSwitch.top >= -2 && rSwitch.bottom <= vh + 2 && rSwitch.left >= -2 && rSwitch.right <= vw + 2,
+        logoutInBounds: rLogout.top >= -2 && rLogout.bottom <= vh + 2 && rLogout.left >= -2 && rLogout.right <= vw + 2,
+        resetInBounds: rReset.top >= -2 && rReset.bottom <= vh + 2 && rReset.left >= -2 && rReset.right <= vw + 2,
+        switchClickable: rSwitch.width > 20 && rSwitch.height > 20,
+        logoutClickable: rLogout.width > 20 && rLogout.height > 20,
+        resetClickable: rReset.width > 20 && rReset.height > 20,
+      };
+    });
+
+    expect(checkButtons.switchClickable).toBe(true);
+    expect(checkButtons.logoutClickable).toBe(true);
+    expect(checkButtons.resetClickable).toBe(true);
+    expect(checkButtons.switchInBounds).toBe(true);
+    expect(checkButtons.logoutInBounds).toBe(true);
+    expect(checkButtons.resetInBounds).toBe(true);
   });
 });
