@@ -2033,6 +2033,44 @@ function liveViewport() {
   return { winW, winH };
 }
 
+function syncRotateLock() {
+  const html = document.documentElement;
+  const lockEl = document.getElementById("rotate-lock");
+  if (html.hasAttribute("data-expo-shell") || html.hasAttribute("data-qa-rotate-bypass")) {
+    html.classList.remove("is-portrait-locked");
+    if (lockEl) lockEl.setAttribute("aria-hidden", "true");
+    return;
+  }
+
+  let isPhone = false;
+  try {
+    const sw = window.screen?.width || window.innerWidth || 0;
+    const sh = window.screen?.height || window.innerHeight || 0;
+    isPhone = window.matchMedia("(pointer: coarse)").matches && Math.min(sw, sh) < 600;
+  } catch (e) {
+    isPhone = false;
+  }
+
+  let isPortrait = false;
+  if (isPhone) {
+    const orientType = window.screen?.orientation?.type;
+    if (typeof orientType === "string" && orientType.startsWith("portrait")) {
+      isPortrait = true;
+    } else if (typeof orientType === "string" && orientType.startsWith("landscape")) {
+      isPortrait = false;
+    } else {
+      const sw = window.screen?.width || window.innerWidth || 0;
+      const sh = window.screen?.height || window.innerHeight || 0;
+      isPortrait = sh >= sw;
+    }
+  }
+
+  html.classList.toggle("is-portrait-locked", isPortrait);
+  if (lockEl) {
+    lockEl.setAttribute("aria-hidden", isPortrait ? "false" : "true");
+  }
+}
+
 function fitGameStage() {
   const stage = document.getElementById("game-stage");
   if (!stage) return;
@@ -2044,15 +2082,17 @@ function fitGameStage() {
   const shellH = shell && shell.clientHeight ? shell.clientHeight : winH;
   const vw = Math.max(1, Math.min(winW, shellW));
   const vh = Math.max(1, Math.min(winH, shellH));
-  // Size the stage to the live platform viewport (iOS / Android / PC) so the
-  // shell uses every pixel — no letterboxing and no cover-crop of chrome.
-  stage.style.width = `${vw}px`;
-  stage.style.height = `${vh}px`;
-  stage.style.transform = "none";
+  // Letterbox contain preserves design aspect ratio (1100x508) within the
+  // available viewport box without stretching or clipping.
   const scale = Math.min(vw / STAGE_W, vh / STAGE_H);
+  const stageW = Math.round(STAGE_W * scale);
+  const stageH = Math.round(STAGE_H * scale);
+  stage.style.width = `${stageW}px`;
+  stage.style.height = `${stageH}px`;
+  stage.style.transform = "none";
   document.documentElement.style.setProperty("--stage-scale", String(Math.max(0.2, scale)));
-  document.documentElement.style.setProperty("--stage-w", `${vw}px`);
-  document.documentElement.style.setProperty("--stage-h", `${vh}px`);
+  document.documentElement.style.setProperty("--stage-w", `${stageW}px`);
+  document.documentElement.style.setProperty("--stage-h", `${stageH}px`);
   if (document.querySelector(".station.has-muddle, .station.has-prep")) placeStationTools();
 }
 
@@ -5637,11 +5677,19 @@ $("#btn-splash-continue")?.addEventListener("click", () => {
 
 // Boot: everyone sees the brand splash first. New players then get the
 // credentials modal; returning players continue to the hub.
+syncRotateLock();
 fitGameStage();
-window.addEventListener("resize", fitGameStage);
-window.addEventListener("orientationchange", () => setTimeout(fitGameStage, 120));
+const onViewportChange = () => {
+  syncRotateLock();
+  fitGameStage();
+};
+window.addEventListener("resize", onViewportChange);
+window.addEventListener("orientationchange", () => setTimeout(onViewportChange, 120));
+if (window.screen?.orientation) {
+  window.screen.orientation.addEventListener("change", onViewportChange);
+}
 if (window.visualViewport) {
-  window.visualViewport.addEventListener("resize", fitGameStage);
+  window.visualViewport.addEventListener("resize", onViewportChange);
 }
 document.body.classList.add("has-game-stage");
 document.body.classList.toggle("is-phone-play", isPhonePlay());

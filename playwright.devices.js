@@ -8,6 +8,20 @@
  *   Playwright has no Apple “flip” preset yet)
  */
 const PHONES = [
+  {
+    name: "phone-galaxy-a54",
+    label: "Galaxy A54 (browser chrome landscape)",
+    use: {
+      browserName: "chromium",
+      isMobile: true,
+      hasTouch: true,
+      defaultBrowserType: "chromium",
+      viewport: { width: 854, height: 360 },
+      deviceScaleFactor: 2.625,
+      userAgent:
+        "Mozilla/5.0 (Linux; Android 14; SM-A546B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36",
+    },
+  },
   { name: "phone-galaxy-a55", device: "Galaxy A55 landscape", label: "Galaxy A55 (Android mid)" },
   { name: "phone-pixel-8", device: "Pixel 8 landscape", label: "Pixel 8" },
   { name: "phone-pixel-8-pro", device: "Pixel 8 Pro landscape", label: "Pixel 8 Pro" },
@@ -47,6 +61,15 @@ const QA_PROJECT_NAMES = ALL_HANDHELDS.map((d) => d.name);
  * @param {import('@playwright/test').Devices} devices
  */
 function toProject(entry, devices) {
+  if (entry.use) {
+    return {
+      name: entry.name,
+      use: {
+        browserName: "chromium",
+        ...entry.use,
+      },
+    };
+  }
   const preset = devices[entry.device];
   if (!preset) {
     throw new Error(`Playwright device preset missing: ${entry.device}`);

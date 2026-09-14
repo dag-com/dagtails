@@ -5008,18 +5008,24 @@ body {
   font-size: 14px;
 }
 
-@media (orientation: portrait) and (pointer: coarse) and (max-width: 900px) {
-  body {
-    overflow: hidden;
-  }
-  .app {
-    filter: blur(8px) saturate(0.85);
-    pointer-events: none;
-    user-select: none;
-  }
-  .rotate-lock {
-    display: flex;
-  }
+html.is-portrait-locked body { overflow: hidden; }
+html.is-portrait-locked .app {
+  filter: blur(8px) saturate(0.85);
+  pointer-events: none;
+  user-select: none;
+}
+html.is-portrait-locked .rotate-lock { display: flex; }
+html[data-expo-shell].is-portrait-locked .rotate-lock { display: none !important; }
+html[data-expo-shell].is-portrait-locked .app {
+  filter: none !important;
+  pointer-events: auto !important;
+  user-select: auto !important;
+}
+html[data-qa-rotate-bypass].is-portrait-locked .rotate-lock { display: none !important; }
+html[data-qa-rotate-bypass].is-portrait-locked .app {
+  filter: none !important;
+  pointer-events: auto !important;
+  user-select: auto !important;
 }
 
 @media (orientation: landscape) {

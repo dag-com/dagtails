@@ -83,6 +83,9 @@ async function gotoHub(page) {
 /** Hide #rotate-lock so landscape automation can tap (portrait tests must not call this). */
 async function clearRotateLock(page) {
   await page.evaluate(() => {
+    const html = document.documentElement;
+    html.setAttribute("data-qa-rotate-bypass", "1");
+    html.classList.remove("is-portrait-locked");
     const el = document.getElementById("rotate-lock");
     if (el) {
       el.style.display = "none";

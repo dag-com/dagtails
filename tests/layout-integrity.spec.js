@@ -271,6 +271,7 @@ test.describe("layout integrity", () => {
   test("splash hero stays inside the stage", async ({ page }) => {
     await seedPlayer(page, { cleared: 0 });
     await page.goto("/");
+    await clearRotateLock(page);
     await page.locator("#screen-splash.is-active").waitFor({ state: "visible", timeout: 15_000 });
     await page.waitForFunction(() => {
       const stage = document.getElementById("game-stage");
@@ -278,13 +279,6 @@ test.describe("layout integrity", () => {
       const r = stage.getBoundingClientRect();
       return r.height > 80 && r.height <= window.innerHeight + 2 && r.width <= window.innerWidth + 2;
     }, null, { timeout: 10_000 });
-    await page.evaluate(() => {
-      const el = document.getElementById("rotate-lock");
-      if (el) {
-        el.style.display = "none";
-        el.style.pointerEvents = "none";
-      }
-    });
 
     const report = await page.evaluate(() => window.measureLayout([
       ["#splash-hero-img", "hero"],
@@ -297,6 +291,45 @@ test.describe("layout integrity", () => {
     expect(report.missing, JSON.stringify(report)).toEqual([]);
     expect(report.outOfBounds, JSON.stringify(report)).toEqual([]);
     expect(report.overflowing, JSON.stringify(report)).toEqual([]);
+  });
+
+  test("stage preserves design aspect ratio (1100:508) and fits centered in viewport", async ({ page }) => {
+    await seedPlayer(page, { cleared: 0 });
+    await gotoHub(page);
+
+    const stageMetrics = await page.evaluate(() => {
+      const stage = document.getElementById("game-stage");
+      if (!stage) return null;
+      const r = stage.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+      const marginLeft = r.left;
+      const marginRight = vw - r.right;
+      const marginTop = r.top;
+      const marginBottom = vh - r.bottom;
+      return {
+        width: r.width,
+        height: r.height,
+        aspect: r.width / r.height,
+        vw,
+        vh,
+        marginLeft,
+        marginRight,
+        marginTop,
+        marginBottom,
+        lrDiff: Math.abs(marginLeft - marginRight),
+        tbDiff: Math.abs(marginTop - marginBottom),
+      };
+    });
+
+    expect(stageMetrics).not.toBeNull();
+    const expectedAspect = 1100 / 508;
+    const ratioDelta = Math.abs(stageMetrics.aspect - expectedAspect) / expectedAspect;
+    expect(ratioDelta).toBeLessThan(0.02);
+    expect(stageMetrics.width).toBeLessThanOrEqual(stageMetrics.vw + 2);
+    expect(stageMetrics.height).toBeLessThanOrEqual(stageMetrics.vh + 2);
+    expect(stageMetrics.lrDiff).toBeLessThanOrEqual(8);
+    expect(stageMetrics.tbDiff).toBeLessThanOrEqual(8);
   });
 
   test("finish screen keeps Menu and Play again in viewport", async ({ page }) => {
