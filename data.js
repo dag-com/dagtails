@@ -157,6 +157,7 @@ export const RECIPES = [
     id: "gin_tonic",
     name: "Gin & Tonic",
     order: "Crisp and clean — a measure of gin, plenty of tonic over ice, with lime.",
+    blurb: "Bright, bitter-sparkling, and ice-cold. A patio classic.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -169,6 +170,7 @@ export const RECIPES = [
     id: "screwdriver",
     name: "Screwdriver",
     order: "The simplest classic — vodka and fresh orange juice over ice.",
+    blurb: "Simple, sunny, and easy-going. Breakfast energy in a tall glass.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -181,6 +183,7 @@ export const RECIPES = [
     id: "cuba_libre",
     name: "Cuba Libre",
     order: "Rum and cola lifted with a squeeze of lime. Built tall over ice.",
+    blurb: "Fizzy, citrus-lifted, and easy to drink all evening.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -194,6 +197,7 @@ export const RECIPES = [
     id: "moscow_mule",
     name: "Moscow Mule",
     order: "Spicy ginger beer, vodka and lime, built over ice. Served long.",
+    blurb: "Spicy, snappy, and copper-cold. A kick of heat with a tart finish.",
     glass: "collins",
     method: "build",
     ingredients: [
@@ -207,6 +211,7 @@ export const RECIPES = [
     id: "jamaican_mule",
     name: "Jamaican Mule",
     order: "Dark rum and lime lengthened with spicy ginger beer. A rum buck.",
+    blurb: "Warmer spice, darker depth, same snappy heat.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -220,6 +225,7 @@ export const RECIPES = [
     id: "tequila_sunrise",
     name: "Tequila Sunrise",
     order: "Tequila and orange juice with grenadine sinking to the bottom.",
+    blurb: "A layered blush from gold to red. Looks like dawn, drinks like brunch.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -233,6 +239,7 @@ export const RECIPES = [
     id: "paloma",
     name: "Paloma",
     order: "Tequila with tart grapefruit, lime and a splash of soda. Mexico's favourite.",
+    blurb: "Tart, blushing, and thirst-quenching. Made for hot weather.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -247,6 +254,7 @@ export const RECIPES = [
     id: "mimosa",
     name: "Mimosa",
     order: "Equal parts sparkling wine and orange juice. Brunch in a glass.",
+    blurb: "Light, sunny, and made for late mornings.",
     glass: "coupe",
     method: "build",
     ingredients: [
@@ -259,6 +267,7 @@ export const RECIPES = [
     id: "bellini",
     name: "Bellini",
     order: "Peach purée topped gently with prosecco. A Venetian icon.",
+    blurb: "Soft orchard fruit with a gentle sparkle.",
     glass: "coupe",
     method: "build",
     ingredients: [
@@ -271,6 +280,7 @@ export const RECIPES = [
     id: "kir_royale",
     name: "Kir Royale",
     order: "A whisper of blackcurrant liqueur lifted by sparkling wine.",
+    blurb: "A dark-berry wink under fine bubbles. Celebration in a flute.",
     glass: "coupe",
     method: "build",
     ingredients: [
@@ -283,6 +293,7 @@ export const RECIPES = [
     id: "black_russian",
     name: "Black Russian",
     order: "Just vodka and coffee liqueur, built over ice. Dark and simple.",
+    blurb: "Night-dark, coffee-leaning, no fuss.",
     glass: "rocks",
     method: "build",
     ingredients: [
@@ -295,6 +306,7 @@ export const RECIPES = [
     id: "white_russian",
     name: "White Russian",
     order: "Vodka and coffee liqueur with a float of cream. The Dude abides.",
+    blurb: "Same night-dark coffee, softened with a creamy top.",
     glass: "rocks",
     method: "build",
     ingredients: [
@@ -308,6 +320,7 @@ export const RECIPES = [
     id: "americano",
     name: "Americano",
     order: "Red bitter and sweet vermouth lengthened with soda. A bittersweet long drink.",
+    blurb: "Bittersweet, long, and unhurried. An afternoon sipper.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -321,6 +334,7 @@ export const RECIPES = [
     id: "garibaldi",
     name: "Garibaldi",
     order: "Red bitter lengthened with orange juice. Milan's bittersweet highball.",
+    blurb: "Bittersweet and glowing. A slow morning aperitivo.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -333,6 +347,7 @@ export const RECIPES = [
     id: "tom_collins",
     name: "Tom Collins",
     order: "Gin, lemon and sugar lengthened with soda over ice. Tall and refreshing.",
+    blurb: "Tall, tart, and garden-party clean.",
     glass: "collins",
     method: "build",
     ingredients: [
@@ -347,6 +362,7 @@ export const RECIPES = [
     id: "sex_on_the_beach",
     name: "Sex on the Beach",
     order: "Vodka and peach schnapps with orange and cranberry. Fruity and easy.",
+    blurb: "Juicy, tropical-sweet, and unapologetically fun.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -361,6 +377,7 @@ export const RECIPES = [
     id: "blue_lagoon",
     name: "Blue Lagoon",
     order: "Vodka and electric-blue curaçao lengthened with lemon and soda.",
+    blurb: "Electric blue, candy-citrus, and a little showy.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -375,6 +392,7 @@ export const RECIPES = [
     id: "bramble",
     name: "Bramble",
     order: "Gin sour built over crushed ice, drizzled with berry liqueur.",
+    blurb: "Berry-drizzled, hedgerow-tart, like late summer.",
     glass: "rocks",
     method: "build",
     ingredients: [
@@ -389,6 +407,7 @@ export const RECIPES = [
     id: "bloody_mary",
     name: "Bloody Mary",
     order: "Vodka and tomato juice with lemon and a few dashes of hot sauce. Savoury and bold.",
+    blurb: "Savoury, spicy, and unapologetically breakfast.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -403,6 +422,7 @@ export const RECIPES = [
     id: "godfather",
     name: "Godfather",
     order: "Scotch sweetened with a measure of amaretto, over ice. Two ingredients, big flavour.",
+    blurb: "Two-note, nutty-rich, and quietly strong.",
     glass: "rocks",
     method: "build",
     ingredients: [
@@ -415,6 +435,7 @@ export const RECIPES = [
     id: "long_island",
     name: "Long Island Iced Tea",
     order: "Five spirits, lemon and a top of cola. Deceptively easy-drinking — go careful.",
+    blurb: "Dangerously easy. Tastes like a long drink, hits like a round of them.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -434,6 +455,7 @@ export const RECIPES = [
     id: "daiquiri",
     name: "Daiquiri",
     order: "A crisp, tart classic — clean rum, lime and a touch of sweetness, served up.",
+    blurb: "Crisp, tart, and deceptively simple.",
     glass: "coupe",
     method: "shake",
     ingredients: [
@@ -447,6 +469,7 @@ export const RECIPES = [
     id: "margarita",
     name: "Margarita",
     order: "Tequila, orange liqueur and lime — shaken, with a salted rim.",
+    blurb: "Tart, salted-rim, and sun-bright. A patio classic with a kick.",
     glass: "margarita",
     method: "shake",
     ingredients: [
@@ -460,6 +483,7 @@ export const RECIPES = [
     id: "gimlet",
     name: "Gimlet",
     order: "Gin sharpened with lime and a little sugar, shaken and served up.",
+    blurb: "Sharp, green-citrus, and short. A precise little classic.",
     glass: "coupe",
     method: "shake",
     ingredients: [
@@ -473,6 +497,7 @@ export const RECIPES = [
     id: "whiskey_sour",
     name: "Whiskey Sour",
     order: "Bourbon, lemon and sugar with a silky egg-white foam. Shaken hard.",
+    blurb: "Silky foam over a tart, warming sip.",
     glass: "rocks",
     method: "shake",
     ingredients: [
@@ -487,6 +512,7 @@ export const RECIPES = [
     id: "amaretto_sour",
     name: "Amaretto Sour",
     order: "Nutty amaretto balanced by lemon and a glossy egg-white foam.",
+    blurb: "Nutty-sweet meeting a tart, foamy top.",
     glass: "rocks",
     method: "shake",
     ingredients: [
@@ -501,6 +527,7 @@ export const RECIPES = [
     id: "cosmopolitan",
     name: "Cosmopolitan",
     order: "Citron vodka, triple sec, lime and a splash of cranberry — shaken and served up.",
+    blurb: "Pink, urbane, and a little sharp. City-night energy.",
     glass: "martini",
     method: "shake",
     ingredients: [
@@ -515,6 +542,7 @@ export const RECIPES = [
     id: "french_75",
     name: "French 75",
     order: "Gin, lemon and sugar shaken cold, then topped with sparkling wine. Elegant.",
+    blurb: "Elegant sparkle with a citrus snap.",
     glass: "coupe",
     method: "shake",
     ingredients: [
@@ -529,6 +557,7 @@ export const RECIPES = [
     id: "clover_club",
     name: "Clover Club",
     order: "Gin, lemon and raspberry shaken with egg white to a pink, frothy finish.",
+    blurb: "Pink, frothy, and a little old-world.",
     glass: "coupe",
     method: "shake",
     ingredients: [
@@ -543,6 +572,7 @@ export const RECIPES = [
     id: "pisco_sour",
     name: "Pisco Sour",
     order: "Pisco, lemon and sugar shaken with egg white, finished with bitters on the foam.",
+    blurb: "Foamy, tart, and dotted like a tiny constellation.",
     glass: "coupe",
     method: "shake",
     ingredients: [
@@ -558,6 +588,7 @@ export const RECIPES = [
     id: "aviation",
     name: "Aviation",
     order: "Gin, maraschino and a touch of violette with lemon — a pale lavender sour.",
+    blurb: "Pale lavender, floral, and a little mysterious.",
     glass: "coupe",
     method: "shake",
     ingredients: [
@@ -572,6 +603,7 @@ export const RECIPES = [
     id: "corpse_reviver",
     name: "Corpse Reviver #2",
     order: "Equal parts gin, triple sec, dry vermouth and lemon with an absinthe rinse.",
+    blurb: "A bright, herbal wake-up call. A little dangerous.",
     glass: "coupe",
     method: "shake",
     ingredients: [
@@ -589,6 +621,7 @@ export const RECIPES = [
     id: "negroni",
     name: "Negroni",
     order: "Equal parts, bittersweet and stirred over ice. A bracing aperitivo.",
+    blurb: "Bittersweet, bracing, and ruby-dark. An aperitivo legend.",
     glass: "rocks",
     method: "stir",
     ingredients: [
@@ -602,6 +635,7 @@ export const RECIPES = [
     id: "boulevardier",
     name: "Boulevardier",
     order: "A Negroni's whiskey cousin — bourbon, red bitter and sweet vermouth, stirred.",
+    blurb: "The same bittersweet bite, warmer and rounder.",
     glass: "rocks",
     method: "stir",
     ingredients: [
@@ -615,6 +649,7 @@ export const RECIPES = [
     id: "sidecar",
     name: "Sidecar",
     order: "Cognac, triple sec and lemon — shaken cold in a coupe. A Prohibition classic.",
+    blurb: "Silky citrus. A Prohibition-era classic.",
     glass: "coupe",
     method: "shake",
     ingredients: [
@@ -628,6 +663,7 @@ export const RECIPES = [
     id: "rob_roy",
     name: "Rob Roy",
     order: "A Manhattan made with Scotch — stirred with sweet vermouth and bitters.",
+    blurb: "Velvet, spiced, and a little smoky. A Highland nightcap.",
     glass: "coupe",
     method: "stir",
     ingredients: [
@@ -641,6 +677,7 @@ export const RECIPES = [
     id: "rusty_nail",
     name: "Rusty Nail",
     order: "Scotch sweetened with honeyed Drambuie, stirred down over ice.",
+    blurb: "Honeyed, herbal, and slow. A fireside sipper.",
     glass: "rocks",
     method: "stir",
     ingredients: [
@@ -653,6 +690,7 @@ export const RECIPES = [
     id: "old_fashioned",
     name: "Old Fashioned",
     order: "Bourbon, a little sugar and bitters, stirred down over ice. Timeless.",
+    blurb: "Warm, bittersweet, and timeless. One slow drink.",
     glass: "rocks",
     method: "stir",
     ingredients: [
@@ -666,6 +704,7 @@ export const RECIPES = [
     id: "manhattan",
     name: "Manhattan",
     order: "Rye and sweet vermouth, stirred down with a couple dashes of bitters, served up.",
+    blurb: "Velvet, cherry-dark, and serious.",
     glass: "coupe",
     method: "stir",
     ingredients: [
@@ -679,6 +718,7 @@ export const RECIPES = [
     id: "sazerac",
     name: "Sazerac",
     order: "Rye and sugar stirred with bitters in an absinthe-rinsed glass. New Orleans royalty.",
+    blurb: "Anise-kissed and solemn. New Orleans in a glass.",
     glass: "rocks",
     method: "stir",
     ingredients: [
@@ -693,6 +733,7 @@ export const RECIPES = [
     id: "dry_martini",
     name: "Dry Martini",
     order: "Gin kissed with dry vermouth, stirred ice-cold and served up. Pure finesse.",
+    blurb: "Ice-cold, bone-dry, and all finesse.",
     glass: "martini",
     method: "stir",
     ingredients: [
@@ -707,6 +748,7 @@ export const RECIPES = [
     id: "mojito",
     name: "Mojito",
     order: "Muddle mint with lime and sugar, build over ice with rum, top with soda.",
+    blurb: "Mint-cool, sparkling, and made for heat.",
     glass: "collins",
     method: "muddle",
     ingredients: [
@@ -722,6 +764,7 @@ export const RECIPES = [
     id: "caipirinha",
     name: "Caipirinha",
     order: "Muddle lime and sugar, then drown in cachaça over crushed ice. Brazil's national drink.",
+    blurb: "Rustic, loud, and sun-baked. Street-carnival energy.",
     glass: "rocks",
     method: "muddle",
     ingredients: [
@@ -735,6 +778,7 @@ export const RECIPES = [
     id: "mint_julep",
     name: "Mint Julep",
     order: "Muddle mint with sugar, pack with crushed ice and pour over bourbon. Derby day.",
+    blurb: "Frosted, mint-cool, and ceremonial.",
     glass: "rocks",
     method: "muddle",
     ingredients: [
@@ -750,6 +794,7 @@ export const RECIPES = [
     id: "mai_tai",
     name: "Mai Tai",
     order: "Two rums, orange liqueur, almond orgeat and lime — shaken. Tiki done right.",
+    blurb: "Tropical, tart, and tiki-proud.",
     glass: "rocks",
     method: "shake",
     ingredients: [
@@ -765,6 +810,7 @@ export const RECIPES = [
     id: "bahama_mama",
     name: "Bahama Mama",
     order: "White and dark rum shaken with pineapple, orange and grenadine.",
+    blurb: "Vacation-sweet, fruit-forward, and oversized.",
     glass: "hurricane",
     method: "shake",
     ingredients: [
@@ -780,6 +826,7 @@ export const RECIPES = [
     id: "singapore_sling",
     name: "Singapore Sling",
     order: "Gin, cherry liqueur and a tangle of pineapple, lime and grenadine. A tropical epic.",
+    blurb: "A long tropical epic. Floral, fruity, and a little theatrical.",
     glass: "hurricane",
     method: "shake",
     ingredients: [
@@ -796,6 +843,7 @@ export const RECIPES = [
     id: "hurricane_cocktail",
     name: "Hurricane",
     order: "Light and dark rum with passion fruit, citrus and grenadine. A New Orleans storm.",
+    blurb: "A New Orleans storm: loud, fruity, and oversized.",
     glass: "hurricane",
     method: "shake",
     ingredients: [
@@ -812,6 +860,7 @@ export const RECIPES = [
     id: "pina_colada",
     name: "Piña Colada",
     order: "Rum, coconut cream and pineapple, blended frozen. A beach in a glass.",
+    blurb: "Creamy, tropical, and unhurried. A beach in a glass.",
     glass: "hurricane",
     method: "blend",
     ingredients: [
@@ -825,6 +874,7 @@ export const RECIPES = [
     id: "espresso_martini",
     name: "Espresso Martini",
     order: "Vodka, coffee liqueur and fresh espresso — shaken hard for a silky foam.",
+    blurb: "Coffee-forward, silky foam, late-night wake-up.",
     glass: "martini",
     method: "shake",
     ingredients: [
@@ -839,6 +889,7 @@ export const RECIPES = [
     id: "penicillin",
     name: "Penicillin",
     order: "Scotch with lemon and honey for a modern, smoky-sweet sour. Shaken.",
+    blurb: "Smoky-sweet and modern. A cold remedy in name only.",
     glass: "rocks",
     method: "shake",
     ingredients: [
@@ -860,6 +911,7 @@ export const MOCKTAILS = [
     id: "virgin_sunrise",
     name: "Virgin Sunrise",
     order: "Orange juice with grenadine sinking to the bottom — a sunrise in a glass.",
+    blurb: "A layered blush from gold to red. Sunrise in a glass, no bite.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -872,6 +924,7 @@ export const MOCKTAILS = [
     id: "roy_rogers",
     name: "Roy Rogers",
     order: "Cola with a splash of grenadine and a cherry. A classic kids' favourite.",
+    blurb: "Fizzy, candy-red, and soda-fountain sweet.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -884,6 +937,7 @@ export const MOCKTAILS = [
     id: "shirley_temple",
     name: "Shirley Temple",
     order: "Fizzy ginger ale with grenadine and a cocktail cherry.",
+    blurb: "Sparkling, candy-red, and made for a celebration.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -896,6 +950,7 @@ export const MOCKTAILS = [
     id: "virgin_pina_colada",
     name: "Virgin Piña Colada",
     order: "Pineapple and coconut cream blended frozen. A tropical treat, no rum.",
+    blurb: "Creamy tropical freeze, lighter on the kick.",
     glass: "hurricane",
     method: "blend",
     ingredients: [
@@ -908,6 +963,7 @@ export const MOCKTAILS = [
     id: "fresh_lemonade",
     name: "Fresh Lemonade",
     order: "Fresh lemon and sugar lengthened with soda over ice. Crisp and simple.",
+    blurb: "Tart, sparkling, and porch-simple.",
     glass: "collins",
     method: "build",
     ingredients: [
@@ -921,6 +977,7 @@ export const MOCKTAILS = [
     id: "ginger_fizz",
     name: "Ginger Fizz",
     order: "Zingy ginger ale brightened with lime and a touch of sugar.",
+    blurb: "Spicy-sparkling with a citrus snap.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -934,6 +991,7 @@ export const MOCKTAILS = [
     id: "berry_fizz",
     name: "Berry Fizz",
     order: "Raspberry syrup with lemon and soda — a bright, berry sparkler.",
+    blurb: "Bright berry sparkle. Picnic energy.",
     glass: "collins",
     method: "build",
     ingredients: [
@@ -947,6 +1005,7 @@ export const MOCKTAILS = [
     id: "virgin_mary",
     name: "Virgin Mary",
     order: "Savoury tomato juice with lemon and a few dashes of hot sauce. Bold and spicy.",
+    blurb: "Savoury, spicy, and bold — brunch without the buzz.",
     glass: "highball",
     method: "build",
     ingredients: [
@@ -960,6 +1019,7 @@ export const MOCKTAILS = [
     id: "virgin_mojito",
     name: "Virgin Mojito",
     order: "Muddle mint with lime and sugar, top with soda. Refreshing, no rum.",
+    blurb: "Mint-cool and sparkling. Garden-heat energy.",
     glass: "collins",
     method: "muddle",
     ingredients: [
@@ -974,6 +1034,7 @@ export const MOCKTAILS = [
     id: "pussyfoot",
     name: "Pussyfoot",
     order: "Orange, lemon and lime shaken with grenadine. A classic temperance cocktail.",
+    blurb: "Citrus-sunset. A temperance-era classic.",
     glass: "highball",
     method: "shake",
     ingredients: [
@@ -988,6 +1049,7 @@ export const MOCKTAILS = [
     id: "tropical_cooler",
     name: "Tropical Cooler",
     order: "Pineapple, orange and passion fruit shaken with lime. A holiday cooler.",
+    blurb: "Holiday fruit, long and cooling.",
     glass: "hurricane",
     method: "shake",
     ingredients: [
@@ -1002,6 +1064,7 @@ export const MOCKTAILS = [
     id: "nojito_berry",
     name: "Berry Nojito",
     order: "Muddle mint with lime and raspberry syrup, top with soda. A berry twist.",
+    blurb: "Mint-cool with a berry twist.",
     glass: "collins",
     method: "muddle",
     ingredients: [
@@ -1022,6 +1085,7 @@ export const SHOTS = [
     id: "kamikaze",
     name: "Kamikaze",
     order: "Vodka, triple sec and lime — shaken and served in one sharp hit.",
+    blurb: "One sharp, citrus hit. Fast and loud.",
     glass: "shot",
     method: "shake",
     ingredients: [
@@ -1035,6 +1099,7 @@ export const SHOTS = [
     id: "lemon_drop_shot",
     name: "Lemon Drop",
     order: "Citron vodka with lemon and sugar — a zingy, sweet-tart shot.",
+    blurb: "Sweet-tart and zingy. A candy-coated punch.",
     glass: "shot",
     method: "shake",
     ingredients: [
@@ -1048,6 +1113,7 @@ export const SHOTS = [
     id: "b52",
     name: "B-52",
     order: "Layered coffee liqueur, Irish cream and triple sec — pour gently to keep the bands.",
+    blurb: "Three bands of dessert. A layered little show.",
     glass: "shot",
     method: "build",
     ingredients: [
@@ -1061,6 +1127,7 @@ export const SHOTS = [
     id: "green_tea_shot",
     name: "Green Tea Shot",
     order: "Whiskey, peach schnapps and lime topped with a splash of soda. Tastes like green tea.",
+    blurb: "Soft tea-like, peachy, and gone in one.",
     glass: "shot",
     method: "shake",
     ingredients: [

@@ -28,6 +28,8 @@ const EMPTY: HubSnapshot = {
   mascotFloor: "8%",
   hubBgSize: "175%",
   hubBgPos: "20% 72%",
+  prototypeOn: false,
+  tips: 0,
 };
 
 function run(action:
@@ -126,6 +128,16 @@ export function HubScreen() {
             <span className="hub-chip">
               ⭐ <span id="hero-stars-total">{snap.stars}</span>
             </span>
+            {snap.prototypeOn ? (
+              <>
+                <span className="hub-chip hub-chip-proto" id="hub-chip-proto">
+                  PROTO
+                </span>
+                <span className="hub-chip" id="hub-chip-tips">
+                  💵 <span id="hero-tips-total">{snap.tips}</span>
+                </span>
+              </>
+            ) : null}
             <button
               id="btn-settings"
               className="hub-icon-btn"
@@ -144,6 +156,13 @@ export function HubScreen() {
           style={{ display: snap.mocktailMode ? undefined : "none" }}
         >
           🧃 Mocktail mode — alcohol-free menu
+        </p>
+        <p
+          className="proto-banner"
+          id="proto-banner"
+          style={{ display: snap.prototypeOn ? undefined : "none" }}
+        >
+          Prototype economy — tips, Cull, Extra shift. Recipe peeks cost points.
         </p>
 
         <div className="hub-mid">

@@ -25,6 +25,8 @@ export type HubSnapshot = {
   mascotFloor: string;
   hubBgSize: string;
   hubBgPos: string;
+  prototypeOn: boolean;
+  tips: number;
 };
 
 export type HubActions = {

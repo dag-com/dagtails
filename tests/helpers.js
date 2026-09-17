@@ -16,7 +16,7 @@ const PROFILE = {
 
 /**
  * @param {import('@playwright/test').Page} page
- * @param {{ cleared?: number, seenTiers?: Record<string, number>, introSeen?: boolean, cotdId?: string, profile?: Partial<typeof PROFILE> }} [opts]
+ * @param {{ cleared?: number, seenTiers?: Record<string, number>, introSeen?: boolean, cotdId?: string, profile?: Partial<typeof PROFILE>, prototype?: boolean }} [opts]
  */
 async function seedPlayer(page, opts = {}) {
   const cleared = opts.cleared ?? 0;
@@ -24,9 +24,10 @@ async function seedPlayer(page, opts = {}) {
   const seenTiers = opts.seenTiers ?? { Guess: 1 };
   const introSeen = opts.introSeen !== false;
   const cotdId = opts.cotdId || null;
+  const prototype = !!opts.prototype;
   const profile = { ...PROFILE, ...(opts.profile || {}) };
   await page.addInitScript(
-    ({ profile, cleared: c, seenTiers: tiers, introSeen: seen, cotdId: dailyId }) => {
+    ({ profile, cleared: c, seenTiers: tiers, introSeen: seen, cotdId: dailyId, prototype: proto }) => {
       localStorage.setItem("dagtails_migrated", "1");
       if (seen) localStorage.setItem("dagtails_intro_seen", "1");
       else localStorage.removeItem("dagtails_intro_seen");
@@ -41,6 +42,12 @@ async function seedPlayer(page, opts = {}) {
         })
       );
       localStorage.setItem("dagtails_settings", JSON.stringify({ sound: false }));
+      if (proto) {
+        localStorage.setItem("dagtails_prototype", "1");
+        localStorage.setItem("dagtails_tips", "40");
+      } else {
+        localStorage.removeItem("dagtails_prototype");
+      }
       if (dailyId) {
         localStorage.setItem("dagtails_cotd", JSON.stringify({
           date: new Date().toISOString().slice(0, 10),
@@ -51,7 +58,7 @@ async function seedPlayer(page, opts = {}) {
         }));
       }
     },
-    { profile, cleared, seenTiers, introSeen, cotdId }
+    { profile, cleared, seenTiers, introSeen, cotdId, prototype }
   );
 }
 

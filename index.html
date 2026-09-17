@@ -198,6 +198,11 @@
             <span class="set-label">Bar ambience</span>
             <button id="set-ambient" class="set-toggle" aria-pressed="false">Off</button>
           </div>
+          <div class="set-row">
+            <span class="set-label">Economy prototype</span>
+            <button id="set-prototype" class="set-toggle" aria-pressed="false" type="button">Off</button>
+          </div>
+          <p class="set-proto-note">Off = live game. On = tips, Cull the well, Extra shift, and recipe peeks that cost points. Same as adding ?proto=1 to the URL.</p>
 
           <div class="set-account">
             <p class="set-account-label" id="set-account-who"></p>
@@ -304,6 +309,10 @@
           </div>
           <div class="endless-hud" id="endless-hud"></div>
           <div class="points" id="points-counter">★ 0 pts</div>
+          <div class="proto-boost" id="proto-boost" hidden>
+            <span class="proto-boost-tips" id="proto-boost-tips">0 tips</span>
+            <button type="button" id="btn-cull" class="btn btn-ghost btn-sm">Cull the well · 15</button>
+          </div>
         </div>
 
         <!-- Step tracker (hidden when the flow is short) -->
@@ -337,6 +346,7 @@
                 <div class="ticket-face ticket-face--back" aria-hidden="true">
                   <div class="ticket-head">
                     <span class="ticket-label">Recipe card</span>
+                    <span class="ticket-peek-cost" id="ticket-peek-cost" hidden>Hint — costs points</span>
                   </div>
                   <ul class="ticket-recipe" id="ticket-recipe"></ul>
                   <p class="ticket-flip-hint">◂ Flip</p>
@@ -643,6 +653,21 @@
         </div>
       </div>
 
+      <div id="modal-hint" class="modal">
+        <div class="modal-box">
+          <h3>Peek at the recipe?</h3>
+          <p class="name-hint">Flipping the ticket shows the spec and costs about a third of this drink’s points. You cannot earn 3 stars after a hint.</p>
+          <label class="pf-consent" for="hint-dont-ask">
+            <input id="hint-dont-ask" type="checkbox" />
+            <span>Don’t show this message again</span>
+          </label>
+          <div class="modal-actions">
+            <button id="btn-hint-cancel" class="btn btn-ghost" type="button">Keep guessing</button>
+            <button id="btn-hint-confirm" class="btn btn-primary" type="button">Show recipe</button>
+          </div>
+        </div>
+      </div>
+
       <!-- ============================== NAME MODAL ============================== -->
       <div id="modal-name" class="modal">
         <div class="modal-box">
@@ -685,6 +710,7 @@
         <span class="dbg-label">DEBUG</span>
         <button id="dbg-diagnostics" class="dbg-btn" title="View local usage diagnostics">📊 Diagnostics</button>
         <button id="dbg-mix-layout" class="dbg-btn" title="Toggle Mixologist verdict layout (UX vs previous stacked card)">Mix result: UX</button>
+        <button id="dbg-prototype" class="dbg-btn" title="Toggle economy prototype">Proto: Off</button>
         <button id="dbg-reset" class="dbg-btn dbg-danger" title="Wipe identity & progress, restart fresh">Reset everything</button>
       </div>
     </div>

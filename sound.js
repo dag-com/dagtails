@@ -173,6 +173,11 @@ export const Sound = {
     this._tone(330, 0.3, { type: "sawtooth", gain: 0.16, slideTo: 160 });
     this._tone(247, 0.4, { type: "sawtooth", gain: 0.14, slideTo: 120, when: 0.12 });
   },
+  alarm() {
+    this._tone(880, 0.12, { type: "square", gain: 0.18 });
+    this._tone(220, 0.28, { type: "sawtooth", gain: 0.2, when: 0.08, slideTo: 110 });
+    this._tone(880, 0.12, { type: "square", gain: 0.16, when: 0.22 });
+  },
   coin() {
     this._tone(880, 0.08, { type: "square", gain: 0.12 });
     this._tone(1318.5, 0.12, { type: "square", gain: 0.12, when: 0.07 });

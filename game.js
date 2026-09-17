@@ -52,6 +52,8 @@ const state = {
   complexity: null, // active complexity profile (portions/glass/method/menu)
   menuIds: null, // curated ingredient menu (Set of ids) or null for full pantry
   editingIngredientId: null, // Mixologist/Pour: one catalog chip expanded at a time
+  ticketHintUsed: false,
+  cullUsed: false,
 };
 
 const STRICTNESS = "balanced";
@@ -128,6 +130,239 @@ function getSettings() {
   catch (e) { return { sound: true }; }
 }
 function setSettings(s) { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* ignore */ } }
+
+// Economy / ticket prototype. Live game is the default. Open with ?proto=1
+// (or Settings → Economy prototype) to try tips, Cull, Extra shift, and
+// recipe-peek penalties without replacing the shipped loop.
+const PROTO_KEY = "dagtails_prototype";
+const HINT_WARN_KEY = "dagtails_hint_warn_ack";
+const TIPS_KEY = "dagtails_tips";
+const CULL_COST = 15;
+const CONTINUE_COST = 25;
+const STARTING_TIPS = 40;
+const HINT_PENALTY_FRAC = 0.35;
+
+function protoQueryOverride() {
+  try {
+    const q = new URLSearchParams(location.search);
+    const raw = q.get("proto") || q.get("prototype");
+    if (raw === "1" || raw === "on" || raw === "true") return true;
+    if (raw === "0" || raw === "off" || raw === "false") return false;
+  } catch (e) { /* ignore */ }
+  return null;
+}
+function isPrototype() {
+  const q = protoQueryOverride();
+  if (q != null) return q;
+  try { return localStorage.getItem(PROTO_KEY) === "1"; } catch (e) { return false; }
+}
+function setPrototype(on) {
+  try { localStorage.setItem(PROTO_KEY, on ? "1" : "0"); } catch (e) { /* ignore */ }
+  applyPrototypeChrome();
+}
+function bootPrototypeFlag() {
+  // Query wins for this load only. Do not write localStorage so / and /?proto=1
+  // stay distinct after visiting both.
+  applyPrototypeChrome();
+}
+function getTips() {
+  try {
+    const raw = localStorage.getItem(TIPS_KEY);
+    if (raw == null || raw === "") return STARTING_TIPS;
+    const n = parseInt(raw, 10);
+    return Number.isFinite(n) ? Math.max(0, n) : STARTING_TIPS;
+  } catch (e) { return STARTING_TIPS; }
+}
+function setTips(n) {
+  try { localStorage.setItem(TIPS_KEY, String(Math.max(0, Math.round(n)))); } catch (e) { /* ignore */ }
+  syncProtoBoostTray();
+  try { refreshHub(); } catch (e) { /* hub may not be ready */ }
+}
+function addTips(n) {
+  if (!isPrototype() || !n) return 0;
+  const next = getTips() + Math.round(n);
+  setTips(next);
+  return n;
+}
+function spendTips(n) {
+  if (!isPrototype()) return false;
+  const cost = Math.round(n);
+  if (getTips() < cost) return false;
+  setTips(getTips() - cost);
+  return true;
+}
+function protoTicketRules() {
+  return isPrototype() && state.mode !== "training" && state.mode !== "mixologist";
+}
+function ticketFaceCopy(recipe) {
+  if (!recipe) return "";
+  if (protoTicketRules() && recipe.blurb) return recipe.blurb;
+  return recipe.order || "";
+}
+function setOrderTicketCopy(recipe) {
+  const name = $("#order-name");
+  const desc = $("#order-desc");
+  if (name) name.textContent = recipe && recipe.name ? recipe.name : "";
+  if (desc) desc.textContent = ticketFaceCopy(recipe);
+}
+function hintWarnAcked() {
+  try { return localStorage.getItem(HINT_WARN_KEY) === "1"; } catch (e) { return false; }
+}
+function setHintWarnAcked() {
+  try { localStorage.setItem(HINT_WARN_KEY, "1"); } catch (e) { /* ignore */ }
+}
+function resetDrinkPrototype() {
+  state.ticketHintUsed = false;
+  state.cullUsed = false;
+  const ticket = $("#order-ticket");
+  if (ticket) ticket.classList.remove("is-peek-alarm");
+  syncProtoBoostTray();
+}
+function applyPrototypeChrome() {
+  const on = isPrototype();
+  document.documentElement.classList.toggle("is-prototype", on);
+  const btn = $("#set-prototype");
+  if (btn) {
+    btn.textContent = on ? "On" : "Off";
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  const dbg = $("#dbg-prototype");
+  if (dbg) dbg.textContent = on ? "Proto: On" : "Proto: Off";
+  const cost = $("#ticket-peek-cost");
+  if (cost) cost.hidden = !protoTicketRules();
+  const hint = $("#order-ticket .ticket-flip-hint");
+  if (hint && protoTicketRules()) hint.textContent = "Hint ▸";
+  else if (hint && !$("#order-ticket")?.classList.contains("is-no-flip")) {
+    if (hint.textContent && /hint/i.test(hint.textContent)) hint.textContent = "Flip ▸";
+  }
+  const recipe = typeof currentRecipe === "function" ? currentRecipe() : null;
+  if (recipe && $("#order-desc") && $("#screen-game")?.classList.contains("is-active")) {
+    setOrderTicketCopy(recipe);
+  }
+  syncProtoBoostTray();
+  try { refreshHub(); } catch (e) { /* ignore */ }
+}
+function syncProtoBoostTray() {
+  const tray = $("#proto-boost");
+  if (!tray) return;
+  const show = isPrototype() && state.mode !== "mixologist" && state.mode !== "training";
+  tray.hidden = !show;
+  const tipsEl = $("#proto-boost-tips");
+  if (tipsEl) tipsEl.textContent = `${getTips()} tips`;
+  const cull = $("#btn-cull");
+  if (cull) {
+    const can = show && !state.cullUsed && getTips() >= CULL_COST;
+    cull.disabled = !can;
+    cull.textContent = state.cullUsed ? "Well culled" : `Cull the well · ${CULL_COST}`;
+  }
+}
+function applyHintPenalty(result) {
+  if (!result || !protoTicketRules() || !state.ticketHintUsed) return result;
+  const cut = Math.round((result.stagePoints || 0) * HINT_PENALTY_FRAC);
+  result.hintUsed = true;
+  result.hintPenalty = cut;
+  result.stagePoints = Math.max(0, (result.stagePoints || 0) - cut);
+  if (result.stars > 2) result.stars = 2;
+  return result;
+}
+function payoutPrototypeTips(result) {
+  if (!isPrototype() || !result || state.mode === "training") return;
+  let pay = 0;
+  if (result.stars >= 3) pay = 12;
+  else if (result.stars >= 1) pay = 4;
+  if (state.mode === "cotd" && result.stars >= 1) pay += 8;
+  if (pay) {
+    addTips(pay);
+    result.tipsEarned = pay;
+  }
+}
+function alarmTicketPeek() {
+  const ticket = $("#order-ticket");
+  if (!ticket) return;
+  ticket.classList.remove("is-peek-alarm");
+  void ticket.offsetWidth;
+  ticket.classList.add("is-peek-alarm");
+  Sound.alarm();
+  window.clearTimeout(alarmTicketPeek._t);
+  alarmTicketPeek._t = window.setTimeout(() => ticket.classList.remove("is-peek-alarm"), 900);
+}
+function revealRecipePeek() {
+  if (protoTicketRules() && !state.ticketHintUsed) state.ticketHintUsed = true;
+  setTicketFlipped(true);
+  if (protoTicketRules()) alarmTicketPeek();
+  else Sound.click();
+}
+function requestRecipePeek() {
+  if (!protoTicketRules()) {
+    Sound.click();
+    setTicketFlipped(true);
+    return;
+  }
+  if (state.ticketHintUsed || hintWarnAcked()) {
+    revealRecipePeek();
+    return;
+  }
+  const modal = $("#modal-hint");
+  if (!modal) {
+    revealRecipePeek();
+    return;
+  }
+  Sound.click();
+  modal.classList.add("is-open");
+  $("#btn-hint-confirm")?.focus();
+}
+function closeHintModal() {
+  $("#modal-hint")?.classList.remove("is-open");
+}
+function cullTheWell() {
+  if (!isPrototype() || state.cullUsed) return;
+  if (!spendTips(CULL_COST)) {
+    showToast("Not enough tips for Cull.");
+    return;
+  }
+  const recipe = currentRecipe();
+  if (!recipe) {
+    addTips(CULL_COST);
+    return;
+  }
+  const required = new Set((recipe.ingredients || []).map((i) => i.id));
+  const added = new Set((state.build.ingredients || []).map((i) => i.id));
+  const pantry = isUnderage() ? INGREDIENTS.filter((i) => (i.mx?.abv || 0) === 0) : INGREDIENTS;
+  const visible = state.menuIds
+    ? [...state.menuIds].map((id) => INGREDIENT_BY_ID[id]).filter(Boolean)
+    : pantry;
+  const decoys = visible.filter((i) => i && !required.has(i.id) && !added.has(i.id));
+  const drop = shuffleArr(decoys).slice(0, 3);
+  if (!drop.length) {
+    addTips(CULL_COST);
+    showToast("No decoys left to hide.");
+    return;
+  }
+  const keep = new Set(visible.filter((i) => !drop.some((d) => d.id === i.id)).map((i) => i.id));
+  required.forEach((id) => keep.add(id));
+  added.forEach((id) => keep.add(id));
+  state.menuIds = keep;
+  state.cullUsed = true;
+  fillCatalog();
+  Sound.coin();
+  showToast(`Hid ${drop.length} decoy bottle${drop.length === 1 ? "" : "s"}.`);
+  syncProtoBoostTray();
+  track("proto_cull", { dropped: drop.length, cost: CULL_COST });
+}
+function extraShiftContinue() {
+  if (!isPrototype() || state.mode !== "endless" || state.lives > 0) return false;
+  if (!spendTips(CONTINUE_COST)) {
+    showToast("Not enough tips for an extra shift.");
+    return false;
+  }
+  state.lives = 1;
+  lastResult = null;
+  Sound.coin();
+  showToast("Extra shift — one more life.");
+  loadEndless(true);
+  track("proto_continue", { cost: CONTINUE_COST });
+  return true;
+}
 
 // Mixologist verdict layout. Default is the two-column UX card. Set
 // localStorage dagtails_mix_result_layout=legacy, or open with ?mixLegacy=1,
@@ -393,6 +628,8 @@ function scoreProps(result) {
     pour_near: pours.filter((x) => x.kind === "near").length,
     pour_miss: pours.filter((x) => x.kind === "bad").length,
     steps_back: stepsBack,
+    hint_used: !!(result && result.hintUsed),
+    proto: isPrototype() ? 1 : 0,
   };
 }
 
@@ -644,6 +881,8 @@ function buildHubSnapshot() {
     badgesLabel: `🏅 Badges (${getEarned().length}/${BADGES.length})`,
     bestLine: bestScoreCopy(),
     footerHtml: `🍸 ${drinkPool().length} ${noun} &nbsp;•&nbsp; ${MEASURE_ENABLED ? "precision pours" : "spot the ingredients"} &nbsp;•&nbsp; earn your stars`,
+    prototypeOn: isPrototype(),
+    tips: getTips(),
     ...currentHubVenueChrome(),
   };
 }
@@ -1007,6 +1246,7 @@ function recordResult(result) {
   p.served = (p.served || 0) + 1;
   if (result.stars === 3) p.perfects = (p.perfects || 0) + 1;
   setProgress(p);
+  payoutPrototypeTips(result);
   checkBadges();
 }
 
@@ -1028,6 +1268,10 @@ function recordPlayDay() {
   d.days = (d.days || 0) + 1;
   d.last = t;
   setDaily(d);
+  if (isPrototype() && (d.streak === 3 || d.streak === 7)) {
+    addTips(d.streak === 7 ? 50 : 20);
+    showToast(d.streak === 7 ? "+50 tips · 7-day streak" : "+20 tips · 3-day streak");
+  }
   checkBadges();
   return d;
 }
@@ -1283,12 +1527,12 @@ function loadCotd() {
   applyVenueChrome(venueForStage(getMap().cleared || 0)?.venue);
   $("#stage-pill").textContent = "🍹 Daily";
   $("#diff-pill").textContent = state.complexity.label;
-  $("#order-name").textContent = recipe.name;
-  $("#order-desc").textContent = recipe.order;
+  setOrderTicketCopy(recipe);
   setTicketOrigin(recipe);
   renderTicketRecipe(recipe);
   setTicketFlippable(true);
   setTicketFlipped(false);
+  resetDrinkPrototype();
   recordPlayDay();
   renderStation();
   enterStep();
@@ -1928,6 +2172,7 @@ function recordStageResult(stageIdx, stars, pct) {
     if (finishingVenue) {
       const next = venueList()[beforeVenue + 1] || null;
       pendingTravel = { fromVenue, toVenue: next };
+      if (isPrototype()) addTips(20);
     }
     // Mid-venue advances stay on the bar (guest swap) — no map walk.
   }
@@ -2020,6 +2265,7 @@ function showScreen(id) {
     const commBtn = $("#btn-community");
     if (commBtn) commBtn.style.display = isUnderage() ? "none" : "";
   }
+  syncProtoBoostTray();
 }
 
 /** Design canvas for the unified stage (phone-landscape proportions). */
@@ -3481,7 +3727,9 @@ function setTicketFlippable(on) {
     ticket.setAttribute("tabindex", "0");
     ticket.setAttribute("role", "button");
     ticket.setAttribute("aria-pressed", ticket.classList.contains("is-flipped") ? "true" : "false");
-    ticket.setAttribute("aria-label", "Order ticket — flip for recipe");
+    ticket.setAttribute("aria-label", protoTicketRules()
+      ? "Order ticket — flip for a recipe hint (costs points)"
+      : "Order ticket — flip for recipe");
   }
 }
 
@@ -3576,12 +3824,12 @@ function loadStage(index) {
   $("#diff-pill").textContent = state.complexity.label;
   pickCustomer();
   renderCustomer(recipe.name);
-  $("#order-name").textContent = recipe.name;
-  $("#order-desc").textContent = recipe.order;
+  setOrderTicketCopy(recipe);
   setTicketOrigin(recipe);
   renderTicketRecipe(recipe);
   setTicketFlippable(true);
   setTicketFlipped(false);
+  resetDrinkPrototype();
   animatePoints(state.totalScore);
   updateProgress();
 
@@ -3598,7 +3846,8 @@ function renderEndlessHud() {
   $("#endless-hud").innerHTML =
     `<span class="hud-lives">${hearts}</span>` +
     `<span class="hud-streak">🔥 ${state.streak}</span>` +
-    `<span class="hud-served">🍸 ${state.served}</span>`;
+    `<span class="hud-served">🍸 ${state.served}</span>` +
+    (isPrototype() ? `<span class="hud-tips">${getTips()} tips</span>` : "");
 }
 
 function loadEndless(next = false) {
@@ -3632,12 +3881,12 @@ function loadEndless(next = false) {
   $("#diff-pill").textContent = state.complexity.label;
   pickCustomer();
   renderCustomer(recipe.name);
-  $("#order-name").textContent = recipe.name;
-  $("#order-desc").textContent = recipe.order;
+  setOrderTicketCopy(recipe);
   setTicketOrigin(recipe);
   renderTicketRecipe(recipe);
   setTicketFlippable(true);
   setTicketFlipped(false);
+  resetDrinkPrototype();
   animatePoints(state.totalScore);
 
   renderStation();
@@ -3654,6 +3903,7 @@ function serveEndless() {
     state.streak += 1;
     state.bestStreak = Math.max(state.bestStreak, state.streak);
     if (lastResult.stars === 3) tip = 10 + state.streak * 2; // streak-boosted tip
+    if (isPrototype() && (state.streak === 5 || state.streak === 10)) addTips(15);
   } else {
     state.lives -= 1;
     state.streak = 0;
@@ -3830,12 +4080,12 @@ function loadTraining() {
   applyVenueChrome(venueOf(r));
   $("#stage-pill").textContent = "📚 Training";
   $("#diff-pill").textContent = "Tutorial";
-  $("#order-name").textContent = r.name;
-  $("#order-desc").textContent = r.order;
+  setOrderTicketCopy(r);
   setTicketOrigin(r);
   renderTicketRecipe(r);
   setTicketFlippable(true);
   setTicketFlipped(false);
+  resetDrinkPrototype();
 
   renderStation();
   enterStep();
@@ -4087,7 +4337,7 @@ function scoreBuild() {
       result.judgeScoring = { mode: "flavor-only", accuracy: pct, judges: panel.total };
     }
   }
-  return result;
+  return applyHintPenalty(result);
 }
 
 function fb(kind, label, text) {
@@ -4167,6 +4417,7 @@ function startMixologist() {
   renderTicketRecipe(null);
   setTicketFlippable(false);
   setTicketFlipped(false);
+  resetDrinkPrototype();
   renderStation();
   enterStep();
   showScreen("screen-game");
@@ -4477,6 +4728,7 @@ function loadChallenge(recipe) {
   renderTicketRecipe(recipe);
   setTicketFlippable(true);
   setTicketFlipped(false);
+  resetDrinkPrototype();
   renderStation();
   enterStep();
   showScreen("screen-game");
@@ -4608,8 +4860,14 @@ function revealResultVerdict(result, recipe) {
   $("#result-points").textContent = pts;
   const bonusEl = $("#result-bonus");
   if (bonusEl) {
+    const bits = [];
     if (result.levelMultiplier && result.levelMultiplier > 1.04) {
-      bonusEl.textContent = ` (×${result.levelMultiplier.toFixed(1)} level bonus)`;
+      bits.push(`×${result.levelMultiplier.toFixed(1)} level bonus`);
+    }
+    if (result.hintUsed) bits.push(`hint −${result.hintPenalty || 0} pts`);
+    if (result.tipsEarned) bits.push(`+${result.tipsEarned} tips`);
+    if (bits.length) {
+      bonusEl.textContent = ` (${bits.join(" · ")})`;
       bonusEl.style.display = "";
     } else {
       bonusEl.style.display = "none";
@@ -4677,6 +4935,13 @@ function revealResultVerdict(result, recipe) {
     retryBtn.textContent = "Retry stage";
     $("#result-eyebrow").textContent = state.lives > 0 ? "Order up" : "Out of lives";
     nextBtn.textContent = state.lives > 0 ? "Next customer →" : "End shift →";
+    if (isPrototype() && state.lives <= 0) {
+      retryBtn.style.display = "";
+      retryBtn.textContent = `Extra shift · ${CONTINUE_COST} tips`;
+      retryBtn.disabled = getTips() < CONTINUE_COST;
+    } else {
+      retryBtn.disabled = false;
+    }
   } else if (state.mode === "challenge") {
     retryBtn.style.display = "";
     retryBtn.textContent = "Retry stage";
@@ -4881,6 +5146,12 @@ $("#btn-next").addEventListener("click", goNext);
 $("#btn-back").addEventListener("click", goBack);
 
 $("#btn-retry").addEventListener("click", () => {
+  if (isPrototype() && state.mode === "endless" && state.lives <= 0) {
+    extraShiftContinue();
+    return;
+  }
+  const retry = $("#btn-retry");
+  if (retry) retry.disabled = false;
   if (state.mode === "training") {
     lastResult = null;
     loadTraining();
@@ -5017,8 +5288,12 @@ $("#btn-finish-menu")?.addEventListener("click", () => {
 $("#order-ticket")?.addEventListener("click", () => {
   const ticket = $("#order-ticket");
   if (!ticket || ticket.classList.contains("is-no-flip")) return;
-  Sound.click();
-  setTicketFlipped(!ticket.classList.contains("is-flipped"));
+  if (ticket.classList.contains("is-flipped")) {
+    Sound.click();
+    setTicketFlipped(false);
+    return;
+  }
+  requestRecipePeek();
 });
 $("#order-ticket")?.addEventListener("keydown", (e) => {
   if (e.key !== "Enter" && e.key !== " ") return;
@@ -5026,6 +5301,35 @@ $("#order-ticket")?.addEventListener("keydown", (e) => {
   if (!ticket || ticket.classList.contains("is-no-flip")) return;
   e.preventDefault();
   ticket.click();
+});
+
+document.addEventListener("pointerdown", (e) => {
+  if (!protoTicketRules()) return;
+  const ticket = $("#order-ticket");
+  if (!ticket || !ticket.classList.contains("is-flipped")) return;
+  const t = e.target;
+  if (!(t instanceof Node)) return;
+  if (ticket.contains(t)) return;
+  if ($("#modal-hint")?.contains(t)) return;
+  setTicketFlipped(false);
+}, true);
+
+$("#btn-cull")?.addEventListener("click", () => {
+  Sound.click();
+  cullTheWell();
+});
+$("#btn-hint-cancel")?.addEventListener("click", () => {
+  Sound.click();
+  closeHintModal();
+});
+$("#btn-hint-confirm")?.addEventListener("click", () => {
+  const box = $("#hint-dont-ask");
+  if (box && box.checked) setHintWarnAcked();
+  closeHintModal();
+  revealRecipePeek();
+});
+$("#modal-hint")?.addEventListener("click", (e) => {
+  if (e.target.id === "modal-hint") closeHintModal();
 });
 
 $("#btn-quit").addEventListener("click", () => {
@@ -5468,6 +5772,7 @@ function openSettings() {
   $("#set-account-who").textContent = p
     ? `Signed in as ${p.name}${p.age ? " · " + p.age : ""} · public ${publicAlias(p)}`
     : "";
+  applyPrototypeChrome();
   showScreen("screen-settings");
 }
 
@@ -5507,6 +5812,14 @@ $("#set-ambient").addEventListener("click", () => {
   $("#set-ambient").setAttribute("aria-pressed", on ? "true" : "false");
   $("#btn-ambient").classList.toggle("is-active", on);
   if (on) Sound.click();
+});
+
+$("#set-prototype")?.addEventListener("click", () => {
+  Sound.click();
+  setPrototype(!isPrototype());
+  showToast(isPrototype()
+    ? "Prototype on — tips, Cull, recipe hints cost points."
+    : "Live game — prototype off.");
 });
 
 $("#set-replay-intro").addEventListener("click", () => { Sound.click(); playIntro(() => openSettings(), "settings"); });
@@ -5605,11 +5918,13 @@ function renderDiagnostics() {
   const reset = $("#dbg-reset");
   const diagBtn = $("#dbg-diagnostics");
   const mixLayoutBtn = $("#dbg-mix-layout");
+  const protoBtn = $("#dbg-prototype");
   if (!bar || !toggle || !reset) return;
   if (!debugEnabled()) { bar.remove(); return; }
   bar.style.display = "flex";
   bar.hidden = false;
   applyMixResultLayout();
+  applyPrototypeChrome();
   toggle.addEventListener("click", () => bar.classList.toggle("is-open"));
   if (mixLayoutBtn) {
     mixLayoutBtn.addEventListener("click", () => {
@@ -5620,6 +5935,12 @@ function renderDiagnostics() {
         showMixResult(lastMix.result);
       }
       showToast(next === "legacy" ? "Mix result: previous stacked card" : "Mix result: two-column UX");
+    });
+  }
+  if (protoBtn) {
+    protoBtn.addEventListener("click", () => {
+      setPrototype(!isPrototype());
+      showToast(isPrototype() ? "Prototype on" : "Live game");
     });
   }
   reset.addEventListener("click", () => {
@@ -5636,6 +5957,7 @@ function renderDiagnostics() {
   }
 })();
 applyMixResultLayout();
+bootPrototypeFlag();
 window.addEventListener("resize", () => applyMixResultLayout());
 if (debugEnabled()) {
   window.__dagtailsMixology = {
