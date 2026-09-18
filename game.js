@@ -131,9 +131,9 @@ function getSettings() {
 }
 function setSettings(s) { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(s)); } catch (e) { /* ignore */ } }
 
-// Economy / ticket prototype. Live game is the default. Open with ?proto=1
-// (or Settings → Economy prototype) to try tips, Cull, Extra shift, and
-// recipe-peek penalties without replacing the shipped loop.
+// Economy / ticket prototype. Live game is the default. Local play, or a
+// Pages session whose beta_testers.note is operator, can switch with
+// Settings / ?proto=1. Other testers always see the live game.
 const PROTO_KEY = "dagtails_prototype";
 const HINT_WARN_KEY = "dagtails_hint_warn_ack";
 const TIPS_KEY = "dagtails_tips";
@@ -152,18 +152,33 @@ function protoQueryOverride() {
   return null;
 }
 function isPrototype() {
+  if (!Backend.operatorToolsEnabled()) return false;
   const q = protoQueryOverride();
   if (q != null) return q;
   try { return localStorage.getItem(PROTO_KEY) === "1"; } catch (e) { return false; }
 }
 function setPrototype(on) {
+  if (!Backend.operatorToolsEnabled()) return;
   try { localStorage.setItem(PROTO_KEY, on ? "1" : "0"); } catch (e) { /* ignore */ }
   applyPrototypeChrome();
 }
 function bootPrototypeFlag() {
   // Query wins for this load only. Do not write localStorage so / and /?proto=1
-  // stay distinct after visiting both.
+  // stay distinct after visiting both. Testers never enter prototype.
+  applyOperatorChrome();
   applyPrototypeChrome();
+}
+function applyOperatorChrome() {
+  const on = Backend.operatorToolsEnabled();
+  document.documentElement.classList.toggle("is-operator-tools", on);
+  const protoRow = $("#set-proto-row");
+  const protoNote = $("#set-proto-note");
+  const reset = $("#set-reset");
+  if (protoRow) protoRow.hidden = !on;
+  if (protoNote) protoNote.hidden = !on;
+  if (reset) reset.hidden = !on;
+  syncDebugToolbar();
+  syncMixologyDebug();
 }
 function getTips() {
   try {
@@ -196,7 +211,10 @@ function protoTicketRules() {
 }
 function ticketFaceCopy(recipe) {
   if (!recipe) return "";
-  if (protoTicketRules() && recipe.blurb) return recipe.blurb;
+  // Training still names the build. Every other ticket face is flavor-only;
+  // the spec stays on the flip side.
+  if (state.mode === "training") return recipe.order || recipe.blurb || "";
+  if (recipe.blurb) return recipe.blurb;
   return recipe.order || "";
 }
 function setOrderTicketCopy(recipe) {
@@ -5782,6 +5800,9 @@ function logoutToGate() {
     localStorage.removeItem(PROFILE_KEY);
     Object.keys(localStorage).filter((k) => k.startsWith("sb-")).forEach((k) => localStorage.removeItem(k));
   } catch (e) { /* ignore */ }
+  try { Backend.clearOperatorPreview(); } catch (e) { /* ignore */ }
+  applyOperatorChrome();
+  applyPrototypeChrome();
   onShowStart();
   showScreen("screen-start");
   openProfileForm(true);
@@ -5815,6 +5836,7 @@ $("#set-ambient").addEventListener("click", () => {
 });
 
 $("#set-prototype")?.addEventListener("click", () => {
+  if (!Backend.operatorToolsEnabled()) return;
   Sound.click();
   setPrototype(!isPrototype());
   showToast(isPrototype()
@@ -5831,6 +5853,7 @@ $("#set-logout").addEventListener("click", () => {
   }
 });
 $("#set-reset")?.addEventListener("click", () => {
+  if (!Backend.operatorToolsEnabled()) return;
   Sound.click();
   const ok = window.confirm(
     "Reset everything?\n\nThis wipes your profile and all progress (map, stars, streaks, badges, My Bar) and restarts at sign-in."
@@ -5852,13 +5875,37 @@ function resetEverything() {
   location.reload();
 }
 
-// Only expose debug tools on localhost or when ?debug is in the URL — never to
-// real players on the live site.
+// Operator tools: local play always, Pages only after beta_preview_ok().
 function debugEnabled() {
-  const h = location.hostname;
-  const isLocal = h === "localhost" || h === "127.0.0.1" || h === "[::1]" || h === "";
-  const hasFlag = /[?&]debug\b/.test(location.search) || location.hash.includes("debug");
-  return isLocal || hasFlag;
+  return Backend.operatorToolsEnabled();
+}
+
+function syncDebugToolbar() {
+  const bar = $("#debug-toolbar");
+  if (!bar) return;
+  if (!debugEnabled()) {
+    bar.hidden = true;
+    bar.style.display = "none";
+    bar.classList.remove("is-open");
+    return;
+  }
+  bar.hidden = false;
+  bar.style.display = "flex";
+}
+
+function syncMixologyDebug() {
+  if (debugEnabled()) {
+    window.__dagtailsMixology = {
+      detectClassic,
+      classicBlocksCommunityShare,
+      evaluate,
+      scoreWithJudges,
+      pickJudges,
+      JUDGES,
+    };
+    return;
+  }
+  try { delete window.__dagtailsMixology; } catch (e) { /* ignore */ }
 }
 
 // Render the on-device diagnostics panel: connection status, per-event
@@ -5920,12 +5967,13 @@ function renderDiagnostics() {
   const mixLayoutBtn = $("#dbg-mix-layout");
   const protoBtn = $("#dbg-prototype");
   if (!bar || !toggle || !reset) return;
-  if (!debugEnabled()) { bar.remove(); return; }
-  bar.style.display = "flex";
-  bar.hidden = false;
   applyMixResultLayout();
+  applyOperatorChrome();
   applyPrototypeChrome();
-  toggle.addEventListener("click", () => bar.classList.toggle("is-open"));
+  toggle.addEventListener("click", () => {
+    if (!debugEnabled()) return;
+    bar.classList.toggle("is-open");
+  });
   if (mixLayoutBtn) {
     mixLayoutBtn.addEventListener("click", () => {
       const next = mixResultLegacyPreferred() ? "ux" : "legacy";
@@ -5939,11 +5987,13 @@ function renderDiagnostics() {
   }
   if (protoBtn) {
     protoBtn.addEventListener("click", () => {
+      if (!Backend.operatorToolsEnabled()) return;
       setPrototype(!isPrototype());
       showToast(isPrototype() ? "Prototype on" : "Live game");
     });
   }
   reset.addEventListener("click", () => {
+    if (!Backend.operatorToolsEnabled()) return;
     const ok = window.confirm(
       "Reset everything?\n\nThis wipes your profile/identity and all progress (map, stars, streaks, badges, My Bar, high scores) and restarts the game fresh."
     );
@@ -5951,6 +6001,7 @@ function renderDiagnostics() {
   });
   if (diagBtn) {
     diagBtn.addEventListener("click", () => {
+      if (!debugEnabled()) return;
       renderDiagnostics();
       $("#modal-diagnostics").classList.add("is-open");
     });
@@ -5959,16 +6010,12 @@ function renderDiagnostics() {
 applyMixResultLayout();
 bootPrototypeFlag();
 window.addEventListener("resize", () => applyMixResultLayout());
-if (debugEnabled()) {
-  window.__dagtailsMixology = {
-    detectClassic,
-    classicBlocksCommunityShare,
-    evaluate,
-    scoreWithJudges,
-    pickJudges,
-    JUDGES,
-  };
-}
+window.addEventListener("dagtails-operator-tools", () => {
+  applyOperatorChrome();
+  applyPrototypeChrome();
+});
+try { Backend.refreshOperatorPreview(); } catch (e) { /* ignore */ }
+syncMixologyDebug();
 
 $("#btn-diag-close").addEventListener("click", () => $("#modal-diagnostics").classList.remove("is-open"));
 $("#modal-diagnostics").addEventListener("click", (e) => {

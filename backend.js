@@ -13,6 +13,7 @@ import { SUPABASE_URL, SUPABASE_ANON_KEY, BETA_LOCK } from "./config.js";
 let sb = null; // Supabase client
 let myId = null; // current (anonymous) auth user id
 let ready = false; // true once signed in + player row ensured
+let operatorPreview = false;
 
 export function isConfigured() {
   return (
@@ -27,6 +28,58 @@ export function isConfigured() {
 
 export function isReady() { return ready; }
 export function currentUserId() { return myId; }
+
+/** Local Vite/serve hosts used for operator testing. Not GitHub Pages. */
+export function isLocalPlay() {
+  try {
+    const host = String(location.hostname || "");
+    return host === "localhost" || host === "127.0.0.1" || host === "[::1]" || host === "";
+  } catch {
+    return false;
+  }
+}
+
+/** Prototype, reset, and debug: local site, or Pages session with beta_testers.note operator. */
+export function operatorToolsEnabled() {
+  return isLocalPlay() || operatorPreview;
+}
+
+function notifyOperatorTools() {
+  try {
+    window.dispatchEvent(new CustomEvent("dagtails-operator-tools", {
+      detail: { enabled: operatorToolsEnabled() },
+    }));
+  } catch {
+    /* non-browser */
+  }
+}
+
+export async function refreshOperatorPreview() {
+  if (isLocalPlay()) {
+    operatorPreview = true;
+    notifyOperatorTools();
+    return true;
+  }
+  operatorPreview = false;
+  try {
+    const client = getClient();
+    if (!client) {
+      notifyOperatorTools();
+      return false;
+    }
+    const { data, error } = await client.rpc("beta_preview_ok");
+    if (!error) operatorPreview = !!data;
+  } catch {
+    operatorPreview = false;
+  }
+  notifyOperatorTools();
+  return operatorPreview;
+}
+
+export function clearOperatorPreview() {
+  if (!isLocalPlay()) operatorPreview = false;
+  notifyOperatorTools();
+}
 
 /** Invite-only lock for the public Pages beta. Local play uses `?betaLock=1` to preview. */
 export function isBetaLocked() {
@@ -169,10 +222,12 @@ export async function initBackend(profile) {
         await client.auth.signOut();
         myId = null;
         ready = false;
+        clearOperatorPreview();
         return false;
       }
     }
     myId = session.user.id;
+    if (isBetaLocked()) await refreshOperatorPreview();
     const publicName = profile && String(profile.alias || "").trim()
       ? String(profile.alias).trim()
       : "Anonymous";
@@ -445,9 +500,11 @@ export async function restoreBetaSession() {
       await client.auth.signOut();
       myId = null;
       ready = false;
+      clearOperatorPreview();
       return { ok: false, reason: "not_invited" };
     }
     myId = session.user.id;
+    await refreshOperatorPreview();
     return { ok: true, email };
   } catch (e) {
     const msg = e && e.message ? e.message : String(e);
@@ -499,10 +556,12 @@ export async function verifyBetaOtp(email, token) {
     await client.auth.signOut();
     myId = null;
     ready = false;
+    clearOperatorPreview();
     throw new Error("not_invited");
   }
   const user = data && data.user;
   myId = (user && user.id) || (data && data.session && data.session.user && data.session.user.id) || null;
+  await refreshOperatorPreview();
   return (user && user.email) || trimmed;
 }
 

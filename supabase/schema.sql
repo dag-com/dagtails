@@ -271,3 +271,23 @@ $$;
 
 revoke all on function public.beta_access_ok() from public;
 grant execute on function public.beta_access_ok() to anon, authenticated;
+
+-- Operator preview (prototype, reset, debug). Clients cannot read beta_testers.
+-- Mark Danny / Atar with note = 'operator'. Local play does not use this RPC.
+create or replace function public.beta_preview_ok()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.beta_testers t
+    where lower(t.email) = lower(nullif(auth.jwt() ->> 'email', ''))
+      and lower(btrim(coalesce(t.note, ''))) in ('operator', 'preview')
+  );
+$$;
+
+revoke all on function public.beta_preview_ok() from public;
+grant execute on function public.beta_preview_ok() to anon, authenticated;

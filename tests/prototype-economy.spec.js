@@ -36,6 +36,7 @@ test.describe("economy prototype", () => {
     await expect(page.locator("#order-name")).toContainText(/Gin\s*&\s*Tonic/i);
     await expect(page.locator("#order-desc")).toContainText(/patio classic/i);
     await expect(page.locator("#order-desc")).not.toContainText(/measure of gin/i);
+    await expect(page.locator("#ticket-recipe")).toBeHidden();
     await expect(page.locator("#btn-cull")).toBeVisible();
 
     const ticket = page.locator("#order-ticket");
@@ -55,14 +56,17 @@ test.describe("economy prototype", () => {
     await expect(ticket).not.toHaveClass(/is-flipped/);
   });
 
-  test("live ticket still shows the ingredient order line", async ({ page }) => {
+  test("live ticket face is flavor-only; free flip still shows the spec", async ({ page }) => {
     await seedPlayer(page, { cleared: 0 });
     await gotoHub(page);
     await enterStation(page);
-    await expect(page.locator("#order-desc")).toContainText(/gin/i);
+    await expect(page.locator("#order-desc")).toContainText(/patio classic/i);
+    await expect(page.locator("#order-desc")).not.toContainText(/measure of gin/i);
+    await expect(page.locator("#ticket-recipe")).toBeHidden();
     await expect(page.locator("#btn-cull")).toBeHidden();
     await page.locator("#order-ticket").click({ force: true });
     await expect(page.locator("#modal-hint.is-open")).toHaveCount(0);
     await expect(page.locator("#order-ticket")).toHaveClass(/is-flipped/);
+    await expect(page.locator("#ticket-recipe")).toContainText(/Tonic/i);
   });
 });

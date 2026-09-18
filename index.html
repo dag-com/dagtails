@@ -198,11 +198,11 @@
             <span class="set-label">Bar ambience</span>
             <button id="set-ambient" class="set-toggle" aria-pressed="false">Off</button>
           </div>
-          <div class="set-row">
+          <div class="set-row" id="set-proto-row" hidden>
             <span class="set-label">Economy prototype</span>
             <button id="set-prototype" class="set-toggle" aria-pressed="false" type="button">Off</button>
           </div>
-          <p class="set-proto-note">Off = live game. On = tips, Cull the well, Extra shift, and recipe peeks that cost points. Same as adding ?proto=1 to the URL.</p>
+          <p class="set-proto-note" id="set-proto-note" hidden>Off = live game. On = tips, Cull the well, Extra shift, and recipe peeks that cost points. Same as adding ?proto=1 to the URL. Operators and local only.</p>
 
           <div class="set-account">
             <p class="set-account-label" id="set-account-who"></p>
@@ -210,7 +210,7 @@
             <button id="set-edit" class="btn btn-ghost">✎ Edit profile</button>
             <button id="set-switch" class="btn btn-ghost">🔄 Switch user</button>
             <button id="set-logout" class="btn btn-ghost set-danger">⎋ Log out</button>
-            <button id="set-reset" class="btn btn-ghost set-danger" type="button">⟲ Reset everything</button>
+            <button id="set-reset" class="btn btn-ghost set-danger" type="button" hidden>⟲ Reset everything</button>
           </div>
         </div>
       </section>
@@ -703,8 +703,8 @@
     </div>
 
     <!-- ============================== DEBUG / TESTING TOOLBAR ============================== -->
-    <!-- Hidden by default; revealed by game.js only on localhost or with ?debug in the URL. -->
-    <div id="debug-toolbar" class="debug-toolbar" aria-label="Debug toolbar" style="display:none">
+    <!-- Hidden by default; revealed by game.js on local play and operator sessions only. -->
+    <div id="debug-toolbar" class="debug-toolbar" aria-label="Debug toolbar" style="display:none" hidden>
       <button id="dbg-toggle" class="dbg-toggle" title="Debug tools">🐞</button>
       <div class="dbg-tools" id="dbg-tools">
         <span class="dbg-label">DEBUG</span>

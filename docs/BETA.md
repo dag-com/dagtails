@@ -2,6 +2,12 @@
 
 The live game on GitHub Pages is **invite-only**. Casual visitors see an email-code door. Local play and Playwright stay open.
 
+Prototype, **Reset everything**, and the debug toolbar are **local play** plus Pages sessions whose `beta_testers.note` is `operator` (Danny and Atar). Other testers only see the live game. `?debug` and `?proto=1` do nothing for them. Mark an operator with:
+
+```bash
+npm run users:add -- you@your-domain.com --note operator
+```
+
 This is a **social + allowlist** lock, not a vault. The game is still a static download. A determined person can copy the files and play offline. For a tester beta that is the accepted bar. Unbypassable hosting would be Cloudflare Access on a custom domain (see the bottom).
 
 ## Before you ship to testers

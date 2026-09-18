@@ -265,6 +265,19 @@ body {
   flex-direction: column;
   overflow: hidden;
   text-align: left;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.order-ticket.is-flipped .ticket-face--back {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+.order-ticket.is-flipped .ticket-face--front {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 .ticket-face::before,
 .ticket-face::after {

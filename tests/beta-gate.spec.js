@@ -82,6 +82,13 @@ test.describe("beta gate", () => {
         body: "true",
       });
     });
+    await page.route(/\/rest\/v1\/rpc\/beta_preview_ok/, async (route) => {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "false",
+      });
+    });
 
     await page.goto("/?betaLock=1");
     await expect(page.locator("#screen-beta.is-active")).toBeVisible({ timeout: 20_000 });
@@ -144,6 +151,13 @@ test.describe("beta gate", () => {
         status: 200,
         contentType: "application/json",
         body: "true",
+      });
+    });
+    await page.route(/\/rest\/v1\/rpc\/beta_preview_ok/, async (route) => {
+      return route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "false",
       });
     });
 
