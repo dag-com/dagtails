@@ -17,7 +17,7 @@ Placeholder pack only. Not legal advice. Not an executed policy.
 - Public display name is **alias only** (`players.name`). Legal/private name and age stay in browser `localStorage`.
 - Usage events in `public.events` (no public SELECT). Player-reports are aggregated.
 - Fonts: self-hosted SIL OFL (Inter, Bebas Neue) via `@fontsource/*` — no Google Fonts request.
-- Operator placeholder: DAG.com operating DAG Tails.
+- Operator placeholder: DAG Factory (dagfactory.com) operating DAG Tails.
 
 ## Please replace
 

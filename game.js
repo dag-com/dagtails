@@ -929,13 +929,15 @@ function renderSplash() {
   const chipStreak = $("#splash-chip-streak");
   const chipStars = $("#splash-chip-stars");
 
+  const hero = $("#splash-hero-img");
   if (!p) {
     greet.textContent = "Welcome to DAG Tails.";
-    sub.textContent = "A bartending game from DAG.com — tap to set up your bartender and begin.";
+    sub.textContent = "A bartending game from DAG Factory — tap to set up your bartender and begin.";
     if (continueBtn) continueBtn.textContent = "Get started →";
     if (chipLevel) chipLevel.textContent = "";
     if (chipStreak) chipStreak.textContent = "";
     if (chipStars) chipStars.textContent = "";
+    if (hero) hero.src = mascotSrcForRank(0);
     return;
   }
 
@@ -964,6 +966,7 @@ function renderSplash() {
   if (chipLevel) chipLevel.textContent = `${rk.emoji} Lv ${lvl} · ${rk.name}`;
   if (chipStreak) chipStreak.textContent = daily.streak > 0 ? `🔥 ${daily.streak}-day streak` : "🔥 Start a streak today";
   if (chipStars) chipStars.textContent = `⭐ ${totalStars()} stars`;
+  if (hero) hero.src = mascotSrcForRank(rankForCleared(cleared));
 }
 
 function dismissSplash() {
@@ -1000,17 +1003,25 @@ function nextRewardCopy(map, prog) {
   };
 }
 
-// The apprentice duck mascot visually levels up as the player climbs bartender
-// titles (still paced by cleared stages, independent of crawl venues):
-// hoodie -> skipper shearling bomber -> full "ace" look.
+// The apprentice duck visually levels up with bartender titles (cleared stages):
+// intro/Trainee hoodie -> Barback bib -> floor bartender (jeans) -> Ace vest.
 function mascotTierClass(rankIdx) {
-  if (rankIdx >= 5) return "tier-3";
+  if (rankIdx >= 3) return "tier-3";
   if (rankIdx >= 2) return "tier-2";
+  if (rankIdx >= 1) return "tier-1";
   return "";
+}
+function mascotSrcForRank(rankIdx) {
+  const tier = mascotTierClass(rankIdx);
+  if (tier === "tier-3") return "assets/duck-hub-mascot-ace.png";
+  if (tier === "tier-2") return "assets/duck-hub-mascot-jacket.png";
+  if (tier === "tier-1") return "assets/duck-hub-mascot-bib.png";
+  return "assets/duck-hub-mascot.png";
 }
 function applyMascotTier(el, rankIdx) {
   if (!el) return;
   const tier = mascotTierClass(rankIdx);
+  el.classList.toggle("tier-1", tier === "tier-1");
   el.classList.toggle("tier-2", tier === "tier-2");
   el.classList.toggle("tier-3", tier === "tier-3");
 }

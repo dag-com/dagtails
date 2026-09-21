@@ -2,7 +2,7 @@
 
 **Status:** Draft for lawyer review. Do not treat as a binding contract. Replace before sending at scale.
 
-**Suggested from:** the operator who invites testers (placeholder: DAG.com / DAG Tails)  
+**Suggested from:** the operator who invites testers (placeholder: DAG Factory / dagfactory.com / DAG Tails)  
 **Suggested subject:** You’re invited to the DAG Tails private beta
 
 ---
@@ -22,7 +22,7 @@ You’re invited to try **DAG Tails**, a private-beta bartending game.
 Play how the beta is used (screens, drinks started or served, a device id). Your invite email so we can send the login code. Your public alias on Community. Your private name and age stay on your device. Full placeholder notice: the in-game **Privacy notice** link, or `docs/legal/PRIVACY-NOTICE.md` in the repo.
 
 **What you make in the game**  
-Placeholder: cocktails, recipes, names, and shares you build in DAG Tails belong to the operator (DAG.com / DAG Tails). You get to play; you don’t keep IP in those creations. A lawyer must confirm this sentence.
+Placeholder: cocktails, recipes, names, and shares you build in DAG Tails belong to the operator (DAG Factory / dagfactory.com / DAG Tails). You get to play; you don’t keep IP in those creations. A lawyer must confirm this sentence.
 
 **Please**  
 - Be 18 or older  

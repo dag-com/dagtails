@@ -3692,7 +3692,7 @@ body {
   flex-shrink: 0;
 }
 
-/* ============================ Start hero (DAG.com duck) ============================ */
+/* ============================ Start hero (DAG Factory duck) ============================ */
 #screen-start.is-active {
   position: relative;
   min-height: 100dvh;
@@ -5812,14 +5812,16 @@ body.is-phone-play .chip {
     linear-gradient(180deg, rgba(0, 0, 0, 0.08), rgba(0, 0, 0, 0.55)),
     linear-gradient(180deg, #120b1f 0%, #140d22 44%, #0c0814 100%);
 }
-/* Shared rank-based mascot: the apprentice duck visually levels up as the
-   player climbs ranks (hoodie -> skipper bomber -> "ace" look). */
+/* Shared rank-based mascot: intro hoodie, then bib -> floor bartender -> Ace vest. */
 .mascot-duck {
   background-image: url("assets/duck-hub-mascot.png");
   background-position: center bottom;
   background-size: contain;
   background-repeat: no-repeat;
   filter: drop-shadow(0 14px 26px rgba(0, 0, 0, 0.55));
+}
+.mascot-duck.tier-1 {
+  background-image: url("assets/duck-hub-mascot-bib.png");
 }
 .mascot-duck.tier-2 {
   background-image: url("assets/duck-hub-mascot-jacket.png");

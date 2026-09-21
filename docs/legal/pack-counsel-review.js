@@ -146,7 +146,7 @@ write(
 **Status:** Working file for counsel. **Not legal advice.** Not an executed opinion, clearance, privacy policy, or assignment.
 
 **Product:** DAG Tails (bartending game)  
-**Operator (placeholder):** DAG.com, operating DAG Tails  
+**Operator (placeholder):** DAG Factory (dagfactory.com), operating DAG Tails  
 **Live beta:** https://dag-com.github.io/dagtails/  
 **Repo:** https://github.com/dag-com/dagtails  
 **Packed:** ${new Date().toISOString().slice(0, 10)}
@@ -255,7 +255,7 @@ Ask: OFL embedding ok? Any extra notice in the app?
 - Static web game on GitHub Pages; backend is Supabase (email OTP, Postgres, RLS).
 - Closed beta: allowlisted emails in \`public.beta_testers\`.
 - Local / Playwright play stays anonymous Auth.
-- Operator placeholder: DAG.com operating DAG Tails.
+- Operator placeholder: DAG Factory (dagfactory.com) operating DAG Tails.
 `
 );
 
@@ -373,6 +373,7 @@ copyFile(path.join("node_modules", "@fontsource", "bebas-neue", "LICENSE"), path
 
 copyFile(path.join("assets", "brand", "dag-tails-logo.png"), path.join("brand-images", "dag-tails-logo.png"));
 copyFile(path.join("assets", "duck-hub-mascot.png"), path.join("brand-images", "duck-hub-mascot.png"));
+copyFile(path.join("assets", "duck-hub-mascot-bib.png"), path.join("brand-images", "duck-hub-mascot-bib.png"));
 copyFile(path.join("assets", "duck-hub-mascot-jacket.png"), path.join("brand-images", "duck-hub-mascot-jacket.png"));
 copyFile(path.join("assets", "duck-hub-mascot-ace.png"), path.join("brand-images", "duck-hub-mascot-ace.png"));
 
@@ -383,9 +384,10 @@ write(
 These are the files actually used on hub / splash / rank-up. Mocks (horses, K9s, apes, unused jacket studies) are **not** included.
 
 - \`dag-tails-logo.png\` — current wordmark
-- \`duck-hub-mascot.png\` — hoodie guide
-- \`duck-hub-mascot-jacket.png\` — skipper bomber rank (DAG tapes, shearling G-1; not the house service jacket)
-- \`duck-hub-mascot-ace.png\` — Ace bomber. Generic gold aviators (no temple logo). Plain cupsole sneakers (foxing line only, no jazz stripe).
+- \`duck-hub-mascot.png\` — hoodie guide (intro, tutorial, Trainee)
+- \`duck-hub-mascot-bib.png\` — Barback bib
+- \`duck-hub-mascot-jacket.png\` — floor bartender (black shirt, jeans, shaker)
+- \`duck-hub-mascot-ace.png\` — Ace vest, glasses, snifter. Generic round spectacles (no logos). Oxfords, no jazz stripe.
 `
 );
 

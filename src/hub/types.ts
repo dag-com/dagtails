@@ -8,7 +8,7 @@ export type HubSnapshot = {
   stars: number;
   welcomeMain: string;
   welcomeSub: string;
-  mascotTier: "" | "tier-2" | "tier-3";
+  mascotTier: "" | "tier-1" | "tier-2" | "tier-3";
   cotdName: string;
   cotdDone: boolean;
   cotdBtnLabel: string;

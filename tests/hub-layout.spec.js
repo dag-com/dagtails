@@ -139,4 +139,30 @@ test.describe("hub layout integrity", () => {
     });
     expect(ok).toBeTruthy();
   });
+
+  test("hub mascot follows V18 rank clothes", async ({ page }) => {
+    const cases = [
+      { cleared: 0, tier: "", asset: /duck-hub-mascot-[A-Za-z0-9_-]+\.png/, forbid: /bib|jacket|ace/ },
+      { cleared: 8, tier: "tier-1", asset: /duck-hub-mascot-bib-/ },
+      { cleared: 16, tier: "tier-2", asset: /duck-hub-mascot-jacket-/ },
+      { cleared: 24, tier: "tier-3", asset: /duck-hub-mascot-ace-/ },
+    ];
+    for (const { cleared, tier, asset, forbid } of cases) {
+      await seedPlayer(page, { cleared });
+      await gotoHub(page);
+      const report = await page.evaluate(() => {
+        const duck = document.querySelector("#hub-duck");
+        const bg = duck ? getComputedStyle(duck).backgroundImage : "";
+        return { className: duck ? duck.className : "", bg };
+      });
+      if (tier) expect(report.className, `cleared ${cleared}`).toContain(tier);
+      else {
+        expect(report.className).not.toContain("tier-1");
+        expect(report.className).not.toContain("tier-2");
+        expect(report.className).not.toContain("tier-3");
+      }
+      expect(report.bg, `cleared ${cleared}`).toMatch(asset);
+      if (forbid) expect(report.bg, `cleared ${cleared}`).not.toMatch(forbid);
+    }
+  });
 });
