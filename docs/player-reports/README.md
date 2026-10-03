@@ -6,12 +6,13 @@ Plain-language snapshots of how people play DAG Tails. Updated daily by GitHub A
 
 **Tracking spec** (what we log, not today’s numbers): [analytics.md](./analytics.md) · public page [analytics.html](https://dag-com.github.io/dagtails/player-reports/analytics.html)
 
-**Latest:** [2026-10-02](./2026-10-02.md) · also [latest.md](./latest.md)
+**Latest:** [2026-10-03](./2026-10-03.md) · also [latest.md](./latest.md)
 
 ## History
 
 | Date (UTC) | Headline |
 | --- | --- |
+| [2026-10-03](./2026-10-03.md) | Most recorded play is automated testing, not testers |
 | [2026-10-02](./2026-10-02.md) | Most recorded play is automated testing, not testers |
 | [2026-10-01](./2026-10-01.md) | Most recorded play is automated testing, not testers |
 | [2026-09-30](./2026-09-30.md) | Most recorded play is automated testing, not testers |
