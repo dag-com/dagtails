@@ -81,6 +81,16 @@ export function clearOperatorPreview() {
   notifyOperatorTools();
 }
 
+/** True on the live custom domain (and www). */
+export function isFactoryHost() {
+  try {
+    const host = String(location.hostname || "").toLowerCase();
+    return host === "dagfactory.com" || host === "www.dagfactory.com";
+  } catch {
+    return false;
+  }
+}
+
 /** Invite-only lock for the public Pages beta. Local play uses `?betaLock=1` to preview. */
 export function isBetaLocked() {
   try {
@@ -88,6 +98,7 @@ export function isBetaLocked() {
     const q = new URLSearchParams(location.search);
     if (q.get("betaLock") === "1") return true;
     if (/\.github\.io$/i.test(host)) return true;
+    if (isFactoryHost()) return true;
   } catch {
     /* non-browser */
   }

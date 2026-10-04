@@ -148,7 +148,7 @@ if (parsed.command === "list") {
   addTesters(emails, parsed.note || "beta");
   console.log("Invited:");
   for (const email of emails) console.log(`- ${email}`);
-  console.log("They open https://dag-com.github.io/dagtails/ and enter that email for a 6-digit code.");
+  console.log("They open https://dagfactory.com/ (or https://dag-com.github.io/dagtails/) and enter that email for a 6-digit code.");
   console.log("Invite email draft (lawyer placeholder): docs/legal/BETA-TESTER-EMAIL.md");
   printList(listTesters());
 } else if (parsed.command === "remove") {

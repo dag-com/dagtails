@@ -12,7 +12,7 @@ Hi,
 You’re invited to try **DAG Tails**, a private-beta bartending game.
 
 **Play**  
-1. Open https://dag-com.github.io/dagtails/  
+1. Open https://dagfactory.com/ (fallback: https://dag-com.github.io/dagtails/)  
 2. Enter **this same email address**  
 3. Type the **6-digit code** we send (or use the magic link)  
 4. Create a **private name** (only on your device) and a **public alias** (what other testers see on Community and Leaderboards)  

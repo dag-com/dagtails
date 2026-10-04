@@ -40,7 +40,11 @@ jobs:
       - name: Build
         env:
           VITE_BETA_LOCK: "1"
-          VITE_PAGES_BASE: "/dagtails/"
+          # Relative base so both dagfactory.com/ and github.io/dagtails/ resolve assets
+          # during the custom-domain cutover (absolute /dagtails/ breaks on the apex).
+          # Do NOT write www/CNAME until Namecheap DNS points at GitHub Pages IPs —
+          # a premature CNAME redirects github.io to the registrar parking page.
+          VITE_PAGES_BASE: "./"
         run: npm run build
 
       - name: Upload Pages artifact

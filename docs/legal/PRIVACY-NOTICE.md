@@ -10,7 +10,7 @@
 
 ## 1. Who this is for
 
-This draft describes how the **private beta** of DAG Tails handles information. Testers are invited by email. The live game is at https://dag-com.github.io/dagtails/
+This draft describes how the **private beta** of DAG Tails handles information. Testers are invited by email. The live game is at https://dagfactory.com/ (also https://dag-com.github.io/dagtails/).
 
 ## 2. What we collect
 

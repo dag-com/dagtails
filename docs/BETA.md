@@ -30,11 +30,11 @@ This is a **social + allowlist** lock, not a vault. The game is still a static d
 3. Confirm Authentication → Providers → **Email** is on. OTP / magic link is enough; do not add a password-only path.
 4. **Put the 6-digit code in the mail.** Hosted Supabase’s default Magic Link (and Confirm signup) body is a button only (`{{ .ConfirmationURL }}`). The game asks testers to type `{{ .Token }}`. Paste `supabase/templates/magic_link.html` into **Authentication → Email Templates → Magic Link**, and `confirmation.html` into **Confirm signup**. Subjects can be `DAG Tails code: {{ .Token }}`. This is a dashboard change, not a Pages deploy. With a [personal access token](https://supabase.com/dashboard/account/tokens): `SUPABASE_ACCESS_TOKEN=sbp_... node scripts/push-auth-email-templates.js`. Do not `supabase config push` just to fix mail — that can wipe custom SMTP.
 5. Optional: Authentication → Rate Limits, raise email sends above 2/hour so a handful of testers are not locked out.
-6. Ship Pages as usual (`/ship`). The deploy workflow sets `VITE_BETA_LOCK=1`. Any `*.github.io` host also fails closed.
+6. Ship Pages as usual (`/ship`). The deploy workflow sets `VITE_BETA_LOCK=1`. Live hosts `dagfactory.com`, `www.dagfactory.com`, and `*.github.io` also fail closed.
 
 ## What testers do
 
-1. Open https://dag-com.github.io/dagtails/
+1. Open https://dagfactory.com/ (fallback while DNS propagates: https://dag-com.github.io/dagtails/)
 2. Enter the **email you invited**
 3. Type the **6-digit code** from the email (or tap the sign-in link in the same browser)
 4. Create a **private name** (device only) and a **public alias** (Community / Leaderboards)
@@ -51,7 +51,7 @@ http://127.0.0.1:4173/?betaLock=1
 ## Going public later
 
 1. Remove testers you no longer want, or drop the lock:
-   - Delete the `github.io` fail-closed branch in `backend.js` `isBetaLocked()` and the inline script in `index.html`
+   - Delete the `github.io` / `dagfactory.com` fail-closed branches in `backend.js` `isBetaLocked()` and the inline script in `index.html`
    - Remove `VITE_BETA_LOCK` from `.github/workflows/deploy-pages.yml`
    - Remove `noindex` from `index.html` and open `public/robots.txt`
 2. Keep anonymous play as the default again (already the path when the lock is off)

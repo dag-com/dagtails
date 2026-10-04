@@ -7,7 +7,7 @@ Email is the **MFA / possession factor**. Supabase Auth (already in the repo) is
 | Surface | Today | Policy |
 |---|---|---|
 | Player, casual play | Anonymous Supabase user per device | Keep **locally**. Offline play must still work if Auth is down. |
-| Player, **public Pages beta** | Invite-only email OTP | Lock is on for `*.github.io` / `VITE_BETA_LOCK=1`. Testers prove the inbox, then `beta_access_ok()` must be true. No anonymous boot on Pages while the lock is on. See `docs/BETA.md`. |
+| Player, **public Pages beta** | Invite-only email OTP | Lock is on for `dagfactory.com` / `www.dagfactory.com` / `*.github.io` / `VITE_BETA_LOCK=1`. Testers prove the inbox, then `beta_access_ok()` must be true. No anonymous boot on Pages while the lock is on. See `docs/BETA.md`. |
 | Player, claimed identity (cross-device / named Community) | Not shipped | Bind the anonymous user to an **email OTP or magic link** before the session is treated as that person. Email is the possession factor. |
 | Operators (GitHub org, Supabase dashboard, domain, CI) | Human accounts | MFA required. Email OTP is the **minimum** second factor. Passkeys or TOTP preferred. |
 

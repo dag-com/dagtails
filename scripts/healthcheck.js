@@ -16,6 +16,9 @@ const ROOT = path.resolve(__dirname, "..");
 const PAGES_URL =
   process.env.DAGTAILS_PAGES_URL ||
   "https://dag-com.github.io/dagtails/";
+const FACTORY_URL =
+  process.env.DAGTAILS_FACTORY_URL ||
+  "https://dagfactory.com/";
 const TIMEOUT_MS = Number(process.env.HEALTH_TIMEOUT_MS || 12_000);
 
 const args = new Set(process.argv.slice(2));
@@ -117,6 +120,28 @@ async function runChecks() {
     error: pagesHtml.error,
     fix: `Open ${PAGES_URL} and confirm Actions → Deploy GitHub Pages succeeded`,
   });
+
+  // Custom domain — optional until Namecheap DNS points at GitHub Pages.
+  if (!pagesOnly) {
+    const factoryHtml = await timed(async () => {
+      const { res, text } = await fetchText(FACTORY_URL);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      if (!/DAG Tails|dag-tails|screen-splash|hub-root/i.test(text)) {
+        throw new Error("HTML is not the DAG Tails shell (DNS may still be parking)");
+      }
+      return { detail: `status=${res.status}; htmlBytes=${text.length}` };
+    });
+    checks.push({
+      id: "factory_html",
+      service: "dagfactory.com (custom domain)",
+      required: false,
+      ok: factoryHtml.ok,
+      latencyMs: factoryHtml.latencyMs,
+      detail: factoryHtml.detail,
+      error: factoryHtml.error,
+      fix: "Point Namecheap A records to GitHub Pages IPs; wait for DNS; enforce HTTPS in repo Pages settings",
+    });
+  }
 
   if (pagesOnly) return checks;
 

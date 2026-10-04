@@ -51,8 +51,8 @@ function copyPlayerReports() {
 }
 
 export default defineConfig({
-  // Relative `./` for Capacitor/local. Absolute `/dagtails/` on Pages so
-  // magic-link redirects without a trailing slash still load CSS/JS.
+  // Relative `./` for Capacitor/local and for Pages on dagfactory.com (and
+  // github.io/dagtails/ during cutover). Avoid absolute `/dagtails/` on the apex.
   base: process.env.VITE_PAGES_BASE || "./",
   plugins: [react(), copyGameAssets(), copyPlayerReports()],
   build: {

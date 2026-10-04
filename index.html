@@ -16,9 +16,10 @@
             return;
           }
         } catch (e) { /* ignore */ }
-        var host = location.hostname || "";
+        var host = (location.hostname || "").toLowerCase();
         var q = location.search || "";
-        if (/\.github\.io$/i.test(host) || /(?:\?|&)betaLock=1(?:&|$)/.test(q)) {
+        var factory = host === "dagfactory.com" || host === "www.dagfactory.com";
+        if (/\.github\.io$/i.test(host) || factory || /(?:\?|&)betaLock=1(?:&|$)/.test(q)) {
           document.documentElement.classList.add("is-beta-lock");
         }
       })();
