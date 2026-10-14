@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How people are playing DAG Tails · 2026-10-14</title>
+  <link rel="canonical" href="https://dag-com.github.io/dagtails/player-reports/" />
+  <style>
+    :root { color-scheme: light dark; }
+    body {
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.45;
+      max-width: 44rem;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+      color: #1c1410;
+      background: #f6f1ea;
+    }
+    @media (prefers-color-scheme: dark) {
+      body { color: #f3ece4; background: #16110e; }
+      a { color: #e8c38a; }
+      th, td { border-color: #3a3028; }
+      aside { background: #2a211c; }
+    }
+    a { color: #6b3a12; }
+    header nav { font-family: system-ui, sans-serif; font-size: 0.9rem; margin-bottom: 1.25rem; }
+    header nav a { margin-right: 1rem; }
+    h1 { font-size: 1.7rem; margin: 0 0 0.4rem; }
+    h2 { font-size: 1.15rem; margin: 1.6rem 0 0.5rem; }
+    h3 { font-size: 1rem; margin: 1.2rem 0 0.4rem; }
+    .lede { font-size: 1.05rem; }
+    .meta, .foot { font-family: system-ui, sans-serif; font-size: 0.85rem; opacity: 0.8; }
+    ul { padding-left: 1.2rem; }
+    table { border-collapse: collapse; width: 100%; font-family: system-ui, sans-serif; font-size: 0.92rem; }
+    th, td { text-align: left; padding: 0.4rem 0.5rem; border-bottom: 1px solid #d9cfc4; }
+    th { font-weight: 600; }
+    aside {
+      background: #efe2d2;
+      padding: 0.75rem 1rem;
+      margin: 1rem 0;
+    }
+    .bars { margin: 0.6rem 0 1.1rem; }
+    .bar-row { display: flex; align-items: center; gap: 0.55rem; margin: 0.28rem 0; font-family: system-ui, sans-serif; font-size: 0.85rem; }
+    .bar-lab { flex: 0 0 10rem; }
+    .bar-track { flex: 1; height: 0.65rem; background: #e4d9cc; }
+    .bar-fill { height: 100%; background: #6b3a12; }
+    .bar-fill.alt { background: #a67c52; }
+    .bar-n { flex: 0 0 6.4rem; text-align: right; opacity: 0.85; }
+    .bar-row.is-zero .bar-lab, .bar-row.is-zero .bar-n { opacity: 0.55; }
+    .bar-row.is-zero .bar-track { background: #eee8e1; outline: 1px dashed #cbbfb2; }
+    .bar-stack { flex: 1; display: flex; flex-direction: column; gap: 0.18rem; }
+    .bar-pair .bar-track { flex: none; }
+    .bar-legend { font-family: system-ui, sans-serif; font-size: 0.8rem; opacity: 0.85; margin: 0.2rem 0 0.4rem; }
+    .swatch { display: inline-block; width: 0.7rem; height: 0.55rem; margin: 0 0.25rem 0 0.1rem; vertical-align: middle; background: #6b3a12; }
+    .swatch.b { background: #a67c52; }
+    .foot { margin-top: 2rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <nav><a href="./index.html">Latest</a><a href="./history.html">History</a><a href="./analytics.html">Spec</a></nav>
+    <p class="meta">DAG Tails · player report</p>
+    <h1>How people are playing DAG Tails</h1>
+  </header>
+  <p class="lede"><strong>Most recorded play is automated testing, not testers</strong></p>
+<p class="meta">Live game events · 2026-08-04 to 2026-10-05 (UTC) · pulled 2026-10-14T12:33:02Z</p>
+<h2>At a glance</h2><ul>
+<li><strong>Opened the game:</strong> 2,526</li>
+<li><strong>Finished a drink:</strong> 566</li>
+<li><strong>Left without serving:</strong> 6</li>
+<li><strong>Signed-in players:</strong> 80</li>
+<li><strong>Phones / browsers we can tell apart:</strong> 16</li>
+</ul>
+<aside><strong>Automated test days</strong> (not real testers): 2026-08-08, 2026-08-16, 2026-08-18, 2026-08-24. Ignore spikes on those dates.</aside>
+<h2>Opens over time</h2>
+<table><thead><tr><th>Day (UTC)</th><th>Opened</th><th>Started a drink</th><th>Finished</th><th>Note</th></tr></thead><tbody><tr><td>2026-08-04</td><td>3</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-08-07</td><td>1</td><td>6</td><td>6</td><td>Quiet / possible people</td></tr><tr><td>2026-08-08</td><td>758</td><td>446</td><td>216</td><td>Automated tests</td></tr><tr><td>2026-08-09</td><td>2</td><td>2</td><td>1</td><td>Quiet / possible people</td></tr><tr><td>2026-08-14</td><td>1</td><td>3</td><td>3</td><td>Quiet / possible people</td></tr><tr><td>2026-08-16</td><td>459</td><td>236</td><td>119</td><td>Automated tests</td></tr><tr><td>2026-08-17</td><td>3</td><td>7</td><td>5</td><td>Quiet / possible people</td></tr><tr><td>2026-08-18</td><td>1,097</td><td>446</td><td>186</td><td>Automated tests</td></tr><tr><td>2026-08-19</td><td>27</td><td>3</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-08-20</td><td>1</td><td>6</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-08-24</td><td>124</td><td>12</td><td>11</td><td>Automated tests</td></tr><tr><td>2026-08-26</td><td>2</td><td>11</td><td>7</td><td>Quiet / possible people</td></tr><tr><td>2026-08-27</td><td>4</td><td>4</td><td>3</td><td>Quiet / possible people</td></tr><tr><td>2026-08-28</td><td>1</td><td>1</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-08-29</td><td>1</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-04</td><td>2</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-06</td><td>4</td><td>6</td><td>5</td><td>Quiet / possible people</td></tr><tr><td>2026-09-07</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-08</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-09</td><td>5</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-10</td><td>1</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-12</td><td>11</td><td>3</td><td>2</td><td>Quiet / possible people</td></tr><tr><td>2026-09-13</td><td>4</td><td>4</td><td>1</td><td>Quiet / possible people</td></tr><tr><td>2026-09-14</td><td>5</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-15</td><td>1</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-16</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-17</td><td>6</td><td>5</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-18</td><td>1</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-20</td><td>2</td><td>1</td><td>1</td><td>Quiet / possible people</td></tr><tr><td>2026-09-21</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-25</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-26</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-27</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-28</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-29</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-09-30</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-10-02</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-10-03</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr><tr><td>2026-10-05</td><td>0</td><td>0</td><td>0</td><td>Quiet / possible people</td></tr></tbody></table>
+<h2>Did they finish the drink?</h2>
+<div class="bars"><div class="bar-row">
+      <span class="bar-lab">0 stars</span>
+      <div class="bar-track"><div class="bar-fill" style="width:2%"></div></div>
+      <span class="bar-n">10</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">1 stars</span>
+      <div class="bar-track"><div class="bar-fill" style="width:2%"></div></div>
+      <span class="bar-n">10</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">2 stars</span>
+      <div class="bar-track"><div class="bar-fill" style="width:3%"></div></div>
+      <span class="bar-n">14</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">3 stars</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">532</span>
+    </div></div>
+<table><thead><tr><th>Stars</th><th>Drinks served</th></tr></thead><tbody><tr><td>0 stars</td><td>10</td></tr><tr><td>1 stars</td><td>10</td></tr><tr><td>2 stars</td><td>14</td></tr><tr><td>3 stars</td><td>532</td></tr></tbody></table>
+<p>Almost every served drink is 3 stars on the first teaching level. That usually means automated tests, not expert players.</p>
+<h2>Play modes</h2>
+<p>What people start versus finish. A dashed empty bar means the mode was available and nobody used it.</p>
+<p class="bar-legend"><span class="swatch a"></span>Started · <span class="swatch b"></span>Finished</p><div class="bars"><div class="bar-row bar-pair">
+      <span class="bar-lab">Bar-hop journey</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:47%"></div></div>
+      </div>
+      <span class="bar-n">1,173 / 548</span>
+    </div><div class="bar-row bar-pair">
+      <span class="bar-lab">Mixologist</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:3%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:3%"></div></div>
+      </div>
+      <span class="bar-n">41 / 36</span>
+    </div><div class="bar-row bar-pair">
+      <span class="bar-lab">Endless shift</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:0%"></div></div>
+      </div>
+      <span class="bar-n">6 / 2</span>
+    </div><div class="bar-row bar-pair">
+      <span class="bar-lab">Training</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:0%"></div></div>
+      </div>
+      <span class="bar-n">3 / 1</span>
+    </div><div class="bar-row bar-pair">
+      <span class="bar-lab">Cocktail of the Day</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:1%"></div></div>
+      </div>
+      <span class="bar-n">16 / 15</span>
+    </div><div class="bar-row bar-pair is-zero">
+      <span class="bar-lab">My Bar challenge</span>
+      <div class="bar-stack">
+        <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+        <div class="bar-track"><div class="bar-fill alt" style="width:0%"></div></div>
+      </div>
+      <span class="bar-n">0 / 0 · none</span>
+    </div></div>
+<table><thead><tr><th>Mode</th><th>Started</th><th>Finished</th><th>Left unfinished</th><th>People</th></tr></thead><tbody><tr><td>Bar-hop journey</td><td>1,173</td><td>548</td><td>4</td><td>996</td></tr><tr><td>Mixologist</td><td>41</td><td>36</td><td>0</td><td>21</td></tr><tr><td>Endless shift</td><td>6</td><td>2</td><td>0</td><td>3</td></tr><tr><td>Training</td><td>3</td><td>1</td><td>1</td><td>3</td></tr><tr><td>Cocktail of the Day</td><td>16</td><td>15</td><td>1</td><td>6</td></tr><tr><td>My Bar challenge</td><td>0</td><td>0</td><td>0</td><td>0</td></tr></tbody></table>
+<p>Nobody started: My Bar challenge.</p>
+<h2>Where they played</h2>
+<div class="bars"><div class="bar-row">
+      <span class="bar-lab">The Snug</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">1,017</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Zavod</span>
+      <div class="bar-track"><div class="bar-fill" style="width:4%"></div></div>
+      <span class="bar-n">39</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">La Cantina</span>
+      <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div>
+      <span class="bar-n">10</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Aperitivo</span>
+      <div class="bar-track"><div class="bar-fill" style="width:9%"></div></div>
+      <span class="bar-n">88</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Casa Caña</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">1</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Casa Caña</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Speakeasy</span>
+      <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div>
+      <span class="bar-n">15</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Le Boudoir</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">1</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">The Still</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Soda fountain</span>
+      <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div>
+      <span class="bar-n">8</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Juice bar</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">5</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Beach shack</span>
+      <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div>
+      <span class="bar-n">7</span>
+    </div></div>
+<table><thead><tr><th>Bar</th><th>Drinks started</th></tr></thead><tbody><tr><td>The Snug</td><td>1,017</td></tr><tr><td>Zavod</td><td>39</td></tr><tr><td>La Cantina</td><td>10</td></tr><tr><td>Aperitivo</td><td>88</td></tr><tr><td>Casa Caña</td><td>1</td></tr><tr><td>Casa Caña</td><td>0</td></tr><tr><td>Speakeasy</td><td>15</td></tr><tr><td>Le Boudoir</td><td>1</td></tr><tr><td>The Still</td><td>0</td></tr><tr><td>Soda fountain</td><td>8</td></tr><tr><td>Juice bar</td><td>5</td></tr><tr><td>Beach shack</td><td>7</td></tr></tbody></table>
+<h2>Teaching levels</h2>
+<p>Every lesson type, including unused. A dashed empty bar means that level was available and nobody started it.</p>
+<div class="bars"><div class="bar-row">
+      <span class="bar-lab">Guess</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">1,192</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Pour</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Mix</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Garnish</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Full bar</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Sandbox</span>
+      <div class="bar-track"><div class="bar-fill" style="width:1%"></div></div>
+      <span class="bar-n">9</span>
+    </div></div>
+<h2>Which drinks</h2>
+<table><thead><tr><th>Drink</th><th>Teaching level</th><th>Times started</th></tr></thead><tbody><tr><td>Gin &amp; Tonic</td><td>Guess</td><td>887</td></tr><tr><td>Tom Collins</td><td>Guess</td><td>122</td></tr><tr><td>Mimosa</td><td>Guess</td><td>87</td></tr><tr><td>Black Russian</td><td>Guess</td><td>13</td></tr><tr><td>unknown</td><td>Sandbox</td><td>9</td></tr><tr><td>Bramble</td><td>Guess</td><td>8</td></tr><tr><td>Screwdriver</td><td>Guess</td><td>7</td></tr><tr><td>espresso_martini</td><td>Guess</td><td>7</td></tr></tbody></table>
+<h2>What they tapped on the home screen</h2>
+<div class="bars"><div class="bar-row">
+      <span class="bar-lab">Start the journey</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">21</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Mixologist</span>
+      <div class="bar-track"><div class="bar-fill" style="width:24%"></div></div>
+      <span class="bar-n">5</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Endless shift</span>
+      <div class="bar-track"><div class="bar-fill" style="width:19%"></div></div>
+      <span class="bar-n">4</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Training</span>
+      <div class="bar-track"><div class="bar-fill" style="width:5%"></div></div>
+      <span class="bar-n">1</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Cocktail of the Day</span>
+      <div class="bar-track"><div class="bar-fill" style="width:71%"></div></div>
+      <span class="bar-n">15</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Badges</span>
+      <div class="bar-track"><div class="bar-fill" style="width:10%"></div></div>
+      <span class="bar-n">2</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">How to play</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Settings</span>
+      <div class="bar-track"><div class="bar-fill" style="width:29%"></div></div>
+      <span class="bar-n">6</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Profile</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div></div>
+<table><thead><tr><th>Button</th><th>Taps</th></tr></thead><tbody><tr><td>Start the journey</td><td>21</td></tr><tr><td>Mixologist</td><td>5</td></tr><tr><td>Endless shift</td><td>4</td></tr><tr><td>Training</td><td>1</td></tr><tr><td>Cocktail of the Day</td><td>15</td></tr><tr><td>Badges</td><td>2</td></tr><tr><td>How to play</td><td>0</td></tr><tr><td>Settings</td><td>6</td></tr><tr><td>Profile</td><td>0</td></tr></tbody></table>
+<h2>Did they skip the intro?</h2>
+<p><strong>0%</strong> of people who were shown the comic skipped it (0 of 3).</p>
+<table><thead><tr><th>What</th><th>Count</th></tr></thead><tbody><tr><td>Shown the comic</td><td>3</td></tr><tr><td>Skipped it</td><td>0</td></tr><tr><td>Watched to the end</td><td>3</td></tr></tbody></table>
+<p>On a first visit (not replay from Settings): <strong>0%</strong> skipped.</p>
+<h2>Who left without serving</h2>
+<p><strong>0.5%</strong> of drinks that were started were left without serving (6 of 1,202).</p>
+<p><strong>0.4%</strong> of people who started a drink left at least one unfinished.</p>
+<p>From where in the pour:</p>
+<div class="bars"><div class="bar-row is-zero">
+      <span class="bar-lab">Choosing a glass</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Pouring</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">6</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Picking a mix method</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Adding a garnish</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div></div>
+<table><thead><tr><th>How they left</th><th>Times</th></tr></thead><tbody><tr><td>Quit</td><td>0</td></tr><tr><td>Back on the first step</td><td>6</td></tr></tbody></table>
+<h2>Who went back to the home screen</h2>
+<p><strong>8</strong> people went back to the home screen <strong>24</strong> times.</p>
+<div class="bars"><div class="bar-row">
+      <span class="bar-lab">The map</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">7</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Mixing a drink</span>
+      <div class="bar-track"><div class="bar-fill" style="width:43%"></div></div>
+      <span class="bar-n">3</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Mixologist</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">After inventing a drink</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Settings</span>
+      <div class="bar-track"><div class="bar-fill" style="width:71%"></div></div>
+      <span class="bar-n">5</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Shop</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Badges</span>
+      <div class="bar-track"><div class="bar-fill" style="width:29%"></div></div>
+      <span class="bar-n">2</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">End of the crawl</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Endless shift</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">My bar</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">After serving</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">7</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Community</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Leaderboard</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Recipe book</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div></div>
+<h2>Invented drinks</h2>
+<p>Started an invention: <strong>41</strong>. Served it: <strong>36</strong>.</p>
+<p>What the judges said (every possible panel verdict, including unused):</p>
+<div class="bars"><div class="bar-row is-zero">
+      <span class="bar-lab">Outstanding</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Crowd-pleaser</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">19</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Solid pour</span>
+      <div class="bar-track"><div class="bar-fill" style="width:89%"></div></div>
+      <span class="bar-n">17</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Needs work</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Back to the drawing board</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div></div>
+<table><thead><tr><th>Judges said</th><th>Drinks</th><th>Average score</th></tr></thead><tbody><tr><td>Outstanding</td><td>0</td><td>—</td></tr><tr><td>Crowd-pleaser</td><td>19</td><td>76.3</td></tr><tr><td>Solid pour</td><td>17</td><td>65.3</td></tr><tr><td>Needs work</td><td>0</td><td>—</td></tr><tr><td>Back to the drawing board</td><td>0</td><td>—</td></tr></tbody></table>
+<p>Drink families they invented:</p>
+<div class="bars"><div class="bar-row">
+      <span class="bar-lab">Spirit-forward</span>
+      <div class="bar-track"><div class="bar-fill" style="width:7%"></div></div>
+      <span class="bar-n">2</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Sour</span>
+      <div class="bar-track"><div class="bar-fill" style="width:7%"></div></div>
+      <span class="bar-n">2</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Long / Fizz</span>
+      <div class="bar-track"><div class="bar-fill" style="width:11%"></div></div>
+      <span class="bar-n">3</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Creamy</span>
+      <div class="bar-track"><div class="bar-fill" style="width:4%"></div></div>
+      <span class="bar-n">1</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">Frozen</span>
+      <div class="bar-track"><div class="bar-fill" style="width:4%"></div></div>
+      <span class="bar-n">1</span>
+    </div><div class="bar-row is-zero">
+      <span class="bar-lab">Mixed</span>
+      <div class="bar-track"><div class="bar-fill" style="width:0%"></div></div>
+      <span class="bar-n">0 · none</span>
+    </div><div class="bar-row">
+      <span class="bar-lab">unknown</span>
+      <div class="bar-track"><div class="bar-fill" style="width:100%"></div></div>
+      <span class="bar-n">27</span>
+    </div></div>
+<h2>Shop and Community</h2>
+<table><thead><tr><th>What</th><th>Count</th></tr></thead><tbody><tr><td>Shop opens</td><td>5</td></tr><tr><td>Shared to Community</td><td>1</td></tr></tbody></table>
+<h2>What this means</h2><ul>
+<li>Do not brief testers from the spike days. Those are machines running the game.</li>
+<li>Nobody started: My Bar challenge. That is a skip signal, not a missing chart.</li>
+<li>Almost all recorded pours are at the first bar. We are not yet seeing the rest of the crawl.</li>
+<li>When someone reaches Mixologist, they usually finish the drink. That is the strongest “they wanted another round” signal here.</li>
+</ul>
+<h2>What hooked them (analytics only)</h2>
+<p>This section is a read of the log. It is not a change to ship.</p>
+<p>The strongest hook in this log is Mixologist: 21 people started 41 inventions and finished 36 (88%). That is the only mode that looks like “make another,” not a lesson.</p>
+<p>The bar-hop journey reads as the lesson, not the product to sell: almost all recorded pours are still the first Guess drink.</p>
+<p>Analytics only — do not change the game from this. If a pass were priced later, Mixologist is the only mode this log would support (invent, extra bottles, save, another round). Endless, Cocktail of the Day, and My Bar have no start signal yet.</p>
+<p>No demand signal for: My Bar challenge — nobody started it.</p>
+<aside><strong>Recorded range only (not a ship item):</strong> $4.99 / month or $29.99 / year. This is a first analytics read from a log that is mostly automated tests. It is not a product change. Revisit after real testers play and we can see who comes back tomorrow.</aside>
+<h2>History</h2>
+<table><thead><tr><th>Date (UTC)</th><th>Headline</th></tr></thead><tbody><tr><td><a href="./2026-10-14.html">2026-10-14</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-13.html">2026-10-13</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-12.html">2026-10-12</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-11.html">2026-10-11</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-10.html">2026-10-10</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-09.html">2026-10-09</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-08.html">2026-10-08</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-07.html">2026-10-07</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-06.html">2026-10-06</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-05.html">2026-10-05</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-04.html">2026-10-04</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-03.html">2026-10-03</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-02.html">2026-10-02</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-10-01.html">2026-10-01</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-30.html">2026-09-30</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-29.html">2026-09-29</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-28.html">2026-09-28</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-27.html">2026-09-27</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-26.html">2026-09-26</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-25.html">2026-09-25</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-24.html">2026-09-24</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-23.html">2026-09-23</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-22.html">2026-09-22</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-21.html">2026-09-21</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-20.html">2026-09-20</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-19.html">2026-09-19</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-18.html">2026-09-18</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-17.html">2026-09-17</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-16.html">2026-09-16</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-15.html">2026-09-15</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-14.html">2026-09-14</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-13.html">2026-09-13</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-09-12.html">2026-09-12</a></td><td>Most recorded play is automated testing, not testers</td></tr><tr><td><a href="./2026-08-19.html">2026-08-19</a></td><td>Most recorded play is automated testing, not testers</td></tr></tbody></table>
+  <p class="foot">No player names, ages, or emails. Share this link with reviewers: https://dag-com.github.io/dagtails/player-reports/</p>
+</body>
+</html>
