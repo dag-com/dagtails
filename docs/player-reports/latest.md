@@ -3,7 +3,7 @@
 
 **Most recorded play is automated testing, not testers**
 
-Source: live game events · 2026-08-04 to 2026-10-05 (UTC) · pulled 2026-10-29T13:49:34Z
+Source: live game events · 2026-08-04 to 2026-10-05 (UTC) · pulled 2026-10-30T13:42:46Z
 
 ## At a glance
 
