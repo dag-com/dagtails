@@ -18,6 +18,7 @@
         } catch (e) { /* ignore */ }
         var host = (location.hostname || "").toLowerCase();
         var q = location.search || "";
+        // Dormant until that domain is owned. Do not send players there.
         var factory = host === "dagfactory.com" || host === "www.dagfactory.com";
         if (/\.github\.io$/i.test(host) || factory || /(?:\?|&)betaLock=1(?:&|$)/.test(q)) {
           document.documentElement.classList.add("is-beta-lock");

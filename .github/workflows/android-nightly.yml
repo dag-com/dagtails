@@ -3,7 +3,7 @@ name: Android nightly APK
 # Builds a sideload debug APK when master has moved, then replaces the
 # stable GitHub Release asset so testers can keep the same download URL.
 # Direct APK: https://github.com/dag-com/dagtails/releases/download/android-nightly/DAG-Tails-debug.apk
-# Landing page (after Pages deploy): https://dagfactory.com/android.html
+# Landing page (after Pages deploy): https://dag-com.github.io/dagtails/android.html
 
 on:
   schedule:
@@ -121,7 +121,7 @@ jobs:
 
           Install: allow unknown sources the first time. If Android refuses an update, uninstall the previous DAG Tails build first.
 
-          Download page: https://dagfactory.com/android.html"
+          Download page: https://dag-com.github.io/dagtails/android.html"
           if gh release view android-nightly >/dev/null 2>&1; then
             gh release upload android-nightly DAG-Tails-debug.apk --clobber
             gh release edit android-nightly --notes "$NOTES"

@@ -81,7 +81,7 @@ export function clearOperatorPreview() {
   notifyOperatorTools();
 }
 
-/** True on the live custom domain (and www). */
+/** True only if this file is ever served on the parked custom domain. */
 export function isFactoryHost() {
   try {
     const host = String(location.hostname || "").toLowerCase();

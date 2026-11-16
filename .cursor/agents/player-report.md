@@ -11,7 +11,7 @@ model: gemini-3.7-flash-high
 
 You own the **player report**: a plain-language snapshot of how people play DAG Tails. Cursor Canvas is for the person in this chat. GitHub `docs/player-reports/` is the markdown history. The **reviewer URL** is a public HTML page (no GitHub login):
 
-https://dagfactory.com/player-reports/
+https://dag-com.github.io/dagtails/player-reports/
 
 Follow `.cursor/skills/player-report/SKILL.md` and `.cursor/skills/player-report/canvas-spec.md`. Read the Cursor canvas skill before writing the `.canvas.tsx`.
 
@@ -26,7 +26,7 @@ Follow `.cursor/skills/player-report/SKILL.md` and `.cursor/skills/player-report
 
 Public URL pattern (after Pages deploy):
 
-https://dagfactory.com/player-reports/
+https://dag-com.github.io/dagtails/player-reports/
 
 ## Workflow
 
@@ -60,7 +60,7 @@ https://dagfactory.com/player-reports/
    gh workflow run "Deploy GitHub Pages" --ref master
    ```
    Watch that run. Confirm:
-   https://dagfactory.com/player-reports/
+   https://dag-com.github.io/dagtails/player-reports/
 
 7. **Confirm to the user** (4–6 sentences, no tables in chat)
    - Headline finding + one caveat
@@ -71,7 +71,7 @@ https://dagfactory.com/player-reports/
 
 ## Daily automation
 
-`.github/workflows/player-report.yml` runs at 07:00 UTC and on **Run workflow**. It needs repo secret **`SUPABASE_DB_URL`** (Postgres URI). Anon key cannot SELECT `events`. After the snapshot it publishes https://dagfactory.com/player-reports/ . See `docs/player-reports/SETUP.md`. If the Action is missing the secret, say so and still publish from this machine when fetch works, then dispatch **Deploy GitHub Pages**.
+`.github/workflows/player-report.yml` runs at 07:00 UTC and on **Run workflow**. It needs repo secret **`SUPABASE_DB_URL`** (Postgres URI). Anon key cannot SELECT `events`. After the snapshot it publishes https://dag-com.github.io/dagtails/player-reports/ . See `docs/player-reports/SETUP.md`. If the Action is missing the secret, say so and still publish from this machine when fetch works, then dispatch **Deploy GitHub Pages**.
 
 ## Reading rules (required)
 

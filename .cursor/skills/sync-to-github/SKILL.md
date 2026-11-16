@@ -59,7 +59,7 @@ Every commit or push **must** pass **legal-watch** and **cyber-watch** on the ne
    - Report branch, commit SHA/message, and remote URL
    - Lead with the code-review findings (or “no outgoing diff”)
    - For this project’s Pages site after `master` push:
-     https://dagfactory.com/
+     https://dag-com.github.io/dagtails/
 
 ## DAG Tails specifics
 
@@ -67,7 +67,7 @@ Every commit or push **must** pass **legal-watch** and **cyber-watch** on the ne
 - Remote: `https://github.com/dag-com/dagtails.git`
 - `www/` is gitignored — GitHub Actions builds and deploys `www/` via `.github/workflows/deploy-pages.yml`
 - After a successful `master` push (or workflow dispatch), live site:
-  https://dagfactory.com/
+  https://dag-com.github.io/dagtails/
 - For a full ship gate (healthcheck + watch deploy), prefer the **ship-pages** skill / **pages-shipper** agent
 - Leave `experiment/*` branches unmerged unless the user asks
 

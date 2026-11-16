@@ -28,7 +28,7 @@ You already have **admin** access to the game repo on GitHub (`ATARGR` on the `d
 
 ### What inviting actually does
 
-The live game is invite-only: https://dagfactory.com/
+The live game is invite-only: https://dag-com.github.io/dagtails/
 
 You add the tester's **email** to a server allowlist. They open that URL, type the same email, and enter a **6-digit code** Supabase emails them. You do not set a password. You do not put emails in git.
 
@@ -41,7 +41,7 @@ You are assisting ATARG (GitHub: ATARGR) on DAG Tails, a bartending game.
 
 Repo: https://github.com/dag-com/dagtails
 Default branch: master
-Live game (invite-only): https://dagfactory.com/
+Live game (invite-only): https://dag-com.github.io/dagtails/
 Owner: Danny (GitHub: dhavis)
 
 Read `.cursor/skills/create-users/SKILL.md` and follow it. Prefer the project **create-users** agent if one is available. The paste-ready instruction is `docs/create-users-instructions.md`.
@@ -90,7 +90,7 @@ Do not invent email addresses. If she did not name any, ask.
 
 After a successful invite, reply with:
 - Which emails are now on the list
-- What the tester does: open https://dagfactory.com/ → enter that exact email → 6-digit code from their inbox
+- What the tester does: open https://dag-com.github.io/dagtails/ → enter that exact email → 6-digit code from their inbox
 - Remind: inviting does not ship a new game build; it only allowlists the inbox
 
 Also ok without extra permission:

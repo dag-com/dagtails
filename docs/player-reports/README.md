@@ -2,9 +2,9 @@
 
 Plain-language snapshots of how people play DAG Tails. Updated daily by GitHub Actions, and whenever the player-report agent runs.
 
-**Reviewer URL** (no GitHub login): [https://dagfactory.com/player-reports/](https://dagfactory.com/player-reports/)
+**Reviewer URL** (no GitHub login): [https://dag-com.github.io/dagtails/player-reports/](https://dag-com.github.io/dagtails/player-reports/)
 
-**Tracking spec** (what we log, not today’s numbers): [analytics.md](./analytics.md) · public page [analytics.html](https://dagfactory.com/player-reports/analytics.html)
+**Tracking spec** (what we log, not today’s numbers): [analytics.md](./analytics.md) · public page [analytics.html](https://dag-com.github.io/dagtails/player-reports/analytics.html)
 
 **Latest:** [2026-11-01](./2026-11-01.md) · also [latest.md](./latest.md)
 

@@ -3,14 +3,14 @@
 **Status:** Draft for lawyer review. This is **not** an in-force privacy policy, terms of service, or copyright assignment. Replace this file with counsel-approved text before a public or store launch.
 
 **Product:** DAG Tails (a bartending game)  
-**Operator (placeholder legal name):** DAG Factory (dagfactory.com), operating DAG Tails  
+**Operator (placeholder legal name):** DAG Factory, operating DAG Tails  
 **Last updated:** 6 September 2026  
 
 ---
 
 ## 1. Who this is for
 
-This draft describes how the **private beta** of DAG Tails handles information. Testers are invited by email. The live game is at https://dagfactory.com/.
+This draft describes how the **private beta** of DAG Tails handles information. Testers are invited by email. The live game is at https://dag-com.github.io/dagtails/.
 
 ## 2. What we collect
 
@@ -35,7 +35,7 @@ Analytics events are **not** supposed to include your private name, age, or emai
 
 ## 4. Intellectual property — cocktails you build
 
-**Placeholder — lawyer must confirm.** Every cocktail, recipe, drink name, garnish combination, and Community share you create in DAG Tails is the **property of the operator** (placeholder: DAG Factory / dagfactory.com / DAG Tails). You get a limited licence to play the game and to display your public alias with those creations. You do not keep ownership of in-game recipes or shares. Classic real-world drink names that appear as catalogue titles remain third-party recipe names used as game content, not a claim that the operator invented those classics.
+**Placeholder — lawyer must confirm.** Every cocktail, recipe, drink name, garnish combination, and Community share you create in DAG Tails is the **property of the operator** (placeholder: DAG Factory / DAG Tails). You get a limited licence to play the game and to display your public alias with those creations. You do not keep ownership of in-game recipes or shares. Classic real-world drink names that appear as catalogue titles remain third-party recipe names used as game content, not a claim that the operator invented those classics.
 
 ## 5. Who can see data
 

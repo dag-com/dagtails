@@ -7,7 +7,7 @@ Capacitor remains the path for store-native builds.
 
 Anyone, anywhere:
 
-**https://dagfactory.com/**
+**https://dag-com.github.io/dagtails/**
 
 Open that URL in mobile Safari/Chrome (or Add to Home Screen). You do **not** need Expo Go, Metro, or a tunnel. Pages is redeployed on every `master` push.
 

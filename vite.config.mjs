@@ -51,8 +51,9 @@ function copyPlayerReports() {
 }
 
 export default defineConfig({
-  // Relative `./` for Capacitor/local and for Pages on dagfactory.com (and
-  // github.io/dagtails/ during cutover). Avoid absolute `/dagtails/` on the apex.
+  // Relative `./` for Capacitor, local play, and github.io/dagtails/.
+  // Avoid absolute `/dagtails/` so an apex can be attached later. The
+  // dagfactory.com name is not owned and must not be published.
   base: process.env.VITE_PAGES_BASE || "./",
   plugins: [react(), copyGameAssets(), copyPlayerReports()],
   build: {

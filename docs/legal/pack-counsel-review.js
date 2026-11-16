@@ -146,8 +146,8 @@ write(
 **Status:** Working file for counsel. **Not legal advice.** Not an executed opinion, clearance, privacy policy, or assignment.
 
 **Product:** DAG Tails (bartending game)  
-**Operator (placeholder):** DAG Factory (dagfactory.com), operating DAG Tails  
-**Live beta:** https://dagfactory.com/  
+**Operator (placeholder):** DAG Factory, operating DAG Tails  
+**Live beta:** https://dag-com.github.io/dagtails/  
 **Repo:** https://github.com/dag-com/dagtails  
 **Packed:** ${new Date().toISOString().slice(0, 10)}
 
@@ -255,7 +255,7 @@ Ask: OFL embedding ok? Any extra notice in the app?
 - Static web game on GitHub Pages; backend is Supabase (email OTP, Postgres, RLS).
 - Closed beta: allowlisted emails in \`public.beta_testers\`.
 - Local / Playwright play stays anonymous Auth.
-- Operator placeholder: DAG Factory (dagfactory.com) operating DAG Tails.
+- Operator placeholder: DAG Factory, operating DAG Tails.
 `
 );
 

@@ -30,7 +30,7 @@ You already have **admin** access to the game repo on GitHub (`ATARGR` on the `d
 
 This works for questions, but it cannot reliably prove GitHub access or write files into the repo unless a GitHub connection and the `dagtails` repo are attached. Prefer Cursor or Claude Code for this workflow.
 
-Live game (read-only, no login): https://dagfactory.com/
+Live game (read-only, no login): https://dag-com.github.io/dagtails/
 
 ---
 
@@ -41,7 +41,7 @@ You are assisting ATARG (GitHub: ATARGR) on DAG Tails, a bartending game.
 
 Repo: https://github.com/dag-com/dagtails
 Default branch: master
-Live game: https://dagfactory.com/
+Live game: https://dag-com.github.io/dagtails/
 Owner she shares reports with: Danny (GitHub: dhavis)
 
 Your job is to validate her access, then query and analyze the codebase. Prefer reports over edits.

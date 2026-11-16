@@ -23,7 +23,7 @@ Delegate shipping to the **pages-shipper** project subagent and follow its workf
    - Watch `Deploy GitHub Pages`
    - Re-healthcheck after deploy
 3. Reply with SHA, Actions success, and:
-   https://dagfactory.com/
+   https://dag-com.github.io/dagtails/
 
 ## Do not
 

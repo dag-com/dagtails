@@ -40,10 +40,9 @@ jobs:
       - name: Build
         env:
           VITE_BETA_LOCK: "1"
-          # Relative base so both dagfactory.com/ and github.io/dagtails/ resolve assets
-          # during the custom-domain cutover (absolute /dagtails/ breaks on the apex).
-          # Do NOT write www/CNAME until Namecheap DNS points at GitHub Pages IPs —
-          # a premature CNAME redirects github.io to the registrar parking page.
+          # Relative base so github.io/dagtails/ resolves assets. The same base
+          # also works on an apex later. dagfactory.com is not owned — do not
+          # publish that name, and do not write www/CNAME.
           VITE_PAGES_BASE: "./"
         run: npm run build
 

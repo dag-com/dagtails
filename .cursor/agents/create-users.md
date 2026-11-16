@@ -16,7 +16,7 @@ Read `.cursor/skills/create-users/SKILL.md` and follow it.
 1. Collect emails the user named. If none, ask.
 2. `node .cursor/skills/create-users/scripts/invite.js add EMAIL [EMAIL...] --note beta`
 3. `node .cursor/skills/create-users/scripts/invite.js list` and confirm they appear
-4. Tell testers to open https://dagfactory.com/ and enter that email for a 6-digit code
+4. Tell testers to open https://dag-com.github.io/dagtails/ and enter that email for a 6-digit code
 
 List or remove with the same script (`list` / `remove`).
 

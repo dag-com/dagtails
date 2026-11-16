@@ -20,7 +20,7 @@ Follow the DAG Tails create-users skill. Read `.cursor/skills/create-users/SKILL
 
 Repo: https://github.com/dag-com/dagtails
 Default branch: master
-Live game (invite-only): https://dagfactory.com/
+Live game (invite-only): https://dag-com.github.io/dagtails/
 
 Creating a user means adding their email to public.beta_testers. It is not a password account. Testers prove the inbox with Supabase email OTP.
 
@@ -39,7 +39,7 @@ DO THIS
 5. If they named no emails, explain the process in one short block, list who is already invited, and ask for addresses. Do not invent emails.
 
 After an invite, tell the tester:
-https://dagfactory.com/ → that exact email → 6-digit code from their inbox.
+https://dag-com.github.io/dagtails/ → that exact email → 6-digit code from their inbox.
 
 Inviting does not ship a new game build. It only allowlists the inbox.
 
