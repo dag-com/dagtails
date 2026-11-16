@@ -34,7 +34,7 @@ This is a **social + allowlist** lock, not a vault. The game is still a static d
 
 ## What testers do
 
-1. Open https://dagfactory.com/ (fallback while DNS propagates: https://dag-com.github.io/dagtails/)
+1. Open https://dagfactory.com/
 2. Enter the **email you invited**
 3. Type the **6-digit code** from the email (or tap the sign-in link in the same browser)
 4. Create a **private name** (device only) and a **public alias** (Community / Leaderboards)

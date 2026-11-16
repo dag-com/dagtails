@@ -271,14 +271,14 @@ any past version, go to the repository's **Releases** page and pick that version
 
 ## v1.3.0 — Journey map, new look & a gentle on-ramp (2026-06-24)
 
-- **New start screen** featuring the DAG.com duck as a cut-out mascot above the
+- **New start screen** featuring the DAG Factory duck as a cut-out mascot above the
   menu (isolated from the original artwork, transparent background), replacing
   the old plain panel.
 - **Candy Crush–style journey map**: a **horizontal** path of numbered stages you
   scroll through. Everyone starts at stage 1; clearing a stage (1★ or better)
   unlocks the next. Cleared stages show the stars you earned, the current stage
   pulses, and later stages stay locked.
-- **Walking duck avatar**: the DAG.com duck stands on your current stage and, every
+- **Walking duck avatar**: the DAG Factory duck stands on your current stage and, every
   time you clear one, **waddles along the map to the next stage** (with a little
   step sound) before you tap in to play it.
 - **Metric or imperial measurements**: pick **ml** or **oz** when you register, and

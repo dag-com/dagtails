@@ -46,7 +46,7 @@ Repo-root `index.html` alone is not enough (it loads `/src/main.tsx` without a b
 ## Notes
 
 - Always-on remote play is Pages, not localhost:
-  https://dag-com.github.io/dagtails/
+  https://dagfactory.com/
 - `www/` is gitignored; local serve builds it on demand
 - Landscape-first: phones may show a rotate lock in portrait
 - Optional iPhone landscape preview (Playwright Chromium) only when the user asks for phone emulation

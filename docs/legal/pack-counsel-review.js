@@ -147,7 +147,7 @@ write(
 
 **Product:** DAG Tails (bartending game)  
 **Operator (placeholder):** DAG Factory (dagfactory.com), operating DAG Tails  
-**Live beta:** https://dag-com.github.io/dagtails/  
+**Live beta:** https://dagfactory.com/  
 **Repo:** https://github.com/dag-com/dagtails  
 **Packed:** ${new Date().toISOString().slice(0, 10)}
 

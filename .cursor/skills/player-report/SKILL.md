@@ -15,7 +15,7 @@ Model: `gemini-3.7-flash-high` (execution). Pass this slug if you launch a Task 
 Build a **Canvas** for the person in chat, **GitHub markdown history**, and a
 **public HTML page** reviewers can open without a GitHub account:
 
-https://dag-com.github.io/dagtails/player-reports/
+https://dagfactory.com/player-reports/
 
 The **player-report** agent publishes to GitHub after this skill. GitHub
 Actions also refreshes `docs/player-reports/` daily when secret `SUPABASE_DB_URL`

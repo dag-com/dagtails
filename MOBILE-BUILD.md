@@ -45,7 +45,7 @@ Run this before every native build/test.
 GitHub Actions builds a debug APK overnight when `master` has new commits,
 then replaces the same Release asset. No manual upload.
 
-- Landing page: https://dag-com.github.io/dagtails/android.html
+- Landing page: https://dagfactory.com/android.html
 - Direct APK: https://github.com/dag-com/dagtails/releases/download/android-nightly/DAG-Tails-debug.apk
 
 Schedule: 02:00 Israel (23:00 UTC), workflow `Android nightly APK`. Use

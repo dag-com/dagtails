@@ -12,7 +12,7 @@ You ship DAG Tails to the always-on remote play URL. You do not redesign feature
 
 ## Always-on URL
 
-https://dag-com.github.io/dagtails/
+https://dagfactory.com/
 
 ## Workflow
 
@@ -43,7 +43,7 @@ https://dag-com.github.io/dagtails/
 5. **Confirm to the user**
    - Commit SHA + message
    - Actions run URL / success
-   - Live URL: https://dag-com.github.io/dagtails/
+   - Live URL: https://dagfactory.com/
    - Remind: Pages is invite-only. Testers must already be in `public.beta_testers` (`docs/BETA.md`). Do not ship an empty list.
    - Optional: `npm run play:url`
 

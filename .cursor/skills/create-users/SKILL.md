@@ -36,7 +36,7 @@ The user names one or more emails (and optional notes). Do not invent addresses.
    node .cursor/skills/create-users/scripts/invite.js remove EMAIL [EMAIL...]
    ```
 4. **Report** the emails written, the live URL, and what the tester does:
-   https://dag-com.github.io/dagtails/ → that email → 6-digit code.
+   https://dagfactory.com/ → that email → 6-digit code.
 
 The script uses `supabase db query --linked`. If the CLI is not logged in, tell them to run `npx supabase login` / `npx supabase link` — do not paste database URLs or service_role keys.
 

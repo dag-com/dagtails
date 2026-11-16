@@ -1816,6 +1816,7 @@ function renderHero(venue, map, cleared) {
       b.setAttribute("aria-selected", v.id === venue.id ? "true" : "false");
       b.title = st.locked ? `${v.name} (locked)` : v.name;
       b.addEventListener("click", () => {
+        if ($("#map-stage")?.classList.contains("is-hopping")) return;
         Sound.click();
         selectedVenueId = v.id;
         mapStep = "hero";
@@ -1830,8 +1831,9 @@ function renderHero(venue, map, cleared) {
   const idx = Math.max(0, venues.findIndex((v) => v.id === venue.id));
   const prev = $("#map-prev");
   const next = $("#map-next");
-  if (prev) prev.disabled = idx <= 0;
-  if (next) next.disabled = idx >= venues.length - 1;
+  const hopping = $("#map-stage")?.classList.contains("is-hopping");
+  if (prev) prev.disabled = hopping || idx <= 0;
+  if (next) next.disabled = hopping || idx >= venues.length - 1;
 }
 
 function ribbonD(points) {
@@ -2080,6 +2082,10 @@ function playVenueHop(fromVenue, toVenue) {
   renderMap({ step: "hero", openVenueId: selectedVenueId });
   const stage = $("#map-stage");
   if (stage) stage.classList.add("is-hopping");
+  const hopPrev = $("#map-prev");
+  const hopNext = $("#map-next");
+  if (hopPrev) hopPrev.disabled = true;
+  if (hopNext) hopNext.disabled = true;
   const hop = $("#map-hop");
   if (hop) {
     const farewell = fromVenue.master && fromVenue.master.farewell;
@@ -2098,6 +2104,7 @@ function playVenueHop(fromVenue, toVenue) {
 }
 
 function shiftFocusedVenue(dir) {
+  if ($("#map-stage")?.classList.contains("is-hopping")) return;
   const venues = venueList();
   const idx = Math.max(0, venues.findIndex((v) => v.id === selectedVenueId));
   const next = venues[idx + dir];
@@ -2328,16 +2335,15 @@ function syncRotateLock() {
 
   let isPortrait = false;
   if (isPhone) {
+    // The visible window wins. A wide viewport must stay playable even when
+    // screen.orientation still says portrait (common in device emulation).
+    const { winW, winH } = liveViewport();
     const orientType = window.screen?.orientation?.type;
-    if (typeof orientType === "string" && orientType.startsWith("portrait")) {
-      isPortrait = true;
-    } else if (typeof orientType === "string" && orientType.startsWith("landscape")) {
-      isPortrait = false;
-    } else {
-      const sw = window.screen?.width || window.innerWidth || 0;
-      const sh = window.screen?.height || window.innerHeight || 0;
-      isPortrait = sh >= sw;
-    }
+    if (winW > winH + 20) isPortrait = false;
+    else if (winH > winW + 20) isPortrait = true;
+    else if (typeof orientType === "string" && orientType.startsWith("portrait")) isPortrait = true;
+    else if (typeof orientType === "string" && orientType.startsWith("landscape")) isPortrait = false;
+    else isPortrait = winH >= winW;
   }
 
   html.classList.toggle("is-portrait-locked", isPortrait);
@@ -2583,7 +2589,7 @@ function renderStation() {
   if (prepMount) prepMount.classList.add("is-on-counter");
 
   updateLiquid(false);
-  if (state.build.garnish || state.steps.includes("garnish") || state.mixed) applyGarnishVisual();
+  applyGarnishVisual();
   refreshStationStatus();
   requestAnimationFrame(() => placeStationTools());
   const svg = mount.querySelector("svg.glass-svg");
@@ -3024,10 +3030,19 @@ function spawnSplash(color, mouthEl) {
   }
 }
 
+function garnishShouldShow() {
+  const gid = state.build.garnish;
+  if (!gid || gid === "none") return false;
+  if (state.mixed || state.build.ingredients.length > 0) return true;
+  // A garnish the player actually picked can sit on an empty glass.
+  // Auto garnish waits until something has been poured.
+  return GARNISH_ENABLED && state.steps.includes("garnish");
+}
+
 function applyGarnishVisual() {
   const svg = $("#glass-mount svg.glass-svg");
   if (!svg) return;
-  const gid = state.build.garnish;
+  const gid = garnishShouldShow() ? state.build.garnish : "";
   Glass.setGarnish(svg, gid, gid ? GARNISH_BY_ID[gid].emoji : "");
 }
 
@@ -3501,6 +3516,7 @@ function addIngredient(id) {
   fillBuildList();
   const afterFrac = g ? computeLiquid(g).fillFrac : beforeFrac;
   animatePour(id, { duration: pourFillDuration(beforeFrac, afterFrac) });
+  applyGarnishVisual();
   updateNav();
 }
 
@@ -3534,6 +3550,7 @@ function removeIngredient(id) {
     reverse: true,
     duration: pourFillDuration(beforeFrac, afterFrac),
   });
+  applyGarnishVisual();
   updateNav();
 }
 
@@ -4413,8 +4430,9 @@ const REACTIONS = {
   ok: ["Not bad at all.", "That'll do nicely, thanks.", "Pretty good, cheers!", "Yeah, I'd order that again."],
   bad: ["Hmm… this isn't quite right.", "That's not what I ordered…", "I'll, uh, drink it I guess.", "Did you read the order?"],
 };
-function reactionFor(stars, drinkName) {
-  const pool = stars === 3 ? REACTIONS.good : stars >= 1 ? REACTIONS.ok : REACTIONS.bad;
+function reactionFor(stars, drinkName, feedback) {
+  const missed = (feedback || []).some((f) => f.kind === "bad");
+  const pool = (missed || stars < 1) ? REACTIONS.bad : stars === 3 ? REACTIONS.good : REACTIONS.ok;
   return pool[Math.floor(Math.random() * pool.length)].replace("{drink}", drinkName);
 }
 
@@ -4841,7 +4859,12 @@ function judgesRevealTitle(result) {
 }
 
 function revealResultVerdict(result, recipe) {
-  $("#result-eyebrow").textContent = result.stars >= 1 ? "Stage cleared" : "Needs work";
+  const missedPiece = (result.feedback || []).some((f) => f.kind === "bad");
+  $("#result-eyebrow").textContent = result.stars < 1
+    ? "Needs work"
+    : missedPiece
+      ? "Missing a piece"
+      : "Stage cleared";
   if (result.judgePanel) {
     $("#result-judges-title").textContent = judgesRevealTitle(result);
   }
@@ -4891,7 +4914,7 @@ function revealResultVerdict(result, recipe) {
   if (bonusEl) {
     const bits = [];
     if (result.levelMultiplier && result.levelMultiplier > 1.04) {
-      bits.push(`×${result.levelMultiplier.toFixed(1)} level bonus`);
+      bits.push(`×${result.levelMultiplier.toFixed(2)} stop bonus`);
     }
     if (result.hintUsed) bits.push(`hint −${result.hintPenalty || 0} pts`);
     if (result.tipsEarned) bits.push(`+${result.tipsEarned} tips`);
@@ -4924,7 +4947,7 @@ function revealResultVerdict(result, recipe) {
       : "";
     const line = usesHouseReviewer()
       ? houseReviewQuote(result)
-      : reactionFor(result.stars, recipe.name);
+      : reactionFor(result.stars, recipe.name, result.feedback);
     custEl.innerHTML = `<span class="result-cust-text"><strong>${c.name}</strong>: "${line}"${tip}</span>`;
     custEl.style.display = "";
   } else {
@@ -4953,7 +4976,11 @@ function revealResultVerdict(result, recipe) {
   const shopBtn = $("#btn-result-shop");
   mapBtn.style.display = "none";
   nextBtn.style.display = "";
-  if (shopBtn) shopBtn.style.display = state.mode === "cotd" ? "none" : "";
+  if (shopBtn) {
+    const gearInPlay = TOOLS_ENABLED || GLASS_ENABLED || GARNISH_ENABLED
+      || state.mode === "mixologist" || state.mode === "endless";
+    shopBtn.style.display = (state.mode === "cotd" || !gearInPlay) ? "none" : "";
+  }
   if (state.mode === "training") {
     retryBtn.style.display = "";
     retryBtn.textContent = "Try again";

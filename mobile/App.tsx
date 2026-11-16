@@ -14,9 +14,9 @@ import {
 import { WebView } from "react-native-webview";
 import type { WebViewNavigation } from "react-native-webview";
 
-/** Live GitHub Pages build — always on, works from any network (no laptop). */
+/** Live product host — always on, works from any network (no laptop). */
 export const PAGES_URL =
-  "https://dag-com.github.io/dagtails/";
+  "https://dagfactory.com/";
 
 /**
  * Override at runtime with EXPO_PUBLIC_GAME_URL

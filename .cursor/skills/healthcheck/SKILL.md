@@ -35,7 +35,7 @@ Gate remote play on live Pages + Supabase, then optionally confirm in-game boot.
 3. **Report**
    - Overall: up / down
    - Failed checks with the script’s `fix:` hints
-   - Always-on URL: https://dag-com.github.io/dagtails/
+   - Always-on URL: https://dagfactory.com/
 
 ## Notes
 

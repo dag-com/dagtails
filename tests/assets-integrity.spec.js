@@ -105,6 +105,8 @@ test.describe("asset integrity", () => {
         u.hash = "";
         return u.href;
       }
+      // Synthetic GitHub project-Pages URL (no trailing slash) — regression for
+      // relative asset joins, not the public product host (dagfactory.com).
       const expoDoc = "https://dag-com.github.io/dagtails?v=expo";
       const naive = new URL(rel, expoDoc).href;
       const fixed = new URL(rel, baseHrefFrom(expoDoc)).href;
