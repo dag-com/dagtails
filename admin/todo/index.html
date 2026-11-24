@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Todo — DAG Tails</title>
+  </head>
+  <body>
+    <main class="wrap">
+      <p class="eyebrow">DAG Tails</p>
+      <h1>Todo</h1>
+      <p class="lede">Danny and Atar. Sign in with the operator email. A 6-digit code arrives in that inbox.</p>
+      <p id="todo-status" class="status" role="status"></p>
+      <p id="todo-error" class="error" role="alert"></p>
+
+      <section id="todo-gate">
+        <form id="todo-email-form">
+          <label for="todo-email">Email</label>
+          <input id="todo-email" name="email" type="email" autocomplete="username" required />
+          <button id="todo-send" type="submit">Email me a code</button>
+        </form>
+        <form id="todo-code-form" hidden>
+          <p id="todo-code-hint"></p>
+          <label for="todo-code">6-digit code</label>
+          <input id="todo-code" name="code" inputmode="numeric" autocomplete="one-time-code" required />
+          <button id="todo-verify" type="submit">Open the list</button>
+          <button id="todo-resend" type="button">Send a new code</button>
+          <button id="todo-back" type="button">Use a different email</button>
+        </form>
+      </section>
+
+      <section id="todo-board" hidden>
+        <p id="todo-who"></p>
+        <form id="todo-add-form" class="add-row">
+          <label class="sr" for="todo-title">New task</label>
+          <input id="todo-title" name="title" maxlength="200" placeholder="Add a task" required />
+          <button id="todo-add" type="submit">Add</button>
+        </form>
+        <ul id="todo-list"></ul>
+        <p id="todo-empty" hidden>Nothing on the list yet.</p>
+        <button id="todo-refresh" type="button">Refresh</button>
+        <button id="todo-signout" type="button">Sign out</button>
+      </section>
+    </main>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

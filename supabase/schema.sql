@@ -291,3 +291,86 @@ $$;
 
 revoke all on function public.beta_preview_ok() from public;
 grant execute on function public.beta_preview_ok() to anon, authenticated;
+
+-- ============================================================================
+-- Operator todo list. Shared by beta_testers.note = 'operator' (Danny / Atar).
+-- Clients cannot read beta_testers. Admission is admin_todo_ok().
+-- ============================================================================
+create table if not exists public.admin_todos (
+  id         uuid primary key default gen_random_uuid(),
+  title      text not null,
+  done       boolean not null default false,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint admin_todos_title_len check (char_length(btrim(title)) between 1 and 200)
+);
+
+alter table public.admin_todos enable row level security;
+
+revoke all on table public.admin_todos from public, anon, authenticated;
+grant select, insert, update, delete on table public.admin_todos to authenticated;
+
+create or replace function public.admin_todo_ok()
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1
+    from public.beta_testers t
+    where lower(t.email) = lower(nullif(auth.jwt() ->> 'email', ''))
+      and lower(btrim(coalesce(t.note, ''))) = 'operator'
+  );
+$$;
+
+revoke all on function public.admin_todo_ok() from public, anon, authenticated;
+grant execute on function public.admin_todo_ok() to authenticated;
+
+create or replace function public.admin_todos_touch()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.title = btrim(new.title);
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+revoke all on function public.admin_todos_touch() from public, anon, authenticated;
+
+drop trigger if exists trg_admin_todos_touch on public.admin_todos;
+create trigger trg_admin_todos_touch
+  before insert or update on public.admin_todos
+  for each row execute function public.admin_todos_touch();
+
+drop policy if exists admin_todos_select on public.admin_todos;
+create policy admin_todos_select
+  on public.admin_todos
+  for select
+  to authenticated
+  using (public.admin_todo_ok());
+
+drop policy if exists admin_todos_insert on public.admin_todos;
+create policy admin_todos_insert
+  on public.admin_todos
+  for insert
+  to authenticated
+  with check (public.admin_todo_ok());
+
+drop policy if exists admin_todos_update on public.admin_todos;
+create policy admin_todos_update
+  on public.admin_todos
+  for update
+  to authenticated
+  using (public.admin_todo_ok())
+  with check (public.admin_todo_ok());
+
+drop policy if exists admin_todos_delete on public.admin_todos;
+create policy admin_todos_delete
+  on public.admin_todos
+  for delete
+  to authenticated
+  using (public.admin_todo_ok());

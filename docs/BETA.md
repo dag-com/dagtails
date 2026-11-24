@@ -2,7 +2,7 @@
 
 The live game on GitHub Pages is **invite-only**. Casual visitors see an email-code door. Local play and Playwright stay open.
 
-Prototype, **Reset everything**, and the debug toolbar are **local play** plus Pages sessions whose `beta_testers.note` is `operator` (Danny and Atar). Other testers only see the live game. `?debug` and `?proto=1` do nothing for them. Mark an operator with:
+Prototype, **Reset everything**, and the debug toolbar are **local play** plus Pages sessions whose `beta_testers.note` is `operator` (Danny and Atar). Other testers only see the live game. `?debug` and `?proto=1` do nothing for them. Those same two operator accounts share a todo list at https://dag-com.github.io/dagtails/admin/todo — same email code as the game, and only `note = operator` can read or change it. Mark an operator with:
 
 ```bash
 npm run users:add -- you@your-domain.com --note operator

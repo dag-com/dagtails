@@ -526,8 +526,37 @@ export async function restoreBetaSession() {
   }
 }
 
+function allowedAuthRedirect(value) {
+  if (typeof value !== "string") return authRedirectTo();
+  try {
+    const url = new URL(value);
+    const host = url.hostname.toLowerCase();
+    const pages = host === "dag-com.github.io" && url.pathname.startsWith("/dagtails");
+    const local = host === "127.0.0.1" || host === "localhost" || host === "[::1]";
+    if ((pages || local) && (url.protocol === "https:" || url.protocol === "http:")) {
+      return `${url.origin}${url.pathname}`;
+    }
+  } catch {
+    /* fall through */
+  }
+  return authRedirectTo();
+}
+
+function operatorCodeRedirect() {
+  try {
+    const host = String(location.hostname || "").toLowerCase();
+    if (host === "127.0.0.1" || host === "localhost" || host === "[::1]") {
+      return `${location.origin}/`;
+    }
+    if (/\.github\.io$/i.test(host)) return "https://dag-com.github.io/dagtails/";
+  } catch {
+    /* non-browser */
+  }
+  return undefined;
+}
+
 /** Send a 6-digit email OTP via Supabase Auth. Does not reveal whether the address is invited. */
-export async function requestBetaOtp(email) {
+export async function requestBetaOtp(email, redirectTo) {
   const client = getClient();
   if (!client) throw new Error("not_configured");
   const trimmed = String(email || "").trim().toLowerCase();
@@ -536,11 +565,24 @@ export async function requestBetaOtp(email) {
     email: trimmed,
     options: {
       shouldCreateUser: true,
-      emailRedirectTo: authRedirectTo(),
+      emailRedirectTo: allowedAuthRedirect(redirectTo),
     },
   });
   if (error) throw error;
   return trimmed;
+}
+
+/** OTP for the operator todo page. Falls back to an already-allowlisted URL if this path is not one yet. */
+export async function requestOperatorOtp(email) {
+  const here = authRedirectTo();
+  try {
+    return await requestBetaOtp(email, here);
+  } catch (e) {
+    const msg = e && e.message ? e.message : String(e || "");
+    const fallback = operatorCodeRedirect();
+    if (!fallback || fallback === here || !/redirect/i.test(msg)) throw e;
+    return await requestBetaOtp(email, fallback);
+  }
 }
 
 /** Verify the email OTP, then admit only allowlisted testers. */
@@ -574,5 +616,102 @@ export async function verifyBetaOtp(email, token) {
   myId = (user && user.id) || (data && data.session && data.session.user && data.session.user.id) || null;
   await refreshOperatorPreview();
   return (user && user.email) || trimmed;
+}
+
+const TODO_ID_RX = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function cleanTodoTitle(title) {
+  const trimmed = String(title || "").trim();
+  if (!trimmed || trimmed.length > 200) throw new Error("invalid_title");
+  return trimmed;
+}
+
+async function assertOperatorClient() {
+  const client = getClient();
+  if (!client) throw new Error("not_configured");
+  const { data, error } = await client.rpc("admin_todo_ok");
+  if (error) {
+    const msg = error.message || String(error);
+    if (/admin_todo_ok|schema cache|does not exist/i.test(msg)) throw new Error("gate_missing");
+    throw error;
+  }
+  if (!data) throw new Error("not_operator");
+  return client;
+}
+
+/** Restore an email session only when that person is an operator. Does not sign anyone else out. */
+export async function restoreOperatorSession() {
+  const restored = await restoreBetaSession();
+  if (!restored.ok) return restored;
+  try {
+    await assertOperatorClient();
+    return restored;
+  } catch (e) {
+    const reason = e && e.message === "gate_missing" ? "gate_missing" : "not_operator";
+    return { ok: false, reason, email: restored.email };
+  }
+}
+
+/** Verify the email OTP, then admit only operator accounts. */
+export async function verifyOperatorOtp(email, token) {
+  const admitted = await verifyBetaOtp(email, token);
+  await assertOperatorClient();
+  return admitted;
+}
+
+export async function signOutSession() {
+  const client = getClient();
+  if (!client) return;
+  await client.auth.signOut();
+  myId = null;
+  ready = false;
+  clearOperatorPreview();
+}
+
+export async function listAdminTodos() {
+  const client = await assertOperatorClient();
+  const { data, error } = await client
+    .from("admin_todos")
+    .select("id,title,done,created_at,updated_at")
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function addAdminTodo(title) {
+  const client = await assertOperatorClient();
+  const { data, error } = await client
+    .from("admin_todos")
+    .insert({ title: cleanTodoTitle(title) })
+    .select("id,title,done,created_at,updated_at")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function updateAdminTodo(id, patch) {
+  const client = await assertOperatorClient();
+  const todoId = String(id || "");
+  if (!TODO_ID_RX.test(todoId)) throw new Error("invalid_title");
+  const next = {};
+  if (patch && Object.prototype.hasOwnProperty.call(patch, "done")) next.done = !!patch.done;
+  if (patch && Object.prototype.hasOwnProperty.call(patch, "title")) next.title = cleanTodoTitle(patch.title);
+  if (!Object.keys(next).length) throw new Error("invalid_title");
+  const { data, error } = await client
+    .from("admin_todos")
+    .update(next)
+    .eq("id", todoId)
+    .select("id,title,done,created_at,updated_at")
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteAdminTodo(id) {
+  const client = await assertOperatorClient();
+  const todoId = String(id || "");
+  if (!TODO_ID_RX.test(todoId)) throw new Error("invalid_title");
+  const { error } = await client.from("admin_todos").delete().eq("id", todoId);
+  if (error) throw error;
 }
 

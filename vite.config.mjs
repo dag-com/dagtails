@@ -60,5 +60,11 @@ export default defineConfig({
     outDir: "www",
     emptyOutDir: true,
     sourcemap: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "index.html"),
+        adminTodo: path.resolve(__dirname, "admin/todo/index.html"),
+      },
+    },
   },
 });
